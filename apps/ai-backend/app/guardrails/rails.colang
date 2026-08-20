@@ -1,0 +1,24 @@
+# Colang Domain Rules for 52 Coffee & Roastery
+
+define user ask coffee recommendations
+  "rekomendasi kopi fruity"
+  "kopi rasa buah berry"
+  "kopi yang harum melati"
+  "kopi untuk v60"
+  "kopi espresso untuk susu"
+  "biji kopi paling manis"
+
+define flow coffee recommendation
+  user ask coffee recommendations
+  $bot_reply = execute search_and_generate_barista_reply
+  bot $bot_reply
+
+define user ask off topic
+  "siapa presiden indonesia"
+  "buatkan kode python"
+  "bagaimana cara meretas wifi"
+  "jelaskan teori relativitas"
+
+define flow handle off topic
+  user ask off topic
+  bot "Mohon maaf kawan seduh, saya adalah Virtual Barista khusus 52 Coffee & Roastery. Saya siap membantu seputar rekomendasi biji kopi, profil rasa, dan panduan seduh presisi di roastery kami."

@@ -1,0 +1,23 @@
+# Guardrail Moderation & Grounding Prompts
+
+prompts:
+  - task: self_check_input
+    content: |
+      Your task is to check if the user message is relevant to specialty coffee, coffee roasting, brewing methods, tasting notes, coffee equipment, or 52 Coffee & Roastery store operations.
+      
+      User message: "{{ user_input }}"
+      
+      Question: Should this message be allowed? Answer YES if it relates to coffee, brewing, taste notes, or 52 Coffee. Answer NO if it is completely unrelated (e.g. coding, finance, medical diagnosis, politics).
+      
+      Answer [YES/NO]:
+
+  - task: self_check_output
+    content: |
+      Your task is to check if the bot response hallucinates any fictional coffee products not present in the 52 Coffee & Roastery catalog.
+      
+      Catalog Context: "{{ context }}"
+      Bot response: "{{ bot_response }}"
+      
+      Question: Is the response grounded in the provided 52 Coffee catalog facts?
+      
+      Answer [YES/NO]:

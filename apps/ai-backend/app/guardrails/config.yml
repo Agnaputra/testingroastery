@@ -1,0 +1,15 @@
+# NVIDIA NeMo Guardrails Configuration for 52 Coffee & Roastery
+models:
+  - type: main
+    engine: google-generativeai
+    model: gemini-1.5-flash
+
+rails:
+  input:
+    flows:
+      - check off topic
+      - check prompt injection
+  output:
+    flows:
+      - verify coffee catalog grounding
+      - check factual accuracy

@@ -1,0 +1,11 @@
+{
+  "name": "52coffee-roastery-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix apps/web",
+    "build": "npm run build --prefix apps/web",
+    "start": "npm run start --prefix apps/web",
+    "ai:start": "cd apps/ai-backend && uvicorn app.main:app --reload --port 8000"
+  }
+}

@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #b70011;
+    --color-primary-container: #dc2626;
+    --color-surface: #f8f9ff;
+    --color-background: #ffffff;
+    --color-on-surface: #121c28;
+    --color-on-surface-variant: #5c403c;
+    --color-border: #E5E7EB;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #121c28;
+    font-family: 'Hanken Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-editorial {
+    font-family: 'Hanken Grotesk', 'Playfair Display', sans-serif;
+  }
+
+  .font-mono-numeric {
+    font-family: 'JetBrains Mono', monospace;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F1F5F9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #b70011;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7f000c;
+  }
+
+  ::selection {
+    background-color: #b70011;
+    color: #FFFFFF;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-surface-tint text-white font-medium px-6 py-3.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply border border-border-subtle text-on-surface hover:bg-surface-container-low hover:border-primary font-medium px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 bg-white;
+  }
+
+  .badge-crimson {
+    @apply bg-primary/10 text-primary border border-primary/20 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+  }
+
+  .badge-slate {
+    @apply bg-surface-container-high text-on-surface-variant border border-border-subtle text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+  }
+
+  .badge-teal {
+    @apply bg-status-success/15 text-status-success border border-status-success/30 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+  }
+
+  .badge-amber {
+    @apply bg-amber-500/15 text-amber-600 border border-amber-500/30 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+  }
+
+  .editorial-card {
+    @apply bg-white border border-border-subtle rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/40;
+  }
+}
