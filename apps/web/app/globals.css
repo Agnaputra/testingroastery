@@ -4,18 +4,24 @@
 
 @layer base {
   :root {
-    --color-primary: #b70011;
-    --color-primary-container: #dc2626;
-    --color-surface: #f8f9ff;
+    --color-primary: #223C5E;
+    --color-primary-container: #1B304B;
+    --color-surface: #f8fafd;
     --color-background: #ffffff;
-    --color-on-surface: #121c28;
-    --color-on-surface-variant: #5c403c;
-    --color-border: #E5E7EB;
+    --color-on-surface: #1e293b;
+    --color-on-surface-variant: #475569;
+    --color-border: #E2E8F0;
+    --color-teal: #2698AB;
+    --color-maroon: #8B1E2D;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: #ffffff;
-    color: #121c28;
+    color: #1e293b;
     font-family: 'Hanken Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -40,45 +46,53 @@
     background: #F1F5F9;
   }
   ::-webkit-scrollbar-thumb {
-    background: #b70011;
+    background: #223C5E;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #7f000c;
+    background: #162A43;
   }
 
   ::selection {
-    background-color: #b70011;
+    background-color: #223C5E;
     color: #FFFFFF;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-surface-tint text-white font-medium px-6 py-3.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center gap-2;
+    @apply bg-brand-navy hover:bg-brand-navy-light text-white font-medium px-6 py-3.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
-    @apply border border-border-subtle text-on-surface hover:bg-surface-container-low hover:border-primary font-medium px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 bg-white;
+    @apply border border-border-subtle text-on-surface hover:bg-surface-container-low hover:border-brand-navy font-medium px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 bg-white;
   }
 
-  .badge-crimson {
-    @apply bg-primary/10 text-primary border border-primary/20 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+  .btn-pill {
+    @apply bg-brand-pill hover:bg-brand-pill-hover text-brand-navy font-semibold px-5 py-2 rounded-full transition-all duration-200 border border-border-subtle text-sm flex items-center justify-center gap-2;
+  }
+
+  .badge-navy {
+    @apply bg-brand-navy/10 text-brand-navy border border-brand-navy/20 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+  }
+
+  .badge-crimson, .badge-maroon {
+    @apply bg-brand-maroon/10 text-brand-maroon border border-brand-maroon/20 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
   }
 
   .badge-slate {
-    @apply bg-surface-container-high text-on-surface-variant border border-border-subtle text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+    @apply bg-surface-container text-on-surface-variant border border-border-subtle text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
   }
 
   .badge-teal {
-    @apply bg-status-success/15 text-status-success border border-status-success/30 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+    @apply bg-brand-teal/15 text-brand-teal-dark border border-brand-teal/30 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
   }
 
   .badge-amber {
-    @apply bg-amber-500/15 text-amber-600 border border-amber-500/30 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
+    @apply bg-amber-500/15 text-amber-700 border border-amber-500/30 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono;
   }
 
   .editorial-card {
-    @apply bg-white border border-border-subtle rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/40;
+    @apply bg-white border border-border-subtle rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-brand-navy/30;
   }
 }

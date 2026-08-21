@@ -150,7 +150,7 @@ export default function BlendBuilderPage() {
       productId: `byob-${Date.now()}`,
       name: blendName,
       slug: 'custom-blend',
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA5JWPgUZd9_tVkcmBHkgtho4yAiQgnIQPaihCRFPZNWtBBT1Ivy1LbiHGC7ajTKofJtnPZ4Hn8UC7BhkgcbxOL2pZa4qQwDEIt-XUUd95oIPsaF8mTnmbize6TPmiVdlf7-E0eA1HXrDe7SVvFIeDHMcNmwd1AEu4l8d02aIKnZUkH_lWncb2z474KLdJLMQeRkhAITtZ4HzPT6ueaY2F6gCgxJke4Lnik-wpT6997hDqx3Kba_Xgpzw',
+      imageUrl: '/images/the-roastery-behind-your-business.png',
       weightGrams: selectedSize === '200 g' ? 200 : selectedSize === '500 g' ? 500 : 1000,
       weightLabel: selectedSize,
       grind: 'whole',
@@ -195,7 +195,7 @@ export default function BlendBuilderPage() {
           <div className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
             <div className="w-full h-full relative flex items-center justify-center">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5JWPgUZd9_tVkcmBHkgtho4yAiQgnIQPaihCRFPZNWtBBT1Ivy1LbiHGC7ajTKofJtnPZ4Hn8UC7BhkgcbxOL2pZa4qQwDEIt-XUUd95oIPsaF8mTnmbize6TPmiVdlf7-E0eA1HXrDe7SVvFIeDHMcNmwd1AEu4l8d02aIKnZUkH_lWncb2z474KLdJLMQeRkhAITtZ4HzPT6ueaY2F6gCgxJke4Lnik-wpT6997hDqx3Kba_Xgpzw"
+                src="/images/the-roastery-behind-your-business.png"
                 alt="52 Coffee BYOB Standing Pouch"
                 className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105"
               />

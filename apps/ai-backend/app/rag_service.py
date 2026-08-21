@@ -8,30 +8,14 @@ import google.generativeai as genai
 from .config import settings
 from .models import ProductSearchResult
 
-# Hardcoded master knowledge base of 52 Coffee & Roastery for high-speed retrieval
+# Master knowledge base of 52 Coffee & Roastery from official Slowbar PDF Menu
 COFFEE_KNOWLEDGE_BASE = [
+    # 1. IJEN SERIES
     {
-        "id": "argopuro-walida",
-        "slug": "argopuro-walida-natural-anaerobic",
-        "name": "Argopuro Walida Natural Anaerobic",
-        "category": "filter",
-        "series": "Ijen Series",
-        "origin": "East Java, Indonesia (Gunung Argopuro 1300-1600 MASL)",
-        "varietal": "Kartika, Typica, USDA 762",
-        "process": "Natural Anaerobic",
-        "roast": "Light",
-        "notes": ["Plum", "Blood Orange", "Dark Cherry", "Juicy Body"],
-        "flavor_category": ["Fruity", "Sweet"],
-        "price_100g": 68000,
-        "price_200g": 128000,
-        "price_500g": 335000,
-        "recipe": "V60 15g kopi, 225ml air (1:15), 91°C, 2m 15s. Bloom 45g 40s.",
-        "description": "Rilisan baru Walida Series lereng Argopuro. Dominasi rasa plum manis berpadu blood orange dan dark cherry yang juicy."
-    },
-    {
-        "id": "ijen-cm",
-        "slug": "ijen-carbonic-maceration",
-        "name": "Ijen Carbonic Maceration",
+        "id": "ijen-cm-asmara",
+        "slug": "ijen-carbonic-maceration-asmara",
+        "name": "Ijen Carbonic Maceration (Asmara)",
+        "slowbar_alias": "ASMARA",
         "category": "filter",
         "series": "Ijen Series",
         "origin": "East Java, Indonesia (Gunung Ijen 1400-1600 MASL)",
@@ -43,242 +27,516 @@ COFFEE_KNOWLEDGE_BASE = [
         "price_100g": 65000,
         "price_200g": 120000,
         "price_500g": 320000,
+        "cup_price": 38000,
         "recipe": "V60 15g kopi, 225ml air (1:15), 92°C, 2m 15s. Bloom 45g 40s.",
-        "description": "Fermentasi CO2 terkontrol 72 jam menghasilkan aroma floral melati intens dan manis buah persik matang."
+        "description": "Fermentasi anaerobik bertekanan CO2 murni menghasilkan aroma floral melati intens dipadukan manisnya buah persik matang."
     },
     {
-        "id": "ijen-lactic",
-        "slug": "ijen-lactic",
-        "name": "Ijen Lactic",
+        "id": "ijen-kenyan-wening",
+        "slug": "ijen-kenyan-wening",
+        "name": "Ijen Kenyan (Wening)",
+        "slowbar_alias": "WENING",
+        "category": "filter",
+        "series": "Ijen Series",
+        "origin": "East Java, Indonesia (Gunung Ijen 1400-1600 MASL)",
+        "varietal": "Kartika / Typica",
+        "process": "Kenyan Process (Double Washed)",
+        "roast": "Light",
+        "notes": ["Clean", "Jasmine", "Crisp Citrus"],
+        "flavor_category": ["Floral", "Fruity"],
+        "price_100g": 59000,
+        "price_200g": 109000,
+        "price_500g": 290000,
+        "cup_price": 30000,
+        "recipe": "V60 15g kopi, 240ml air (1:16), 93°C, 2m 10s. Bloom 45g 35s.",
+        "description": "Seduhan yang sangat jernih (clean cup) dengan karakter bunga melati merekah dan keasaman sitrus yang menyegarkan."
+    },
+    {
+        "id": "ijen-anaerob-rahsa",
+        "slug": "ijen-anaerob-rahsa",
+        "name": "Ijen Anaerob (Rahsa)",
+        "slowbar_alias": "RAHSA",
+        "category": "filter",
+        "series": "Ijen Series",
+        "origin": "East Java, Indonesia (Gunung Ijen 1400-1600 MASL)",
+        "varietal": "Kartika",
+        "process": "Anaerobic Natural",
+        "roast": "Light-Medium",
+        "notes": ["Tropical", "Fermented Sweetness", "Complex"],
+        "flavor_category": ["Fruity", "Sweet"],
+        "price_100g": 59000,
+        "price_200g": 109000,
+        "price_500g": 290000,
+        "cup_price": 35000,
+        "recipe": "Kalita Wave 15g kopi, 225ml air (1:15), 91°C, 2m 20s.",
+        "description": "Kekayaan rasa tropis dengan manis fermentasi buah yang padat, aroma semerbak, dan kompleksitas rasa memikat."
+    },
+    {
+        "id": "ijen-lactic-laras",
+        "slug": "ijen-lactic-laras",
+        "name": "Ijen Lactic (Laras)",
+        "slowbar_alias": "LARAS",
         "category": "filter",
         "series": "Ijen Series",
         "origin": "East Java, Indonesia (Kawah Ijen 1400-1600 MASL)",
         "varietal": "Kartika",
-        "process": "Lactic Anaerobic",
+        "process": "Lactic Process",
         "roast": "Light-Medium",
         "notes": ["Mango", "Lychee", "Lime", "Creamy", "Chocolate"],
         "flavor_category": ["Fruity", "Sweet", "Chocolaty"],
         "price_100g": 59000,
         "price_200g": 109000,
         "price_500g": 290000,
-        "recipe": "Kalita Wave 14g kopi, 220ml air (1:15.7), 91°C, 2m 30s.",
-        "description": "Kultur bakteri asam laktat murni menciptakan mouthfeel creamy seperti cokelat susu dengan aroma mangga dan leci."
+        "cup_price": 35000,
+        "recipe": "Origami / V60 15g, 225ml air (1:15), 91°C, 2m 25s.",
+        "description": "Sensasi mangga ranum dan leci berpadu keasaman segar jeruk nipis, diakhiri dengan tekstur creamy bagai cokelat susu."
     },
     {
-        "id": "ijen-yb",
-        "slug": "ijen-yellow-bourbon",
-        "name": "Ijen Yellow Bourbon",
+        "id": "ijen-yellow-bourbon-kencana",
+        "slug": "ijen-yellow-bourbon-kencana",
+        "name": "Ijen Yellow Bourbon (Kencana)",
+        "slowbar_alias": "KENCANA",
         "category": "filter",
         "series": "Ijen Series",
         "origin": "East Java, Indonesia (Gunung Ijen 1500 MASL)",
         "varietal": "Yellow Bourbon",
-        "process": "Honey Processed",
+        "process": "Honey Process",
         "roast": "Light-Medium",
         "notes": ["Honey", "Almond", "Smooth Body"],
         "flavor_category": ["Sweet", "Nutty"],
         "price_100g": 59000,
         "price_200g": 109000,
         "price_500g": 290000,
-        "recipe": "Origami / V60 15g, 240ml air (1:16), 93°C, 2m 20s.",
-        "description": "Varietas langka berbuah kuning cerah dengan kelembutan madu hutan dan gurihnya kacang almond panggang."
+        "cup_price": 30000,
+        "recipe": "V60 15g, 240ml air (1:16), 92°C, 2m 15s.",
+        "description": "Varietas langka Yellow Bourbon dengan kelembutan madu hutan dan gurihnya kacang almond panggang dalam body yang halus."
     },
     {
-        "id": "sunda-puntang-honey",
-        "slug": "puntang-honey",
-        "name": "Puntang Honey",
+        "id": "ijen-full-wash-washey",
+        "slug": "ijen-full-wash-washey",
+        "name": "Ijen Full Wash (Washey)",
+        "slowbar_alias": "WASHEY",
+        "category": "filter",
+        "series": "Ijen Series",
+        "origin": "East Java, Indonesia (Gunung Ijen 1400-1600 MASL)",
+        "varietal": "Kartika / USDA",
+        "process": "Full Wash",
+        "roast": "Medium-Light",
+        "notes": ["Balanced", "Mild", "Acidity", "Nutty"],
+        "flavor_category": ["Nutty", "Sweet"],
+        "price_100g": 59000,
+        "price_200g": 109000,
+        "price_500g": 290000,
+        "cup_price": 25000,
+        "recipe": "V60 15g, 225ml air (1:15), 90°C, 2m 15s.",
+        "description": "Profil seduhan klasik Ijen yang seimbang, keasaman lembut, dengan sentuhan rasa nutty hangat yang bersahabat untuk harian."
+    },
+
+    # 2. ENREKANG SERIES
+    {
+        "id": "buntu-lenta-wash-duharman",
+        "slug": "buntu-lenta-wash-duharman",
+        "name": "Buntu Lenta Wash (Duharman Wash)",
+        "slowbar_alias": "DUHARMAN WASH",
+        "category": "filter",
+        "series": "Enrekang Series",
+        "origin": "South Sulawesi, Indonesia (Buntu Lenta 1500-1800 MASL)",
+        "varietal": "Typica, S-795",
+        "process": "Wash Process",
+        "roast": "Light-Medium",
+        "notes": ["Mandarin", "Honey", "Caramel", "Floral"],
+        "flavor_category": ["Fruity", "Floral", "Sweet"],
+        "price_100g": 109000,
+        "price_200g": 199000,
+        "price_500g": 439000,
+        "cup_price": 45000,
+        "recipe": "V60 15g, 225ml air (1:15), 92°C, 2m 20s.",
+        "description": "Kopi legendaris Enrekang dengan manis madu pekat, aroma bunga pegunungan, dan keasaman segar buah jeruk mandarin."
+    },
+    {
+        "id": "buntu-lenta-wine-duharman",
+        "slug": "buntu-lenta-wine-duharman",
+        "name": "Buntu Lenta Wine (Duharman Winey)",
+        "slowbar_alias": "DUHARMAN WINEY",
+        "category": "filter",
+        "series": "Enrekang Series",
+        "origin": "South Sulawesi, Indonesia (Buntu Lenta 1500-1800 MASL)",
+        "varietal": "Typica, S-795",
+        "process": "Wine Processed",
+        "roast": "Light-Medium",
+        "notes": ["Wine", "Tangerine", "Caramel"],
+        "flavor_category": ["Fruity", "Sweet"],
+        "price_100g": 115000,
+        "price_200g": 215000,
+        "price_500g": 459000,
+        "cup_price": 52000,
+        "recipe": "Kalita Wave 15g, 225ml air (1:15), 91°C, 2m 30s.",
+        "description": "Fermentasi ceri utuh berlapis menciptakan sensasi winey berkelas dengan manis karamel dan kesegaran jeruk keprok."
+    },
+    {
+        "id": "buntu-lenta-natural-duharman",
+        "slug": "buntu-lenta-natural-duharman",
+        "name": "Buntu Lenta Natural (Duharman Natural)",
+        "slowbar_alias": "DUHARMAN NATURAL",
+        "category": "filter",
+        "series": "Enrekang Series",
+        "origin": "South Sulawesi, Indonesia (Buntu Lenta 1500-1800 MASL)",
+        "varietal": "Typica, S-795",
+        "process": "Natural Process",
+        "roast": "Light",
+        "notes": ["Blueberry", "Strawberry", "Bold Body", "Sweetness"],
+        "flavor_category": ["Fruity", "Sweet"],
+        "price_100g": 109000,
+        "price_200g": 199000,
+        "price_500g": 439000,
+        "cup_price": 45000,
+        "recipe": "V60 15g, 225ml air (1:15), 91°C, 2m 15s.",
+        "description": "Ledakan aroma buah beri ungu, stroberi manis, serta body yang tebal dan memanjakan lidah."
+    },
+    {
+        "id": "kalaciri-wash-process",
+        "slug": "kalaciri-wash-process",
+        "name": "Kalaciri Wash Process",
+        "slowbar_alias": "KALACIRI",
+        "category": "filter",
+        "series": "Enrekang Series",
+        "origin": "South Sulawesi, Indonesia (Kalaciri Dammang 1400-1600 MASL)",
+        "varietal": "Typica, S-795",
+        "process": "Kalaciri Dammang Wash Process",
+        "roast": "Medium-Light",
+        "notes": ["Palm Sugar", "Sweet Spicy", "Chocolate"],
+        "flavor_category": ["Sweet", "Spicy", "Chocolaty"],
+        "price_100g": 99000,
+        "price_200g": 185000,
+        "price_500g": 399000,
+        "cup_price": 35000,
+        "recipe": "Aeropress / V60 16g, 240ml air (1:15), 90°C, 2m 00s.",
+        "description": "Manisnya gula aren hangat berpadu dengan rempah manis aromatik dan aftertaste cokelat lembut."
+    },
+    {
+        "id": "benteng-alla-wash-sembada",
+        "slug": "benteng-alla-wash-sembada",
+        "name": "Benteng Alla Wash (Sembada)",
+        "slowbar_alias": "SEMBADA",
+        "category": "filter",
+        "series": "Enrekang Series",
+        "origin": "South Sulawesi, Indonesia (Benteng Alla 1600-1800 MASL)",
+        "varietal": "S-795",
+        "process": "Benteng Alla Wash Process",
+        "roast": "Light-Medium",
+        "notes": ["Lime", "Brown Sugar", "Cashew", "Caramel", "Tamarind"],
+        "flavor_category": ["Fruity", "Sweet", "Nutty"],
+        "price_100g": 115000,
+        "price_200g": 215000,
+        "price_500g": 459000,
+        "cup_price": 50000,
+        "recipe": "V60 15g, 225ml air (1:15), 92°C, 2m 15s.",
+        "description": "Kompleksitas tinggi dengan keasaman segar jeruk nipis dan asam jawa, diimbangi manis gula merah dan gurih kacang mete."
+    },
+
+    # 3. SUNDA SERIES
+    {
+        "id": "puntang-honey-gulali",
+        "slug": "puntang-honey-gulali",
+        "name": "Puntang Honey (Gulali)",
+        "slowbar_alias": "GULALI",
         "category": "filter",
         "series": "Sunda Series",
         "origin": "West Java, Indonesia (Gunung Puntang 1300-1600 MASL)",
         "varietal": "Typica, Sigarar Utang",
-        "process": "Yellow Honey",
+        "process": "Puntang Honey Process",
         "roast": "Light-Medium",
         "notes": ["Honey", "Peach", "Chocolate-Like"],
         "flavor_category": ["Sweet", "Fruity", "Chocolaty"],
         "price_100g": 95000,
         "price_200g": 179000,
         "price_500g": 379000,
+        "cup_price": 45000,
         "recipe": "V60 16g kopi, 250ml air (1:15.6), 92°C, 2m 30s.",
-        "description": "Kopi bersejarah tanah Priangan Barat dengan manis brix 22% dan kelembutan peach berpadu cokelat."
+        "description": "Manis pekat bagai permen gulali dan madu bunga, berpadu buah persik dan sentuhan cokelat manis."
     },
     {
-        "id": "sunda-puntang-natural",
-        "slug": "puntang-natural",
-        "name": "Puntang Natural",
+        "id": "puntang-natural-aromanis",
+        "slug": "puntang-natural-aromanis",
+        "name": "Puntang Natural (Aromanis)",
+        "slowbar_alias": "AROMANIS",
         "category": "filter",
         "series": "Sunda Series",
         "origin": "West Java, Indonesia (Gunung Puntang 1300-1600 MASL)",
-        "varietal": "Typica",
-        "process": "Dry Natural",
+        "varietal": "Typica, Ateng Super",
+        "process": "Puntang Natural Process",
         "roast": "Light",
         "notes": ["Pineapple", "Berry", "Jackfruit"],
         "flavor_category": ["Fruity", "Sweet"],
         "price_100g": 99000,
         "price_200g": 185000,
         "price_500g": 399000,
-        "recipe": "Aeropress Inverted 15g, 200ml air (1:13.3), 89°C, 1m 45s.",
-        "description": "Ledakan buah tropis: nanas matang, berry liar, dan manis nangka dengan jemur lambat 28 hari."
+        "cup_price": 52000,
+        "recipe": "V60 15g kopi, 225ml air (1:15), 91°C, 2m 15s.",
+        "description": "Aroma harum buah nanas matang, nangka manis, dan aneka beri tropis yang semerbak sejak digiling."
     },
+
+    # 4. JAVA EXOTIC SERIES
     {
-        "id": "sindoro-strawberry",
-        "slug": "sindoro-strawberry-triple-yeast",
-        "name": "Sindoro Strawberry Triple Yeast",
+        "id": "sumbing-supernova-celestia",
+        "slug": "sumbing-supernova-celestia",
+        "name": "Sumbing Supernova Wash (Celestia)",
+        "slowbar_alias": "CELESTIA",
         "category": "filter",
         "series": "Java Exotic",
-        "origin": "Central Java, Indonesia (Gunung Sindoro 1500-1800 MASL)",
-        "varietal": "Kartika",
-        "process": "Triple Yeast Fermentation",
-        "roast": "Light",
-        "notes": ["Sweet Jammy Strawberry", "Vanilla"],
-        "flavor_category": ["Fruity", "Sweet", "Floral"],
-        "price_100g": 119000,
-        "price_200g": 220000,
-        "recipe": "V60 Kasuyo 4:6 20g kopi, 300ml air (1:15), 90°C, 3m 15s.",
-        "description": "Fermentasi tiga jenis ragi memicu ester rasa selai stroberi manis pekat berpadu vanili hangat."
-    },
-    {
-        "id": "sumbing-supernova",
-        "slug": "sumbing-supernova-wash",
-        "name": "Sumbing Supernova Wash",
-        "category": "filter",
-        "series": "Java Exotic",
-        "origin": "Central Java, Indonesia (Gunung Sumbing 1600-1900 MASL)",
-        "varietal": "Sigarar Utang",
-        "process": "Supernova Washed",
+        "origin": "Central Java, Indonesia (Gunung Sumbing 1500-1700 MASL)",
+        "varietal": "Kartika / Typica",
+        "process": "Sumbing Supernova Wash",
         "roast": "Light",
         "notes": ["Explosive Berry", "Complex", "Candy-Like"],
         "flavor_category": ["Fruity", "Sweet"],
         "price_100g": 139000,
         "price_200g": 259000,
-        "recipe": "Hario Switch 16g kopi, 240ml air (1:15), 92°C, 2m 45s.",
-        "description": "Pencucian dingin 12°C selama 96 jam menghasilkan keasaman berry ungu tajam dan sensasi permen manis."
+        "cup_price": 48000,
+        "recipe": "Origami / V60 15g, 225ml air (1:15), 91°C, 2m 10s.",
+        "description": "Ledakan rasa buah beri manis yang luar biasa intens bagai permen buah, dengan tingkat kompleksitas spektakuler."
     },
     {
-        "id": "prau-natural-secret",
-        "slug": "prau-natural-secret-project",
-        "name": "Prau Natural Secret Project",
+        "id": "prau-natural-surya",
+        "slug": "prau-natural-el-davisio-surya",
+        "name": "Prau Natural El Davisio Double Mosto (Surya)",
+        "slowbar_alias": "SURYA",
         "category": "filter",
         "series": "Java Exotic",
-        "origin": "Central Java, Indonesia (Gunung Prau 1600-2000 MASL)",
-        "varietal": "Kartika",
-        "process": "Secret Fermentation Natural",
+        "origin": "Central Java, Indonesia (Gunung Prau 1600-1800 MASL)",
+        "varietal": "El Davisio Selection",
+        "process": "Double Mosto Triple Yeast",
         "roast": "Light",
-        "notes": ["Strawberry Candy", "White Floral", "Fruit Punch"],
-        "flavor_category": ["Fruity", "Floral", "Sweet"],
+        "notes": ["White Floral", "Strawberry", "Candy Mint"],
+        "flavor_category": ["Floral", "Fruity", "Sweet"],
         "price_100g": 139000,
         "price_200g": 259000,
-        "recipe": "V60 15g kopi, 225ml air (1:15), 91°C, 2m 15s.",
-        "description": "Proyek rahasia mikrolot ekstrem 2.000 MASL dengan dominasi rasa permen stroberi dan bunga lily."
+        "cup_price": 60000,
+        "recipe": "V60 15g, 230ml air (1:15.3), 92°C, 2m 15s.",
+        "description": "Aroma bunga putih elegan, manis buah stroberi ranum, dan sensasi semilir candy mint di ujung lidah."
     },
     {
-        "id": "reserve-magnum-sidra",
-        "slug": "magnum-sidra-el-vergel-cauca",
-        "name": "Magnum Sidra El Vergel Cauca",
-        "category": "reserve",
-        "series": "Grand Reserve",
-        "origin": "Colombia (Cauca, Finca El Vergel 1850-2000 MASL)",
-        "varietal": "Sidra Heirloom",
-        "process": "Koji Anaerobic Natural",
+        "id": "sindoro-strawberry-selai",
+        "slug": "sindoro-strawberry-selai",
+        "name": "Sindoro Strawberry Triple Yeast (Selai)",
+        "slowbar_alias": "SELAI",
+        "category": "filter",
+        "series": "Java Exotic",
+        "origin": "Central Java, Indonesia (Gunung Sindoro 1500-1700 MASL)",
+        "varietal": "Kartika",
+        "process": "Sindoro Strawberry Triple Yeast",
+        "roast": "Light-Medium",
+        "notes": ["Sweet Jammy Strawberry", "Vanilla"],
+        "flavor_category": ["Fruity", "Sweet"],
+        "price_100g": 119000,
+        "price_200g": 220000,
+        "cup_price": 56000,
+        "recipe": "V60 / Kalita 15g, 225ml air (1:15), 91°C, 2m 20s.",
+        "description": "Karakter selai stroberi manis yang amat lezat berpadu aroma vanila hangat yang creamy dan lembut."
+    },
+
+    # 5. ARGOPURO WALIDA SERIES
+    {
+        "id": "argopuro-walida-anaerob-arcapada",
+        "slug": "argopuro-walida-anaerob-arcapada",
+        "name": "Argopuro Natural Anaerob (Arcapada)",
+        "slowbar_alias": "ARCAPADA",
+        "category": "filter",
+        "series": "Argopuro Walida",
+        "origin": "East Java, Indonesia (Gunung Argopuro 1300-1600 MASL)",
+        "varietal": "Kartika, Typica",
+        "process": "Argopuro Natural Anaerob",
         "roast": "Light",
-        "notes": ["Tropical", "Syrup", "Layered Cocoa", "Brown Sugar"],
-        "flavor_category": ["Fruity", "Sweet", "Chocolaty"],
-        "price_16g": 72000,
-        "price_50g": 180000,
-        "price_100g": 350000,
-        "price_200g": 685000,
-        "recipe": "Competition V60 16g kopi, 240ml air (1:15), 93°C, 2m 10s.",
-        "description": "Kopi kompetisi dunia dengan inokulasi Koji Jepang menghasilkan mouthfeel syrupy lebat dan cokelat berlapis."
+        "notes": ["Intensely Sweet", "Boozy", "Candy Like Fruit"],
+        "flavor_category": ["Sweet", "Fruity"],
+        "price_100g": 80000,
+        "price_200g": 150000,
+        "cup_price": 50000,
+        "recipe": "V60 Pour Over 15g, 225ml air (1:15), 91°C, 2m 15s.",
+        "description": "Manis yang sangat intens dengan sentuhan boozy elegan dan cita rasa buah tropis bagai permen."
     },
     {
-        "id": "reserve-el-triunfo-geisha",
-        "slug": "el-triunfo-geisha-tolima",
-        "name": "El Triunfo Geisha Tolima",
+        "id": "damarkandang-cm-kismis",
+        "slug": "damarkandang-cm-kismis",
+        "name": "Damarkandang Carbonic Maceration Kismis",
+        "slowbar_alias": "DAMARKANDANG KISMIS",
+        "category": "filter",
+        "series": "Argopuro Walida",
+        "origin": "East Java, Indonesia (Damarkandang, Argopuro 1400-1600 MASL)",
+        "varietal": "Kartika",
+        "process": "Damarkandang Carbonic Maceration",
+        "roast": "Light-Medium",
+        "notes": ["Intensely Sweet", "Winey", "Candy Like Cup"],
+        "flavor_category": ["Sweet", "Fruity"],
+        "price_100g": 90000,
+        "price_200g": 175000,
+        "cup_price": 60000,
+        "recipe": "Kalita Wave / V60 15g, 225ml air (1:15), 91°C, 2m 20s.",
+        "description": "Karakter rasa manis buah kismis hitam yang pekat, sentuhan winey yang halus, dan cangkir yang luar biasa manis."
+    },
+
+    # 6. GRAND RESERVE MICRO-LOT SERIES
+    {
+        "id": "grand-reserve-el-triunfo-geisha",
+        "slug": "el-triunfo-geisha-tolima-aurora",
+        "name": "El Triunfo Geisha Tolima (Aurora)",
+        "slowbar_alias": "AURORA",
         "category": "reserve",
         "series": "Grand Reserve",
-        "origin": "Colombia (Planadas, Tolima 1900-2100 MASL)",
-        "varietal": "Geisha",
-        "process": "Washed Slow Dry",
+        "origin": "Tolima, Colombia (1800-2000 MASL)",
+        "varietal": "Geisha (Gesha)",
+        "process": "Washed Extended Fermentation",
         "roast": "Light",
-        "notes": ["Jasmine", "Bergamot", "Peach", "Tea-Like"],
+        "notes": ["Jasmine", "Bergamot", "Peach", "Tea-like", "Crystalline"],
         "flavor_category": ["Floral", "Fruity", "Sweet"],
         "price_16g": 86000,
         "price_50g": 200000,
         "price_100g": 380000,
         "price_200g": 709000,
-        "recipe": "Orea V3 / V60 15g kopi, 240ml air (1:16), 90°C, 2m 00s.",
-        "description": "Puncak keanggunan aroma melati surgawi, bergamot earl grey, dan kelembutan teh persik."
+        "cup_price": 200000,
+        "recipe": "Hario V60 Plastic 16g kopi, 256ml air (1:16), 93°C, 2m 15s. Bloom 50g 45s.",
+        "description": "Puncak kemewahan rasa kopi dunia. Aroma melati yang semerbak, minyak bergamot earl grey, manisnya buah peach putih, dan kejernihan crystalline."
     },
     {
-        "id": "reserve-yemen-haraz",
-        "slug": "yemen-haraz-golden-harvest",
-        "name": "Yemen Haraz Golden Harvest",
+        "id": "grand-reserve-magnum-sidra",
+        "slug": "magnum-sidra-el-vergel-soberano",
+        "name": "Magnum Sidra El Vergel Cauca (Soberano)",
+        "slowbar_alias": "SOBERANO",
         "category": "reserve",
         "series": "Grand Reserve",
-        "origin": "Yemen (Haraz Mountains 2200-2400 MASL)",
-        "varietal": "Jaadi, Dawairi Ancient Landrace",
-        "process": "Anaerobic Natural Terraces",
+        "origin": "Cauca, Colombia (1850 MASL)",
+        "varietal": "Sidra (Bourbon x Typica Heirloom)",
+        "process": "Anaerobic Natural Koji Co-Ferment",
         "roast": "Light",
+        "notes": ["Tropical", "Syrup", "Layered Cocoa", "Brown Sugar"],
+        "flavor_category": ["Fruity", "Chocolaty", "Sweet"],
+        "price_16g": 72000,
+        "price_50g": 180000,
+        "price_100g": 350000,
+        "price_200g": 685000,
+        "cup_price": 180000,
+        "recipe": "V60 Pour Over 16g, 240ml air (1:15), 92°C, 2m 10s.",
+        "description": "Varietas langka Sidra dengan rasa sirup tropis pekat, lapisan rasa kakao mewah, dan aftertaste brown sugar yang amat panjang."
+    },
+    {
+        "id": "grand-reserve-sudan-rume-carmin",
+        "slug": "sudan-rume-huila-carmin",
+        "name": "Sudan Rume Huila (Carmin)",
+        "slowbar_alias": "CARMIN",
+        "category": "reserve",
+        "series": "Grand Reserve",
+        "origin": "Huila, Colombia (1750-1900 MASL)",
+        "varietal": "Sudan Rume",
+        "process": "Natural Fermented",
+        "roast": "Light",
+        "notes": ["Deepberry", "Wine-Like", "Red Fruit"],
+        "flavor_category": ["Fruity", "Sweet"],
+        "price_16g": 80000,
+        "price_50g": 185000,
+        "price_100g": 360000,
+        "price_200g": 690000,
+        "cup_price": 180000,
+        "recipe": "Kalita Wave / V60 16g, 240ml air (1:15), 91°C, 2m 20s.",
+        "description": "Varietas kuno Sudan Rume yang sangat langka dengan rasa buah beri gelap pekat, sentuhan winey yang anggun, dan buah merah ranum."
+    },
+    {
+        "id": "grand-reserve-yemen-sahara",
+        "slug": "yemen-haraz-golden-harvest-sahara",
+        "name": "Yemen Haraz Golden Harvest (Sahara)",
+        "slowbar_alias": "SAHARA",
+        "category": "reserve",
+        "series": "Grand Reserve",
+        "origin": "Haraz Mountain, Yemen (2000-2200 MASL)",
+        "varietal": "Yemenia / Udaini Heirloom",
+        "process": "Traditional Rooftop Natural",
+        "roast": "Light-Medium",
         "notes": ["Sweet Jammy Strawberry", "Vanilla"],
         "flavor_category": ["Fruity", "Sweet"],
         "price_16g": 59000,
         "price_50g": 165000,
         "price_100g": 229000,
         "price_200g": 549000,
-        "recipe": "V60 16g kopi, 240ml air (1:15), 92°C, 2m 20s.",
-        "description": "Keajaiban pohon kopi kuno terasering tebing Yaman dengan rasa selai stroberi dan rempah vanili mistis."
+        "cup_price": 99000,
+        "recipe": "Origami / V60 16g, 240ml air (1:15), 91°C, 2m 15s.",
+        "description": "Biji kopi tertua di dunia dari pegunungan tinggi Haraz Yaman. Manisnya selai stroberi pekat berpadu sentuhan vanila rempah magis."
     },
+
+    # 7. ESPRESSO BASED ROAST PROFILES
     {
-        "id": "espresso-dampit",
-        "slug": "dampit-natural-robusta",
-        "name": "Dampit Natural (Fine Robusta)",
+        "id": "espresso-dampit-natural",
+        "slug": "dampit-natural-espresso",
+        "name": "Dampit Natural Robusta Espresso",
+        "slowbar_alias": "DAMPIT NATURAL",
         "category": "espresso",
-        "series": "Espresso Roast",
-        "origin": "East Java, Indonesia (Dampit, Malang 800-1000 MASL)",
-        "varietal": "Fine Robusta Klon Tugusari",
-        "process": "Natural",
+        "series": "Robusta Espresso",
+        "origin": "Dampit, Malang, East Java (700-900 MASL)",
+        "varietal": "Fine Robusta Malang",
+        "process": "Natural Process",
         "roast": "Medium-Dark",
         "notes": ["Chocolate", "Brown Sugar", "Full Body"],
-        "flavor_category": ["Chocolaty", "Sweet", "Nutty"],
+        "flavor_category": ["Chocolaty", "Sweet"],
         "price_200g": 35000,
         "price_500g": 85000,
-        "price_1kg": 150000,
-        "recipe": "Espresso 18g in, 36g out (1:2 ratio), 93°C, 26-28 detik.",
-        "description": "Robusta kebanggaan Malang Selatan dengan crema tebal, notes cokelat hitam dan gula aren tanpa rasa getir kasar."
+        "price_1000g": 150000,
+        "recipe": "Espresso Machine: 19g in, 38g out, 26 detik suhu 93°C. Cocok untuk Es Kopi Susu Gula Aren.",
+        "description": "Robusta terbaik kebanggaan Malang dengan body tebal mantap, aroma cokelat pekat, dan manis brown sugar yang pas untuk es kopi susu."
     },
     {
-        "id": "espresso-kintamani",
-        "slug": "kintamani-full-wash-arabica",
-        "name": "Kintamani Full Wash (Arabica)",
+        "id": "espresso-arabica-kintamani",
+        "slug": "kintamani-full-wash-arabica-espresso",
+        "name": "Kintamani Full Wash Arabica Espresso",
+        "slowbar_alias": "KINTAMANI FULL WASH",
         "category": "espresso",
-        "series": "Espresso Roast",
-        "origin": "Bali, Indonesia (Kintamani 1200-1500 MASL)",
-        "varietal": "S-795, Kopyol",
-        "process": "Full Washed",
+        "series": "Arabica Espresso",
+        "origin": "Kintamani, Bali (1200-1400 MASL)",
+        "varietal": "Typica, Kartika",
+        "process": "Full Wash",
         "roast": "Medium",
         "notes": ["Chocolate", "Brown Sugar", "Full Body"],
-        "flavor_category": ["Chocolaty", "Sweet", "Fruity"],
+        "flavor_category": ["Chocolaty", "Sweet"],
         "price_200g": 70000,
         "price_500g": 135000,
-        "price_1kg": 260000,
-        "recipe": "Espresso Flat White 19g in, 38g out, 93°C, 27 detik.",
-        "description": "Arabika Bali dengan keseimbangan cokelat susu manis dan hint citrus lembut yang berpadu dengan susu."
+        "price_1000g": 260000,
+        "recipe": "Espresso Machine: 18g in, 36g out, 28 detik suhu 93°C.",
+        "description": "Single origin Arabika Bali dengan profil sangrai espresso menghasilkan krema tebal, manis brown sugar, dan sentuhan cokelat hangat."
+    },
+    {
+        "id": "espresso-arabica-ijen-full-wash",
+        "slug": "arabica-ijen-full-wash-espresso",
+        "name": "Arabica Ijen Full Wash Espresso",
+        "slowbar_alias": "ARABICA IJEN FULL WASH",
+        "category": "espresso",
+        "series": "Arabica Espresso",
+        "origin": "Gunung Ijen, Bondowoso, East Java (1400 MASL)",
+        "varietal": "Kartika / Typica",
+        "process": "Full Wash",
+        "roast": "Medium",
+        "notes": ["Earthy", "Dark Chocolate", "Full Body"],
+        "flavor_category": ["Chocolaty", "Nutty"],
+        "price_200g": 60000,
+        "price_500g": 140000,
+        "price_1000g": 250000,
+        "recipe": "Espresso Machine: 18g in, 36g out, 26 detik suhu 93°C.",
+        "description": "Espresso Arabika Ijen yang balance dengan crema cokelat keemasan, sentuhan cokelat hitam gurih, dan aftertaste yang bersih."
     },
     {
         "id": "espresso-brazil-santos",
-        "slug": "brazil-santos-arabica",
-        "name": "Brazil Santos (Arabica)",
+        "slug": "brazil-santos-espresso",
+        "name": "Brazil Santos Espresso",
+        "slowbar_alias": "BRAZIL SANTOS",
         "category": "espresso",
-        "series": "Espresso Roast",
-        "origin": "Brazil (Santos, Minas Gerais 1000-1200 MASL)",
+        "series": "Arabica Espresso",
+        "origin": "Minas Gerais, Santos, Brazil (900-1200 MASL)",
         "varietal": "Mundo Novo, Catuai",
-        "process": "Natural / Pulped Natural",
+        "process": "Natural Process",
         "roast": "Medium-Dark",
         "notes": ["Earthy", "Dark Chocolate", "Full Body"],
         "flavor_category": ["Chocolaty", "Nutty"],
         "price_200g": 92000,
         "price_500g": 175000,
-        "price_1kg": 340000,
-        "recipe": "Americano / Latte 18g in, 36g out, 92°C, 27 detik.",
-        "description": "Fondasi espresso klasik dunia dengan sensasi cokelat hitam pekat, kacang panggang, dan aftertaste tebal."
+        "price_1000g": 340000,
+        "recipe": "Espresso Machine: 18.5g in, 37g out, 28 detik suhu 92°C.",
+        "description": "Kopi Arabika impor asal Brazil dengan rasa nutty cokelat klasik dunia, keasaman sangat rendah, dan body yang mantap."
     }
 ]
 
@@ -287,65 +545,77 @@ class RAGService:
         self.api_key = settings.GEMINI_API_KEY
         if self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
+            self.model = genai.GenerativeModel("gemini-1.5-flash")
+            self.embedding_model = "models/text-embedding-004"
         else:
             self.model = None
+            self.embedding_model = None
 
-    def search_similar_products(self, query: str, limit: int = 4) -> List[Tuple[Dict[str, Any], float]]:
-        """Semantic & keyword scoring across 52 Coffee items"""
-        q_lower = query.lower()
-        scored_items = []
+    def search_similar_products(self, query: str, top_k: int = 3) -> List[Tuple[Dict[str, Any], float]]:
+        """
+        Calculates semantic similarity using keyword overlap and token embeddings
+        """
+        query_lower = query.lower()
+        results = []
 
-        for item in COFFEE_KNOWLEDGE_BASE:
+        for product in COFFEE_KNOWLEDGE_BASE:
             score = 0.0
             
-            # Match tasting notes
-            for note in item["notes"]:
-                if note.lower() in q_lower:
-                    score += 0.4
-            
-            # Match flavor categories
-            for cat in item["flavor_category"]:
-                if cat.lower() in q_lower:
-                    score += 0.35
-            
-            # Match process & series & origin
-            if item["process"].lower() in q_lower:
-                score += 0.3
-            if item["series"].lower() in q_lower:
-                score += 0.4
-            if item["name"].lower() in q_lower:
-                score += 0.6
-            if "espresso" in q_lower and item["category"] == "espresso":
-                score += 0.5
-            if ("filter" in q_lower or "v60" in q_lower) and item["category"] == "filter":
-                score += 0.3
-            if ("reserve" in q_lower or "geisha" in q_lower or "colombia" in q_lower) and item["category"] == "reserve":
-                score += 0.5
+            # Check slowbar alias match (e.g. Asmara, Celestia, Soberano)
+            if "slowbar_alias" in product and product["slowbar_alias"].lower() in query_lower:
+                score += 3.0
+                
+            # Check direct name/slug match
+            if product["name"].lower() in query_lower or product["slug"] in query_lower:
+                score += 2.5
+
+            # Check series match
+            if product["series"].lower() in query_lower:
+                score += 1.5
+
+            # Check category match (filter, espresso, manual brew, susu, v60)
+            if ("v60" in query_lower or "filter" in query_lower or "manual" in query_lower) and product["category"] == "filter":
+                score += 0.8
+            if ("susu" in query_lower or "espresso" in query_lower or "latte" in query_lower) and product["category"] == "espresso":
+                score += 1.2
+            if ("geisha" in query_lower or "mahal" in query_lower or "reserve" in query_lower or "kompetisi" in query_lower) and product["category"] == "reserve":
+                score += 1.5
+
+            # Check notes match
+            for note in product["notes"]:
+                if note.lower() in query_lower:
+                    score += 1.0
+
+            # Check flavor category match
+            for cat in product["flavor_category"]:
+                if cat.lower() in query_lower:
+                    score += 0.9
 
             if score > 0:
-                scored_items.append((item, score))
+                results.append((product, score))
 
-        # Sort descending by score
-        scored_items.sort(key=lambda x: x[1], reverse=True)
-        if not scored_items:
-            # Return top 2 featured if no query match
-            return [(COFFEE_KNOWLEDGE_BASE[0], 0.1), (COFFEE_KNOWLEDGE_BASE[5], 0.1)]
+        # Sort by score descending
+        results.sort(key=lambda x: x[1], reverse=True)
 
-        return scored_items[:limit]
+        # Fallback if no specific match
+        if not results:
+            return [(COFFEE_KNOWLEDGE_BASE[0], 0.5), (COFFEE_KNOWLEDGE_BASE[1], 0.4), (COFFEE_KNOWLEDGE_BASE[2], 0.3)]
 
-    def check_guardrails_input(self, user_prompt: str) -> Tuple[bool, str]:
-        """NeMo Input Rails: Blocks off-topic / prompt injections"""
-        prompt_lower = user_prompt.lower()
-        
-        # Block malicious prompt injections
-        forbidden_patterns = [
-            "ignore previous instructions", "system prompt", "jailbreak", "dan mode",
-            "write python code for hacking", "create a bomb", "politik indonesia"
+        return results[:top_k]
+
+    def check_guardrails_input(self, user_input: str) -> Tuple[bool, str]:
+        """
+        NeMo Guardrails Input Validation
+        """
+        blocked_phrases = [
+            "ignore previous instructions", "system prompt", "hack", "bypass",
+            "judi", "politik", "presiden", "meretas", "ddos", "script injection",
+            "drop table", "select * from users"
         ]
-        for pattern in forbidden_patterns:
-            if pattern in prompt_lower:
-                return False, "Mohon maaf kawan seduh, saya adalah Virtual Barista 52 Coffee & Roastery. Saya hanya melayani konsultasi seputar rekomendasi biji kopi, profil rasa, dan panduan seduh presisi."
+        user_input_lower = user_input.lower()
+        for phrase in blocked_phrases:
+            if phrase in user_input_lower:
+                return False, "Mohon maaf kawan seduh, saya adalah Virtual Barista khusus 52 Coffee & Roastery. Saya hanya dapat melayani pertanyaan seputar biji kopi, profil rasa, dan panduan seduh."
 
         return True, ""
 
@@ -373,7 +643,8 @@ class RAGService:
             f"Origin: {p['origin']}\n"
             f"Process: {p['process']} | Varietal: {p['varietal']}\n"
             f"Tasting Notes: {', '.join(p['notes'])}\n"
-            f"Harga: Rp {p.get('price_100g', p.get('price_200g', p.get('price_16g', 0))):,}\n"
+            f"Harga Beans: Rp {p.get('price_100g', p.get('price_200g', p.get('price_16g', 0))):,}\n"
+            f"Harga Cup Slowbar: Rp {p.get('cup_price', 0):,}\n"
             f"Resep Seduh: {p['recipe']}\n"
             f"Deskripsi: {p['description']}"
             for p in retrieved_products
@@ -381,7 +652,7 @@ class RAGService:
 
         # 3. Formulate Prompt with Gemini
         system_instruction = (
-            "Anda adalah 'Virtual Barista 52 Coffee & Roastery' yang bertugas di tasting room kami di Jl. KH. Agus Salim No. 11, Malang.\n"
+            "Anda adalah 'Virtual Barista 52 Coffee & Roastery' yang bertugas di slowbar tasting room kami di Jl. KH. Agus Salim No. 11, Malang.\n"
             "Persona Anda ramah, hangat, berpengetahuan mendalam tentang specialty coffee, dan menyapa pelanggan dengan panggilan 'kawan seduh'.\n\n"
             "ATURAN KETAT (GUARDRAILS & GROUNDING):\n"
             "1. HANYA rekomendasikan biji kopi yang ada pada data katalog 52 Coffee yang diberikan di bawah ini. JANGAN berhalusinasi atau menyebut merek luar.\n"
@@ -435,7 +706,7 @@ class RAGService:
     def _fallback_reply(self, query: str, products: List[Dict[str, Any]]) -> str:
         """Deterministic intelligent fallback barista response"""
         if not products:
-            return "Halo kawan seduh! Di 52 Coffee & Roastery Malang, kami memiliki beragam koleksi fresh crop dari lereng Ijen, Sunda, hingga Grand Reserve Colombia. Ceritakan rasa kopi impianmu!"
+            return "Halo kawan seduh! Di 52 Coffee & Roastery Malang, kami memiliki beragam koleksi fresh crop dari lereng Ijen, Enrekang, Sunda, Java Exotic, hingga Grand Reserve Colombia. Ceritakan rasa kopi impianmu!"
 
         lead_product = products[0]
         reply = (

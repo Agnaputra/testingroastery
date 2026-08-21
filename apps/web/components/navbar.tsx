@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useCartStore } from '../lib/store/useCartStore';
 import { SearchModal } from './search-modal';
+import { FiftyTwoLogo } from './logo';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -69,12 +70,12 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-surface-white border-b border-border-subtle">
         <div className="flex justify-between items-center px-4 sm:px-10 w-full max-w-[1280px] mx-auto h-20">
-          {/* Brand Logo (Exact NIR / 52 Coffee Typography) */}
+          {/* Brand Logo (52 Coffee Oceanic Swirl from PDF Menu) */}
           <Link
             href="/"
-            className="text-2xl font-editorial font-black tracking-tighter text-primary hover:opacity-90 transition-opacity flex items-center gap-1.5"
+            className="hover:opacity-90 transition-opacity"
           >
-            <span>52 COFFEE</span>
+            <FiftyTwoLogo size="md" textColor="dark" />
           </Link>
 
           {/* Desktop Navigation Links (Exact Screenshot 1 Menu) */}

@@ -30,11 +30,11 @@ interface ChatMessage {
 }
 
 const QUICK_PROMPTS = [
-  '☕ Rekomendasi kopi rasa fruity & floral',
-  '🍓 Kopi dengan aroma stroberi manis',
-  '🧪 Ceritakan tentang Ijen Carbonic Maceration',
-  '🥛 Kopi espresso paling pas untuk es kopi susu aren',
-  '🏆 Rekomendasi Grand Reserve Colombia Geisha',
+  '☕ Rekomendasi kopi Asmara & Wening dari Ijen',
+  '🍓 Kopi dengan aroma stroberi manis (Selai / Celestia)',
+  '👑 Ceritakan tentang Grand Reserve Aurora Geisha',
+  '🥛 Biji espresso terbaik untuk es kopi susu (Dampit Natural)',
+  '🌿 Rekomendasi kopi floral melati & mandarin (Buntu Lenta / Duharman)',
   '⏱️ Tips rasio seduh V60 untuk biji Ijen',
 ];
 
