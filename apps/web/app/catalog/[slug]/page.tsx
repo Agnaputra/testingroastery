@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { notFound, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
   Plus,
@@ -22,6 +23,14 @@ import {
 import { useCartStore } from '../../../lib/store/useCartStore';
 
 export default function ProductDetailPage() {
+  return (
+    <Suspense fallback={<div className="p-20 text-center text-xs font-mono text-gray-400">Loading product...</div>}>
+      <ProductDetailContent />
+    </Suspense>
+  );
+}
+
+function ProductDetailContent() {
   const params = useParams();
   const slug = params?.slug as string;
   const product = getProductBySlug(slug);
@@ -38,8 +47,14 @@ export default function ProductDetailPage() {
     );
   }
 
+  const searchParams = useSearchParams();
+  const modeParam = searchParams.get('mode');
+  const initialMode = modeParam === 'cup' && product.cupPrice ? 'cup' : 'beans';
+  const [orderMode, setOrderMode] = useState<'cup' | 'beans'>(initialMode);
+  const [servingTemp, setServingTemp] = useState<'hot' | 'iced'>('hot');
+
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(
-    product.variants[0] || { price: product.basePrice, weightLabel: '200g', weightGrams: 200, inStock: true }
+    product.variants[0] || { price: product.basePrice, weightLabel: '100g', weightGrams: 100, inStock: true }
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -53,20 +68,37 @@ export default function ProductDetailPage() {
   const { addItem } = useCartStore();
 
   const handleAddToCart = () => {
-    addItem({
-      productId: product.id,
-      name: product.name,
-      slug: product.slug,
-      imageUrl: product.imageUrl,
-      weightGrams: selectedVariant.weightGrams,
-      weightLabel: selectedVariant.weightLabel,
-      grind: 'whole',
-      grindLabel: 'Whole Beans (Biji Utuh)',
-      unitPrice: selectedVariant.price,
-      quantity: quantity,
-      series: product.series,
-      tastingNotes: product.tastingNotes,
-    });
+    if (orderMode === 'cup') {
+      addItem({
+        productId: product.id,
+        name: `${product.slowbarAlias || product.name} (Slowbar Cup - ${servingTemp === 'hot' ? 'Hot' : 'Iced'})`,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        weightGrams: 1,
+        weightLabel: '1 Cup',
+        grind: 'whole',
+        grindLabel: `Manual Brew (${servingTemp.toUpperCase()})`,
+        unitPrice: product.cupPrice || product.basePrice,
+        quantity: quantity,
+        series: product.series,
+        tastingNotes: product.tastingNotes,
+      });
+    } else {
+      addItem({
+        productId: product.id,
+        name: product.name,
+        slug: product.slug,
+        imageUrl: product.imageUrl,
+        weightGrams: selectedVariant.weightGrams,
+        weightLabel: selectedVariant.weightLabel,
+        grind: 'whole',
+        grindLabel: 'Whole Beans (Biji Utuh)',
+        unitPrice: selectedVariant.price,
+        quantity: quantity,
+        series: product.series,
+        tastingNotes: product.tastingNotes,
+      });
+    }
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -81,137 +113,286 @@ export default function ProductDetailPage() {
     : Math.round(product.basePrice * 3.8);
   const grossProfit1kg = price1kg - hppPerKg - packagingPerKg;
 
+  // Resolve clean studio product bag image
+  let displayImg = product.imageUrl;
+  if (!product.imageUrl || product.imageUrl.startsWith('http')) {
+    if (product.series === 'Java Exotic') displayImg = '/images/bag-sumbing.jpg';
+    else if (product.series === 'Grand Reserve') displayImg = '/images/bag-grand-reserve.jpg';
+    else if (product.series === 'Argopuro Walida' || product.series === 'Arjuna Series') displayImg = '/images/bag-walida.jpg';
+    else displayImg = '/images/bag-prau.jpg';
+  }
+
+  const currentPrice = orderMode === 'cup' ? (product.cupPrice || product.basePrice) : selectedVariant.price;
+  const cleanName = product.name.replace(/\(.*?\)/g, '').trim();
+
   return (
     <div className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans">
-      <div className="max-w-[1280px] mx-auto space-y-12">
+      <div className="max-w-[1280px] mx-auto space-y-10">
         {/* ========================================================================= */}
-        {/* 1. BREADCRUMB (Exact Screenshot 2)                                        */}
+        {/* 1. BREADCRUMB                                                             */}
         {/* ========================================================================= */}
-        <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
-          <Link href="/catalog" className="hover:text-primary transition-colors">
+        <div className="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+          <Link href="/catalog" className="hover:text-brand-navy transition-colors">
             Shop
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <Link
-            href={`/catalog?series=${product.series.toLowerCase().includes('daily') ? 'daily' : 'limited'}`}
-            className="hover:text-primary transition-colors"
+            href={`/catalog?series=${encodeURIComponent(product.series)}`}
+            className="hover:text-brand-navy transition-colors"
           >
             {product.series}
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="capitalize">{product.category}</span>
+          <span className="capitalize">{product.categoryLabel || product.category}</span>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-on-surface font-semibold truncate max-w-xs">{product.name}</span>
+          <span className="text-brand-navy font-semibold truncate max-w-xs">{cleanName}</span>
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. 2-COLUMN MAIN PRODUCT SECTION (Exact Screenshot 2)                     */}
+        {/* 2. 2-COLUMN MAIN PRODUCT SECTION                                          */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* LEFT: Pouch Visual Mockup */}
-          <div className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          {/* LEFT: Visual Mockup */}
+          <div className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 sm:p-12 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
             <div className="w-full h-full relative flex items-center justify-center">
               <img
-                src={product.imageUrl}
+                src={displayImg}
                 alt={product.name}
-                className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105"
+                className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105 filter drop-shadow-md"
               />
             </div>
           </div>
 
           {/* RIGHT: Product Details & Purchase Form */}
-          <div className="lg:col-span-7 space-y-8">
-            {/* Title */}
-            <div className="space-y-2">
-              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-on-surface leading-tight tracking-tight">
-                {product.name}
+          <div className="lg:col-span-7 space-y-7">
+            {/* Title & Metadata Hierarchy */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+                <span className="px-3 py-1 rounded-full bg-brand-maroon text-white font-bold text-[10px] uppercase tracking-wider">
+                  {product.series}
+                </span>
+                {product.slowbarAlias && (
+                  <span className="px-3 py-1 rounded-full bg-brand-pill text-brand-navy font-bold text-[10px] uppercase tracking-wider border border-border-subtle">
+                    Slowbar Alias: {product.slowbarAlias}
+                  </span>
+                )}
+              </div>
+
+              {/* Clean Main Headline */}
+              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-tight tracking-tight">
+                {orderMode === 'cup' && product.slowbarAlias
+                  ? product.slowbarAlias
+                  : cleanName}
               </h1>
+
+              {/* Secondary Clean Subtitle */}
+              <p className="text-sm text-on-surface-variant font-sans font-medium">
+                {cleanName} <span className="text-border-subtle mx-1.5">•</span> <span className="font-mono text-xs text-brand-navy-light">{product.process}</span>
+              </p>
             </div>
 
-            {/* Size Selector */}
-            <div className="space-y-2.5">
-              <label className="block text-xs font-mono text-gray-500 uppercase font-bold tracking-wider">
-                Size
-              </label>
-              <div className="flex flex-wrap gap-2.5">
-                {[
-                  { weightGrams: 200, weightLabel: '200 g', price: product.variants.find(v => v.weightGrams === 200)?.price || product.basePrice },
-                  { weightGrams: 500, weightLabel: '500 g', price: product.variants.find(v => v.weightGrams === 500)?.price || Math.round(product.basePrice * 2.3) },
-                  { weightGrams: 1000, weightLabel: '1 kg', price: product.variants.find(v => v.weightGrams === 1000)?.price || Math.round(product.basePrice * 3.8) },
-                ].map((size) => (
+            {/* ORDER TYPE TOGGLE (Slowbar Cup vs Beans Pouch) */}
+            {product.cupPrice && (
+              <div className="space-y-2">
+                <span className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
+                  Format Pesanan
+                </span>
+                <div className="grid grid-cols-2 gap-2 max-w-lg p-1.5 bg-surface-container-low rounded-2xl border border-border-subtle relative">
                   <button
-                    key={size.weightLabel}
                     type="button"
-                    onClick={() => setSelectedVariant({ ...size, inStock: true })}
-                    className={`px-5 py-2 rounded-full font-mono text-xs font-bold transition-all ${
-                      selectedVariant.weightLabel.replace(/\s+/g, '') === size.weightLabel.replace(/\s+/g, '')
-                        ? 'bg-primary text-white shadow-md'
-                        : 'bg-white border border-border-subtle text-gray-700 hover:border-gray-400'
+                    onClick={() => setOrderMode('cup')}
+                    className={`relative py-3 px-4 rounded-xl text-xs transition-colors duration-200 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 z-10 ${
+                      orderMode === 'cup'
+                        ? 'text-white font-bold'
+                        : 'text-on-surface-variant hover:text-brand-navy font-medium'
                     }`}
                   >
-                    {size.weightLabel}
+                    {orderMode === 'cup' && (
+                      <motion.div
+                        layoutId="activeOrderModePill"
+                        className="absolute inset-0 bg-brand-navy rounded-xl shadow-md -z-10"
+                        transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <span>☕ Seduhan Cangkir</span>
+                    <span className="font-mono text-[11px] opacity-90">{formatRupiah(product.cupPrice)}</span>
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setOrderMode('beans')}
+                    className={`relative py-3 px-4 rounded-xl text-xs transition-colors duration-200 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 z-10 ${
+                      orderMode === 'beans'
+                        ? 'text-white font-bold'
+                        : 'text-on-surface-variant hover:text-brand-navy font-medium'
+                    }`}
+                  >
+                    {orderMode === 'beans' && (
+                      <motion.div
+                        layoutId="activeOrderModePill"
+                        className="absolute inset-0 bg-brand-navy rounded-xl shadow-md -z-10"
+                        transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <span>🛍️ Biji Kopi (Pouch)</span>
+                    <span className="font-mono text-[11px] opacity-90">Mulai {formatRupiah(product.basePrice)}</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Price Display */}
-            <div className="space-y-1">
-              <span className="text-xs font-mono text-gray-500 uppercase font-bold block">
-                Price
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="font-mono text-3xl sm:text-4xl font-bold text-on-surface">
-                  {formatRupiah(selectedVariant.price)}
+            {/* TAB CONTENT TRANSITION */}
+            <AnimatePresence mode="wait">
+              {orderMode === 'cup' && product.cupPrice ? (
+                /* MODE 1: SLOWBAR CUP (Tanpa Gramasi Biji Kopi) */
+                <motion.div
+                  key="slowbar-cup-mode"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4 p-5 rounded-2xl bg-brand-pill/60 border border-border-subtle"
+                >
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <span className="text-brand-navy font-bold uppercase tracking-wider">Format Penyajian:</span>
+                    <span className="px-3 py-1 rounded-full bg-brand-maroon text-white font-bold text-[10px]">
+                      1 Cangkir (Single Cup)
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono text-on-surface-variant uppercase font-semibold block">
+                      Pilihan Suhu Seduhan Barista:
+                    </span>
+                    <div className="flex gap-2.5 relative">
+                      <button
+                        type="button"
+                        onClick={() => setServingTemp('hot')}
+                        className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 ${
+                          servingTemp === 'hot'
+                            ? 'text-white'
+                            : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
+                        }`}
+                      >
+                        {servingTemp === 'hot' && (
+                          <motion.div
+                            layoutId="activeServingTempPill"
+                            className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
+                            transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                          />
+                        )}
+                        <span>🔥 Hot (V60 Seduh Panas)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setServingTemp('iced')}
+                        className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 ${
+                          servingTemp === 'iced'
+                            ? 'text-white'
+                            : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
+                        }`}
+                      >
+                        {servingTemp === 'iced' && (
+                          <motion.div
+                            layoutId="activeServingTempPill"
+                            className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
+                            transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                          />
+                        )}
+                        <span>🧊 Iced (Japanese Drip Dingin)</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                /* MODE 2: BIJI KOPI KEMASAN POUCH (Dengan Pilihan Gramasi) */
+                <motion.div
+                  key="beans-pouch-mode"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-2.5"
+                >
+                  <label className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
+                    Pilih Ukuran Biji Kopi (Kemasan Retail Pouch)
+                  </label>
+                  <div className="flex flex-wrap gap-2.5">
+                    {product.variants.map((size) => (
+                      <button
+                        key={size.weightLabel}
+                        type="button"
+                        onClick={() => setSelectedVariant(size)}
+                        className={`px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all ${
+                          selectedVariant.weightGrams === size.weightGrams
+                            ? 'bg-brand-navy text-white shadow-md'
+                            : 'bg-white border border-border-subtle text-gray-700 hover:border-brand-navy'
+                        }`}
+                      >
+                        {size.weightLabel} — {formatRupiah(size.price)}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Price & Quantity & Add to Cart Section */}
+            <div className="pt-4 border-t border-border-subtle space-y-4">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
+                  Total Harga
                 </span>
-                <span className="text-xs font-mono text-gray-500">
-                  / {selectedVariant.weightLabel}
-                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl sm:text-4xl font-bold text-brand-navy">
+                    {formatRupiah(currentPrice * quantity)}
+                  </span>
+                  <span className="text-xs font-mono text-on-surface-variant">
+                    / {quantity} {orderMode === 'cup' ? 'Cup' : selectedVariant.weightLabel}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Quantity & Add to Cart Row */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-1">
-              {/* Quantity Selector */}
+              {/* Quantity & CTA Row */}
               <div className="flex items-center gap-3">
-                <span className="text-xs font-mono text-gray-500 uppercase font-bold">Quantity</span>
-                <div className="flex items-center gap-2">
+                {/* Stepper */}
+                <div className="flex items-center border border-border-subtle rounded-xl bg-surface-container-low p-1 shrink-0">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-xl bg-red-100 text-primary font-bold flex items-center justify-center hover:bg-red-200 transition-colors"
+                    className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs"
+                    aria-label="Kurangi jumlah"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-8 text-center font-mono font-bold text-base text-on-surface">
+                  <span className="w-10 text-center font-mono font-bold text-sm text-brand-navy">
                     {quantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-xl bg-primary text-white font-bold flex items-center justify-center hover:bg-surface-tint transition-colors shadow-sm"
+                    className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs"
+                    aria-label="Tambah jumlah"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
 
-              {/* Add to Cart Button */}
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={isAdded}
-                className="flex-1 bg-primary text-white font-mono font-bold text-sm py-4 px-8 rounded-xl hover:bg-surface-tint transition-all shadow-lg flex items-center justify-center gap-2"
-              >
-                {isAdded ? (
-                  <>
-                    <Check className="w-5 h-5" />
-                    <span>Added to Cart!</span>
-                  </>
-                ) : (
-                  <span>Add to Cart</span>
-                )}
-              </button>
+                {/* Add to Cart Button */}
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={isAdded}
+                  className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isAdded ? (
+                    <>
+                      <Check className="w-5 h-5 text-emerald-300" />
+                      <span>{orderMode === 'cup' ? 'Cup Berhasil Ditambahkan!' : 'Biji Kopi Ditambahkan!'}</span>
+                    </>
+                  ) : (
+                    <span>{orderMode === 'cup' ? 'Pesan Cangkir Slowbar' : 'Beli Biji Kopi Pouch'}</span>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* ========================================================================= */}

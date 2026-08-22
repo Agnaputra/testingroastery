@@ -8,21 +8,6 @@ import { BrewCalculator } from '../../../components/brew-calculator';
 export default function BrewCalculatorPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-      {/* Top Breadcrumb / Back to Home Navigation */}
-      <div className="flex items-center justify-between text-xs font-mono">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-roastery-border text-roastery-charcoal hover:text-roastery-crimson hover:border-roastery-crimson transition-all shadow-sm group"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-          <span>Kembali ke Beranda</span>
-        </Link>
-        <div className="text-roastery-muted hidden sm:flex items-center gap-1.5">
-          <Link href="/" className="hover:text-roastery-crimson">Beranda</Link>
-          <span>/</span>
-          <span className="text-roastery-dark font-semibold">Slowbar Tools & Brew Calculator</span>
-        </div>
-      </div>
 
       {/* Main Header */}
       <div className="border-b border-roastery-border pb-8">

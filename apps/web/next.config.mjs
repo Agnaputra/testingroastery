@@ -14,6 +14,15 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { dev, isServer }) => {
+    if (dev) {
+      // Use memory cache during development on Windows to prevent PackFileCacheStrategy ENOENT lock errors
+      config.cache = {
+        type: 'memory',
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

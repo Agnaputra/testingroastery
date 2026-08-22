@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare,
   X,
@@ -16,6 +17,8 @@ import {
   Bot,
   User,
   Check,
+  Flame,
+  HelpCircle,
 } from 'lucide-react';
 import { PRODUCTS, CoffeeProduct, formatRupiah } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
@@ -30,16 +33,16 @@ interface ChatMessage {
 }
 
 const QUICK_PROMPTS = [
-  '☕ Rekomendasi kopi Asmara & Wening dari Ijen',
-  '🍓 Kopi dengan aroma stroberi manis (Selai / Celestia)',
-  '👑 Ceritakan tentang Grand Reserve Aurora Geisha',
-  '🥛 Biji espresso terbaik untuk es kopi susu (Dampit Natural)',
-  '🌿 Rekomendasi kopi floral melati & mandarin (Buntu Lenta / Duharman)',
-  '⏱️ Tips rasio seduh V60 untuk biji Ijen',
+  '🍓 Rekomendasi beans fruity & floral (Sumbing / Sidra)',
+  '☕ Biji kopi terbaik untuk V60 manual brew (Ijen / Walida)',
+  '🥛 Blend espresso manis cocok untuk es kopi susu (Dampit / Arjuna)',
+  '👑 Ceritakan tentang Grand Reserve Inmaculada Pink Bourbon',
+  '⏱️ Tips rasio seduh & suhu air V60 harian',
 ];
 
 export function VirtualBaristaWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
@@ -47,7 +50,7 @@ export function VirtualBaristaWidget() {
     {
       id: 'welcome',
       sender: 'barista',
-      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery ☕. Ada yang bisa saya bantu rekomendasikan hari ini? Ceritakan profil rasa favoritmu (fruity, floral, chocolate, sweet) atau metode seduh yang ingin kamu gunakan!',
+      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery ☕. Ada yang bisa saya bantu rekomendasikan hari ini? Ceritakan profil rasa favoritmu (fruity, floral candy, winey, chocolate) atau metode seduh yang ingin kamu gunakan!',
       timestamp: 'Baru saja',
     },
   ]);
@@ -61,9 +64,18 @@ export function VirtualBaristaWidget() {
 
   useEffect(() => {
     if (isOpen) {
+      setShowTooltip(false);
       scrollToBottom();
     }
   }, [messages, isOpen]);
+
+  // Periodic tooltip reminder if not opened
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isOpen) setShowTooltip(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || input;
@@ -100,7 +112,6 @@ export function VirtualBaristaWidget() {
 
       const data = await response.json();
 
-      // Find matching products from slugs or IDs if returned
       let matchedProducts: CoffeeProduct[] = [];
       if (data.recommendedSlugs && Array.isArray(data.recommendedSlugs)) {
         matchedProducts = PRODUCTS.filter((p) => data.recommendedSlugs.includes(p.slug));
@@ -120,7 +131,7 @@ export function VirtualBaristaWidget() {
     } catch (err) {
       console.warn('Fallback to local barista AI logic:', err);
 
-      // Local intelligent response generator
+      // Local fallback logic
       const lower = query.toLowerCase();
       let reply = '';
       let matched: CoffeeProduct[] = [];
@@ -208,259 +219,313 @@ export function VirtualBaristaWidget() {
 
   return (
     <>
-      {/* Floating Toggle Button */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* Eye-Catching Floating Barista Launcher with Interactive Tooltip Bubble */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5">
+        {/* Animated Attention Grabber Tooltip */}
+        <AnimatePresence>
+          {!isOpen && showTooltip && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.9 }}
+              className="relative max-w-[260px] bg-white border border-brand-navy/15 rounded-2xl p-3 shadow-2xl text-xs font-sans text-brand-navy flex items-start gap-2.5 cursor-pointer hover:border-brand-navy/30 transition-colors"
+              onClick={() => setIsOpen(true)}
+            >
+              <div className="w-6 h-6 rounded-full bg-brand-maroon/10 text-brand-maroon flex items-center justify-center shrink-0 mt-0.5">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex-1 text-[11px] leading-snug">
+                <span className="font-bold block text-brand-navy">Bingung pilih beans?</span>
+                <span className="text-on-surface-variant">Tanya AI Barista rekomendasi rasa &amp; origin ☕</span>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowTooltip(false);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-0.5"
+                title="Tutup"
+              >
+                <X className="w-3 h-3" />
+              </button>
+              {/* Tooltip Arrow pointing down */}
+              <div className="absolute -bottom-1.5 right-8 w-3 h-3 bg-white border-b border-r border-brand-navy/15 transform rotate-45" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Toggle Button with Glowing Aurora Beacon */}
         {!isOpen && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-3 bg-roastery-dark text-white hover:bg-roastery-crimson px-4 py-3 rounded-full shadow-floating border border-roastery-slate-light/40 transition-all duration-300 hover:scale-105"
+            className="group relative flex items-center gap-3 bg-gradient-to-r from-brand-navy via-[#1b2b40] to-brand-navy text-white px-4 py-3 rounded-full shadow-2xl border border-white/20 transition-all duration-300 ring-4 ring-brand-navy/10 hover:ring-brand-teal/30 cursor-pointer"
             aria-label="Open Virtual Barista"
           >
+            {/* Pulsing Beacon Avatar */}
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-roastery-crimson to-roastery-amber p-[1.5px]">
-                <div className="w-full h-full rounded-full bg-[#4A141B] flex items-center justify-center">
-                  <FiftyTwoBeanMark className="w-4 h-4 text-roastery-teal" />
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-teal to-brand-teal-light p-[2px] shadow-sm">
+                <div className="w-full h-full rounded-full bg-brand-navy flex items-center justify-center">
+                  <FiftyTwoBeanMark className="w-4 h-4 text-brand-teal-light" />
                 </div>
               </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-roastery-dark rounded-full animate-pulse" />
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-brand-navy rounded-full animate-pulse shadow-sm" />
             </div>
+
+            {/* Label Text */}
             <div className="text-left pr-1 hidden sm:block">
-              <div className="text-xs font-editorial font-bold leading-tight">
-                Virtual Barista AI
+              <div className="text-xs font-editorial font-bold leading-tight flex items-center gap-1">
+                <span>Virtual Barista AI</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-brand-teal/20 text-brand-teal-light text-[9px] font-mono font-bold">
+                  PRO
+                </span>
               </div>
-              <div className="text-[10px] font-mono text-roastery-teal-light">
-                Tanya Rekomendasi Rasa
+              <div className="text-[10px] font-mono text-gray-300">
+                Tanya Rekomendasi Rasa ✨
               </div>
             </div>
-            <Sparkles className="w-4 h-4 text-roastery-amber group-hover:rotate-12 transition-transform" />
-          </button>
+
+            <Sparkles className="w-4 h-4 text-brand-teal-light group-hover:rotate-12 transition-transform" />
+          </motion.button>
         )}
       </div>
 
-      {/* Chat Modal Box */}
-      {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[85vh] bg-roastery-card rounded-2xl shadow-2xl border border-roastery-border flex flex-col overflow-hidden animate-slide-up">
-          {/* Header */}
-          <div className="bg-roastery-dark text-white p-4 flex items-center justify-between border-b border-roastery-charcoal">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-roastery-crimson to-roastery-amber p-[2px]">
-                  <div className="w-full h-full rounded-full bg-[#4A141B] flex items-center justify-center">
-                    <FiftyTwoBeanMark className="w-5 h-5 text-roastery-teal" />
+      {/* Chat Modal Box with Framer Motion Entrance */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 25, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 25, scale: 0.94 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[430px] h-[600px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-border-subtle flex flex-col overflow-hidden"
+          >
+            {/* Header with Roastery Identity */}
+            <div className="bg-gradient-to-r from-brand-navy via-[#162537] to-brand-navy text-white p-4 flex items-center justify-between border-b border-white/10 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-teal to-brand-teal-light p-[2px]">
+                    <div className="w-full h-full rounded-full bg-brand-navy flex items-center justify-center">
+                      <FiftyTwoBeanMark className="w-5 h-5 text-brand-teal-light" />
+                    </div>
                   </div>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-brand-navy rounded-full" />
                 </div>
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-roastery-dark rounded-full" />
+                <div>
+                  <h3 className="font-editorial text-sm font-bold text-white flex items-center gap-1.5">
+                    Virtual Barista 52
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 bg-brand-teal/30 text-brand-teal-light border border-brand-teal/40 rounded-md font-bold">
+                      RAG AI
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-gray-300 font-mono">
+                    @52coffeeroastery • Malang Tasting Room
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-editorial text-sm font-bold text-white flex items-center gap-1.5">
-                  Virtual Barista 52 Coffee
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 bg-roastery-crimson rounded text-white">
-                    RAG AI
-                  </span>
-                </h3>
-                <p className="text-[11px] text-roastery-teal-light font-mono">
-                  @52coffeeroastery • Malang
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() =>
-                  setMessages([
-                    {
-                      id: 'welcome',
-                      sender: 'barista',
-                      text: 'Halo kawan seduh! Ada profil rasa atau origin biji kopi yang ingin kamu tanyakan hari ini? ☕',
-                      timestamp: 'Baru saja',
-                    },
-                  ])
-                }
-                className="p-1.5 rounded-lg text-roastery-muted hover:text-white hover:bg-roastery-charcoal transition-colors"
-                title="Reset Chat"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg text-roastery-muted hover:text-white hover:bg-roastery-charcoal transition-colors"
-                aria-label="Close Chat"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Messages Body */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-roastery-light/60">
-            {messages.map((msg) => {
-              const isBarista = msg.sender === 'barista';
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex gap-2.5 ${isBarista ? 'items-start' : 'items-end flex-row-reverse'}`}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() =>
+                    setMessages([
+                      {
+                        id: 'welcome',
+                        sender: 'barista',
+                        text: 'Halo kawan seduh! Ada profil rasa atau origin biji kopi yang ingin kamu tanyakan hari ini? ☕',
+                        timestamp: 'Baru saja',
+                      },
+                    ])
+                  }
+                  className="p-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                  title="Reset Chat"
                 >
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs shadow-sm ${
-                      isBarista
-                        ? 'bg-roastery-crimson text-white'
-                        : 'bg-roastery-slate text-white'
-                    }`}
-                  >
-                    {isBarista ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
-                  </div>
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Close Chat"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
 
-                  <div className={`max-w-[82%] space-y-2`}>
+            {/* Messages Body */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-container-low">
+              {messages.map((msg) => {
+                const isBarista = msg.sender === 'barista';
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex gap-2.5 ${isBarista ? 'items-start' : 'items-end flex-row-reverse'}`}
+                  >
                     <div
-                      className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-sm ${
+                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs shadow-sm ${
                         isBarista
-                          ? 'bg-white border border-roastery-border text-roastery-dark rounded-tl-none'
-                          : 'bg-roastery-slate text-white rounded-tr-none'
+                          ? 'bg-brand-navy text-white'
+                          : 'bg-brand-maroon text-white'
                       }`}
                     >
-                      <p className="whitespace-pre-line">{msg.text.replace(/\*/g, '')}</p>
+                      {isBarista ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
                     </div>
 
-                    {/* Render Recommended Product Cards in Chat */}
-                    {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
-                      <div className="space-y-2 pt-1">
-                        <div className="text-[11px] font-mono text-roastery-muted uppercase tracking-wider">
-                          Rekomendasi Biji Kopi:
-                        </div>
-                        {msg.recommendedProducts.map((prod) => (
-                          <div
-                            key={prod.id}
-                            className="p-2.5 rounded-xl border border-roastery-border bg-white flex items-center justify-between gap-2.5 shadow-sm hover:border-roastery-crimson/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-roastery-light">
-                                <Image
-                                  src={prod.imageUrl}
-                                  alt={prod.name}
-                                  fill
-                                  sizes="48px"
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="min-w-0">
-                                <Link
-                                  href={`/catalog/${prod.slug}`}
-                                  onClick={() => setIsOpen(false)}
-                                  className="font-editorial text-xs font-bold text-roastery-dark hover:text-roastery-crimson line-clamp-1 block"
-                                >
-                                  {prod.name}
-                                </Link>
-                                <div className="text-[10px] font-mono text-roastery-crimson font-semibold">
-                                  {formatRupiah(prod.basePrice)} / {prod.defaultWeight}
+                    <div className="max-w-[84%] space-y-2">
+                      <div
+                        className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                          isBarista
+                            ? 'bg-white border border-border-subtle text-on-surface rounded-tl-none font-sans'
+                            : 'bg-brand-navy text-white rounded-tr-none font-sans'
+                        }`}
+                      >
+                        <p className="whitespace-pre-line">{msg.text.replace(/\*/g, '')}</p>
+                      </div>
+
+                      {/* Render Recommended Product Cards in Chat */}
+                      {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
+                        <div className="space-y-2 pt-1">
+                          <div className="text-[10px] font-mono text-brand-maroon uppercase tracking-wider font-bold">
+                            Rekomendasi Biji Kopi:
+                          </div>
+                          {msg.recommendedProducts.map((prod) => (
+                            <div
+                              key={prod.id}
+                              className="p-2.5 rounded-2xl border border-border-subtle bg-white flex items-center justify-between gap-2.5 shadow-sm hover:border-brand-navy/40 transition-colors"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-surface-container-low">
+                                  <Image
+                                    src={prod.imageUrl}
+                                    alt={prod.name}
+                                    fill
+                                    sizes="48px"
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="min-w-0">
+                                  <Link
+                                    href={`/catalog/${prod.slug}?mode=beans`}
+                                    onClick={() => setIsOpen(false)}
+                                    className="font-editorial text-xs font-bold text-brand-navy hover:text-brand-teal line-clamp-1 block"
+                                  >
+                                    {prod.name}
+                                  </Link>
+                                  <div className="text-[10px] font-mono text-brand-maroon font-bold">
+                                    {formatRupiah(prod.basePrice)} / {prod.defaultWeight}
+                                  </div>
                                 </div>
                               </div>
+
+                              <button
+                                onClick={() => {
+                                  const variant = prod.variants[0];
+                                  addItem({
+                                    productId: prod.id,
+                                    name: prod.name,
+                                    slug: prod.slug,
+                                    imageUrl: prod.imageUrl,
+                                    weightGrams: variant.weightGrams,
+                                    weightLabel: variant.weightLabel,
+                                    grind: 'whole',
+                                    grindLabel: 'Whole Beans',
+                                    unitPrice: variant.price,
+                                    quantity: 1,
+                                    series: prod.series,
+                                    tastingNotes: prod.tastingNotes,
+                                  });
+                                  setAddedProductId(prod.id);
+                                  setTimeout(() => setAddedProductId(null), 1500);
+                                }}
+                                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors shadow-xs ${
+                                  addedProductId === prod.id
+                                    ? 'bg-brand-navy text-white'
+                                    : 'bg-brand-navy hover:bg-brand-navy-light text-white'
+                                }`}
+                              >
+                                {addedProductId === prod.id ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-emerald-300" />
+                                    <span>Added</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShoppingBag className="w-3.5 h-3.5" />
+                                    <span>+ Cart</span>
+                                  </>
+                                )}
+                              </button>
                             </div>
+                          ))}
+                        </div>
+                      )}
 
-                            <button
-                              onClick={() => {
-                                const variant = prod.variants[0];
-                                addItem({
-                                  productId: prod.id,
-                                  name: prod.name,
-                                  slug: prod.slug,
-                                  imageUrl: prod.imageUrl,
-                                  weightGrams: variant.weightGrams,
-                                  weightLabel: variant.weightLabel,
-                                  grind: 'whole',
-                                  grindLabel: 'Whole Beans',
-                                  unitPrice: variant.price,
-                                  quantity: 1,
-                                  series: prod.series,
-                                  tastingNotes: prod.tastingNotes,
-                                });
-                                setAddedProductId(prod.id);
-                                setTimeout(() => setAddedProductId(null), 1500);
-                              }}
-                              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 shrink-0 transition-colors shadow-sm ${
-                                addedProductId === prod.id
-                                  ? 'bg-roastery-slate text-white'
-                                  : 'bg-roastery-crimson hover:bg-roastery-dark text-white'
-                              }`}
-                            >
-                              {addedProductId === prod.id ? (
-                                <>
-                                  <Check className="w-3 h-3 text-roastery-teal" />
-                                  <span>Ditambahkan</span>
-                                </>
-                              ) : (
-                                <>
-                                  <ShoppingBag className="w-3 h-3" />
-                                  <span>+ Cart</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        ))}
+                      <div
+                        className={`text-[9px] font-mono text-on-surface-variant ${
+                          isBarista ? 'text-left' : 'text-right'
+                        }`}
+                      >
+                        {msg.timestamp}
                       </div>
-                    )}
-
-                    <div
-                      className={`text-[10px] font-mono text-roastery-muted ${
-                        isBarista ? 'text-left' : 'text-right'
-                      }`}
-                    >
-                      {msg.timestamp}
                     </div>
                   </div>
+                );
+              })}
+
+              {isLoading && (
+                <div className="flex items-center gap-2 text-on-surface-variant text-xs p-2 bg-white/70 rounded-2xl border border-border-subtle max-w-[240px]">
+                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce" />
+                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce [animation-delay:0.4s]" />
+                  <span className="font-mono text-[11px] text-brand-navy font-semibold">
+                    AI Barista sedang meracik...
+                  </span>
                 </div>
-              );
-            })}
+              )}
+              <div ref={messagesEndRef} />
+            </div>
 
-            {isLoading && (
-              <div className="flex items-center gap-2 text-roastery-muted text-xs p-2">
-                <div className="w-2 h-2 rounded-full bg-roastery-crimson animate-bounce" />
-                <div className="w-2 h-2 rounded-full bg-roastery-crimson animate-bounce [animation-delay:0.2s]" />
-                <div className="w-2 h-2 rounded-full bg-roastery-crimson animate-bounce [animation-delay:0.4s]" />
-                <span className="font-mono text-[11px]">Barista sedang meracik jawaban...</span>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+            {/* Quick Prompts Carousel */}
+            <div className="px-3 py-2 bg-white border-t border-border-subtle overflow-x-auto flex gap-1.5 no-scrollbar">
+              {QUICK_PROMPTS.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(prompt)}
+                  className="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-low hover:bg-brand-navy hover:text-white border border-border-subtle text-[11px] text-brand-navy transition-colors font-medium shrink-0 shadow-2xs"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
 
-          {/* Quick Prompts Carousel */}
-          <div className="px-3 py-2 bg-white border-t border-roastery-border overflow-x-auto flex gap-1.5 no-scrollbar">
-            {QUICK_PROMPTS.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(prompt)}
-                className="whitespace-nowrap px-2.5 py-1 rounded-full bg-roastery-light hover:bg-roastery-crimson hover:text-white border border-roastery-border text-[11px] text-roastery-charcoal transition-colors font-medium shrink-0"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-
-          {/* Input Footer */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            className="p-3 bg-white border-t border-roastery-border flex items-center gap-2"
-          >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Tanya rekomendasi rasa, origin, atau rasio..."
-              className="flex-1 px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-full border border-roastery-border focus:outline-none focus:border-roastery-crimson text-roastery-dark placeholder:text-roastery-muted"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className="p-2.5 rounded-full bg-roastery-crimson hover:bg-roastery-dark text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 shadow-sm"
-              aria-label="Send message"
+            {/* Input Footer */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="p-3 bg-white border-t border-border-subtle flex items-center gap-2"
             >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
-        </div>
-      )}
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Tanya rasa, origin, atau rekomendasi..."
+                className="flex-1 px-4 py-2.5 text-xs sm:text-sm bg-surface-container-low rounded-full border border-border-subtle focus:outline-none focus:border-brand-navy text-on-surface placeholder:text-on-surface-variant"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isLoading}
+                className="p-2.5 rounded-full bg-brand-navy hover:bg-brand-navy-light text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0 shadow-md cursor-pointer hover:scale-105"
+                aria-label="Send message"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

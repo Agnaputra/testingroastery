@@ -133,37 +133,37 @@ export default function CheckoutPage() {
   if (orderCompleted) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-6">
-        <div className="w-20 h-20 rounded-full bg-roastery-sage/15 text-roastery-sage flex items-center justify-center mx-auto">
+        <div className="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200 shadow-sm">
           <CheckCircle2 className="w-10 h-10" />
         </div>
         <div className="space-y-2">
-          <span className="badge-sage font-mono">Pesanan Terkonfirmasi</span>
-          <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-roastery-dark">
+          <span className="badge-teal font-mono">Pesanan Terkonfirmasi</span>
+          <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-brand-navy">
             Terima Kasih, Kawan Seduh!
           </h1>
-          <p className="text-sm text-roastery-muted max-w-md mx-auto">
+          <p className="text-sm text-on-surface-variant max-w-md mx-auto">
             Pesanan dengan nomor <strong>#{orderId}</strong> sedang disiapkan oleh tim roastery kami di Jl. KH. Agus Salim No. 11 Malang.
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-roastery-border max-w-md mx-auto text-left text-xs font-mono space-y-2.5 shadow-sm">
-          <div className="flex justify-between border-b border-roastery-border pb-2">
-            <span className="text-roastery-muted">Penerima:</span>
-            <span className="font-bold text-roastery-dark">{fullName}</span>
+        <div className="p-6 rounded-2xl bg-white border border-border-subtle max-w-md mx-auto text-left text-xs font-mono space-y-2.5 shadow-sm">
+          <div className="flex justify-between border-b border-border-subtle pb-2">
+            <span className="text-on-surface-variant">Penerima:</span>
+            <span className="font-bold text-on-surface">{fullName}</span>
           </div>
-          <div className="flex justify-between border-b border-roastery-border pb-2">
-            <span className="text-roastery-muted">Metode Kirim:</span>
-            <span className="font-bold text-roastery-dark">
+          <div className="flex justify-between border-b border-border-subtle pb-2">
+            <span className="text-on-surface-variant">Metode Kirim:</span>
+            <span className="font-bold text-on-surface">
               {shippingOptions.find((s) => s.id === selectedShipping)?.name}
             </span>
           </div>
-          <div className="flex justify-between border-b border-roastery-border pb-2">
-            <span className="text-roastery-muted">Status Pembayaran:</span>
-            <span className="text-roastery-teal font-bold">LUNAS (Midtrans Verified)</span>
+          <div className="flex justify-between border-b border-border-subtle pb-2">
+            <span className="text-on-surface-variant">Status Pembayaran:</span>
+            <span className="text-brand-teal font-bold">LUNAS (Midtrans Verified)</span>
           </div>
           <div className="flex justify-between pt-1 text-sm font-bold">
             <span>Total Pembayaran:</span>
-            <span className="text-roastery-crimson">{formatRupiah(grandTotal)}</span>
+            <span className="text-brand-navy">{formatRupiah(grandTotal)}</span>
           </div>
         </div>
 

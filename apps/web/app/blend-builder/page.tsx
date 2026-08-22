@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
   Plus,
@@ -11,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { useCartStore } from '../../lib/store/useCartStore';
 import { formatRupiah } from '../../lib/data';
@@ -174,25 +176,35 @@ export default function BlendBuilderPage() {
   };
 
   return (
-    <div className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans">
-      <div className="max-w-[1280px] mx-auto space-y-12">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35 }}
+      className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans"
+    >
+      <div className="max-w-[1280px] mx-auto space-y-10">
         {/* ========================================================================= */}
         {/* 1. BREADCRUMB (Exact Screenshot 3)                                        */}
         {/* ========================================================================= */}
-        <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
-          <Link href="/catalog" className="hover:text-primary transition-colors">
+        <div className="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+          <Link href="/catalog" className="hover:text-brand-navy transition-colors">
             Shop
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-on-surface font-semibold">Custom Blend</span>
+          <span className="text-brand-navy font-semibold">Custom Blend (BYOB)</span>
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. 2-COLUMN MAIN BYOB SECTION (Exact Screenshot 3)                        */}
+        {/* 2. 2-COLUMN MAIN BYOB SECTION                                             */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* LEFT: Standing White Pouch with Custom Blend Label */}
-          <div className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group"
+          >
             <div className="w-full h-full relative flex items-center justify-center">
               <img
                 src="/images/the-roastery-behind-your-business.png"
@@ -206,51 +218,54 @@ export default function BlendBuilderPage() {
                 <div className="text-[9px] font-mono opacity-90 mt-1">{ratioA}% {componentA.name.split(' ')[0]} • {ratioB}% {componentB.name.split(' ')[0]}</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* RIGHT: BYOB Form Controls */}
-          <div className="lg:col-span-7 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+            className="lg:col-span-7 space-y-6"
+          >
             <header className="space-y-1">
-              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-on-surface leading-tight tracking-tight">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-maroon/10 text-brand-maroon text-[11px] font-mono font-bold mb-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Custom Roastery Blend</span>
+              </div>
+              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-tight tracking-tight">
                 B.Y.O.B - Build Your Own Blend
               </h1>
               <p className="text-sm sm:text-base text-on-surface-variant">
-                Pick the espresso you like from our list. We blend it for you.
+                Pilih kombinasi single origin favorit Anda dan atur rasio persentase. Kami blend &amp; sangrai khusus untuk Anda.
               </p>
             </header>
 
-            {/* Dual Ratio Progress Bar (Exact Screenshot 3) */}
+            {/* Dual Ratio Progress Bar with Framer Motion */}
             <div className="space-y-2 pt-2">
-              <div className="w-full h-7 rounded-full overflow-hidden flex bg-gray-200 border border-border-subtle relative shadow-inner">
+              <div className="w-full h-8 rounded-full overflow-hidden flex bg-gray-200 border border-border-subtle relative shadow-inner">
                 {/* Segment A (Pink / Red) */}
-                <div
+                <motion.div
                   className="bg-[#fb7185] h-full flex items-center justify-center font-mono text-xs font-bold text-white transition-all duration-300"
                   style={{ width: `${ratioA}%` }}
                 >
-                  A
-                </div>
-
-                {/* Slider Handle Knob */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-[#fb7185] rounded-full shadow-md z-10 cursor-ew-resize hidden sm:block"
-                  style={{ left: `calc(${ratioA}% - 10px)` }}
-                />
+                  A ({ratioA}%)
+                </motion.div>
 
                 {/* Segment B (Yellow / Amber) */}
-                <div
+                <motion.div
                   className="bg-[#facc15] h-full flex items-center justify-center font-mono text-xs font-bold text-gray-800 transition-all duration-300"
                   style={{ width: `${ratioB}%` }}
                 >
-                  B
-                </div>
+                  B ({ratioB}%)
+                </motion.div>
 
                 {hasComponentC && (
-                  <div
+                  <motion.div
                     className="bg-teal-500 h-full flex items-center justify-center font-mono text-xs font-bold text-white transition-all duration-300"
                     style={{ width: `${ratioC}%` }}
                   >
-                    C
-                  </div>
+                    C ({ratioC}%)
+                  </motion.div>
                 )}
               </div>
             </div>
@@ -458,7 +473,7 @@ export default function BlendBuilderPage() {
                 50/50 Gayo Full Washed + Kerinci Blueberry
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* ========================================================================= */}
@@ -590,6 +605,6 @@ export default function BlendBuilderPage() {
           </div>
         </section>
       </div>
-    </div>
+    </motion.div>
   );
 }

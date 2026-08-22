@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PRODUCTS, CoffeeProduct } from '../../../lib/data';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   try {
     const { message, history } = await req.json();
@@ -10,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
-    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || 'AQ.Ab8RN6Ia3HCdpIY36WQhDt7NV88YtlZgmedNZvjjlPeRCSCLBA';
 
     // 1. Attempt to call Google Gemini API directly if GEMINI_API_KEY is available
     if (geminiApiKey) {
@@ -28,6 +31,7 @@ ${catalogContext}
 Panduan Barista:
 - Jawablah dengan ramah, hangat, antusias, dan profesional dalam bahasa Indonesia.
 - Jika pengguna bertanya tentang rekomendasi umum, tanyakan preferensi atau langsung rekomendasikan kopi unggulan (Argopuro Walida, Sindoro Strawberry, Ijen Carbonic Maceration).
+- Jika pengguna bertanya tentang minuman selain kopi (non-coffee), jelaskan bahwa di bar/kedai 52 Coffee Malang tersedia Artisan Chocolate, Japanese Matcha Latte, Artisan Tea, dan Refreshing Fruit Mocktails.
 - Jika pengguna menjawab 'manual' / 'filter', rekomendasikan lini Single Origin filter (Argopuro Walida, Sindoro Strawberry, Puntang Natural, Ijen CM) beserta tips seduh V60.
 - Jika pengguna menjawab 'kopi susu' / 'espresso', rekomendasikan Dampit Fine Robusta Malang, Kintamani Arabica, atau Brazil Santos.
 - Berikan rekomendasi yang ringkas, terstruktur, dan sebutkan tasting notes serta cara seduh terbaiknya.`;
@@ -37,47 +41,63 @@ Panduan Barista:
           parts: [{ text: h.content }],
         }));
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [
-                { role: 'user', parts: [{ text: systemPrompt }] },
-                { role: 'model', parts: [{ text: 'Siap! Saya adalah Virtual Barista 52 Coffee & Roastery Malang.' }] },
-                ...geminiHistory,
-                { role: 'user', parts: [{ text: message }] },
-              ],
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 600,
-              },
-            }),
-            signal: AbortSignal.timeout(4500),
-          }
-        );
+        const targetModels = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
+        let generatedText = '';
 
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const generatedText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            // Find mentioned products in generated text
-            const lowerText = (generatedText + ' ' + message).toLowerCase();
-            const recommendedSlugs = PRODUCTS.filter((p) =>
-              lowerText.includes(p.name.toLowerCase()) ||
-              lowerText.includes(p.slug.toLowerCase()) ||
-              p.tastingNotes.some((n) => lowerText.includes(n.toLowerCase()))
-            ).slice(0, 3).map((p) => p.slug);
+        for (const modelName of targetModels) {
+          try {
+            const geminiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [
+                    { role: 'user', parts: [{ text: systemPrompt }] },
+                    { role: 'model', parts: [{ text: 'Siap! Saya adalah Virtual Barista 52 Coffee & Roastery Malang.' }] },
+                    ...geminiHistory,
+                    { role: 'user', parts: [{ text: message }] },
+                  ],
+                  generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 900,
+                  },
+                }),
+                signal: AbortSignal.timeout(7000),
+              }
+            );
 
-            return NextResponse.json({
-              reply: generatedText,
-              recommendedSlugs: recommendedSlugs.length > 0 ? recommendedSlugs : ['argopuro-walida-natural-anaerobic', 'sindoro-strawberry-triple-yeast'],
-              groundedInCatalog: true,
-            });
+            if (geminiRes.ok) {
+              const geminiData = await geminiRes.json();
+              const parts = geminiData.candidates?.[0]?.content?.parts;
+              generatedText = Array.isArray(parts)
+                ? parts.map((p: any) => p.text).filter(Boolean).join('\n')
+                : geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+              if (generatedText) break;
+            }
+          } catch (modelErr) {
+            // Try next fast model in cascade
           }
         }
-      } catch (geminiErr) {
+
+        if (generatedText) {
+          // Find mentioned products in generated text
+          const lowerText = (generatedText + ' ' + message).toLowerCase();
+          const recommendedSlugs = PRODUCTS.filter((p) =>
+            lowerText.includes(p.name.toLowerCase()) ||
+            lowerText.includes(p.slug.toLowerCase()) ||
+            p.tastingNotes.some((n) => lowerText.includes(n.toLowerCase()))
+          ).slice(0, 3).map((p) => p.slug);
+
+          return NextResponse.json({
+            reply: generatedText,
+            recommendedSlugs: recommendedSlugs.length > 0 ? recommendedSlugs : ['argopuro-walida-natural-anaerobic', 'sindoro-strawberry-triple-yeast'],
+            groundedInCatalog: true,
+          });
+        }
+      } catch (geminiErr: any) {
+        console.error('Gemini API Error in route:', geminiErr?.message || geminiErr);
         // Fall through to local engine
       }
     }
@@ -371,6 +391,25 @@ Panduan Barista:
         `1. Diskon 10%: Gunakan kode promo 52COFFEE atau SEDUPRESISI di halaman Checkout!\n` +
         `2. Gratis Ongkir: Otomatis aktif untuk pembelanjaan minimal Rp 250.000 ke seluruh Indonesia.\n` +
         `3. Pengiriman Cepat: Didukung oleh JNE Reguler, SiCepat BEST (Next Day), dan Kurir Instan (GoSend/Grab) khusus area Kota Malang.`;
+    }
+
+    // --- CASE K2: NON-COFFEE / MINUMAN SELAIN KOPI ---
+    else if (
+      query.includes('selain kopi') ||
+      query.includes('non coffee') ||
+      query.includes('non-coffee') ||
+      query.includes('bukan kopi') ||
+      query.includes('matcha') ||
+      query.includes('cokelat') ||
+      query.includes('chocolate') ||
+      query.includes('mocktail')
+    ) {
+      reply = `Tentu ada, kawan seduh! Di Tasting Room & Bar 52 Coffee Malang, kami juga menyediakan ragam minuman non-coffee spesial:\n\n` +
+        `1. Artisan Chocolate: Cokelat pekat pilihan yang gurih, creamy, dan manisnya pas.\n` +
+        `2. Japanese Matcha Latte: Matcha otentik dengan susu segar creamy.\n` +
+        `3. Refreshing Fruit Mocktails: Perpaduan ekstrak sari buah alami dengan sensasi soda segar dingin.\n` +
+        `4. Artisan Tea: Daun teh pilihan yang wangi dan menenangkan.\n\n` +
+        `Kamu juga bisa mencoba cascara tea (seduhan kulit ceri kopi organik) yang kaya antioksidan dan bercita rasa teh kismis manis!`;
     }
 
     // --- CASE L: LOKASI / ALAMAT / TASTING ROOM / JAM BUKA ---

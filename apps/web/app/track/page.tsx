@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   Search,
@@ -18,7 +19,7 @@ import { formatRupiah } from '../../lib/data';
 
 export default function TrackOrderPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-xs font-mono text-roastery-muted">Memuat data pelacakan...</div>}>
+    <Suspense fallback={<div className="text-center py-20 text-xs font-mono text-on-surface-variant">Memuat data pelacakan...</div>}>
       <TrackOrderContent />
     </Suspense>
   );
@@ -49,48 +50,68 @@ function TrackOrderContent() {
     setTimeout(() => {
       setIsLoading(false);
       setSearched(true);
-    }, 500);
+    }, 450);
   };
 
   return (
-    <div className="w-full bg-surface-white text-on-surface min-h-screen flex flex-col justify-between py-12 px-4 sm:px-6 lg:px-8">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35 }}
+      className="w-full bg-surface-white text-on-surface min-h-screen flex flex-col justify-between py-12 px-4 sm:px-6 lg:px-8 font-sans"
+    >
       <div className="w-full max-w-lg mx-auto space-y-8">
         {/* Back Link */}
         <Link
           href="/catalog"
-          className="inline-flex items-center text-roastery-crimson font-mono text-xs font-bold hover:opacity-80 transition-opacity gap-1"
+          className="inline-flex items-center text-brand-navy font-mono text-xs font-bold hover:text-brand-maroon transition-colors gap-1"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span>Back to Shop</span>
+          <span>Kembali ke Shop</span>
         </Link>
 
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-on-surface">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-center space-y-2"
+        >
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-navy/5 border border-border-subtle text-xs font-mono text-brand-navy font-bold">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Order Traceability</span>
+          </div>
+          <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-brand-navy">
             Find Your Order
           </h1>
           <p className="font-sans text-xs sm:text-sm text-on-surface-variant max-w-sm mx-auto leading-relaxed">
-            Enter your order code, email, and the phone number used during checkout to view your order details.
+            Masukkan kode pesanan 52 Coffee Anda untuk melihat status sangrai batch &amp; posisi pengiriman kurir.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Form (Exact Figma Inputs) */}
-        <form onSubmit={handleSearch} className="space-y-5 bg-white p-6 sm:p-8 rounded-3xl border border-border-subtle shadow-sm">
+        {/* Form */}
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1 }}
+          onSubmit={handleSearch}
+          className="space-y-5 bg-white p-6 sm:p-8 rounded-3xl border border-border-subtle shadow-xl"
+        >
           {/* Order Code */}
           <div className="space-y-1">
             <label className="block font-mono text-xs text-on-surface font-semibold" htmlFor="order-code">
-              Order Code
+              Kode Pesanan (Order Code)
             </label>
             <input
               id="order-code"
               type="text"
               value={orderCode}
               onChange={(e) => setOrderCode(e.target.value)}
-              placeholder="NIR-120225-ABC12XYZ9"
-              className="w-full rounded-xl border border-border-subtle bg-surface-bright px-4 py-3 text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-roastery-crimson focus:border-roastery-crimson transition-colors uppercase font-mono"
+              placeholder="52C-2026-X89A12"
+              className="w-full rounded-xl border border-border-subtle bg-surface-bright px-4 py-3 text-xs sm:text-sm text-on-surface focus:outline-none focus:border-brand-navy transition-colors uppercase font-mono"
             />
             <p className="text-[10px] text-on-surface-variant">
-              You can find this in your order confirmation email or checkout success page.
+              Tercantum pada invoice WhatsApp atau halaman konfirmasi checkout Anda.
             </p>
           </div>
 
@@ -104,103 +125,119 @@ function TrackOrderContent() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-border-subtle bg-surface-bright px-4 py-3 text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-roastery-crimson focus:border-roastery-crimson transition-colors"
+              placeholder="contoh@gmail.com"
+              className="w-full rounded-xl border border-border-subtle bg-surface-bright px-4 py-3 text-xs sm:text-sm text-on-surface focus:outline-none focus:border-brand-navy transition-colors font-sans"
             />
-            <p className="text-[10px] text-on-surface-variant">
-              The email address used at checkout.
-            </p>
           </div>
 
-          {/* Phone Number */}
+          {/* Phone */}
           <div className="space-y-1">
             <label className="block font-mono text-xs text-on-surface font-semibold" htmlFor="phone">
-              Phone Number
+              Nomor WhatsApp
             </label>
-            <div className="flex rounded-xl border border-border-subtle bg-surface-bright overflow-hidden focus-within:ring-1 focus-within:ring-roastery-crimson focus-within:border-roastery-crimson transition-colors">
+            <div className="flex gap-2">
               <select
-                id="country-code"
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-transparent border-none py-3 pl-3 pr-2 text-xs font-mono text-on-surface focus:ring-0 cursor-pointer"
+                className="rounded-xl border border-border-subtle bg-surface-bright px-3 py-3 text-xs font-mono text-on-surface focus:outline-none focus:border-brand-navy shrink-0"
               >
-                <option value="+62">ID +62</option>
-                <option value="+1">US +1</option>
-                <option value="+44">UK +44</option>
+                <option value="+62">+62 (ID)</option>
+                <option value="+65">+65 (SG)</option>
+                <option value="+60">+60 (MY)</option>
+                <option value="+1">+1 (US)</option>
               </select>
-              <div className="w-px bg-border-subtle my-2"></div>
               <input
                 id="phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="812 345 678"
-                className="flex-1 bg-transparent border-none px-4 py-3 text-xs sm:text-sm text-on-surface focus:ring-0 font-mono"
+                placeholder="81234567890"
+                className="w-full rounded-xl border border-border-subtle bg-surface-bright px-4 py-3 text-xs sm:text-sm text-on-surface focus:outline-none focus:border-brand-navy transition-colors font-mono"
               />
             </div>
-            <p className="text-[10px] text-on-surface-variant">
-              The phone number of the recipient or the one used at checkout.
-            </p>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-roastery-crimson text-white font-mono font-bold text-xs sm:text-sm py-4 rounded-xl hover:bg-roastery-crimson-dark transition-colors shadow-md"
+            className="w-full bg-brand-navy hover:bg-brand-navy-light text-white font-mono font-bold text-xs sm:text-sm py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            {isLoading ? 'Searching...' : 'Find Order'}
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span>Mencari Pesanan...</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                <span>Lacak Status Pesanan</span>
+              </span>
+            )}
           </button>
-        </form>
+        </motion.form>
 
-        {/* Live Tracking Result Details Card */}
-        {searched && (
-          <div className="space-y-4 animate-fade-in">
-            <div className="p-6 rounded-3xl bg-white border border-border-subtle shadow-md space-y-4">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+        {/* Mock Tracking Result */}
+        <AnimatePresence>
+          {searched && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.35 }}
+              className="bg-white p-6 sm:p-8 rounded-3xl border border-border-subtle space-y-6 shadow-xl"
+            >
+              <div className="flex justify-between items-start border-b border-border-subtle pb-4">
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-roastery-muted block">Order ID</span>
-                  <strong className="font-mono text-sm text-roastery-dark">{orderCode || '52CR-892102'}</strong>
+                  <span className="text-[10px] font-mono uppercase text-on-surface-variant block font-bold">Status Pesanan:</span>
+                  <div className="font-editorial text-xl font-bold text-brand-navy flex items-center gap-2 mt-0.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Dalam Pengiriman Ekspedisi</span>
+                  </div>
                 </div>
-                <span className="badge-teal font-mono text-xs font-bold">
-                  ✓ Dalam Pengiriman (In Transit)
+                <span className="font-mono text-xs px-2.5 py-1 rounded-full bg-brand-pill text-brand-navy font-bold border border-border-subtle">
+                  {orderCode || '52C-2026-X89A12'}
                 </span>
               </div>
 
-              {/* Progress Stepper */}
-              <div className="space-y-3 pt-2">
-                {[
-                  { step: '1. Pesanan Diterima & Roasting Batch', date: 'Hari ini, 09:15 WIB', done: true },
-                  { step: '2. Degassing & Nitrogen Flush Packaging', date: 'Hari ini, 13:40 WIB', done: true },
-                  { step: '3. Diserahkan ke Kurir Ekspedisi (JNE REG)', date: 'Hari ini, 16:20 WIB', done: true },
-                  { step: '4. Tiba di Kota Tujuan', date: 'Estimasi Besok Sore', done: false },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${item.done ? 'bg-roastery-teal text-white' : 'bg-roastery-light text-roastery-muted border border-border-subtle'}`}>
-                      {item.done ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3 h-3" />}
-                    </div>
-                    <div className="flex-1 text-xs">
-                      <div className={`font-semibold ${item.done ? 'text-roastery-dark' : 'text-roastery-muted'}`}>
-                        {item.step}
-                      </div>
-                      <div className="text-[10px] text-roastery-muted font-mono">{item.date}</div>
-                    </div>
+              {/* Progress Timeline */}
+              <div className="space-y-4 font-mono text-xs">
+                <div className="flex items-center gap-3 text-emerald-700">
+                  <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center font-bold shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   </div>
-                ))}
-              </div>
-
-              {/* Package Summary */}
-              <div className="p-3.5 rounded-2xl bg-roastery-light border border-border-subtle flex justify-between items-center text-xs">
-                <div className="space-y-0.5">
-                  <div className="font-bold text-roastery-dark">Arjuna Budug Asu Natural + Ijen Honey</div>
-                  <div className="text-[10px] text-roastery-muted font-mono">2 item • Total {formatRupiah(339000)}</div>
+                  <div className="flex-1">
+                    <div className="font-bold text-on-surface">Batch Disangrai (Roasting Done)</div>
+                    <div className="text-[10px] text-on-surface-variant font-sans">Rubasse Infrared • Profil Light-Medium</div>
+                  </div>
+                  <span className="text-[10px] text-on-surface-variant">Kemarin</span>
                 </div>
-                <span className="text-[11px] font-mono text-roastery-crimson font-bold">Resi: JNE8829104819</span>
+
+                <div className="flex items-center gap-3 text-emerald-700">
+                  <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center font-bold shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-on-surface">Quality Control &amp; Nitrogen Flush</div>
+                    <div className="text-[10px] text-on-surface-variant font-sans">Degassing valve pouch tertutup rapat</div>
+                  </div>
+                  <span className="text-[10px] text-on-surface-variant">09:30 WIB</span>
+                </div>
+
+                <div className="flex items-center gap-3 text-brand-navy">
+                  <div className="w-7 h-7 rounded-full bg-brand-navy text-white flex items-center justify-center font-bold shrink-0 shadow-sm">
+                    <Truck className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-brand-navy">Dalam Perjalanan Kurir (JNE/SiCepat)</div>
+                    <div className="text-[10px] text-on-surface-variant font-sans">No. Resi: 52EXP998823100</div>
+                  </div>
+                  <span className="text-[10px] text-brand-maroon font-bold">Hari Ini</span>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
