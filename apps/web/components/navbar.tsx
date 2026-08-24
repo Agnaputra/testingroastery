@@ -312,12 +312,11 @@ export function Navbar() {
                   : 'text-brand-navy border-border-subtle hover:bg-surface-container-low'
               }`}
             >
-              <span className="text-xs">🇺🇸</span>
-              <span>{lang}</span>
+              <span className="font-mono text-[11px] font-bold tracking-wider">{lang}</span>
               <ChevronDown className={`w-3 h-3 ${isDarkNavbar ? 'text-white/70' : 'text-gray-400'}`} />
             </button>
 
-            {/* Cart Drawer Trigger Button */}
+            {/* Cart Drawer Trigger Button with Micro-bounce Counter */}
             <button
               type="button"
               onClick={toggleDrawer}
@@ -330,9 +329,15 @@ export function Navbar() {
             >
               <ShoppingBag className="w-5 h-5" />
               {totalItems > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-brand-maroon text-white text-[10px] font-mono font-bold flex items-center justify-center shadow-sm">
+                <motion.span
+                  key={totalItems}
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  className="absolute top-1 right-1 w-4 h-4 rounded-full bg-brand-maroon text-white text-[10px] font-mono font-bold flex items-center justify-center shadow-sm"
+                >
                   {totalItems}
-                </span>
+                </motion.span>
               )}
             </button>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import { notFound, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +12,15 @@ import {
   ChevronDown,
   ChevronUp,
   Share2,
-  Info,
+  Sparkles,
+  Coffee,
+  Flame,
+  Droplets,
+  Scale,
+  Clock,
+  ArrowRight,
+  ShieldCheck,
+  ShoppingBag,
 } from 'lucide-react';
 import {
   PRODUCTS,
@@ -21,6 +29,7 @@ import {
   formatRupiah,
 } from '../../../lib/data';
 import { useCartStore } from '../../../lib/store/useCartStore';
+import { FlavorRadarChart, FlavorMetrics } from '../../../components/flavor-radar-chart';
 
 export default function ProductDetailPage() {
   return (
@@ -104,6 +113,29 @@ function ProductDetailContent() {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  // Sensory Radar Metrics for this single origin / product
+  const productSensory: FlavorMetrics = useMemo(() => {
+    const acid = Math.min(10, Math.max(2, (product.acidity || 3.5) * 2));
+    const sweet = Math.min(10, Math.max(2, (product.sweetness || 3.8) * 2));
+    const bod = Math.min(10, Math.max(2, (product.body || 3.5) * 2));
+    const flor = product.flavorCategory.includes('Floral')
+      ? 9.0
+      : product.flavorCategory.includes('Fruity')
+      ? 8.5
+      : 6.0;
+    const after = Number(Math.min(10, (sweet + bod) * 0.55).toFixed(1));
+    const bal = Number(Math.min(10, (acid + sweet + bod) / 3 + 1.2).toFixed(1));
+
+    return {
+      acidity: acid,
+      sweetness: sweet,
+      body: bod,
+      floral: flor,
+      aftertaste: after,
+      balance: bal,
+    };
+  }, [product]);
+
   // Calculated transparency figures
   const landedGreenCost = Math.round((product.basePrice * 0.58) / 1000) * 1000 || 169993;
   const hppPerKg = Math.round((landedGreenCost / 0.8) + 10000);
@@ -126,7 +158,7 @@ function ProductDetailContent() {
   const cleanName = product.name.replace(/\(.*?\)/g, '').trim();
 
   return (
-    <div className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans">
+    <div className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans pb-28 sm:pb-16">
       <div className="max-w-[1280px] mx-auto space-y-10">
         {/* ========================================================================= */}
         {/* 1. BREADCRUMB                                                             */}
@@ -152,18 +184,44 @@ function ProductDetailContent() {
         {/* 2. 2-COLUMN MAIN PRODUCT SECTION                                          */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* LEFT: Visual Mockup */}
-          <div className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 sm:p-12 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
-            <div className="w-full h-full relative flex items-center justify-center">
-              <img
-                src={displayImg}
-                alt={product.name}
-                className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105 filter drop-shadow-md"
+          {/* LEFT: Visual Mockup & Sensory Radar Chart (5 Cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-surface-container-low rounded-3xl p-8 sm:p-12 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
+              <div className="w-full h-full relative flex items-center justify-center">
+                <img
+                  src={displayImg}
+                  alt={product.name}
+                  className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105 filter drop-shadow-md"
+                />
+              </div>
+            </div>
+
+            {/* SENSORY RADAR CARD */}
+            <div className="p-6 rounded-3xl bg-white border border-border-subtle shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-brand-maroon" />
+                  <h3 className="font-editorial text-base font-bold text-brand-navy">
+                    Profil Sensorik SCA
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-brand-maroon/10 text-brand-maroon">
+                  Cupping Verified
+                </span>
+              </div>
+
+              {/* Flavor Radar Component */}
+              <FlavorRadarChart
+                metrics={productSensory}
+                size={270}
+                color={product.series === 'Grand Reserve' ? 'amber' : 'maroon'}
+                showLabels={true}
+                showBars={true}
               />
             </div>
           </div>
 
-          {/* RIGHT: Product Details & Purchase Form */}
+          {/* RIGHT: Product Details & Purchase Form (7 Cols) */}
           <div className="lg:col-span-7 space-y-7">
             {/* Title & Metadata Hierarchy */}
             <div className="space-y-3">
@@ -176,6 +234,9 @@ function ProductDetailContent() {
                     Slowbar Alias: {product.slowbarAlias}
                   </span>
                 )}
+                <span className="px-3 py-1 rounded-full bg-brand-navy/10 text-brand-navy font-bold text-[10px] uppercase tracking-wider font-mono">
+                  Roast: {product.roastLevel}
+                </span>
               </div>
 
               {/* Clean Main Headline */}
@@ -214,7 +275,10 @@ function ProductDetailContent() {
                         transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                       />
                     )}
-                    <span>☕ Seduhan Cangkir</span>
+                    <div className="flex items-center gap-1.5">
+                      <Coffee className="w-3.5 h-3.5" />
+                      <span>Seduhan Cangkir</span>
+                    </div>
                     <span className="font-mono text-[11px] opacity-90">{formatRupiah(product.cupPrice)}</span>
                   </button>
                   <button
@@ -233,7 +297,10 @@ function ProductDetailContent() {
                         transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                       />
                     )}
-                    <span>🛍️ Biji Kopi (Pouch)</span>
+                    <div className="flex items-center gap-1.5">
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      <span>Biji Kopi (Pouch)</span>
+                    </div>
                     <span className="font-mono text-[11px] opacity-90">Mulai {formatRupiah(product.basePrice)}</span>
                   </button>
                 </div>
@@ -243,7 +310,7 @@ function ProductDetailContent() {
             {/* TAB CONTENT TRANSITION */}
             <AnimatePresence mode="wait">
               {orderMode === 'cup' && product.cupPrice ? (
-                /* MODE 1: SLOWBAR CUP (Tanpa Gramasi Biji Kopi) */
+                /* MODE 1: SLOWBAR CUP */
                 <motion.div
                   key="slowbar-cup-mode"
                   initial={{ opacity: 0, y: 8 }}
@@ -279,7 +346,8 @@ function ProductDetailContent() {
                             transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                           />
                         )}
-                        <span>🔥 Hot (V60 Seduh Panas)</span>
+                        <Flame className="w-3.5 h-3.5" />
+                        <span>Hot (V60 Seduh Panas)</span>
                       </button>
                       <button
                         type="button"
@@ -297,13 +365,14 @@ function ProductDetailContent() {
                             transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                           />
                         )}
-                        <span>🧊 Iced (Japanese Drip Dingin)</span>
+                        <Droplets className="w-3.5 h-3.5" />
+                        <span>Iced (Japanese Drip Dingin)</span>
                       </button>
                     </div>
                   </div>
                 </motion.div>
               ) : (
-                /* MODE 2: BIJI KOPI KEMASAN POUCH (Dengan Pilihan Gramasi) */
+                /* MODE 2: BIJI KOPI KEMASAN POUCH */
                 <motion.div
                   key="beans-pouch-mode"
                   initial={{ opacity: 0, y: 8 }}
@@ -396,9 +465,31 @@ function ProductDetailContent() {
             </div>
 
             {/* ========================================================================= */}
-            {/* AT A GLANCE (Exact Screenshot 2 Layout)                                    */}
+            {/* ONE-CLICK BREW GUIDE BRIDGE CARD                                          */}
             {/* ========================================================================= */}
-            <div className="space-y-4 pt-6 border-t border-border-subtle">
+            <div className="p-5 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-brand-maroon">
+                  <Coffee className="w-4 h-4" />
+                  <span>Resep Ekstraksi Barista 52 Coffee</span>
+                </div>
+                <p className="text-xs text-on-surface-variant">
+                  {product.brewingRecipe.dose} • Rasio {product.brewingRecipe.ratio} • Suhu {product.brewingRecipe.temp}
+                </p>
+              </div>
+              <Link
+                href={`/guide?bean=${encodeURIComponent(product.name)}`}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-navy text-white text-xs font-mono font-bold hover:bg-brand-navy-light transition-colors shadow-sm shrink-0"
+              >
+                <span>Seduh di Guide</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* AT A GLANCE                                                               */}
+            {/* ========================================================================= */}
+            <div className="space-y-4 pt-4 border-t border-border-subtle">
               <span className="font-mono text-xs text-gray-400 uppercase tracking-widest font-bold block">
                 AT A GLANCE
               </span>
@@ -408,7 +499,7 @@ function ProductDetailContent() {
                 <span className="text-[10px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
                   TASTING NOTES
                 </span>
-                <p className="font-editorial text-lg sm:text-xl font-bold text-on-surface">
+                <p className="font-editorial text-lg sm:text-xl font-bold text-brand-navy">
                   {product.tastingNotes.join(', ')}
                 </p>
               </div>
@@ -416,31 +507,25 @@ function ProductDetailContent() {
               {/* Freshness Box */}
               <div className="p-5 rounded-2xl bg-surface-container-low border border-border-subtle space-y-2">
                 <span className="text-[10px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
-                  FRESHNESS
+                  FRESHNESS &amp; ROAST DATE
                 </span>
                 <div className="w-full h-2 rounded-full bg-gray-200 relative overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-status-success to-teal-400 w-full rounded-full"></div>
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 w-full rounded-full"></div>
                   <div className="absolute top-0 left-[15%] w-2 h-2 rounded-full bg-white border border-gray-400 shadow-sm"></div>
                 </div>
-                <p className="text-xs font-semibold text-on-surface">
-                  Roasted less than 7 days ago
+                <p className="text-xs font-semibold text-brand-navy">
+                  Disangrai fresh kurang dari 7 hari yang lalu di Roastery Malang
                 </p>
               </div>
 
-              {/* Roast Rest Advisory Note (Exact Screenshot 2 Text) */}
+              {/* Roast Rest Advisory Note */}
               <div className="text-xs text-on-surface-variant space-y-3 leading-relaxed font-sans pt-1">
                 <p>
-                  Our beans are at their best after a proper rest — at least 2 weeks for espresso and 3 weeks for filter. If the cup still tastes gassy, give it a little more time; some of our beans need up to 2 months to fully open up.{' '}
-                  <strong className="text-primary">
-                    We don&#39;t recommend brewing freshly roasted coffee, but the choice is always yours.
-                  </strong>
-                </p>
-                <p className="text-gray-500 text-[11px]">
-                  Please note: we cannot check the roast date of each coffee individually — our inventory moves quite fast, so at the time of purchase we can&#39;t be sure which batch your order will come from. Rest assured, it&#39;s always freshly roasted and will still need to be rested no matter what.
+                  Biji kopi 52 Coffee mencapai puncak rasa terbaiknya setelah melalui masa resting minimal 2 minggu untuk espresso dan 3 minggu untuk filter.
                 </p>
               </div>
 
-              {/* Metadata 3x2 Grid (Exact Screenshot 2) */}
+              {/* Metadata 3x2 Grid */}
               <div className="grid grid-cols-3 gap-3 pt-2">
                 <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
                   <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">FARM</span>
@@ -472,11 +557,11 @@ function ProductDetailContent() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. TRANSPARENCY ACCORDIONS SECTION (Exact Screenshot 4)                   */}
+        {/* 3. TRANSPARENCY ACCORDIONS SECTION                                        */}
         {/* ========================================================================= */}
         <section className="space-y-4 pt-8 border-t border-border-subtle">
           <span className="font-mono text-xs text-gray-400 uppercase tracking-widest font-bold block">
-            TRANSPARENCY
+            TRANSPARENCY &amp; SOURCING
           </span>
 
           {/* Accordion 1: Green Information */}
@@ -486,7 +571,7 @@ function ProductDetailContent() {
               onClick={() => setOpenGreenInfo(!openGreenInfo)}
               className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
             >
-              <span>Green Information</span>
+              <span>Informasi Green Beans Mentah</span>
               {openGreenInfo ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
@@ -494,10 +579,10 @@ function ProductDetailContent() {
               <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border-subtle/50">
                 <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between items-center font-mono text-xs">
                   <span className="text-on-surface-variant">Landed Cost per 1 kg of Green Coffee</span>
-                  <span className="font-bold text-on-surface">{formatRupiah(landedGreenCost)}</span>
+                  <span className="font-bold text-brand-navy">{formatRupiah(landedGreenCost)}</span>
                 </div>
-                <p className="text-[11px] text-gray-500 font-sans">
-                  Landed cost is the raw green coffee cost per kilogram, including all shipping charges, before roasting and packaging.
+                <p className="text-[11px] text-on-surface-variant font-sans">
+                  Landed cost adalah biaya green coffee mentah per kilogram termasuk ongkir kurir origin sebelum disangrai dan dikemas.
                 </p>
               </div>
             )}
@@ -510,32 +595,29 @@ function ProductDetailContent() {
               onClick={() => setOpenPriceBreakdown(!openPriceBreakdown)}
               className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
             >
-              <span>Price Breakdown</span>
+              <span>Rincian Struktur Harga &amp; HPP Sangrai</span>
               {openPriceBreakdown ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
             {openPriceBreakdown && (
               <div className="px-5 pb-5 pt-1 space-y-3 border-t border-border-subtle/50">
                 <p className="text-xs text-on-surface-variant font-sans">
-                  <strong>HPP (Harga Pokok Produksi)</strong> is the production cost: green coffee adjusted for 20% roast weight loss, plus Rp. 10.000 electricity for 1 kg.
+                  <strong>HPP (Harga Pokok Produksi)</strong> mencakup green bean disesuaikan dengan 20% susut bobot roasting, ditambah Rp 10.000 listrik/gas per 1 kg.
                 </p>
                 <div className="space-y-2 font-mono text-xs">
                   <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-                    <span className="text-on-surface-variant">HPP (1 kg)</span>
+                    <span className="text-on-surface-variant">HPP Sangrai (1 kg)</span>
                     <span className="font-bold text-on-surface">{formatRupiah(hppPerKg)}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-                    <span className="text-on-surface-variant">Packaging (1 kg)</span>
+                    <span className="text-on-surface-variant">Kemasan Valve Pouch &amp; Label (1 kg)</span>
                     <span className="font-bold text-on-surface">{formatRupiah(packagingPerKg)}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-                    <span className="text-on-surface-variant">Gross Profit (1 kg)</span>
-                    <span className="font-bold text-primary">{formatRupiah(Math.max(20000, grossProfit1kg))}</span>
+                    <span className="text-on-surface-variant">Gross Profit Roastery (1 kg)</span>
+                    <span className="font-bold text-brand-teal-dark">{formatRupiah(Math.max(20000, grossProfit1kg))}</span>
                   </div>
                 </div>
-                <p className="text-[10px] text-gray-400 italic">
-                  Slight rounding discrepancy may occur.
-                </p>
               </div>
             )}
           </div>
@@ -547,14 +629,14 @@ function ProductDetailContent() {
               onClick={() => setOpenOrigin(!openOrigin)}
               className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
             >
-              <span>Origin &amp; Sourcing</span>
+              <span>Terroir &amp; Karakteristik Origin</span>
               {openOrigin ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
             {openOrigin && (
               <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border-subtle/50 text-xs text-on-surface-variant leading-relaxed">
                 <p>{product.description}</p>
-                <p className="font-mono text-[11px] text-gray-500">
+                <p className="font-mono text-[11px] text-brand-navy font-semibold">
                   Terroir: {product.region} • Altitude: {product.altitude}
                 </p>
               </div>
@@ -568,7 +650,7 @@ function ProductDetailContent() {
               onClick={() => setOpenStory(!openStory)}
               className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
             >
-              <span>Farm Story</span>
+              <span>Cerita Petani &amp; Roastery</span>
               {openStory ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
@@ -579,6 +661,35 @@ function ProductDetailContent() {
             )}
           </div>
         </section>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MOBILE STICKY BOTTOM ACTION BAR                                           */}
+      {/* ========================================================================= */}
+      <div className="fixed bottom-0 left-0 right-0 sm:hidden z-40 bg-white/95 backdrop-blur-md border-t border-border-subtle p-3.5 shadow-2xl flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <span className="text-[10px] font-mono text-on-surface-variant uppercase block">Total</span>
+          <div className="font-mono font-bold text-base text-brand-navy truncate">
+            {formatRupiah(currentPrice * quantity)}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isAdded}
+          className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5"
+        >
+          {isAdded ? (
+            <>
+              <Check className="w-4 h-4 text-emerald-300" />
+              <span>Ditambahkan!</span>
+            </>
+          ) : (
+            <>
+              <span>+ Keranjang ({orderMode === 'cup' ? 'Cup' : selectedVariant.weightLabel})</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

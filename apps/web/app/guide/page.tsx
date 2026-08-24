@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
@@ -17,6 +18,9 @@ import {
   Coffee,
   Sliders,
   ChevronRight,
+  Volume2,
+  VolumeX,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface BrewStep {
@@ -62,7 +66,7 @@ const TOPICS: BrewTopic[] = [
         startSec: 0,
         endSec: 40,
         timeLabel: '00:00 - 00:40',
-        action: 'Blooming & Swirl',
+        action: 'Blooming & Gentle Swirl',
         waterPercent: 0.2,
         desc: 'Tuang 20% air panas merata ke seluruh bubuk kopi, lakukan gentle swirl 3-5 detik untuk melepas gas CO2 alami.',
       },
@@ -86,7 +90,7 @@ const TOPICS: BrewTopic[] = [
         startSec: 110,
         endSec: 150,
         timeLabel: '01:50 - 02:30',
-        action: 'Drawdown Selesai',
+        action: 'Drawdown & Serving',
         waterPercent: 0,
         desc: 'Biarkan air turun habis dengan permukaan bed kopi rata. Angkat dripper, swirl server sebelum dinikmati!',
       },
@@ -180,11 +184,25 @@ const TOPICS: BrewTopic[] = [
 ];
 
 export default function BrewGuidePage() {
+  return (
+    <Suspense fallback={<div className="p-24 text-center text-xs font-mono text-gray-400">Loading Brew Guide...</div>}>
+      <BrewGuideContent />
+    </Suspense>
+  );
+}
+
+function BrewGuideContent() {
+  const searchParams = useSearchParams();
+  const beanParam = searchParams.get('bean');
+
   const [activeTopicId, setActiveTopicId] = useState<string>('v60-filter');
   const currentTopic = TOPICS.find((t) => t.id === activeTopicId) || TOPICS[0];
 
   // Interactive Dose State
   const [dose, setDose] = useState<number>(currentTopic.defaultDose);
+
+  // Sound State
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
 
   // Sync dose when switching topics
   useEffect(() => {
@@ -196,22 +214,85 @@ export default function BrewGuidePage() {
   // Interactive Live Timer State
   const [timerRunning, setTimerRunning] = useState<boolean>(false);
   const [seconds, setSeconds] = useState<number>(0);
+  const lastChimedSec = useRef<number>(-1);
+
+  // Play synthetic Web Audio chimes without external audio assets
+  const playChime = (type: 'start' | 'pour' | 'finish' = 'pour') => {
+    if (!soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'start') {
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } else if (type === 'finish') {
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); // E5
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.25); // G5
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.6);
+      } else {
+        // Pour interval chime (Double gentle ping)
+        osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      }
+    } catch (e) {
+      // Ignore if autoplay blocked
+    }
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (timerRunning) {
       interval = setInterval(() => {
-        setSeconds((prev) => prev + 1);
+        setSeconds((prev) => {
+          const next = prev + 1;
+
+          // Check if current seconds matches any step start time
+          const stepMatch = currentTopic.steps.find((s) => s.startSec === next);
+          if (stepMatch && lastChimedSec.current !== next) {
+            lastChimedSec.current = next;
+            playChime(next === 0 ? 'start' : 'pour');
+          } else if (next >= currentTopic.targetSeconds && lastChimedSec.current !== next) {
+            lastChimedSec.current = next;
+            playChime('finish');
+          }
+
+          return next;
+        });
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [timerRunning]);
+  }, [timerRunning, currentTopic.steps, currentTopic.targetSeconds, soundEnabled]);
+
+  const toggleTimer = () => {
+    if (!timerRunning && seconds === 0) {
+      playChime('start');
+    }
+    setTimerRunning(!timerRunning);
+  };
 
   const resetTimer = () => {
     setTimerRunning(false);
     setSeconds(0);
+    lastChimedSec.current = -1;
   };
 
   const formatTimer = (sec: number) => {
@@ -228,7 +309,7 @@ export default function BrewGuidePage() {
   return (
     <div className="w-full bg-[#131313] text-gray-100 font-sans min-h-screen">
       {/* ========================================================================= */}
-      {/* 1. HERO SECTION WITH PROPORTIONATE HEIGHT                                 */}
+      {/* 1. HERO SECTION                                                           */}
       {/* ========================================================================= */}
       <section className="relative min-h-[380px] sm:min-h-[440px] pt-24 pb-12 w-full flex items-center justify-start overflow-hidden">
         <div
@@ -245,9 +326,18 @@ export default function BrewGuidePage() {
         />
 
         <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-xs font-mono text-[11px] text-brand-teal-light tracking-widest uppercase font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Slowbar Tasting Room / 52 Coffee Malang</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-xs font-mono text-[11px] text-brand-teal-light tracking-widest uppercase font-bold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Slowbar Tasting Room / 52 Coffee Malang</span>
+            </div>
+
+            {beanParam && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-maroon/80 border border-brand-maroon font-mono text-[11px] text-white font-bold animate-fade-in">
+                <Coffee className="w-3.5 h-3.5" />
+                <span>Menyeduh: {beanParam}</span>
+              </div>
+            )}
           </div>
 
           <h1 className="font-editorial text-4xl sm:text-6xl font-bold max-w-3xl leading-tight">
@@ -255,7 +345,7 @@ export default function BrewGuidePage() {
           </h1>
 
           <p className="text-xs sm:text-sm max-w-xl text-gray-300 leading-relaxed font-sans">
-            Panduan rasio seduh interaktif &amp; live timer yang digunakan setiap hari oleh barista di Slowbar 52 Coffee Malang.
+            Panduan rasio seduh interaktif, interval tuangan air otomatis, dan timer bersuara (*audio chimes*) yang digunakan barista di Slowbar 52 Coffee Malang.
           </p>
         </div>
       </section>
@@ -264,259 +354,284 @@ export default function BrewGuidePage() {
       {/* 2. INTERACTIVE BREW GUIDE INTERFACE                                       */}
       {/* ========================================================================= */}
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Method Switcher Tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10 max-w-2xl mx-auto">
-          {TOPICS.map((topic) => {
-            const isActive = activeTopicId === topic.id;
-            return (
-              <button
-                key={topic.id}
-                type="button"
-                onClick={() => {
-                  setActiveTopicId(topic.id);
-                  resetTimer();
-                }}
-                className={`relative px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-2 z-10 ${
-                  isActive ? 'text-white' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeGuideMethodPill"
-                    className="absolute inset-0 bg-brand-navy rounded-xl shadow-md border border-white/20 -z-10"
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                  />
-                )}
-                <span>{topic.num}</span>
-                <span>{topic.title.split(' (')[0]}</span>
-              </button>
-            );
-          })}
+        {/* Method Switcher Tabs & Sound Toggle */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10">
+            {TOPICS.map((topic) => {
+              const isActive = activeTopicId === topic.id;
+              return (
+                <button
+                  key={topic.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTopicId(topic.id);
+                    resetTimer();
+                  }}
+                  className={`relative px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-2 z-10 ${
+                    isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeGuideMethodPill"
+                      className="absolute inset-0 bg-brand-navy rounded-xl shadow-md border border-white/20 -z-10"
+                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <span>{topic.num}</span>
+                  <span>{topic.title.split(' (')[0]}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sound Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className={`px-4 py-2.5 rounded-xl font-mono text-xs font-bold border transition-all flex items-center gap-2 ${
+              soundEnabled
+                ? 'bg-brand-maroon/20 border-brand-maroon text-amber-200'
+                : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+            }`}
+            title={soundEnabled ? 'Suara audio aktif' : 'Suara audio dibisukan'}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-300" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
+            <span>{soundEnabled ? 'Audio Chimes On' : 'Mute Audio'}</span>
+          </button>
         </div>
 
         {/* Main 2-Column Interactive Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* LEFT: Live Interactive Brewing Timer & Dose Calculator (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Live Stopwatch Card */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6 text-center shadow-xl relative overflow-hidden backdrop-blur-md">
-              <div className="flex justify-between items-center text-xs font-mono text-gray-400">
-                <span className="uppercase font-bold tracking-wider">Live Pouring Timer</span>
-                <span className="text-brand-teal-light font-bold">Target: ~{formatTimer(currentTopic.targetSeconds)}</span>
+            {/* TIMER CARD */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl space-y-6 text-center">
+              <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                <span className="uppercase tracking-widest font-bold text-brand-teal-light">
+                  {currentTopic.tag}
+                </span>
+                <span>Target: {formatTimer(currentTopic.targetSeconds)}</span>
               </div>
 
-              {/* Digital Clock Digits */}
-              <div className="space-y-1 py-2">
-                <div className="font-mono text-5xl sm:text-6xl font-black text-white tracking-widest">
+              {/* Huge Monospace Timer Display */}
+              <div className="py-2">
+                <div className="font-mono text-6xl sm:text-7xl font-bold tracking-tight text-white drop-shadow-md">
                   {formatTimer(seconds)}
                 </div>
-                <div className="text-xs font-mono text-gray-400">
+                <div className="text-xs font-mono text-gray-400 mt-2">
                   {timerRunning ? (
-                    <span className="text-emerald-400 font-bold flex items-center justify-center gap-1.5">
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+                    <span className="text-emerald-400 flex items-center justify-center gap-1.5 font-bold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                       Sedang Menyeduh...
                     </span>
                   ) : seconds > 0 ? (
-                    <span className="text-amber-400">Waktu Dijeda</span>
+                    <span className="text-amber-300">Timer Dijeda</span>
                   ) : (
-                    <span>Tekan Mulai saat tuangan pertama</span>
+                    <span>Tekan Start Saat Tuangan Pertama Dimulai</span>
                   )}
                 </div>
               </div>
 
-              {/* Action Timer Buttons */}
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setTimerRunning(!timerRunning)}
-                  className={`px-6 py-3.5 rounded-2xl font-mono text-xs font-bold transition-all flex items-center gap-2 shadow-lg cursor-pointer ${
-                    timerRunning
-                      ? 'bg-amber-500 hover:bg-amber-600 text-gray-950'
-                      : 'bg-brand-teal hover:bg-brand-teal-dark text-white'
-                  }`}
-                >
-                  {timerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  <span>{timerRunning ? 'Jeda Timer' : seconds > 0 ? 'Lanjutkan' : 'Mulai Seduh'}</span>
-                </button>
-
-                {seconds > 0 && (
-                  <button
-                    type="button"
-                    onClick={resetTimer}
-                    className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/15 text-gray-300 hover:text-white border border-white/10 transition-colors"
-                    title="Reset Timer"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                )}
+              {/* Progress Bar of Target Time */}
+              <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden relative">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-brand-teal to-brand-maroon rounded-full"
+                  style={{
+                    width: `${Math.min(100, (seconds / currentTopic.targetSeconds) * 100)}%`,
+                  }}
+                />
               </div>
 
-              {/* Interactive Dose Slider */}
-              <div className="pt-4 border-t border-white/10 space-y-3 text-left">
-                <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-gray-400 uppercase font-bold">Atur Dosis Kopi (Dose):</span>
+              {/* Timer Controls */}
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={toggleTimer}
+                  className={`flex-1 py-4 px-6 rounded-2xl font-mono text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg ${
+                    timerRunning
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                      : 'bg-brand-maroon hover:bg-brand-maroon-light text-white'
+                  }`}
+                >
+                  {timerRunning ? (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      <span>Pause Seduh</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 fill-white" />
+                      <span>{seconds > 0 ? 'Lanjutkan' : 'Mulai Seduh (Start)'}</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resetTimer}
+                  className="p-4 rounded-2xl bg-white/10 hover:bg-white/15 text-gray-300 transition-colors"
+                  aria-label="Reset timer"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* DOSE & RATIO CALCULATOR CARD */}
+            <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-brand-teal-light" />
+                  <h3 className="font-editorial text-base font-bold text-white">
+                    Kalkulator Rasio Seduh
+                  </h3>
+                </div>
+                <span className="font-mono text-xs text-brand-teal-light font-bold">
+                  Rasio 1:{currentTopic.ratioMultiplier}
+                </span>
+              </div>
+
+              {/* Dose Stepper */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                  <span>Gramasi Kopi (Dose):</span>
                   <span className="text-white font-bold text-sm">{dose} Gram</span>
                 </div>
-
                 <div className="flex items-center gap-2">
-                  {[12, 15, 18, 20].map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDose(d)}
-                      className={`flex-1 py-2 rounded-xl font-mono text-xs font-bold transition-colors ${
-                        dose === d
-                          ? 'bg-white text-gray-950 shadow-sm'
-                          : 'bg-white/5 hover:bg-white/10 text-gray-300'
-                      }`}
-                    >
-                      {d}g
-                    </button>
-                  ))}
+                  <input
+                    type="range"
+                    min="10"
+                    max="30"
+                    step="0.5"
+                    value={dose}
+                    onChange={(e) => setDose(parseFloat(e.target.value))}
+                    className="flex-1 accent-brand-maroon cursor-pointer h-2 bg-white/10 rounded-lg"
+                  />
                 </div>
+              </div>
 
-                <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex justify-between items-center font-mono text-xs">
-                  <span className="text-gray-400">Total Kebutuhan Air:</span>
-                  <span className="text-brand-teal-light font-bold text-sm sm:text-base">
-                    {totalWater} {activeTopicId === 'espresso-calibration' ? 'Gram Yield' : 'ml Air'}
+              {/* Total Water Yield Output */}
+              <div className="p-4 rounded-2xl bg-brand-navy/60 border border-white/10 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-mono uppercase text-gray-300 font-bold block">
+                    Total Air Panas (Yield):
+                  </span>
+                  <span className="text-xs text-gray-300 font-sans">
+                    Suhu optimal {currentTopic.waterTemp}
+                  </span>
+                </div>
+                <div className="font-mono text-2xl font-bold text-amber-300">
+                  {totalWater} ml
+                </div>
+              </div>
+
+              {/* Specs Pills */}
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-[10px] text-gray-400 block">Grind Size:</span>
+                  <span className="font-bold text-white text-[11px] truncate block">
+                    {currentTopic.grindSize.split(' (')[0]}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-[10px] text-gray-400 block">Target Waktu:</span>
+                  <span className="font-bold text-white text-[11px] block">
+                    {formatTimer(currentTopic.targetSeconds)}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* RIGHT: Step-by-Step Pouring Timeline & Parameters (7 Cols) */}
+          {/* RIGHT: Step-by-Step Interactive Pour Timeline (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentTopic.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                {/* 4 Essential Quick Parameters Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                    <div className="flex items-center gap-1.5 text-gray-400 text-[11px]">
-                      <Scale className="w-3.5 h-3.5 text-brand-teal-light" />
-                      <span>Rasio Seduh</span>
-                    </div>
-                    <div className="font-bold text-white text-xs sm:text-sm">
-                      1:{currentTopic.ratioMultiplier} ({dose}g:{totalWater}ml)
-                    </div>
-                  </div>
+            <div className="space-y-2">
+              <span className="text-xs font-mono text-brand-teal-light uppercase font-bold tracking-wider block">
+                TIMELINE INTERVAL TUANGAN
+              </span>
+              <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-white">
+                {currentTopic.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-sans">
+                {currentTopic.description}
+              </p>
+            </div>
 
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                    <div className="flex items-center gap-1.5 text-gray-400 text-[11px]">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Gilingan</span>
-                    </div>
-                    <div className="font-bold text-white text-xs leading-tight">{currentTopic.grindSize}</div>
-                  </div>
+            {/* Steps List */}
+            <div className="space-y-3.5">
+              {currentTopic.steps.map((step, idx) => {
+                const isActive = currentActiveStepIndex === idx;
+                const isCompleted = seconds > step.endSec;
+                const waterAmount = Math.round(totalWater * step.waterPercent);
 
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                    <div className="flex items-center gap-1.5 text-gray-400 text-[11px]">
-                      <Flame className="w-3.5 h-3.5 text-red-400" />
-                      <span>Suhu Air</span>
-                    </div>
-                    <div className="font-bold text-white text-xs sm:text-sm">{currentTopic.waterTemp}</div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                    <div className="flex items-center gap-1.5 text-gray-400 text-[11px]">
-                      <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Target Waktu</span>
-                    </div>
-                    <div className="font-bold text-white text-xs sm:text-sm">
-                      {formatTimer(currentTopic.targetSeconds)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step by Step Timeline with Active Step Highlighting */}
-                <div className="space-y-3">
-                  <h3 className="font-editorial text-xl font-bold text-white">
-                    Tahapan Seduhan (Step-by-Step)
-                  </h3>
-
-                  <div className="space-y-2.5">
-                    {currentTopic.steps.map((step, idx) => {
-                      const isCurrentActive = currentActiveStepIndex === idx;
-                      const stepWaterAmount =
-                        step.waterPercent > 0
-                          ? Math.round(totalWater * step.waterPercent)
-                          : totalWater;
-
-                      return (
+                return (
+                  <motion.div
+                    key={`step-${idx}`}
+                    className={`p-5 rounded-2xl border transition-all duration-300 relative ${
+                      isActive
+                        ? 'bg-brand-navy/90 border-brand-maroon shadow-xl ring-1 ring-brand-maroon/50'
+                        : isCompleted
+                        ? 'bg-white/5 border-emerald-500/30 opacity-75'
+                        : 'bg-white/5 border-white/10'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3.5">
                         <div
-                          key={idx}
-                          className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                            isCurrentActive
-                              ? 'bg-brand-navy/60 border-brand-teal shadow-md ring-2 ring-brand-teal/30 scale-[1.01]'
-                              : 'bg-white/5 border-white/10 hover:bg-white/[0.07]'
+                          className={`w-8 h-8 rounded-xl font-mono text-xs font-bold flex items-center justify-center shrink-0 ${
+                            isActive
+                              ? 'bg-brand-maroon text-white animate-pulse'
+                              : isCompleted
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-white/10 text-gray-400'
                           }`}
                         >
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold ${
-                                  isCurrentActive
-                                    ? 'bg-brand-teal text-white'
-                                    : 'bg-white/10 text-brand-teal-light'
-                                }`}
-                              >
-                                {step.timeLabel}
-                              </span>
-                              <span className="font-bold text-sm text-white">{step.action}</span>
-                            </div>
-                            <p className="text-xs text-gray-300 font-sans">{step.desc}</p>
-                          </div>
-
-                          {step.waterPercent > 0 && (
-                            <span className="px-3 py-1 rounded-xl bg-white/10 text-white font-mono text-xs font-bold shrink-0">
-                              +{stepWaterAmount} ml
-                            </span>
-                          )}
+                          {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : `0${idx + 1}`}
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-editorial text-base font-bold text-white">
+                              {step.action}
+                            </h4>
+                            {isActive && (
+                              <span className="px-2 py-0.5 rounded-full bg-brand-maroon text-white font-mono text-[9px] font-bold uppercase animate-pulse">
+                                Tuang Sekarang
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-300 font-sans leading-relaxed">
+                            {step.desc}
+                          </p>
+                        </div>
+                      </div>
 
-                {/* Barista Tips & Recommendations */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 sm:p-5 rounded-2xl bg-amber-950/20 border border-amber-500/20 space-y-2">
-                    <span className="text-xs font-mono uppercase text-amber-400 font-bold flex items-center gap-1.5">
-                      <AlertCircle className="w-4 h-4" /> Kalibrasi Rasa (Barista Tip)
-                    </span>
-                    <ul className="text-xs text-gray-300 space-y-1.5 list-disc list-inside font-sans">
-                      {currentTopic.keyTips.map((tip, idx) => (
-                        <li key={idx}>{tip}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2">
-                    <span className="text-xs font-mono uppercase text-emerald-400 font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4" /> Biji Kopi Rekomendasi
-                    </span>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {currentTopic.recommendedBeans.map((bean, idx) => (
-                        <Link
-                          key={idx}
-                          href="/catalog"
-                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-sans text-xs font-medium transition-colors"
-                        >
-                          {bean}
-                        </Link>
-                      ))}
+                      {/* Interval & Grams Target */}
+                      <div className="text-right font-mono shrink-0">
+                        <div className="text-xs font-bold text-amber-300">
+                          {step.waterPercent > 0 ? `+${waterAmount} ml` : 'Finishing'}
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-0.5">
+                          {step.timeLabel}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Pro Barista Tips */}
+            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+              <span className="text-[11px] font-mono text-amber-300 font-bold uppercase tracking-wider block">
+                Catatan Penting Barista 52 Coffee:
+              </span>
+              <ul className="space-y-1 text-xs text-amber-100/90 list-disc pl-4 font-sans">
+                {currentTopic.keyTips.map((tip, i) => (
+                  <li key={`tip-${i}`}>{tip}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>

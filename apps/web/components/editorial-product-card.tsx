@@ -7,6 +7,7 @@ import { Eye, Plus, Check, Coffee } from 'lucide-react';
 import { CoffeeProduct, formatRupiah } from '../lib/data';
 import { QuickViewModal } from './quick-view-modal';
 import { useCartStore } from '../lib/store/useCartStore';
+import { SensoryTag } from './sensory-tag';
 
 interface EditorialProductCardProps {
   product: CoffeeProduct;
@@ -90,15 +91,10 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
             )}
           </Link>
 
-          {/* Tasting Notes (2 Key Notes for Compact View) */}
-          <div className="flex flex-wrap items-center gap-1 py-1">
+          {/* Tasting Notes (Color-coded Sensory Tag Badges) */}
+          <div className="flex flex-wrap items-center gap-1.5 py-1">
             {product.tastingNotes.slice(0, 2).map((note) => (
-              <span
-                key={note}
-                className="text-[10px] font-sans px-2 py-0.5 rounded-md bg-brand-pill border border-border-subtle/60 text-brand-navy font-medium truncate max-w-[110px]"
-              >
-                {note}
-              </span>
+              <SensoryTag key={note} note={note} size="sm" />
             ))}
           </div>
 

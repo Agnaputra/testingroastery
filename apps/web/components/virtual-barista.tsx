@@ -1,24 +1,20 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  MessageSquare,
-  X,
-  Send,
   Sparkles,
-  Coffee,
+  Send,
+  X,
   RotateCcw,
   ShoppingBag,
-  ExternalLink,
-  ChevronDown,
-  Bot,
-  User,
   Check,
+  ChevronRight,
+  Coffee,
   Flame,
-  HelpCircle,
+  Scale,
 } from 'lucide-react';
 import { PRODUCTS, CoffeeProduct, formatRupiah } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
@@ -33,11 +29,11 @@ interface ChatMessage {
 }
 
 const QUICK_PROMPTS = [
-  '🍓 Rekomendasi beans fruity & floral (Sumbing / Sidra)',
-  '☕ Biji kopi terbaik untuk V60 manual brew (Ijen / Walida)',
-  '🥛 Blend espresso manis cocok untuk es kopi susu (Dampit / Arjuna)',
-  '👑 Ceritakan tentang Grand Reserve Inmaculada Pink Bourbon',
-  '⏱️ Tips rasio seduh & suhu air V60 harian',
+  'Rekomendasi biji kopi fruity & floral (Sumbing / Sidra)',
+  'Biji kopi terbaik untuk V60 manual brew (Ijen / Walida)',
+  'Blend espresso manis untuk es kopi susu (Dampit / Arjuna)',
+  'Spesifikasi Grand Reserve Inmaculada Pink Bourbon',
+  'Tips rasio seduh & suhu air V60 harian',
 ];
 
 export function VirtualBaristaWidget() {
@@ -50,7 +46,7 @@ export function VirtualBaristaWidget() {
     {
       id: 'welcome',
       sender: 'barista',
-      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery ☕. Ada yang bisa saya bantu rekomendasikan hari ini? Ceritakan profil rasa favoritmu (fruity, floral candy, winey, chocolate) atau metode seduh yang ingin kamu gunakan!',
+      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery. Ada yang bisa saya bantu rekomendasikan hari ini? Ceritakan profil rasa favoritmu (fruity, floral, winey, chocolate) atau metode seduh yang ingin kamu gunakan.',
       timestamp: 'Baru saja',
     },
   ]);
@@ -69,13 +65,48 @@ export function VirtualBaristaWidget() {
     }
   }, [messages, isOpen]);
 
-  // Periodic tooltip reminder if not opened
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isOpen) setShowTooltip(true);
-    }, 4000);
-    return () => clearTimeout(timer);
-  }, [isOpen]);
+  // Progressive Typewriter streaming response effect
+  const streamBaristaResponse = async (
+    fullText: string,
+    products?: CoffeeProduct[]
+  ) => {
+    const messageId = Date.now().toString();
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Initial empty message
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: messageId,
+        sender: 'barista',
+        text: '',
+        timestamp,
+      },
+    ]);
+
+    const words = fullText.split(' ');
+    let currentText = '';
+
+    for (let i = 0; i < words.length; i++) {
+      currentText += (i === 0 ? '' : ' ') + words[i];
+      const snapshot = currentText;
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                text: snapshot,
+                recommendedProducts: i === words.length - 1 ? products : undefined,
+              }
+            : msg
+        )
+      );
+
+      // Natural reading speed delay
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+  };
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || input;
@@ -119,15 +150,8 @@ export function VirtualBaristaWidget() {
 
       const rawReply = (data.reply || 'Berikut rekomendasi kurasi biji kopi segar dari roastery kami di Malang yang sangat pas dengan selera kamu:').replace(/\*/g, '');
 
-      const baristaMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        sender: 'barista',
-        text: rawReply,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        recommendedProducts: matchedProducts.length > 0 ? matchedProducts : undefined,
-      };
-
-      setMessages((prev) => [...prev, baristaMessage]);
+      setIsLoading(false);
+      await streamBaristaResponse(rawReply, matchedProducts.length > 0 ? matchedProducts : undefined);
     } catch (err) {
       console.warn('Fallback to local barista AI logic:', err);
 
@@ -198,32 +222,22 @@ export function VirtualBaristaWidget() {
       } else if (lower.includes('rasio') || lower.includes('v60') || lower.includes('seduh') || lower.includes('resep')) {
         reply = 'Untuk seduh V60 biji kopi kami, kami sarankan Dosis 15g, Air 225ml (Rasio 1:15), Suhu 92°C. Blooming 45g selama 40 detik, lalu tuang 2 tahap spiral hingga 225ml dengan drawdown tuntas di 02:15. Coba juga fitur Brew Calculator kami!';
       } else {
-        matched = PRODUCTS.slice(0, 3);
-        reply = `Senang berdiskusi kopi denganmu! Di 52 Coffee & Roastery, semua biji disangrai dalam batch kecil (small-batch artisanal) di roastery kami di Jl. KH. Agus Salim No. 11 Malang. Berikut beberapa pilihan biji kopi yang sedang di puncak kesegarannya:`;
+        matched = PRODUCTS.filter((p) => p.isFeatured).slice(0, 2);
+        reply = `Halo! Kami memiliki beragam kurasi biji kopi segar yang disangrai di Malang. Kamu bisa memilih:\n1. Filter Manual Brew (Fruity, Floral, atau Sweet Strawberry)\n2. Espresso & Kopi Susu (Chocolate, Nutty, Crema Tebal)\n3. Grand Reserve Micro-Lot (Geisha & Sidra Langka)\n\nProfil rasa mana yang ingin kamu eksplorasi?`;
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          sender: 'barista',
-          text: reply.replace(/\*/g, ''),
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          recommendedProducts: matched.length > 0 ? matched : undefined,
-        },
-      ]);
-    } finally {
       setIsLoading(false);
+      await streamBaristaResponse(reply, matched.length > 0 ? matched : undefined);
     }
   };
 
   return (
     <>
-      {/* Eye-Catching Floating Barista Launcher with Interactive Tooltip Bubble */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5">
-        {/* Animated Attention Grabber Tooltip */}
+      {/* Floating Launcher Button */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5 font-sans select-none">
+        {/* Helper Tooltip Badge */}
         <AnimatePresence>
-          {!isOpen && showTooltip && (
+          {showTooltip && !isOpen && (
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -236,7 +250,7 @@ export function VirtualBaristaWidget() {
               </div>
               <div className="flex-1 text-[11px] leading-snug">
                 <span className="font-bold block text-brand-navy">Bingung pilih beans?</span>
-                <span className="text-on-surface-variant">Tanya AI Barista rekomendasi rasa &amp; origin ☕</span>
+                <span className="text-on-surface-variant">Tanya AI Barista rekomendasi rasa &amp; origin</span>
               </div>
               <button
                 type="button"
@@ -283,7 +297,7 @@ export function VirtualBaristaWidget() {
                 </span>
               </div>
               <div className="text-[10px] font-mono text-gray-300">
-                Tanya Rekomendasi Rasa ✨
+                Tanya Rekomendasi Rasa
               </div>
             </div>
 
@@ -333,7 +347,7 @@ export function VirtualBaristaWidget() {
                       {
                         id: 'welcome',
                         sender: 'barista',
-                        text: 'Halo kawan seduh! Ada profil rasa atau origin biji kopi yang ingin kamu tanyakan hari ini? ☕',
+                        text: 'Halo kawan seduh! Ada profil rasa atau origin biji kopi yang ingin kamu tanyakan hari ini?',
                         timestamp: 'Baru saja',
                       },
                     ])
@@ -353,8 +367,8 @@ export function VirtualBaristaWidget() {
               </div>
             </div>
 
-            {/* Messages Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-container-low">
+            {/* Chat Body Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-container-low/40">
               {messages.map((msg) => {
                 const isBarista = msg.sender === 'barista';
                 return (
@@ -362,40 +376,38 @@ export function VirtualBaristaWidget() {
                     key={msg.id}
                     className={`flex gap-2.5 ${isBarista ? 'items-start' : 'items-end flex-row-reverse'}`}
                   >
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs shadow-sm ${
-                        isBarista
-                          ? 'bg-brand-navy text-white'
-                          : 'bg-brand-maroon text-white'
-                      }`}
-                    >
-                      {isBarista ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
-                    </div>
+                    {isBarista && (
+                      <div className="w-7 h-7 rounded-full bg-brand-navy text-brand-teal-light flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                        <FiftyTwoBeanMark className="w-3.5 h-3.5" />
+                      </div>
+                    )}
 
-                    <div className="max-w-[84%] space-y-2">
+                    <div className={`space-y-2 max-w-[85%]`}>
                       <div
-                        className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                        className={`p-3.5 rounded-2xl text-xs sm:text-[13px] leading-relaxed font-sans shadow-xs whitespace-pre-line ${
                           isBarista
-                            ? 'bg-white border border-border-subtle text-on-surface rounded-tl-none font-sans'
-                            : 'bg-brand-navy text-white rounded-tr-none font-sans'
+                            ? 'bg-white border border-border-subtle text-on-surface'
+                            : 'bg-brand-navy text-white rounded-br-none'
                         }`}
                       >
-                        <p className="whitespace-pre-line">{msg.text.replace(/\*/g, '')}</p>
+                        {msg.text || (
+                          <span className="inline-block w-1.5 h-3 bg-brand-navy animate-pulse" />
+                        )}
                       </div>
 
-                      {/* Render Recommended Product Cards in Chat */}
+                      {/* Product Recommendation Cards Carousel if present */}
                       {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
                         <div className="space-y-2 pt-1">
-                          <div className="text-[10px] font-mono text-brand-maroon uppercase tracking-wider font-bold">
-                            Rekomendasi Biji Kopi:
-                          </div>
+                          <span className="text-[10px] font-mono text-on-surface-variant font-bold uppercase tracking-wider block">
+                            Rekomendasi Biji Kopi Terpilih:
+                          </span>
                           {msg.recommendedProducts.map((prod) => (
                             <div
                               key={prod.id}
-                              className="p-2.5 rounded-2xl border border-border-subtle bg-white flex items-center justify-between gap-2.5 shadow-sm hover:border-brand-navy/40 transition-colors"
+                              className="p-3 rounded-2xl bg-white border border-border-subtle shadow-xs flex items-center justify-between gap-3 hover:border-brand-navy/30 transition-all"
                             >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-surface-container-low">
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
                                   <Image
                                     src={prod.imageUrl}
                                     alt={prod.name}
@@ -474,7 +486,7 @@ export function VirtualBaristaWidget() {
               })}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-on-surface-variant text-xs p-2 bg-white/70 rounded-2xl border border-border-subtle max-w-[240px]">
+                <div className="flex items-center gap-2 text-on-surface-variant text-xs p-2.5 bg-white rounded-2xl border border-border-subtle max-w-[240px] shadow-xs">
                   <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce" />
                   <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce [animation-delay:0.2s]" />
                   <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce [animation-delay:0.4s]" />
@@ -492,7 +504,7 @@ export function VirtualBaristaWidget() {
                 <button
                   key={idx}
                   onClick={() => handleSendMessage(prompt)}
-                  className="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-low hover:bg-brand-navy hover:text-white border border-border-subtle text-[11px] text-brand-navy transition-colors font-medium shrink-0 shadow-2xs"
+                  className="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-low hover:bg-brand-navy hover:text-white border border-border-subtle text-[11px] text-brand-navy transition-colors font-medium shrink-0 shadow-2xs cursor-pointer"
                 >
                   {prompt}
                 </button>
