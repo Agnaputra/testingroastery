@@ -163,6 +163,24 @@ export function VirtualBaristaWidget() {
       const clean = lower.replace(/[^\w\s]/gi, '').trim();
 
       if (
+        lower.includes('lambung') ||
+        lower.includes('maag') ||
+        lower.includes('gerd') ||
+        lower.includes('asam lambung') ||
+        lower.includes('perut') ||
+        lower.includes('ringan') ||
+        lower.includes('low acid') ||
+        lower.includes('tidak asam') ||
+        lower.includes('aman') ||
+        lower.includes('lembut') ||
+        lower.includes('smooth') ||
+        lower.includes('mild')
+      ) {
+        matched = PRODUCTS.filter((p) =>
+          ['kintamani-full-wash-arabica', 'ijen-yellow-bourbon', 'sumbing-deep-washed'].includes(p.slug)
+        );
+        reply = 'Untuk kawan seduh yang mencari kopi Ringan, Lembut, dan Ramah/Aman untuk Lambung, kurasi terbaik kami:\n1. Kintamani Full Wash (Medium Roast Arabica — Nyaman di perut dengan aftertaste sweet chocolate)\n2. Ijen Yellow Bourbon Honey (Low Acidity — Manis madu & kacang almond)\n3. Java Exotic Sumbing Deep Washed (Clean body & brown sugar manis)\n\nTips: Seduh dengan metode Cold Brew atau V60 suhu air 88-90°C agar asam klorogenat ekstra lembut!';
+      } else if (
         clean === 'manual' ||
         clean === 'manual brew' ||
         clean === 'filter' ||
