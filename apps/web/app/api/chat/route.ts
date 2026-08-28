@@ -1,8 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PRODUCTS, CoffeeProduct } from '../../../lib/data';
+import { PRODUCTS } from '../../../lib/data';
+import * as fsSync from 'fs';
+import * as path from 'path';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
+
+function getApiKey(): string {
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+  if (process.env.GOOGLE_AI_API_KEY) return process.env.GOOGLE_AI_API_KEY;
+  try {
+    const envPaths = [
+      path.join(process.cwd(), '.env.local'),
+      path.join(process.cwd(), '..', '..', '.env.local')
+    ];
+    for (const p of envPaths) {
+      if (fsSync.existsSync(p)) {
+        const text = fsSync.readFileSync(p, 'utf8');
+        const match = text.match(/GEMINI_API_KEY\s*=\s*([^\r\n]+)/);
+        if (match) return match[1].trim();
+      }
+    }
+  } catch (e) {}
+  return '';
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,10 +34,10 @@ export async function POST(req: NextRequest) {
     }
 
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
-    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || '';
+    const geminiApiKey = getApiKey();
 
     // 1. Attempt to call Google Gemini API if a valid Gemini API key is configured
-    if (geminiApiKey && geminiApiKey.startsWith('AIzaSy')) {
+    if (geminiApiKey && (geminiApiKey.startsWith('AIzaSy') || geminiApiKey.startsWith('AQ.'))) {
       try {
         const catalogContext = PRODUCTS.map((p) =>
           `• [${p.name}] (Slug: ${p.slug}, Series: ${p.series}, Category: ${p.categoryLabel}, Process: ${p.process}, Roast: ${p.roastLevel}, Notes: ${p.tastingNotes.join(', ')}, Price: Rp ${p.basePrice}/${p.defaultWeight})`
@@ -29,19 +50,19 @@ Katalog Biji Kopi Tersedia:
 ${catalogContext}
 
 Panduan Barista:
-- Jawablah secara akurat, ramah, antusias, dan profesional dalam bahasa Indonesia.
-- Jangan menggunakan emoticon atau emoji yang berlebihan.
-- Jika pengguna bertanya tentang kopi aman untuk lambung / maag / GERD / ringan: jelaskan bahwa kopi Arabika Specialty medium roast (seperti Kintamani Full Wash, Ijen Yellow Bourbon, atau Sumbing Washed) atau metode Cold Brew sangat ramah untuk lambung karena asam klorogenatnya terkontrol dan kafein lebih bersahabat daripada Robusta pekat.
-- Jika pengguna bertanya tentang rekomendasi umum: tanyakan preferensi atau rekomendasikan kopi unggulan (Argopuro Walida, Sindoro Strawberry, Ijen Carbonic Maceration).
-- Jika pengguna bertanya tentang minuman selain kopi: jelaskan ketersediaan Artisan Chocolate, Matcha Latte, Artisan Tea, dan Fruit Mocktail di slowbar Malang.
-- Berikan rekomendasi yang ringkas, terstruktur, dan sebutkan tasting notes serta cara seduhnya.`;
+- PENTING: Langsung berikan jawaban akhir yang ramah, sopan, dan solutif dalam Bahasa Indonesia. JANGAN PERNAH menyertakan proses berpikir, catatan internal, atau teks seperti '(Self-correction...)' atau 'Let\'s write the response'.
+- Jika pengguna bertanya tentang kopi aman untuk lambung / maag / GERD: jelaskan opsi kopi low acidity seperti Kintamani Full Wash dan Ijen Yellow Bourbon, atau metode Cold Brew.
+- Jika pengguna bertanya tentang kopi STRONG tapi AMAN DI LAMBUNG: rekomendasikan biji Arabika Specialty low acidity dengan profil dark chocolate/nutty (Brazil Santos atau Kintamani) atau metode Cold Brew pekat dan Kopi Susu (lemak susu melindungi lambung).
+- Jika pengguna bertanya tentang checkout / memesan / membeli / bayar: jelaskan bahwa mereka dapat langsung klik tombol '+ Cart' pada kartu produk di bawah chat, lalu klik ikon keranjang di kanan atas untuk menuju halaman Checkout dengan voucher promo '52COFFEE'.
+- Jika pengguna bertanya tentang rekomendasi best seller: rekomendasikan Argopuro Walida (Fruity), Sindoro Strawberry (Manis Selai), dan Dampit Natural Fine Robusta (Kopi Susu).
+- Berikan rekomendasi yang terstruktur, jelas, dan sebutkan tasting notes serta saran penyajiannya.`;
 
         const geminiHistory = (history || []).slice(-6).map((h: any) => ({
           role: h.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: h.content }],
         }));
 
-        const targetModels = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-2.0-flash'];
+        const targetModels = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash'];
         let generatedText = '';
 
         for (const modelName of targetModels) {
@@ -60,21 +81,27 @@ Panduan Barista:
                   ],
                   generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 900,
+                    maxOutputTokens: 2500,
                   },
                 }),
-                signal: AbortSignal.timeout(7000),
+                signal: AbortSignal.timeout(12000),
               }
             );
 
             if (geminiRes.ok) {
               const geminiData = await geminiRes.json();
               const parts = geminiData.candidates?.[0]?.content?.parts;
-              generatedText = Array.isArray(parts)
+              let rawText = Array.isArray(parts)
                 ? parts.map((p: any) => p.text).filter(Boolean).join('\n')
                 : geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-              if (generatedText) break;
+              if (rawText) {
+                generatedText = rawText
+                  .replace(/^\s*\([\s\S]*?(?:self-correction|thinking|internal note)[\s\S]*?\)\s*/gi, '')
+                  .replace(/^[\s\S]*?(?:let's write the response|here is the response)[.:]\s*/gi, '')
+                  .trim();
+                break;
+              }
             }
           } catch (modelErr) {
             // Try next model
@@ -82,16 +109,47 @@ Panduan Barista:
         }
 
         if (generatedText) {
+          const genLower = generatedText.toLowerCase();
           const lowerText = (generatedText + ' ' + message).toLowerCase();
-          const recommendedSlugs = PRODUCTS.filter((p) =>
-            lowerText.includes(p.name.toLowerCase()) ||
-            lowerText.includes(p.slug.toLowerCase()) ||
-            p.tastingNotes.some((n) => lowerText.includes(n.toLowerCase()))
-          ).slice(0, 3).map((p) => p.slug);
+
+          if (recommendedSlugs.length === 0) {
+          // 1. Direct match by product name, slug, or slowbar alias
+          const directMatches = PRODUCTS.filter((p) =>
+            genLower.includes(p.name.toLowerCase()) ||
+            genLower.includes(p.slug.toLowerCase()) ||
+            (p.slowbarAlias && genLower.includes(p.slowbarAlias.toLowerCase()))
+          ).map((p) => p.slug);
+
+          let geminiSlugs = Array.from(new Set(directMatches)).slice(0, 3);
+
+          // 2. Contextual tasting notes match if fewer than 3
+          if (geminiSlugs.length < 3) {
+            const contextualMatches = PRODUCTS.filter((p) =>
+              !geminiSlugs.includes(p.slug) &&
+              p.tastingNotes.some((n) => n.length > 5 && genLower.includes(n.toLowerCase()))
+            ).map((p) => p.slug);
+
+            geminiSlugs = Array.from(new Set([...geminiSlugs, ...contextualMatches])).slice(0, 3);
+          }
+
+          // 3. Fallback defaults based on intent if none matched
+          if (geminiSlugs.length === 0) {
+            if (lowerText.includes('strong') || lowerText.includes('susu') || lowerText.includes('espresso')) {
+              recommendedSlugs = ['brazil-santos-espresso', 'dampit-natural-espresso'];
+              geminiSlugs = ['brazil-santos-espresso', 'dampit-natural-espresso'];
+            } else if (lowerText.includes('lambung') || lowerText.includes('maag') || lowerText.includes('mild')) {
+              recommendedSlugs = ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana'];
+              geminiSlugs = ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana'];
+            } else {
+              recommendedSlugs = ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'];
+              geminiSlugs = ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'];
+            }
+          }
 
           return NextResponse.json({
             reply: generatedText,
-            recommendedSlugs: recommendedSlugs.length > 0 ? recommendedSlugs : ['kintamani-full-wash-arabica', 'ijen-yellow-bourbon'],
+            recommendedSlugs,
+            recommendedSlugs: geminiSlugs,
             groundedInCatalog: true,
           });
         }
@@ -143,24 +201,52 @@ Panduan Barista:
       query.includes('smooth') ||
       query.includes('mild')
     ) {
-      recommendedSlugs.push(
-        'kintamani-full-wash-arabica',
-        'ijen-yellow-bourbon',
-        'sumbing-deep-washed'
-      );
-      reply = `Untuk kawan seduh yang mencari kopi yang Ringan, Lembut, dan Ramah/Aman di Lambung, berikut kurasi terbaik kami:\n\n` +
-        `1. Kintamani Full Wash (Arabica Medium Roast)\n` +
-        `   • Rasa: Sweet Chocolate, hint Citrus lembut, dan aftertaste manis bersih.\n` +
-        `   • Karakter: Proses washed menghilangkan keasaman liar sehingga sangat nyaman di perut.\n\n` +
-        `2. Ijen Yellow Bourbon (Honey Process)\n` +
-        `   • Rasa: Manis Madu hutan alami & Gurih Kacang Almond panggang.\n` +
-        `   • Karakter: Keasaman sangat rendah (low acidity) dengan body yang halus.\n\n` +
-        `3. Java Exotic Sumbing Deep Washed\n` +
-        `   • Rasa: Brown Sugar hangat, Red Apple manis, & Black Tea halus.\n` +
-        `   • Karakter: Clean cup tinggi dengan body medium yang tidak membebani pencernaan.\n\n` +
-        `Tips Barista untuk Lambung Sensitif:\n` +
-        `• Hindari seduhan Robusta pekat/dark roast yang tinggi kafein.\n` +
-        `• Seduh dengan metode Cold Brew (rendam dingin 12 jam) atau V60 dengan suhu air 88-90°C rasio 1:16 untuk hasil seduhan yang ekstra aman dan manis alami.`;
+      if (
+        query.includes('strong') ||
+        query.includes('pekat') ||
+        query.includes('tebal') ||
+        query.includes('bold') ||
+        query.includes('pahit') ||
+        query.includes('mantap')
+      ) {
+        recommendedSlugs.push(
+          'brazil-santos-espresso',
+          'kintamani-full-wash-arabica-espresso',
+          'dampit-natural-espresso'
+        );
+        reply = `Untuk kawan seduh yang menginginkan kopi berkarakter **Strong, Tebal, & Mantap tapi Tetap Aman di Lambung**, ini rahasia & kurasi terbaik kami:\n\n` +
+          `1. Brazil Santos (Arabica Medium-Dark Roast)\n` +
+          `   • Rasa: Dark Chocolate tebal, Roasted Peanut gurih, & Caramel manis.\n` +
+          `   • Mengapa Aman: Biji Arabika alami dengan keasaman (acidity) sangat rendah, sehingga tidak memicu asam lambung berlebih meski rasanya tebal.\n\n` +
+          `2. Kintamani Full Wash (Arabica Medium Roast)\n` +
+          `   • Rasa: Sweet Chocolate halus dengan aftertaste bersih.\n` +
+          `   • Mengapa Aman: Proses wash membuang asam liar, memberikan body seimbang tanpa rasa perih di lambung.\n\n` +
+          `3. Dampit Natural Espresso (Fine Robusta Malang)\n` +
+          `   • Cocok diseduh menjadi Kopi Susu / Latte yang nendang tanpa rasa langu.\n\n` +
+          `Tips Barista agar Kopi Strong Tetap Nyaman di Lambung:\n` +
+          `• **Seduh Metode Cold Brew Pekat**: Rendaman dingin 12 jam menghasilkan ekstrak yang sangat pekat & bold, namun kadar asam klorogenatnya turun drastis hingga 67%!\n` +
+          `• **Tambahkan Susu Fresh (Cafe Latte / Flat White)**: Lemak dan kalsium susu membentuk lapisan pelindung pada dinding lambung sekaligus menetralkan keasaman.\n` +
+          `• **Waktu Seduh Terbaik**: Nikmati 30-60 menit setelah sarapan/makan ringan, hindari minum saat perut kosong.`;
+      } else {
+        recommendedSlugs.push(
+          'kintamani-full-wash-arabica-espresso',
+          'ijen-yellow-bourbon-kencana',
+          'sumbing-supernova-celestia'
+        );
+        reply = `Untuk kawan seduh yang mencari kopi yang Ringan, Lembut, dan Ramah/Aman di Lambung, berikut kurasi terbaik kami:\n\n` +
+          `1. Kintamani Full Wash (Arabica Medium Roast)\n` +
+          `   • Rasa: Sweet Chocolate, hint Citrus lembut, dan aftertaste manis bersih.\n` +
+          `   • Karakter: Proses washed menghilangkan keasaman liar sehingga sangat nyaman di perut.\n\n` +
+          `2. Ijen Yellow Bourbon (Honey Process)\n` +
+          `   • Rasa: Manis Madu hutan alami & Gurih Kacang Almond panggang.\n` +
+          `   • Karakter: Keasaman sangat rendah (low acidity) dengan body yang halus.\n\n` +
+          `3. Java Exotic Sumbing Deep Washed\n` +
+          `   • Rasa: Brown Sugar hangat, Red Apple manis, & Black Tea halus.\n` +
+          `   • Karakter: Clean cup tinggi dengan body medium yang tidak membebani pencernaan.\n\n` +
+          `Tips Barista untuk Lambung Sensitif:\n` +
+          `• Hindari seduhan Robusta pekat/dark roast yang tinggi kafein.\n` +
+          `• Seduh dengan metode Cold Brew (rendam dingin 12 jam) atau V60 dengan suhu air 88-90°C rasio 1:16 untuk hasil seduhan yang ekstra aman dan manis alami.`;
+      }
     }
 
     // --- PRIORITY 2: FRUITY / STRAWBERRY / BUAH EXOTIC ---
@@ -179,9 +265,9 @@ Panduan Barista:
       query.includes('cherry')
     ) {
       recommendedSlugs.push(
-        'sindoro-strawberry-triple-yeast',
-        'argopuro-walida-natural-anaerobic',
-        'puntang-natural'
+        'sindoro-strawberry-selai',
+        'argopuro-walida-anaerob-arcapada',
+        'puntang-natural-aromanis'
       );
       reply = `Untuk kawan seduh yang menyukai karakter Fruity & Juicy:\n\n` +
         `1. Sindoro Strawberry Triple Yeast: Fermentasi ragi ganda dengan aroma selai stroberi kental & vanili hangat.\n` +
@@ -201,9 +287,9 @@ Panduan Barista:
       query.includes('bergamot')
     ) {
       recommendedSlugs.push(
-        'el-triunfo-geisha-tolima',
-        'ijen-carbonic-maceration',
-        'prau-natural-secret-project'
+        'el-triunfo-geisha-tolima-aurora',
+        'ijen-carbonic-maceration-asmara',
+        'prau-natural-el-davisio-surya'
       );
       reply = `Untuk aroma Floral Elegan & Bersih (Tea-Like):\n\n` +
         `1. El Triunfo Geisha Tolima (Colombia): Puncak keanggunan aroma melati semerbak, bergamot earl grey, dan kelembutan teh persik.\n` +
@@ -229,9 +315,9 @@ Panduan Barista:
       (query.includes('filter') && !query.includes('roast'))
     ) {
       recommendedSlugs.push(
-        'argopuro-walida-natural-anaerobic',
-        'sindoro-strawberry-triple-yeast',
-        'ijen-carbonic-maceration'
+        'argopuro-walida-anaerob-arcapada',
+        'sindoro-strawberry-selai',
+        'ijen-carbonic-maceration-asmara'
       );
       reply = `Untuk seduhan Filter Manual Brew (V60, Kalita Wave, Aeropress, Origami), 3 kurasi terbaik kami:\n\n` +
         `1. Argopuro Walida Natural Anaerobic (New Release)\n` +
@@ -261,9 +347,9 @@ Panduan Barista:
       query.includes('robusta')
     ) {
       recommendedSlugs.push(
-        'dampit-natural-robusta',
-        'kintamani-full-wash-arabica',
-        'brazil-santos-arabica'
+        'dampit-natural-espresso',
+        'kintamani-full-wash-arabica-espresso',
+        'brazil-santos-espresso'
       );
       reply = `Untuk kebutuhan Espresso Mesin, Moka Pot, & Es Kopi Susu Gula Aren:\n\n` +
         `1. Dampit Natural (Fine Robusta Malang)\n` +
@@ -294,9 +380,9 @@ Panduan Barista:
       query.includes('kompetisi')
     ) {
       recommendedSlugs.push(
-        'magnum-sidra-el-vergel-cauca',
-        'el-triunfo-geisha-tolima',
-        'yemen-haraz-golden-harvest'
+        'magnum-sidra-el-vergel-soberano',
+        'el-triunfo-geisha-tolima-aurora',
+        'yemen-haraz-golden-harvest-sahara'
       );
       reply = `Lini Grand Reserve Micro-Lot menghadirkan kopi langka standar kompetisi dunia:\n\n` +
         `1. El Triunfo Geisha Tolima (Colombia)\n` +
@@ -353,9 +439,9 @@ Panduan Barista:
       query.includes('paling enak')
     ) {
       recommendedSlugs.push(
-        'argopuro-walida-natural-anaerobic',
-        'sindoro-strawberry-triple-yeast',
-        'dampit-natural-robusta'
+        'argopuro-walida-anaerob-arcapada',
+        'sindoro-strawberry-selai',
+        'dampit-natural-espresso'
       );
       reply = `Berikut Rekomendasi Biji Kopi Terfavorit di 52 Coffee & Roastery:\n\n` +
         `1. Argopuro Walida Natural Anaerobic (Filter V60)\n` +
@@ -377,8 +463,8 @@ Panduan Barista:
       query.startsWith('hai')
     ) {
       recommendedSlugs.push(
-        'argopuro-walida-natural-anaerobic',
-        'sindoro-strawberry-triple-yeast'
+        'argopuro-walida-anaerob-arcapada',
+        'sindoro-strawberry-selai'
       );
       reply = `Halo kawan seduh! Selamat datang di 52 Coffee & Roastery Malang.\n\n` +
         `Saya siap membantu memilihkan biji kopi yang paling cocok dengan selera seduhmu. Kamu bisa menanyakan:\n\n` +
@@ -389,11 +475,32 @@ Panduan Barista:
         `Profil rasa atau metode seduh apa yang ingin kamu eksplorasi hari ini?`;
     }
 
+    // --- PRIORITY 11: CHECKOUT / CARA BELI / PESAN ---
+    else if (
+      query.includes('checkout') ||
+      query.includes('check out') ||
+      query.includes('beli') ||
+      query.includes('pesan') ||
+      query.includes('order') ||
+      query.includes('bayar')
+    ) {
+      recommendedSlugs.push(
+        'argopuro-walida-anaerob-arcapada',
+        'sindoro-strawberry-selai'
+      );
+      reply = `Saat ini saya belum bisa memproses pembayaran langsung dari dalam balon chat, kawan seduh. Namun kamu bisa checkout dengan sangat mudah:\n\n` +
+        `1. Klik tombol **+ Cart** pada kartu produk rekomendasi di bawah obrolan ini.\n` +
+        `2. Buka keranjang belanja lewat **ikon keranjang** di pojok kanan atas.\n` +
+        `3. Klik tombol **Lanjut ke Checkout**.\n` +
+        `4. Masukkan kode voucher promo **52COFFEE** untuk diskon 10%!\n\n` +
+        `Gratis Ongkir otomatis aktif untuk pembelian minimal Rp 250.000 ke seluruh Indonesia. Apakah ada biji kopi favorit yang ingin kamu pesan sekarang?`;
+    }
+
     // --- DEFAULT FALLBACK ---
     else {
       recommendedSlugs.push(
-        'kintamani-full-wash-arabica',
-        'argopuro-walida-natural-anaerobic'
+        'kintamani-full-wash-arabica-espresso',
+        'argopuro-walida-anaerob-arcapada'
       );
       reply = `Di 52 Coffee & Roastery Malang, kami menyangrai aneka pilihan biji kopi artisanal segar dalam batch kecil.\n\n` +
         `Kamu bisa memilih:\n` +
@@ -414,7 +521,7 @@ Panduan Barista:
     return NextResponse.json(
       {
         reply: 'Halo kawan seduh! Saya siap membantu merekomendasikan biji kopi terbaik dari roastery kami di Malang. Ingin profil rasa fruity, floral, kopi susu, atau yang ringan di lambung?',
-        recommendedSlugs: ['argopuro-walida-natural-anaerobic', 'kintamani-full-wash-arabica'],
+        recommendedSlugs: ['argopuro-walida-anaerob-arcapada', 'kintamani-full-wash-arabica-espresso'],
       },
       { status: 200 }
     );

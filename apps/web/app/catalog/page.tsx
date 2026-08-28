@@ -141,7 +141,18 @@ function CatalogContent() {
 
       // 5. Process
       let matchProcess = true;
-      if (selectedProcess !== 'all') {
+      if (selectedProcess === 'washed') {
+        matchProcess = p.process.toLowerCase().includes('wash');
+      } else if (selectedProcess === 'natural') {
+        const proc = p.process.toLowerCase();
+        matchProcess = proc.includes('natural') || proc.includes('anaerob') || proc.includes('wine');
+      } else if (selectedProcess === 'carbonic') {
+        const proc = p.process.toLowerCase();
+        matchProcess = proc.includes('carbonic') || proc.includes('koji') || proc.includes('maceration');
+      } else if (selectedProcess === 'honey') {
+        const proc = p.process.toLowerCase();
+        matchProcess = proc.includes('honey') || proc.includes('lactic');
+      } else if (selectedProcess !== 'all') {
         matchProcess = p.process.toLowerCase().includes(selectedProcess.toLowerCase());
       }
 
