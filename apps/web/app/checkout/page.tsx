@@ -562,13 +562,32 @@ export default function CheckoutPage() {
 
             {selectedPayment === 'qris' && (
               <div className="text-center space-y-3 py-2">
-                <p className="text-xs text-gray-600">Scan QRIS menggunakan GoPay, BCA, OVO, atau ShopeePay:</p>
-                <div className="w-48 h-48 bg-gray-100 rounded-xl mx-auto flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-2">
-                  <QrCode className="w-32 h-32 text-gray-800" />
-                  <span className="text-[10px] font-mono text-gray-500 mt-1">NMID: ID102003928192</span>
+                <p className="text-xs text-gray-600">Scan QRIS Nasional (GPN) via BCA, Mandiri, GoPay, OVO, ShopeePay:</p>
+                <div className="bg-white p-3 rounded-2xl border-2 border-[#8B1E2D] shadow-sm inline-block max-w-[260px] mx-auto text-center">
+                  <div className="relative w-56 h-72 mx-auto overflow-hidden rounded-xl bg-white">
+                    <Image
+                      src="/images/qris-nana-store.jpg"
+                      alt="QRIS Nana Store Telecommunication"
+                      fill
+                      sizes="230px"
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-gray-100 font-mono text-[11px] text-gray-700">
+                    <p className="font-bold text-[#162A43]">NANA STORE - TELECOMMUNICATION</p>
+                    <p className="text-[10px] text-gray-500">NMID: ID1026579452370 • A01</p>
+                  </div>
                 </div>
-                <div className="text-[11px] font-mono text-gray-500">
-                  Waktu berlaku: <strong className="text-red-500">14:59</strong>
+
+                <div className="pt-2 flex items-center justify-center">
+                  <a
+                    href="/images/qris-nana-store.jpg"
+                    download="QRIS-Nana-Store.jpg"
+                    className="text-xs font-mono px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 transition-colors inline-flex items-center gap-1.5 shadow-xs"
+                  >
+                    <span>Unduh Gambar QRIS</span>
+                  </a>
                 </div>
               </div>
             )}
