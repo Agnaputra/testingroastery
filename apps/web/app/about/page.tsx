@@ -64,7 +64,7 @@ export default function AboutPage() {
 
         <div className="lg:col-span-6 relative aspect-[4/3] rounded-2xl overflow-hidden bg-roastery-light border border-roastery-border shadow-md">
           <Image
-            src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop"
+            src="/images/canva-roaster-drum.jpg"
             alt="52 Coffee Roasting Process"
             fill
             sizes="500px"
@@ -90,7 +90,7 @@ export default function AboutPage() {
               <HeartHandshake className="w-6 h-6" />
             </div>
             <h3 className="font-editorial text-lg font-bold text-roastery-dark">
-              1. Direct Trade & Petani Lokal
+              1. Direct Trade &amp; Petani Lokal
             </h3>
             <p className="text-xs text-roastery-muted leading-relaxed">
               Bekerjasama langsung dengan kelompok tani di lereng Kawah Ijen, Gunung Argopuro, dan Gunung Puntang. Kami membayar harga di atas rata-rata pasar untuk mendukung kesejahteraan petani ceri matang.
@@ -114,7 +114,7 @@ export default function AboutPage() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h3 className="font-editorial text-lg font-bold text-roastery-dark">
-              3. Valve Packaging & Freshness
+              3. Valve Packaging &amp; Freshness
             </h3>
             <p className="text-xs text-roastery-muted leading-relaxed">
               Biji kopi dikemas dalam *foil pouch* dengan *one-way degassing valve* untuk membuang gas CO2 alami tanpa membiarkan oksigen masuk, menjaga rasa optimal selama berbulan-bulan.
@@ -141,7 +141,7 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center gap-2 text-roastery-light">
               <Clock className="w-4 h-4 text-roastery-teal shrink-0" />
-              <span>Buka Setiap Hari: 10.00 - 20.00 WIB</span>
+              <span>Buka Senin - Jumat: 11.00 - 16.00 WIB</span>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export default function AboutPage() {
 
         <div className="relative aspect-video rounded-2xl overflow-hidden bg-roastery-charcoal border border-white/10 shadow-lg">
           <Image
-            src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?q=80&w=800&auto=format&fit=crop"
+            src="/images/canva-cafe-table.jpg"
             alt="52 Coffee Tasting Room Malang"
             fill
             sizes="500px"

@@ -10,72 +10,76 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // 52 Coffee Slowbar Design System Tokens (From Official PDF Menu)
-        primary: "#223C5E",
-        "primary-container": "#1B304B",
+        // 52 Coffee Official Brand Guidelines Palette (from Canva)
+        primary: "#465C70", // Deep Steel Blue
+        "primary-container": "#2C3136", // Charcoal
         "on-primary": "#ffffff",
-        "on-primary-container": "#eaf0f8",
-        "primary-fixed": "#d4e3f4",
-        "primary-fixed-dim": "#a8c5e6",
-        "surface-tint": "#2B4C77",
+        "on-primary-container": "#CFE8EA", // Light Mist
+        "primary-fixed": "#CFE8EA",
+        "primary-fixed-dim": "#8FB9BC", // Soft Teal
+        "surface-tint": "#465C70",
         "surface": "#ffffff",
-        "background": "#f8fafd",
+        "background": "#F8FAFC",
         "surface-white": "#FFFFFF",
-        "surface-bright": "#f8fafd",
-        "surface-dim": "#d9e2ec",
+        "surface-bright": "#F8FAFC",
+        "surface-dim": "#DDE7EB",
         "surface-container-lowest": "#ffffff",
-        "surface-container-low": "#f1f5f9",
-        "surface-container": "#eaf0f6",
-        "surface-container-high": "#e2eaf2",
-        "surface-container-highest": "#d6e2ee",
-        "on-surface": "#1e293b",
-        "on-surface-variant": "#475569",
-        "on-secondary-container": "#334155",
-        "on-secondary-fixed-variant": "#1e293b",
-        "border-subtle": "#E2E8F0",
-        "outline-variant": "#cbd5e1",
-        "outline": "#64748b",
+        "surface-container-low": "#F0F5F7",
+        "surface-container": "#E3ECF0",
+        "surface-container-high": "#D3E0E6",
+        "surface-container-highest": "#C2D3DC",
+        "on-surface": "#2C3136", // Charcoal
+        "on-surface-variant": "#617281", // Slate Blue Gray
+        "on-secondary-container": "#2C3136",
+        "on-secondary-fixed-variant": "#465C70",
+        "border-subtle": "#DCE6EB",
+        "outline-variant": "#CBD8DF",
+        "outline": "#617281",
         "status-success": "#10B981",
-        "inverse-surface": "#1e293b",
-        "inverse-on-surface": "#f8fafc",
-        "chat-bot-bg": "#1e293b",
+        "inverse-surface": "#2C3136",
+        "inverse-on-surface": "#F8FAFC",
+        "chat-bot-bg": "#2C3136",
 
-        // Slowbar PDF Theme
+        // Official Canva Brand Tokens
         brand: {
-          navy: "#223C5E",
-          "navy-dark": "#162A43",
-          "navy-light": "#31527D",
-          teal: "#2698AB",
-          "teal-light": "#54B6C5",
-          "teal-dark": "#1A7382",
-          maroon: "#8B1E2D",
-          "maroon-light": "#A82C3D",
-          pill: "#EAF0F6",
-          "pill-hover": "#DCE6F1",
-          border: "#E2E8F0",
+          navy: "#465C70", // Deep Steel Blue (Primary)
+          "navy-dark": "#2C3136", // Charcoal
+          "navy-light": "#617281", // Slate Blue Gray
+          teal: "#8FB9BC", // Soft Teal (Primary Accent)
+          "teal-light": "#CFE8EA", // Light Mist
+          "teal-dark": "#465C70", // Deep Steel Blue
+          maroon: "#A52136", // Crimson Roast
+          "maroon-dark": "#5D1823", // Dark Maroon Roast
+          "maroon-light": "#C4334C",
+          charcoal: "#2C3136",
+          slate: "#617281",
+          mist: "#CFE8EA",
+          pill: "#F0F5F7",
+          "pill-hover": "#E3ECF0",
+          border: "#DCE6EB",
         },
 
-        // 52 Coffee Palette
+        // Roastery Named Palette
         roastery: {
-          dark: "#162A43",
-          charcoal: "#1E293B",
-          slate: "#223C5E",
-          "slate-light": "#31527D",
-          "slate-dark": "#162A43",
-          crimson: "#8B1E2D",
-          "crimson-light": "#A82C3D",
-          "crimson-dark": "#63131F",
-          teal: "#2698AB",
-          "teal-light": "#54B6C5",
+          dark: "#2C3136",
+          charcoal: "#2C3136",
+          slate: "#465C70",
+          "slate-light": "#617281",
+          "slate-dark": "#2C3136",
+          crimson: "#A52136",
+          "crimson-light": "#C4334C",
+          "crimson-dark": "#5D1823",
+          teal: "#8FB9BC",
+          "teal-light": "#CFE8EA",
           amber: "#D97706",
           "amber-light": "#F59E0B",
-          caramel: "#8B1E2D",
-          cream: "#f8fafd",
+          caramel: "#A52136",
+          cream: "#F8FAFC",
           card: "#FFFFFF",
-          sage: "#2698AB",
-          muted: "#64748B",
-          light: "#EAF0F6",
-          border: "#E2E8F0",
+          sage: "#8FB9BC",
+          muted: "#617281",
+          light: "#F0F5F7",
+          border: "#DCE6EB",
         },
       },
       spacing: {
@@ -87,10 +91,11 @@ const config: Config = {
         "component-gap": "16px",
       },
       fontFamily: {
-        sans: ["Hanken Grotesk", "Plus Jakarta Sans", "Inter", "sans-serif"],
-        editorial: ["Hanken Grotesk", "Playfair Display", "serif"],
-        serif: ["Hanken Grotesk", "Playfair Display", "serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Montserrat", "Plus Jakarta Sans", "sans-serif"],
+        headline: ["Raleway", "sans-serif"],
+        editorial: ["Raleway", "sans-serif"],
+        serif: ["Raleway", "serif"],
+        mono: ["Cascadia Code", "JetBrains Mono", "monospace"],
       },
       fontSize: {
         "display-xl": ["72px", { lineHeight: "1.1", letterSpacing: "-0.04em", fontWeight: "800" }],

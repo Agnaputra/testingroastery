@@ -315,7 +315,7 @@ function BrewGuideContent() {
         <div
           className="absolute inset-0 z-0 bg-cover bg-center opacity-45 mix-blend-luminosity"
           style={{
-            backgroundImage: `url('/images/roaster-footage.png')`,
+            backgroundImage: `url('/images/canva-brewista-pour.jpg')`,
           }}
         />
         <div

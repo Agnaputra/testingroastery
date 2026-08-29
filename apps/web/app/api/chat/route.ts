@@ -33,6 +33,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
+    // --- INPUT GUARDRAILS (Next.js layer, always active) ---
+    // 1. Max length — prevents token flooding / prompt stuffing
+    if (message.length > 500) {
+      return NextResponse.json({
+        reply: 'Pertanyaanmu terlalu panjang, kawan seduh. Coba ringkas pertanyaanmu, misalnya: "Kopi fruity untuk V60 apa yang bagus?"',
+        recommendedSlugs: [],
+        groundedInCatalog: true,
+      });
+    }
+
+    // 2. Blocked phrases — prompt injection, SQL, jailbreak, off-topic abuse
+    const BLOCKED_PHRASES = [
+      'ignore previous instructions', 'ignore all instructions',
+      'system prompt', 'jailbreak', 'bypass filter', 'bypass guardrail',
+      'act as dan', 'you are dan', 'pretend you are', 'roleplay as',
+      'drop table', 'select * from', 'insert into', 'delete from', '--',
+      'hack', 'meretas', 'ddos', 'script injection', 'xss',
+      'judi', 'togel', 'politik', 'presiden', 'narkoba', 'drugs',
+      'cara membuat bom', 'weapons', 'senjata',
+    ];
+    const msgLower = message.toLowerCase();
+    const isBlocked = BLOCKED_PHRASES.some((phrase) => msgLower.includes(phrase));
+    if (isBlocked) {
+      return NextResponse.json({
+        reply: 'Mohon maaf kawan seduh 🙏 Saya adalah Virtual Barista khusus 52 Coffee & Roastery. Saya hanya dapat membantu seputar rekomendasi biji kopi, profil rasa, dan panduan seduh presisi. Ada yang ingin kamu ketahui tentang kopi kami?',
+        recommendedSlugs: ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'],
+        groundedInCatalog: true,
+      });
+    }
+
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
     const geminiApiKey = getApiKey();
 
@@ -43,26 +73,34 @@ export async function POST(req: NextRequest) {
           `• [${p.name}] (Slug: ${p.slug}, Series: ${p.series}, Category: ${p.categoryLabel}, Process: ${p.process}, Roast: ${p.roastLevel}, Notes: ${p.tastingNotes.join(', ')}, Price: Rp ${p.basePrice}/${p.defaultWeight})`
         ).join('\n');
 
-        const systemPrompt = `Kamu adalah Virtual Barista ramah, cerdas, dan ahli dari 52 Coffee & Roastery (Instagram: @52coffeeroastery), roastery artisanal yang menyangrai biji kopi dalam batch kecil di Jl. KH. Agus Salim No. 11 Malang, Jawa Timur (Jam Buka: 10.00-20.00 WIB).
+        const systemPrompt = `Kamu adalah Virtual Barista ramah, cerdas, dan ahli dari 52 Coffee & Roastery (Instagram: @52coffeeroastery), roastery artisanal yang menyangrai biji kopi dalam batch kecil di Jl. KH. Agus Salim No. 11 Malang, Jawa Timur (Jam Buka: Senin - Jumat 11.00-16.00 WIB).
 Voucher promo: '52COFFEE' (10% OFF), Gratis Ongkir min. Rp 250.000.
+
+Fitur & Tools Roastery yang Tersedia di Website:
+1. BYOB (Build Your Own Blend) di menu /blend-builder: Simulator racik blend sendiri dengan kalkulasi harga transparan per kg dan prediksi profil rasa radar. Profil sangrai dikhususkan pada 'Dark Espresso Roast' untuk mesin espresso & kopi susu.
+2. Price Calculator (Kalkulator Harga / HPP) di menu /tools/price-calculator: Simulator finansial kedai kopi untuk menghitung HPP biji sangrai, susut bobot roasting (~19.93%), biaya listrik gas (Rp 10.000/kg), kemasan pouch, serta target margin keuntungan retail.
+3. Brew Calculator di menu /tools/brew-calculator: Kalkulator rasio seduh presisi V60, Aeropress, French Press, dan Cold Brew.
+4. Slowbar & Retail Catalog di /catalog: Pilihan single origin Java Exotic, Kaldera Ijen, Walida, hingga Grand Reserve Micro-Lot.
+5. B2B Wholesale / Work With Us di /work-with-us: Solusi pasokan biji kopi roasted & green bean untuk kedai kopi di seluruh Indonesia.
+6. Order Tracker di /track: Lacak status pemrosesan dan resi pengiriman kurir.
 
 Katalog Biji Kopi Tersedia:
 ${catalogContext}
 
 Panduan Barista:
-- PENTING: Langsung berikan jawaban akhir yang ramah, sopan, dan solutif dalam Bahasa Indonesia. JANGAN PERNAH menyertakan proses berpikir, catatan internal, atau teks seperti '(Self-correction...)' atau 'Let\'s write the response'.
-- Jika pengguna bertanya tentang kopi aman untuk lambung / maag / GERD: jelaskan opsi kopi low acidity seperti Kintamani Full Wash dan Ijen Yellow Bourbon, atau metode Cold Brew.
-- Jika pengguna bertanya tentang kopi STRONG tapi AMAN DI LAMBUNG: rekomendasikan biji Arabika Specialty low acidity dengan profil dark chocolate/nutty (Brazil Santos atau Kintamani) atau metode Cold Brew pekat dan Kopi Susu (lemak susu melindungi lambung).
-- Jika pengguna bertanya tentang checkout / memesan / membeli / bayar: jelaskan bahwa mereka dapat langsung klik tombol '+ Cart' pada kartu produk di bawah chat, lalu klik ikon keranjang di kanan atas untuk menuju halaman Checkout dengan voucher promo '52COFFEE'.
-- Jika pengguna bertanya tentang rekomendasi best seller: rekomendasikan Argopuro Walida (Fruity), Sindoro Strawberry (Manis Selai), dan Dampit Natural Fine Robusta (Kopi Susu).
-- Berikan rekomendasi yang terstruktur, jelas, dan sebutkan tasting notes serta saran penyajiannya.`;
+- PENTING: Langsung berikan jawaban akhir yang ramah, sopan, solutif, dan informatif dalam Bahasa Indonesia. JANGAN PERNAH menyertakan proses berpikir, catatan internal, atau teks seperti '(Self-correction...)' atau 'Let\'s write the response'.
+- Jika ditanya tentang BYOB / racik blend: jelaskan fitur BYOB di /blend-builder, profil sangrai Dark Espresso Roast, dan berikan rekomendasi racikan (misal: 70% Java Ijen + 30% Dampit Robusta seharga Rp 220.000/kg atau 70% Java Ijen + 30% Arjuna Budug seharga Rp 253.000/kg).
+- Jika ditanya tentang Price Calculator / Hitung HPP: jelaskan fungsinya di /tools/price-calculator untuk menghitung biaya produksi, susut sangrai 19.93%, kemasan, dan margin profit kedai kopi.
+- Jika ditanya tentang lokasi / alamat / jam buka: jelaskan lokasinya di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (Senin-Jumat 11:00-16:00 WIB).
+- Jika ditanya tentang kopi lambung / GERD: rekomendasikan Kintamani Full Wash atau Ijen Yellow Bourbon.
+- Berikan rekomendasi yang terstruktur dan sebutkan tasting notes serta saran penyajiannya.`;
 
         const geminiHistory = (history || []).slice(-6).map((h: any) => ({
           role: h.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: h.content }],
         }));
 
-        const targetModels = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash'];
+        const targetModels = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'];
         let generatedText = '';
 
         for (const modelName of targetModels) {
@@ -112,7 +150,6 @@ Panduan Barista:
           const genLower = generatedText.toLowerCase();
           const lowerText = (generatedText + ' ' + message).toLowerCase();
 
-          if (recommendedSlugs.length === 0) {
           // 1. Direct match by product name, slug, or slowbar alias
           const directMatches = PRODUCTS.filter((p) =>
             genLower.includes(p.name.toLowerCase()) ||
@@ -135,20 +172,16 @@ Panduan Barista:
           // 3. Fallback defaults based on intent if none matched
           if (geminiSlugs.length === 0) {
             if (lowerText.includes('strong') || lowerText.includes('susu') || lowerText.includes('espresso')) {
-              recommendedSlugs = ['brazil-santos-espresso', 'dampit-natural-espresso'];
               geminiSlugs = ['brazil-santos-espresso', 'dampit-natural-espresso'];
             } else if (lowerText.includes('lambung') || lowerText.includes('maag') || lowerText.includes('mild')) {
-              recommendedSlugs = ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana'];
               geminiSlugs = ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana'];
             } else {
-              recommendedSlugs = ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'];
               geminiSlugs = ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'];
             }
           }
 
           return NextResponse.json({
             reply: generatedText,
-            recommendedSlugs,
             recommendedSlugs: geminiSlugs,
             groundedInCatalog: true,
           });
@@ -181,8 +214,166 @@ Panduan Barista:
     let reply = '';
     const recommendedSlugs: string[] = [];
 
-    // --- PRIORITY 1: LAMBUNG / MAAG / GERD / RINGAN / LOW ACID / AMAN ---
+    // --- PRIORITY 0A: BYOB / BUILD YOUR OWN BLEND / RACIK BLEND / CUSTOM BLEND ---
     if (
+      query.includes('byob') ||
+      query.includes('by ob') ||
+      query.includes('build your own') ||
+      query.includes('custom blend') ||
+      query.includes('racik blend') ||
+      query.includes('racik kopi') ||
+      query.includes('campur kopi') ||
+      query.includes('blend builder') ||
+      (query.includes('blend') && (query.includes('racik') || query.includes('buat') || query.includes('bikin') || query.includes('rekomendasi') || query.includes('rekomen') || query.includes('apa')))
+    ) {
+      recommendedSlugs.push(
+        'dampit-natural-espresso',
+        'kintamani-full-wash-arabica-espresso',
+        'brazil-santos-espresso'
+      );
+      reply = `☕ **BYOB (Build Your Own Blend) Simulator 52 Coffee & Roastery**\n\n` +
+        `Fitur BYOB memungkinkan kawan seduh atau pemilik kedai kopi meracik house blend signature sendiri secara langsung di website kami (/blend-builder)!\n\n` +
+        `**Spesifikasi Profil Sangrai:**\n` +
+        `• Profil Sangrai difokuskan pada **Dark Espresso Roast** — menghasilkan krema tebal, body mantap, dan rasa cokelat manis pekat yang sempurna untuk mesin espresso, moka pot, maupun es kopi susu gula aren.\n\n` +
+        `**Rekomendasi Racikan BYOB Terfavorit:**\n` +
+        `1. **Classic House Blend (70% Java Ijen + 30% Dampit Robusta)**\n` +
+        `   • Harga: **Rp 220.000 / kg** (atau Rp 56.000 / 200g)\n` +
+        `   • Rasa: Dark Chocolate tebal, Gula Aren murni, & Crema kokoh.\n` +
+        `   • Rekomendasi: Es Kopi Susu kekinian & Cafe Latte.\n\n` +
+        `2. **Fruity Caramel Espresso (70% Java Ijen + 30% Arjuna Budug Asu)**\n` +
+        `   • Harga: **Rp 253.000 / kg** (atau Rp 62.000 / 200g)\n` +
+        `   • Rasa: Jeruk Tangerine segar, Sweet Caramel, & body bersih.\n` +
+        `   • Rekomendasi: Americano segar & Hot Cappuccino aromatik.\n\n` +
+        `3. **Heritage Balanced Blend (50% Gayo + 30% Kintamani + 20% Dampit Robusta)**\n` +
+        `   • Harga: **Rp 245.000 / kg**\n` +
+        `   • Rasa: Sweet Cocoa, Earthy spices, & aftertaste panjang.\n\n` +
+        `Kamu bisa langsung mencoba menyimulasikan rasio persentase dan melihat kalkulasi harga real-time di halaman **[Custom Blend Simulator (BYOB)](/blend-builder)**!`;
+    }
+
+    // --- PRIORITY 0B: PRICE CALCULATOR / KALKULATOR HARGA / HPP / COGS ---
+    else if (
+      query.includes('price calculator') ||
+      query.includes('kalkulator harga') ||
+      query.includes('kalkulator hpp') ||
+      query.includes('hitung hpp') ||
+      query.includes('hitung harga') ||
+      query.includes('cogs') ||
+      query.includes('margin') ||
+      query.includes('susut') ||
+      (query.includes('kalkulator') && !query.includes('seduh') && !query.includes('brew'))
+    ) {
+      reply = `📊 **Fungsi Price Calculator (Kalkulator Harga & HPP Roastery)**\n\n` +
+        `Tool **Price Calculator** di 52 Coffee (/tools/price-calculator) dibuat khusus untuk membantu pemilik kedai kopi, roaster pemula, dan pelaku bisnis F&B menghitung Harga Pokok Produksi (HPP) dan menentukan harga jual biji kopi sangrai secara transparan & akurat.\n\n` +
+        `**Komponen yang Dihitung Secara Presisi:**\n` +
+        `1. **Landed Green Coffee Cost**: Biaya pembelian biji mentah per kilogram.\n` +
+        `2. **Roasting Shrink Loss (Susut Bobot ~19.93%)**: Biji kopi mentah akan menyusut kadar airnya saat disangrai. Kalkulator otomatis menghitung berapa kg green bean yang dibutuhkan untuk menghasilkan 1 kg roasted bean murni.\n` +
+        `3. **Operational & Energy Cost**: Biaya listrik infrared & gas operasional roaster (standar Rp 10.000/kg).\n` +
+        `4. **Packaging & Valve Pouch**: Biaya standing pouch food-grade dengan one-way degassing valve dan label craft (Rp 5.000 - Rp 10.000).\n` +
+        `5. **Target Margin & Profit Projection**: Menampilkan rekomendasi harga jual eceran (retail) dan harga grosir (B2B wholesale) serta estimasi laba bersih.\n\n` +
+        `Kamu bisa mencoba memasukkan parameter biaya kedai kopimu langsung di menu **[Price Calculator](/tools/price-calculator)**!`;
+    }
+
+    // --- PRIORITY 0C: BREW CALCULATOR & PANDUAN SEDUH ---
+    else if (
+      query.includes('brew calculator') ||
+      query.includes('kalkulator seduh') ||
+      query.includes('kalkulator v60') ||
+      query.includes('rasio seduh') ||
+      query.includes('panduan seduh') ||
+      query.includes('brew guide') ||
+      query.includes('resep seduh') ||
+      query.includes('resep v60')
+    ) {
+      recommendedSlugs.push(
+        'argopuro-walida-anaerob-arcapada',
+        'sindoro-strawberry-selai'
+      );
+      reply = `⏱️ **Brew Calculator & Panduan Seduh Presisi 52 Coffee**\n\n` +
+        `Untuk menghasilkan cangkir seduhan yang seimbang, manis maksimal, dan bebas over-ekstraksi, kami menyediakan tool **[Brew Calculator](/tools/brew-calculator)** dan **[Brew Guide](/guide)**.\n\n` +
+        `**Panduan Standar Seduh V60 52 Roastery:**\n` +
+        `• **Dosis Biji**: 15 gram (Giling Medium - sehalus pasir pantai)\n` +
+        `• **Air Seduh**: 225 ml (Rasio 1:15), Suhu 91°C - 93°C\n` +
+        `• **Tahap Penuangan (3 Pours)**:\n` +
+        `  1. *Bloom*: 45 ml air, tunggu 40 detik untuk degassing aroma kopi.\n` +
+        `  2. *First Pour*: Tuang spiral perlahan hingga 135 ml (di detik 00:45).\n` +
+        `  3. *Final Pour*: Tuang perlahan di tengah hingga 225 ml (di detik 01:20).\n` +
+        `• **Target Total Time (Drawdown)**: 02:15 - 02:30 menit.\n\n` +
+        `Coba gunakan **[Brew Calculator Interaktif](/tools/brew-calculator)** untuk menghitung otomatis takaran air sesuai gramatur kopimu!`;
+    }
+
+    // --- PRIORITY 0D: LOKASI / ALAMAT / JAM BUKA / KONTAK MALANG ---
+    else if (
+      query.includes('lokasi') ||
+      query.includes('alamat') ||
+      query.includes('dimana') ||
+      query.includes('di mana') ||
+      query.includes('tempat') ||
+      query.includes('tasting room') ||
+      query.includes('slowbar') ||
+      query.includes('jam buka') ||
+      query.includes('buka jam') ||
+      query.includes('operasional') ||
+      query.includes('kontak') ||
+      query.includes('instagram') ||
+      query.includes('telepon') ||
+      query.includes('wa') ||
+      query.includes('whatsapp')
+    ) {
+      reply = `📍 **Lokasi & Jam Operasional 52 Coffee & Roastery Malang**\n\n` +
+        `• **Alamat Roastery & Tasting Room**:\n` +
+        `  Jl. KH. Agus Salim No. 11, Kel. Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65118 (Dekat Alun-Alun & Pasar Besar Malang).\n\n` +
+        `• **Jam Buka Slowbar & Tasting Room**:\n` +
+        `  Senin - Jumat: **11.00 - 16.00 WIB** (Sabtu & Minggu: Khusus Pemesanan Online & Event Cupping).\n\n` +
+        `• **Kontak Resmi & Media Sosial**:\n` +
+        `  • Instagram: **@52coffeeroastery**\n` +
+        `  • Website: 52coffeeroastery.com\n` +
+        `  • Layanan Pengiriman: SiCepat, JNE, GoSend/GrabExpress se-Kota Malang.\n\n` +
+        `Kawan seduh dipersilakan mampir ke Slowbar kami untuk mencicipi kurasi origin mingguan atau berkonsultasi seputar beans kedai kopi!`;
+    }
+
+    // --- PRIORITY 0E: B2B WHOLESALE / KEMITRAAN KEDAI / MAKLON ---
+    else if (
+      query.includes('wholesale') ||
+      query.includes('b2b') ||
+      query.includes('kedai kopi') ||
+      query.includes('cafe') ||
+      query.includes('kemitraan') ||
+      query.includes('maklon') ||
+      query.includes('white label') ||
+      query.includes('suplai') ||
+      query.includes('supply') ||
+      query.includes('konsultasi') ||
+      query.includes('work with us')
+    ) {
+      recommendedSlugs.push(
+        'dampit-natural-espresso',
+        'kintamani-full-wash-arabica-espresso',
+        'brazil-santos-espresso'
+      );
+      reply = `🤝 **Kemitraan B2B & Wholesale Kedai Kopi 52 Roastery**\n\n` +
+        `Kami bermitra dengan puluhan coffee shop di Malang, Surabaya, Jabodetabek, dan kota lainnya di Indonesia.\n\n` +
+        `**Layanan B2B yang Kami Sediakan:**\n` +
+        `1. **Suplai House Blend & Single Origin (Kemasan 1 kg)**: Harga bertingkat (Tiered Wholesale Price) dengan jaminan profil sangrai yang konsisten setiap batch.\n` +
+        `2. **Custom Profiling & White Label (Maklon Sangrai)**: Kami dapat membuatkan profil sangrai unik dan kemasan khusus merek kafe Anda.\n` +
+        `3. **Sample Pack & Barista Calibration**: Dapatkan sample kit untuk uji rasa (cupping) di kedai Anda.\n\n` +
+        `Pelajari penawaran lengkap dan ajukan formulir kemitraan di menu **[Work With Us / B2B Solutions](/work-with-us)**!`;
+    }
+
+    // --- PRIORITY 0F: TRACK ORDER / LACAK RESI ---
+    else if (
+      query.includes('track') ||
+      query.includes('lacak') ||
+      query.includes('resi') ||
+      query.includes('status pesanan') ||
+      query.includes('sampai mana')
+    ) {
+      reply = `📦 **Lacak Pesanan Biji Kopi Anda**\n\n` +
+        `Anda dapat memantau status sangrai dan nomor resi ekspedisi secara real-time melalui menu **[Track Order](/track)**.\n\n` +
+        `Cukup masukkan **Order ID (Contoh: 52C-XXXXXX)** atau Nomor WhatsApp yang Anda gunakan saat checkout!`;
+    }
+
+    // --- PRIORITY 1: LAMBUNG / MAAG / GERD / RINGAN / LOW ACID / AMAN ---
+    else if (
       query.includes('lambung') ||
       query.includes('maag') ||
       query.includes('gerd') ||
@@ -450,7 +641,7 @@ Panduan Barista:
         `   • Rasa: Selai Stroberi kental manis dengan aroma Vanilla hangat.\n\n` +
         `3. Dampit Natural Fine Robusta Malang (Espresso / Kopi Susu)\n` +
         `   • Rasa: Dark Chocolate tebal & gula aren murni dengan crema kokoh.\n\n` +
-        `Apakah kamu lebih menyukai seduhan Manual Brew (V60) atau Kopi Susu / Espresso?`;
+        `Apakah kamu lebih menyukai seduhan Manual Brew (V60), Racik BYOB Blend, atau Kopi Susu / Espresso?`;
     }
 
     // --- PRIORITY 10: GREETINGS & SALAM ---
@@ -468,11 +659,12 @@ Panduan Barista:
       );
       reply = `Halo kawan seduh! Selamat datang di 52 Coffee & Roastery Malang.\n\n` +
         `Saya siap membantu memilihkan biji kopi yang paling cocok dengan selera seduhmu. Kamu bisa menanyakan:\n\n` +
+        `• B.Y.O.B Simulator (Racik House Blend sendiri dengan Dark Espresso Roast)\n` +
         `• Kopi yang Ringan & Aman untuk Lambung (Kintamani / Ijen Yellow Bourbon)\n` +
         `• Koleksi Filter Fruity & Floral (Argopuro Walida / Sindoro Strawberry)\n` +
         `• Biji Espresso & Kopi Susu Aren (Dampit Robusta)\n` +
-        `• Panduan Rasio Seduh V60 Presisi\n\n` +
-        `Profil rasa atau metode seduh apa yang ingin kamu eksplorasi hari ini?`;
+        `• Price Calculator & Panduan Seduh V60 Presisi\n\n` +
+        `Profil rasa atau topik apa yang ingin kamu eksplorasi hari ini?`;
     }
 
     // --- PRIORITY 11: CHECKOUT / CARA BELI / PESAN ---
@@ -503,11 +695,12 @@ Panduan Barista:
         'argopuro-walida-anaerob-arcapada'
       );
       reply = `Di 52 Coffee & Roastery Malang, kami menyangrai aneka pilihan biji kopi artisanal segar dalam batch kecil.\n\n` +
-        `Kamu bisa memilih:\n` +
-        `1. Kopi Ringan & Ramah Lambung (Kintamani Full Wash & Ijen Yellow Bourbon)\n` +
-        `2. Filter Fruity & Floral (Argopuro Walida & Sindoro Strawberry)\n` +
-        `3. Espresso & Kopi Susu (Dampit Robusta & Brazil Santos)\n` +
-        `4. Grand Reserve Micro-Lot (Colombia Geisha & Sidra)\n\n` +
+        `Kamu bisa mengeksplorasi:\n` +
+        `1. **B.Y.O.B Blend Simulator** (/blend-builder) — Racik house blend Dark Espresso custom.\n` +
+        `2. **Kopi Ringan & Ramah Lambung** — Kintamani Full Wash & Ijen Yellow Bourbon.\n` +
+        `3. **Filter Fruity & Floral** — Argopuro Walida & Sindoro Strawberry.\n` +
+        `4. **Espresso & Kopi Susu** — Dampit Robusta & Brazil Santos.\n` +
+        `5. **Price & Brew Calculator** — Simulasi HPP dan rasio seduh presisi.\n\n` +
         `Ceritakan profil rasa atau metode seduh yang kamu inginkan, dan saya akan merekomendasikan pilihan terbaik!`;
     }
 

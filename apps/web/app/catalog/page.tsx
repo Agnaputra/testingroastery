@@ -5,37 +5,11 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search,
-  X,
   RotateCcw,
   SlidersHorizontal,
 } from 'lucide-react';
 import { PRODUCTS, CoffeeProduct } from '../../lib/data';
 import { EditorialProductCard } from '../../components/editorial-product-card';
-
-const CATEGORY_TABS = [
-  { id: 'all', label: 'SEMUA BIJI KOPI' },
-  { id: 'filter', label: 'FILTER BEANS' },
-  { id: 'espresso', label: 'ESPRESSO BEANS' },
-  { id: 'reserve', label: 'GRAND RESERVE' },
-  { id: 'beverages', label: 'SLOWBAR MENU (PER CUP)' },
-];
-
-const FLAVOR_FILTERS = [
-  { id: 'all', label: 'Semua Flavor' },
-  { id: 'Fruity', label: 'Fruity & Berry' },
-  { id: 'Floral', label: 'Floral & Jasmine' },
-  { id: 'Sweet', label: 'Sweet & Honey' },
-  { id: 'Chocolaty', label: 'Chocolaty & Nutty' },
-];
-
-const PROCESS_FILTERS = [
-  { id: 'all', label: 'Semua Proses' },
-  { id: 'natural', label: 'Natural / Anaerob' },
-  { id: 'washed', label: 'Washed' },
-  { id: 'carbonic', label: 'Carbonic / Koji' },
-  { id: 'honey', label: 'Honey / Lactic' },
-];
 
 // Ordered according to official 52 Coffee Menu PDF
 const ORDERED_SERIES = [
@@ -71,17 +45,24 @@ function CatalogContent() {
   const initialCategory = searchParams.get('category');
   const initialSeries = searchParams.get('series');
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    initialCategory ? initialCategory.toLowerCase() : 'all'
-  );
+  const [mainTab, setMainTab] = useState<'beans' | 'slowbar'>(() => {
+    if (initialCategory && (initialCategory.toLowerCase() === 'beverages' || initialCategory.toLowerCase() === 'slowbar')) {
+      return 'slowbar';
+    }
+    return 'beans';
+  });
+
+  const [beansSubTab, setBeansSubTab] = useState<'filter' | 'espresso'>(() => {
+    if (initialCategory && initialCategory.toLowerCase() === 'espresso') {
+      return 'espresso';
+    }
+    return 'filter';
+  });
+
   const [selectedSeries, setSelectedSeries] = useState<string>(
     initialSeries || 'all'
   );
-  const [selectedFlavor, setSelectedFlavor] = useState<string>('all');
-  const [selectedProcess, setSelectedProcess] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'name' | 'price-asc' | 'price-desc'>('name');
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
 
@@ -103,77 +84,42 @@ function CatalogContent() {
   // Filtered products
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((p) => {
-      // 1. Search Query
-      const q = searchQuery.toLowerCase().trim();
-      const matchSearch =
-        q === '' ||
-        p.name.toLowerCase().includes(q) ||
-        (p.slowbarAlias && p.slowbarAlias.toLowerCase().includes(q)) ||
-        p.origin.toLowerCase().includes(q) ||
-        p.process.toLowerCase().includes(q) ||
-        p.tastingNotes.some((t) => t.toLowerCase().includes(q));
-
-      // 2. Category
+      // 1. Category Filter
       let matchCategory = true;
-      if (selectedCategory === 'filter') {
-        matchCategory = p.category === 'filter';
-      } else if (selectedCategory === 'espresso') {
-        matchCategory = p.category === 'espresso';
-      } else if (selectedCategory === 'reserve') {
-        matchCategory = p.category === 'reserve';
-      } else if (selectedCategory === 'beverages') {
+      if (mainTab === 'slowbar') {
         matchCategory = !!p.cupPrice;
+      } else {
+        if (beansSubTab === 'filter') {
+          matchCategory = p.category === 'filter' || p.category === 'reserve';
+        } else if (beansSubTab === 'espresso') {
+          matchCategory = p.category === 'espresso';
+        }
       }
 
-      // 3. Series
+      // 2. Series Filter
       let matchSeries = true;
       if (selectedSeries !== 'all') {
         matchSeries = p.series.toLowerCase() === selectedSeries.toLowerCase();
       }
 
-      // 4. Flavor
-      let matchFlavor = true;
-      if (selectedFlavor !== 'all') {
-        matchFlavor =
-          p.flavorCategory?.includes(selectedFlavor as any) ||
-          p.tastingNotes.some((n) => n.toLowerCase().includes(selectedFlavor.toLowerCase()));
-      }
-
-      // 5. Process
-      let matchProcess = true;
-      if (selectedProcess === 'washed') {
-        matchProcess = p.process.toLowerCase().includes('wash');
-      } else if (selectedProcess === 'natural') {
-        const proc = p.process.toLowerCase();
-        matchProcess = proc.includes('natural') || proc.includes('anaerob') || proc.includes('wine');
-      } else if (selectedProcess === 'carbonic') {
-        const proc = p.process.toLowerCase();
-        matchProcess = proc.includes('carbonic') || proc.includes('koji') || proc.includes('maceration');
-      } else if (selectedProcess === 'honey') {
-        const proc = p.process.toLowerCase();
-        matchProcess = proc.includes('honey') || proc.includes('lactic');
-      } else if (selectedProcess !== 'all') {
-        matchProcess = p.process.toLowerCase().includes(selectedProcess.toLowerCase());
-      }
-
-      return matchSearch && matchCategory && matchSeries && matchFlavor && matchProcess;
+      return matchCategory && matchSeries;
     }).sort((a, b) => {
       if (sortBy === 'name') {
         return a.name.localeCompare(b.name);
       }
       if (sortBy === 'price-asc') {
-        const priceA = selectedCategory === 'beverages' && a.cupPrice ? a.cupPrice : a.basePrice;
-        const priceB = selectedCategory === 'beverages' && b.cupPrice ? b.cupPrice : b.basePrice;
+        const priceA = mainTab === 'slowbar' && a.cupPrice ? a.cupPrice : a.basePrice;
+        const priceB = mainTab === 'slowbar' && b.cupPrice ? b.cupPrice : b.basePrice;
         return priceA - priceB;
       }
       if (sortBy === 'price-desc') {
-        const priceA = selectedCategory === 'beverages' && a.cupPrice ? a.cupPrice : a.basePrice;
-        const priceB = selectedCategory === 'beverages' && b.cupPrice ? b.cupPrice : b.basePrice;
+        const priceA = mainTab === 'slowbar' && a.cupPrice ? a.cupPrice : a.basePrice;
+        const priceB = mainTab === 'slowbar' && b.cupPrice ? b.cupPrice : b.basePrice;
         return priceB - priceA;
       }
       return 0;
     });
-  }, [searchQuery, selectedCategory, selectedSeries, selectedFlavor, selectedProcess, sortBy]);
+  }, [mainTab, beansSubTab, selectedSeries, sortBy]);
 
   // Handle image assignment for clean studio isolated bag preview
   const enrichedProducts = useMemo(() => {
@@ -195,19 +141,10 @@ function CatalogContent() {
 
   const displayedProducts = enrichedProducts.slice(0, visibleCount);
 
-  const hasActiveFilters =
-    searchQuery !== '' ||
-    selectedCategory !== 'all' ||
-    selectedSeries !== 'all' ||
-    selectedFlavor !== 'all' ||
-    selectedProcess !== 'all';
+  const hasActiveFilters = selectedSeries !== 'all';
 
   const resetAllFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('all');
     setSelectedSeries('all');
-    setSelectedFlavor('all');
-    setSelectedProcess('all');
     setVisibleCount(12);
   };
 
@@ -228,232 +165,197 @@ function CatalogContent() {
             52 Coffee Catalog
           </h1>
 
-          {/* Centered Category Links with Smooth Sliding Indicator */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-6 font-mono text-xs uppercase tracking-wider font-bold">
-            {CATEGORY_TABS.map((tab) => {
-              const isActive = selectedCategory === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setSelectedCategory(tab.id);
-                    setVisibleCount(12);
-                  }}
-                  className={`relative px-3 py-2 transition-colors duration-200 ${
-                    isActive ? 'text-brand-maroon' : 'text-on-surface-variant hover:text-brand-navy'
-                  }`}
-                >
-                  <span className="relative z-10">{tab.label}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeCatalogTabIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-maroon"
-                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ===================================================================== */}
-        {/* 2. MINIMALIST TOOLBAR: FILTERS +  &  SORT BY +                        */}
-        {/* ===================================================================== */}
-        <div className="mt-10 mb-6 border-y border-border-subtle py-3.5 flex items-center justify-between font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
-          {/* Filters Toggle Button */}
-          <button
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className="flex items-center gap-2 hover:text-brand-teal transition-colors cursor-pointer"
-          >
-            <span>FILTERS {filtersOpen ? '–' : '+'}</span>
-            {hasActiveFilters && (
-              <span className="w-2 h-2 rounded-full bg-brand-maroon" />
-            )}
-          </button>
-
-          {/* Results Count (Center) */}
-          <span className="hidden md:inline-block text-[11px] font-mono text-on-surface-variant font-normal normal-case">
-            Menampilkan {displayedProducts.length} dari {filteredProducts.length} {selectedCategory === 'beverages' ? 'menu seduh cangkir' : 'biji kopi'}
-          </span>
-
-          {/* Sort By Dropdown */}
-          <div className="relative">
+          {/* 1. PRIMARY EDITORIAL TABS (WHOLEBEANS/RETAIL vs SLOWBAR) */}
+          <div className="flex items-center justify-center border-b border-border-subtle max-w-sm sm:max-w-md mx-auto">
             <button
-              onClick={() => setSortOpen(!sortOpen)}
-              className="flex items-center gap-2 hover:text-brand-teal transition-colors cursor-pointer"
+              type="button"
+              onClick={() => {
+                setMainTab('beans');
+                setVisibleCount(12);
+              }}
+              className={`relative flex-1 pb-3 pt-2 font-mono text-xs sm:text-sm uppercase tracking-wider font-bold transition-colors duration-200 text-center cursor-pointer ${
+                mainTab === 'beans' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
+              }`}
             >
-              <span>SORT BY {sortOpen ? '–' : '+'}</span>
+              <span>Wholebeans/Retail</span>
+              {mainTab === 'beans' && (
+                <motion.div
+                  layoutId="activeCatalogTabLine"
+                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand-navy"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
             </button>
 
-            {sortOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border-subtle shadow-xl rounded-xl p-2 z-40 space-y-1 normal-case text-xs font-sans">
-                <button
-                  onClick={() => {
-                    setSortBy('name');
-                    setSortOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
-                    sortBy === 'name' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
-                  }`}
-                >
-                  Nama (A-Z)
-                </button>
-                <button
-                  onClick={() => {
-                    setSortBy('price-asc');
-                    setSortOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
-                    sortBy === 'price-asc' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
-                  }`}
-                >
-                  Harga: Terendah → Tertinggi
-                </button>
-                <button
-                  onClick={() => {
-                    setSortBy('price-desc');
-                    setSortOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
-                    sortBy === 'price-desc' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
-                  }`}
-                >
-                  Harga: Tertinggi → Terendah
-                </button>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setMainTab('slowbar');
+                setVisibleCount(12);
+              }}
+              className={`relative flex-1 pb-3 pt-2 font-mono text-xs sm:text-sm uppercase tracking-wider font-bold transition-colors duration-200 text-center cursor-pointer ${
+                mainTab === 'slowbar' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
+              }`}
+            >
+              <span>Slowbar</span>
+              {mainTab === 'slowbar' && (
+                <motion.div
+                  layoutId="activeCatalogTabLine"
+                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand-navy"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+            </button>
           </div>
+
+          {/* 2. SUB-FILTERS INSIDE WHOLEBEANS: FILTER vs ESPRESSO */}
+          <AnimatePresence>
+            {mainTab === 'beans' && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18 }}
+                className="flex items-center justify-center gap-2.5 pt-4 font-mono text-[11px] uppercase tracking-wider"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBeansSubTab('filter');
+                    setVisibleCount(12);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 cursor-pointer border text-xs ${
+                    beansSubTab === 'filter'
+                      ? 'bg-brand-maroon text-white border-brand-maroon font-bold shadow-xs'
+                      : 'bg-surface-container-low text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
+                  }`}
+                >
+                  <span>Filter Roast</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBeansSubTab('espresso');
+                    setVisibleCount(12);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 cursor-pointer border text-xs ${
+                    beansSubTab === 'espresso'
+                      ? 'bg-brand-maroon text-white border-brand-maroon font-bold shadow-xs'
+                      : 'bg-surface-container-low text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
+                  }`}
+                >
+                  <span>Espresso Roast</span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* ===================================================================== */}
-        {/* 3. COLLAPSIBLE FILTERS SLIDE-DOWN DRAWER                              */}
+        {/* 2. PERMANENTLY OPEN SERIES FILTER BAR & SORT TOOLBAR                  */}
         {/* ===================================================================== */}
-        <AnimatePresence>
-          {filtersOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden mb-8"
-            >
-              <div className="bg-surface-container-low border border-border-subtle p-6 rounded-2xl space-y-6 text-xs font-mono">
-                {/* Search Bar */}
-                <div className="relative">
-                  <Search className="w-4 h-4 text-on-surface-variant absolute left-4 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Cari aroma (misal: Berry, Jasmine, Peach), alias (Asmara, Celestia), origin..."
-                    className="w-full bg-white border border-border-subtle rounded-xl pl-11 pr-10 py-3 text-xs text-brand-navy placeholder-gray-400 focus:outline-none focus:border-brand-navy"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-brand-navy"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+        <div className="mt-8 mb-8 space-y-4">
+          {/* Series Selection Bar (Always Open) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-border-subtle space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant font-bold block">
+                Pilih Series (Origin Nusantara &amp; Dunia)
+              </span>
+              {hasActiveFilters && (
+                <button
+                  onClick={resetAllFilters}
+                  className="inline-flex items-center gap-1.5 text-xs text-brand-maroon hover:underline font-mono font-bold cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset Filter</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedSeries('all')}
+                className={`px-3.5 py-1.5 rounded-full border transition-all text-xs font-mono cursor-pointer ${
+                  selectedSeries === 'all'
+                    ? 'bg-brand-navy text-white border-brand-navy font-bold shadow-xs'
+                    : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
+                }`}
+              >
+                Semua Series
+              </button>
+              {allSeriesList.map((series) => (
+                <button
+                  key={series}
+                  onClick={() => setSelectedSeries(series)}
+                  className={`px-3.5 py-1.5 rounded-full border transition-all text-xs font-mono cursor-pointer ${
+                    selectedSeries === series
+                      ? 'bg-brand-navy text-white border-brand-navy font-bold shadow-xs'
+                      : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
+                  }`}
+                >
+                  {series}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Results Count & Sort By Toolbar */}
+          <div className="border-y border-border-subtle py-3 flex items-center justify-between font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
+            {/* Results Count */}
+            <span className="text-[11px] font-mono text-on-surface-variant font-normal normal-case">
+              Menampilkan {displayedProducts.length} dari {filteredProducts.length} {mainTab === 'slowbar' ? 'menu seduh cangkir' : 'biji kopi'}
+            </span>
+
+            {/* Sort By Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className="flex items-center gap-2 hover:text-brand-teal transition-colors cursor-pointer"
+              >
+                <span>SORT BY {sortOpen ? '–' : '+'}</span>
+              </button>
+
+              {sortOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border-subtle shadow-xl rounded-xl p-2 z-40 space-y-1 normal-case text-xs font-sans">
+                  <button
+                    onClick={() => {
+                      setSortBy('name');
+                      setSortOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
+                      sortBy === 'name' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
+                    }`}
+                  >
+                    Nama (A-Z)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('price-asc');
+                      setSortOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
+                      sortBy === 'price-asc' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
+                    }`}
+                  >
+                    Harga: Terendah → Tertinggi
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('price-desc');
+                      setSortOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
+                      sortBy === 'price-desc' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
+                    }`}
+                  >
+                    Harga: Tertinggi → Terendah
+                  </button>
                 </div>
-
-                {/* Series Chips Filter */}
-                <div className="space-y-2">
-                  <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">
-                    Pilih Series (Origin Nusantara &amp; Dunia)
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setSelectedSeries('all')}
-                      className={`px-3 py-1.5 rounded-full border transition-all text-xs ${
-                        selectedSeries === 'all'
-                          ? 'bg-brand-navy text-white border-brand-navy font-bold'
-                          : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-navy'
-                      }`}
-                    >
-                      Semua Series
-                    </button>
-                    {allSeriesList.map((series) => (
-                      <button
-                        key={series}
-                        onClick={() => setSelectedSeries(series)}
-                        className={`px-3 py-1.5 rounded-full border transition-all text-xs ${
-                          selectedSeries === series
-                            ? 'bg-brand-navy text-white border-brand-navy font-bold'
-                            : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-navy'
-                        }`}
-                      >
-                        {series}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Flavor & Process Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-border-subtle/60">
-                  {/* Flavor Categories */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">
-                      Profil Rasa (Taste Notes)
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {FLAVOR_FILTERS.map((f) => (
-                        <button
-                          key={f.id}
-                          onClick={() => setSelectedFlavor(f.id)}
-                          className={`px-3 py-1.5 rounded-full border transition-all text-xs ${
-                            selectedFlavor === f.id
-                              ? 'bg-brand-maroon text-white border-brand-maroon font-bold'
-                              : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-maroon'
-                          }`}
-                        >
-                          {f.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Process Filters */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">
-                      Metode Proses Pasca-Panen
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {PROCESS_FILTERS.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => setSelectedProcess(p.id)}
-                          className={`px-3 py-1.5 rounded-full border transition-all text-xs ${
-                            selectedProcess === p.id
-                              ? 'bg-brand-teal text-white border-brand-teal font-bold'
-                              : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-teal'
-                          }`}
-                        >
-                          {p.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Reset Action */}
-                {hasActiveFilters && (
-                  <div className="pt-2 flex justify-end">
-                    <button
-                      onClick={resetAllFilters}
-                      className="inline-flex items-center gap-1.5 text-xs text-brand-maroon hover:underline font-bold"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Reset Semua Filter</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* ===================================================================== */}
         {/* 4. 4-COLUMN COMPACT EDITORIAL PRODUCT GRID                           */}
@@ -461,7 +363,7 @@ function CatalogContent() {
         <AnimatePresence mode="wait">
           {displayedProducts.length > 0 ? (
             <motion.div
-              key={`${selectedCategory}-${selectedSeries}-${selectedFlavor}-${selectedProcess}-${sortBy}`}
+              key={`${mainTab}-${beansSubTab}-${selectedSeries}-${sortBy}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -472,7 +374,7 @@ function CatalogContent() {
                 <EditorialProductCard
                   key={product.id}
                   product={product}
-                  isBeverageMode={selectedCategory === 'beverages'}
+                  isBeverageMode={mainTab === 'slowbar'}
                 />
               ))}
             </motion.div>

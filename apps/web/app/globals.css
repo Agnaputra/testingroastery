@@ -4,15 +4,17 @@
 
 @layer base {
   :root {
-    --color-primary: #223C5E;
-    --color-primary-container: #1B304B;
-    --color-surface: #f8fafd;
+    --color-primary: #465C70; /* Deep Steel Blue */
+    --color-primary-container: #2C3136; /* Charcoal */
+    --color-surface: #F8FAFC;
     --color-background: #ffffff;
-    --color-on-surface: #1e293b;
-    --color-on-surface-variant: #475569;
-    --color-border: #E2E8F0;
-    --color-teal: #2698AB;
-    --color-maroon: #8B1E2D;
+    --color-on-surface: #2C3136;
+    --color-on-surface-variant: #617281; /* Slate Blue Gray */
+    --color-border: #DCE6EB;
+    --color-teal: #8FB9BC; /* Soft Teal */
+    --color-mist: #CFE8EA; /* Light Mist */
+    --color-maroon: #A52136; /* Crimson Roast */
+    --color-maroon-dark: #5D1823; /* Dark Maroon Roast */
   }
 
   html {
@@ -21,19 +23,19 @@
 
   body {
     background-color: #ffffff;
-    color: #1e293b;
-    font-family: 'Hanken Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif;
+    color: #2C3136;
+    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, .font-editorial {
-    font-family: 'Hanken Grotesk', 'Playfair Display', sans-serif;
+  h1, h2, h3, h4, .font-editorial, .font-headline {
+    font-family: 'Raleway', sans-serif;
   }
 
   .font-mono-numeric {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Cascadia Code', 'JetBrains Mono', monospace;
     font-feature-settings: "tnum" 1;
   }
 
@@ -43,18 +45,18 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #F1F5F9;
+    background: #F0F5F7;
   }
   ::-webkit-scrollbar-thumb {
-    background: #223C5E;
+    background: #465C70;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #162A43;
+    background: #2C3136;
   }
 
   ::selection {
-    background-color: #223C5E;
+    background-color: #465C70;
     color: #FFFFFF;
   }
 }

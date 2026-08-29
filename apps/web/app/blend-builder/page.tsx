@@ -29,181 +29,237 @@ interface BlendComponent {
   region: string;
   varietals: string;
   notes: string;
-  landedGreenPricePerKg: number;
+  pricePerKg: number; // Retail price per 1kg
+  pricePer200g: number;
   sensory: FlavorMetrics;
+  image: string;
 }
 
 const AVAILABLE_BEANS: BlendComponent[] = [
   {
-    id: 'java-ijen-washed',
-    name: 'Java Ijen Full Washed',
-    process: 'Full Washed',
-    region: 'East Java Bondowoso',
-    varietals: 'Mix (Kartika, USDA)',
-    notes: 'Apple, Lemon Juice, Brown Sugar, Chocolate Milk',
-    landedGreenPricePerKg: 155000,
+    id: 'java-ijen-full-wash',
+    name: 'Arabica Java Ijen Full Wash',
+    process: 'Full Wash',
+    region: 'Gunung Ijen, Bondowoso',
+    varietals: 'Kartika, USDA 762',
+    notes: 'Dark Chocolate, Brown Sugar, Clean Citrus',
+    pricePerKg: 250000,
+    pricePer200g: 60000,
+    image: '/images/bag-prau.jpg',
     sensory: {
-      acidity: 7.8,
-      sweetness: 8.2,
-      body: 6.5,
-      floral: 7.0,
-      aftertaste: 8.0,
-      balance: 8.5,
+      acidity: 6.5,
+      sweetness: 8.5,
+      body: 7.5,
+      floral: 5.0,
+      aftertaste: 8.2,
+      balance: 8.8,
     },
   },
   {
     id: 'arjuna-budug-asu',
     name: 'Arjuna Budug Asu Natural Espresso',
     process: 'Natural',
-    region: 'Arjuna, Malang',
-    varietals: 'Mixed Varietals',
-    notes: 'Tangerine, Lychee, Black Tea',
-    landedGreenPricePerKg: 180000,
+    region: 'Gunung Arjuna, Malang',
+    varietals: 'Mixed Heirloom',
+    notes: 'Tangerine, Lychee, Caramel, Black Tea',
+    pricePerKg: 260000,
+    pricePer200g: 68000,
+    image: '/images/bag-walida.jpg',
     sensory: {
-      acidity: 8.8,
-      sweetness: 8.5,
-      body: 7.2,
-      floral: 8.5,
-      aftertaste: 8.2,
-      balance: 8.0,
-    },
-  },
-  {
-    id: 'gayo-full-washed',
-    name: 'Gayo Full Washed',
-    process: 'Full Washed',
-    region: 'Aceh Gayo',
-    varietals: 'Ateng, Tim Tim',
-    notes: 'Dark Chocolate, Brown Sugar, Sweet Cedar',
-    landedGreenPricePerKg: 160000,
-    sensory: {
-      acidity: 6.2,
-      sweetness: 8.0,
-      body: 8.5,
-      floral: 5.5,
-      aftertaste: 8.6,
-      balance: 8.8,
-    },
-  },
-  {
-    id: 'kerinci-blueberry',
-    name: 'Kerinci Blueberry Natural',
-    process: 'Natural Anaerobic',
-    region: 'Kayu Aro, Kerinci',
-    varietals: 'Andung Sari, Sigarar Utang',
-    notes: 'Blueberry Jam, Sweet Vanilla, Winey',
-    landedGreenPricePerKg: 195000,
-    sensory: {
-      acidity: 9.4,
-      sweetness: 9.0,
-      body: 7.0,
-      floral: 9.2,
-      aftertaste: 8.8,
-      balance: 8.0,
+      acidity: 7.5,
+      sweetness: 8.8,
+      body: 7.5,
+      floral: 7.2,
+      aftertaste: 8.5,
+      balance: 8.4,
     },
   },
   {
     id: 'dampit-fine-robusta',
     name: 'Dampit Fine Robusta Malang',
-    process: 'Honey Process',
+    process: 'Natural Honey',
     region: 'Dampit, Malang',
-    varietals: 'Robusta BP 42',
-    notes: 'Dark Cocoa, Heavy Crema, Roasted Almond',
-    landedGreenPricePerKg: 95000,
+    varietals: 'Fine Robusta BP 42',
+    notes: 'Dark Cocoa, Gula Aren, Heavy Crema',
+    pricePerKg: 150000,
+    pricePer200g: 35000,
+    image: '/images/bag-sumbing.jpg',
+    sensory: {
+      acidity: 2.0,
+      sweetness: 7.0,
+      body: 9.8,
+      floral: 2.5,
+      aftertaste: 8.5,
+      balance: 7.5,
+    },
+  },
+  {
+    id: 'kintamani-full-wash',
+    name: 'Kintamani Full Wash Arabica',
+    process: 'Full Wash',
+    region: 'Kintamani, Bali',
+    varietals: 'Typica, Kartika',
+    notes: 'Sweet Chocolate, Orange Citrus, Smooth Body',
+    pricePerKg: 260000,
+    pricePer200g: 70000,
+    image: '/images/bag-prau.jpg',
+    sensory: {
+      acidity: 6.8,
+      sweetness: 8.5,
+      body: 7.2,
+      floral: 6.0,
+      aftertaste: 8.0,
+      balance: 8.6,
+    },
+  },
+  {
+    id: 'gayo-full-washed',
+    name: 'Gayo Full Wash Arabica',
+    process: 'Full Wash',
+    region: 'Takengon, Aceh Tengah',
+    varietals: 'Ateng, Tim Tim',
+    notes: 'Dark Chocolate, Earthy Spices, Full Body',
+    pricePerKg: 265000,
+    pricePer200g: 75000,
+    image: '/images/bag-prau.jpg',
+    sensory: {
+      acidity: 5.5,
+      sweetness: 8.0,
+      body: 8.8,
+      floral: 4.5,
+      aftertaste: 8.8,
+      balance: 8.5,
+    },
+  },
+  {
+    id: 'brazil-santos',
+    name: 'Brazil Santos Arabica Espresso',
+    process: 'Natural',
+    region: 'Minas Gerais, Brazil',
+    varietals: 'Mundo Novo, Catuai',
+    notes: 'Roasted Peanut, Nutty Cocoa, Low Acid',
+    pricePerKg: 340000,
+    pricePer200g: 92000,
+    image: '/images/bag-grand-reserve.jpg',
     sensory: {
       acidity: 3.5,
-      sweetness: 6.5,
-      body: 9.6,
+      sweetness: 8.2,
+      body: 9.0,
       floral: 3.0,
-      aftertaste: 8.0,
-      balance: 7.5,
+      aftertaste: 8.5,
+      balance: 8.8,
+    },
+  },
+  {
+    id: 'telemung-honey-robusta',
+    name: 'Telemung Honey Robusta Banyuwangi',
+    process: 'Honey Process',
+    region: 'Telemung, Banyuwangi',
+    varietals: 'Fine Robusta',
+    notes: 'Sweet Chocolate, Brown Sugar, Dense Crema',
+    pricePerKg: 150000,
+    pricePer200g: 35000,
+    image: '/images/bag-sumbing.jpg',
+    sensory: {
+      acidity: 2.2,
+      sweetness: 7.8,
+      body: 9.2,
+      floral: 3.0,
+      aftertaste: 8.2,
+      balance: 8.0,
     },
   },
 ];
 
-type RoastProfile = 'Filter Light-Medium' | 'Medium All-Rounder' | 'Dark Espresso Roast';
-
 export default function BlendBuilderPage() {
-  const [componentA, setComponentA] = useState<BlendComponent>(AVAILABLE_BEANS[0]);
+  const [componentA, setComponentA] = useState<BlendComponent>(AVAILABLE_BEANS[0]); // Java Ijen
   const [ratioA, setRatioA] = useState<number>(70);
 
-  const [componentB, setComponentB] = useState<BlendComponent>(AVAILABLE_BEANS[1]);
+  const [componentB, setComponentB] = useState<BlendComponent>(AVAILABLE_BEANS[1]); // Arjuna Budug Asu
   const [ratioB, setRatioB] = useState<number>(30);
 
   const [hasComponentC, setHasComponentC] = useState<boolean>(false);
-  const [componentC, setComponentC] = useState<BlendComponent>(AVAILABLE_BEANS[3]);
-  const [ratioC, setRatioC] = useState<number>(10);
+  const [componentC, setComponentC] = useState<BlendComponent>(AVAILABLE_BEANS[2]); // Dampit Robusta
+  const [ratioC, setRatioC] = useState<number>(15);
 
-  const [roastLevel, setRoastLevel] = useState<RoastProfile>('Medium All-Rounder');
+  const roastLevel = 'Dark Espresso Roast';
   const [selectedSize, setSelectedSize] = useState<'200 g' | '500 g' | '1 kg'>('1 kg');
   const [isAdded, setIsAdded] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Accordions
-  const [openGreenInfo, setOpenGreenInfo] = useState(true);
-  const [openPriceBreakdown, setOpenPriceBreakdown] = useState(true);
-
   const { addItem } = useCartStore();
 
   // Handle Preset Selection
-  const applyPreset = (beanAName: string, beanBName: string, rA: number, rB: number, roast: RoastProfile = 'Medium All-Rounder') => {
-    const a = AVAILABLE_BEANS.find((b) => b.name.includes(beanAName)) || AVAILABLE_BEANS[2];
-    const b = AVAILABLE_BEANS.find((b) => b.name.includes(beanBName)) || AVAILABLE_BEANS[3];
+  const applyPreset = (beanAId: string, beanBId: string, rA: number = 70, rB: number = 30) => {
+    const a = AVAILABLE_BEANS.find((b) => b.id === beanAId) || AVAILABLE_BEANS[0];
+    const b = AVAILABLE_BEANS.find((b) => b.id === beanBId) || AVAILABLE_BEANS[1];
     setComponentA(a);
     setComponentB(b);
     setRatioA(rA);
     setRatioB(rB);
     setHasComponentC(false);
-    setRoastLevel(roast);
   };
 
-  // Blended Landed Cost Calculation
-  const blendedLandedCost = useMemo(() => {
-    let cost = 0;
-    if (!hasComponentC) {
-      cost = (componentA.landedGreenPricePerKg * (ratioA / 100)) + (componentB.landedGreenPricePerKg * (ratioB / 100));
-    } else {
-      const totalRatio = ratioA + ratioB + ratioC;
-      cost = (componentA.landedGreenPricePerKg * (ratioA / totalRatio)) +
-             (componentB.landedGreenPricePerKg * (ratioB / totalRatio)) +
-             (componentC.landedGreenPricePerKg * (ratioC / totalRatio));
-    }
-    return Math.round(cost);
-  }, [componentA, ratioA, componentB, ratioB, hasComponentC, componentC, ratioC]);
+  // Precise Weighted Price Calculation
+  const priceCalculation = useMemo(() => {
+    const totalRatio = hasComponentC ? ratioA + ratioB + ratioC : ratioA + ratioB;
+    const wA = ratioA / totalRatio;
+    const wB = ratioB / totalRatio;
+    const wC = hasComponentC ? ratioC / totalRatio : 0;
 
-  // HPP & Retail Pricing Breakdown (19.93% roast weight loss + Rp 10.000 electricity/kg)
-  const hppPerKg = Math.round(blendedLandedCost / (1 - 0.1993) + 10000);
-  const packagingCost1kg = 10000;
-  const retailPrice1kg = 266000;
-  const grossProfit1kg = retailPrice1kg - hppPerKg - packagingCost1kg;
+    const costA = Math.round(componentA.pricePerKg * wA);
+    const costB = Math.round(componentB.pricePerKg * wB);
+    const costC = hasComponentC ? Math.round(componentC.pricePerKg * wC) : 0;
+
+    const blendedPricePerKg = costA + costB + costC;
+
+    // Price scaling for packaging sizes
+    const price1kg = blendedPricePerKg;
+    const price500g = Math.round((blendedPricePerKg * 0.52) / 1000) * 1000;
+    const price200g = Math.round((blendedPricePerKg * 0.22) / 1000) * 1000;
+
+    return {
+      wA,
+      wB,
+      wC,
+      costA,
+      costB,
+      costC,
+      blendedPricePerKg,
+      price1kg,
+      price500g,
+      price200g,
+    };
+  }, [componentA, ratioA, componentB, ratioB, hasComponentC, componentC, ratioC]);
 
   // Active Price based on selected size
   const activePrice = useMemo(() => {
-    if (selectedSize === '200 g') return 78000;
-    if (selectedSize === '500 g') return 145000;
-    return retailPrice1kg;
-  }, [selectedSize, retailPrice1kg]);
+    if (selectedSize === '200 g') return priceCalculation.price200g;
+    if (selectedSize === '500 g') return priceCalculation.price500g;
+    return priceCalculation.price1kg;
+  }, [selectedSize, priceCalculation]);
 
   // Dynamic Blended Flavor Sensory Profile calculation
   const blendedSensory: FlavorMetrics = useMemo(() => {
-    const tot = hasComponentC ? ratioA + ratioB + ratioC : 100;
-    const wA = ratioA / tot;
-    const wB = ratioB / tot;
-    const wC = hasComponentC ? ratioC / tot : 0;
+    const wA = priceCalculation.wA;
+    const wB = priceCalculation.wB;
+    const wC = priceCalculation.wC;
 
-    // Roast level modifiers
-    const roastModifier =
-      roastLevel === 'Filter Light-Medium'
-        ? { acidity: +0.6, sweetness: 0, body: -0.5, floral: +0.6, aftertaste: -0.2, balance: +0.2 }
-        : roastLevel === 'Dark Espresso Roast'
-        ? { acidity: -1.4, sweetness: -0.2, body: +1.2, floral: -1.0, aftertaste: +0.4, balance: -0.2 }
-        : { acidity: 0, sweetness: 0, body: 0, floral: 0, aftertaste: 0, balance: 0 };
+    // Dark Espresso Roast modifiers
+    const roastModifier: Record<keyof FlavorMetrics, number> = {
+      acidity: -1.2,
+      sweetness: +0.2,
+      body: +1.2,
+      floral: -0.8,
+      aftertaste: +0.6,
+      balance: +0.4,
+    };
 
     const calculateAxis = (key: keyof FlavorMetrics) => {
       const base =
         componentA.sensory[key] * wA +
         componentB.sensory[key] * wB +
-        (componentC?.sensory?.[key] || 0) * wC;
+        (hasComponentC && componentC ? componentC.sensory[key] * wC : 0);
       return Math.min(10, Math.max(1, base + (roastModifier[key] || 0)));
     };
 
@@ -215,18 +271,97 @@ export default function BlendBuilderPage() {
       aftertaste: Number(calculateAxis('aftertaste').toFixed(1)),
       balance: Number(calculateAxis('balance').toFixed(1)),
     };
-  }, [componentA, ratioA, componentB, ratioB, hasComponentC, componentC, ratioC, roastLevel]);
+  }, [componentA, componentB, hasComponentC, componentC, priceCalculation]);
 
   const handleRatioAChange = (val: number) => {
-    const clamped = Math.max(10, Math.min(90, val));
+    if (!hasComponentC) {
+      const clamped = Math.max(10, Math.min(90, Math.round(val)));
+      setRatioA(clamped);
+      setRatioB(100 - clamped);
+      return;
+    }
+    const clamped = Math.max(5, Math.min(90, Math.round(val)));
+    const remaining = 100 - clamped;
+    const oldOtherSum = ratioB + ratioC;
+    let newB = oldOtherSum > 0 ? Math.round(remaining * (ratioB / oldOtherSum)) : Math.round(remaining / 2);
+    let newC = remaining - newB;
+
+    if (newB < 5) {
+      newB = 5;
+      newC = remaining - 5;
+    } else if (newC < 5) {
+      newC = 5;
+      newB = remaining - 5;
+    }
     setRatioA(clamped);
-    if (!hasComponentC) setRatioB(100 - clamped);
+    setRatioB(newB);
+    setRatioC(newC);
   };
 
   const handleRatioBChange = (val: number) => {
-    const clamped = Math.max(10, Math.min(90, val));
+    if (!hasComponentC) {
+      const clamped = Math.max(10, Math.min(90, Math.round(val)));
+      setRatioB(clamped);
+      setRatioA(100 - clamped);
+      return;
+    }
+    const clamped = Math.max(5, Math.min(90, Math.round(val)));
+    const remaining = 100 - clamped;
+    const oldOtherSum = ratioA + ratioC;
+    let newA = oldOtherSum > 0 ? Math.round(remaining * (ratioA / oldOtherSum)) : Math.round(remaining / 2);
+    let newC = remaining - newA;
+
+    if (newA < 5) {
+      newA = 5;
+      newC = remaining - 5;
+    } else if (newC < 5) {
+      newC = 5;
+      newA = remaining - 5;
+    }
     setRatioB(clamped);
-    if (!hasComponentC) setRatioA(100 - clamped);
+    setRatioA(newA);
+    setRatioC(newC);
+  };
+
+  const handleRatioCChange = (val: number) => {
+    const clamped = Math.max(5, Math.min(90, Math.round(val)));
+    const remaining = 100 - clamped;
+    const oldOtherSum = ratioA + ratioB;
+    let newA = oldOtherSum > 0 ? Math.round(remaining * (ratioA / oldOtherSum)) : Math.round(remaining / 2);
+    let newB = remaining - newA;
+
+    if (newA < 5) {
+      newA = 5;
+      newB = remaining - 5;
+    } else if (newB < 5) {
+      newB = 5;
+      newA = remaining - 5;
+    }
+    setRatioC(clamped);
+    setRatioA(newA);
+    setRatioB(newB);
+  };
+
+  const handleAddComponentC = () => {
+    setHasComponentC(true);
+    const newC = 20;
+    const remaining = 80;
+    const oldSum = ratioA + ratioB;
+    const newA = Math.round(remaining * (ratioA / oldSum));
+    const newB = remaining - newA;
+    setRatioA(newA);
+    setRatioB(newB);
+    setRatioC(newC);
+  };
+
+  const handleRemoveComponentC = () => {
+    setHasComponentC(false);
+    const oldSum = ratioA + ratioB;
+    const newA = Math.round((ratioA / oldSum) * 100);
+    const newB = 100 - newA;
+    setRatioA(newA);
+    setRatioB(newB);
+    setRatioC(0);
   };
 
   const handleAddToCart = () => {
@@ -240,7 +375,7 @@ export default function BlendBuilderPage() {
       productId: `byob-${Date.now()}`,
       name: blendName,
       slug: 'custom-blend',
-      imageUrl: '/images/the-roastery-behind-your-business.png',
+      imageUrl: '/images/canva-pouch-showcase.jpg',
       weightGrams: selectedSize === '200 g' ? 200 : selectedSize === '500 g' ? 500 : 1000,
       weightLabel: selectedSize,
       grind: 'whole',
@@ -272,49 +407,144 @@ export default function BlendBuilderPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans"
+      className="w-full bg-[#F4F6F8] text-[#162A43] min-h-screen py-10 px-4 sm:px-10 font-sans"
     >
       <div className="max-w-[1280px] mx-auto space-y-10">
         {/* ========================================================================= */}
         {/* 1. BREADCRUMB                                                             */}
         {/* ========================================================================= */}
-        <div className="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
-          <Link href="/catalog" className="hover:text-brand-navy transition-colors">
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <Link href="/catalog" className="text-[#465C70] hover:text-[#162A43] font-bold transition-colors">
             Shop
           </Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-brand-navy font-semibold">Custom Blend Simulator (BYOB)</span>
+          <ChevronRight className="w-3.5 h-3.5 text-[#465C70]" />
+          <span className="text-[#162A43] font-extrabold">Custom Blend Simulator (BYOB)</span>
         </div>
 
         {/* ========================================================================= */}
         {/* 2. 2-COLUMN MAIN BYOB SECTION                                             */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* LEFT: Standing Pouch Mockup + Live Flavor Radar Chart (5 Cols) */}
+          {/* LEFT: Dynamic Bean Pouch Showcase + Live Flavor Radar Chart (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45 }}
-              className="bg-surface-container-low rounded-3xl p-8 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group"
+              className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-gray-200 shadow-md space-y-4"
             >
-              <div className="w-full h-full relative flex items-center justify-center">
-                <img
-                  src="/images/the-roastery-behind-your-business.png"
-                  alt="52 Coffee BYOB Standing Pouch"
-                  className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105"
-                />
-                {/* Custom Label Mockup Overlay */}
-                <div className="absolute bottom-[20%] w-52 p-3.5 rounded-xl bg-gradient-to-r from-brand-navy/95 to-brand-maroon/95 text-white text-center shadow-xl backdrop-blur-md pointer-events-none border border-white/20">
-                  <div className="text-[9px] font-mono uppercase tracking-widest font-bold text-amber-300">52 COFFEE ROASTERY</div>
-                  <div className="font-editorial text-sm font-bold mt-0.5">Custom BYOB Blend</div>
-                  <div className="text-[9px] font-mono opacity-90 mt-1 truncate">
-                    {ratioA}% {componentA.name.split(' ')[0]} • {ratioB}% {componentB.name.split(' ')[0]}
-                    {hasComponentC && ` • ${ratioC}% ${componentC.name.split(' ')[0]}`}
+              {/* Header Badge */}
+              <div className="flex items-center justify-between border-b-2 border-gray-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#A52136]" />
+                  <span className="font-editorial text-sm font-extrabold text-[#162A43]">
+                    Visualisasi Racikan Biji
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-[#162A43]/10 text-[#162A43]">
+                  {hasComponentC ? '3-Bean Blend' : '2-Bean Blend'}
+                </span>
+              </div>
+
+              {/* Component Pouches Showcase Grid */}
+              <div className={`grid ${hasComponentC ? 'grid-cols-3 gap-2 sm:gap-3' : 'grid-cols-2 gap-3 sm:gap-4'} items-stretch`}>
+                {/* Component A Card */}
+                <div className="bg-[#F8FAFC] border-2 border-gray-200 hover:border-[#A52136] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
+                  <div className="w-full flex items-center justify-between mb-1.5">
+                    <span className="px-2 py-0.5 rounded-full bg-[#A52136] text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
+                      A
+                    </span>
+                    <span className="font-mono text-xs sm:text-sm font-black text-[#A52136]">
+                      {ratioA}%
+                    </span>
                   </div>
-                  <div className="text-[8px] font-mono uppercase px-2 py-0.5 rounded-full bg-white/20 inline-block mt-1 font-semibold">
+                  <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-white border border-gray-200 p-1.5 flex items-center justify-center my-1 group-hover:scale-105 transition-transform">
+                    <img
+                      src={componentA.image}
+                      alt={componentA.name}
+                      className="w-full h-full object-contain filter drop-shadow-sm"
+                    />
+                  </div>
+                  <div className="w-full mt-1 space-y-0.5">
+                    <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-[#162A43] truncate">
+                      {componentA.name.replace(/Arabica|Robusta/g, '').trim()}
+                    </div>
+                    <div className="text-[9px] font-mono text-[#64748B] truncate font-semibold">
+                      {componentA.process}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Component B Card */}
+                <div className="bg-[#F8FAFC] border-2 border-gray-200 hover:border-[#162A43] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
+                  <div className="w-full flex items-center justify-between mb-1.5">
+                    <span className="px-2 py-0.5 rounded-full bg-[#162A43] text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
+                      B
+                    </span>
+                    <span className="font-mono text-xs sm:text-sm font-black text-[#162A43]">
+                      {ratioB}%
+                    </span>
+                  </div>
+                  <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-white border border-gray-200 p-1.5 flex items-center justify-center my-1 group-hover:scale-105 transition-transform">
+                    <img
+                      src={componentB.image}
+                      alt={componentB.name}
+                      className="w-full h-full object-contain filter drop-shadow-sm"
+                    />
+                  </div>
+                  <div className="w-full mt-1 space-y-0.5">
+                    <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-[#162A43] truncate">
+                      {componentB.name.replace(/Arabica|Robusta/g, '').trim()}
+                    </div>
+                    <div className="text-[9px] font-mono text-[#64748B] truncate font-semibold">
+                      {componentB.process}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Component C Card (if active) */}
+                {hasComponentC && (
+                  <div className="bg-[#F8FAFC] border-2 border-gray-200 hover:border-[#246A73] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
+                    <div className="w-full flex items-center justify-between mb-1.5">
+                      <span className="px-2 py-0.5 rounded-full bg-[#246A73] text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
+                        C
+                      </span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-[#246A73]">
+                        {ratioC}%
+                      </span>
+                    </div>
+                    <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-white border border-gray-200 p-1.5 flex items-center justify-center my-1 group-hover:scale-105 transition-transform">
+                      <img
+                        src={componentC.image}
+                        alt={componentC.name}
+                        className="w-full h-full object-contain filter drop-shadow-sm"
+                      />
+                    </div>
+                    <div className="w-full mt-1 space-y-0.5">
+                      <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-[#162A43] truncate">
+                        {componentC.name.replace(/Arabica|Robusta/g, '').trim()}
+                      </div>
+                      <div className="text-[9px] font-mono text-[#64748B] truncate font-semibold">
+                        {componentC.process}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Custom BYOB Blend Packaging Label Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#162A43] to-[#1E293B] text-white text-center shadow-lg border border-gray-700/50 space-y-1">
+                <div className="text-[9px] font-mono uppercase tracking-widest font-extrabold text-[#8FB9BC]">
+                  52 COFFEE ROASTERY • ARTISAN BLEND
+                </div>
+                <div className="font-editorial text-sm sm:text-base font-extrabold text-white">
+                  {ratioA}% {componentA.name.split(' ')[0]} + {ratioB}% {componentB.name.split(' ')[0]}
+                  {hasComponentC && ` + ${ratioC}% ${componentC.name.split(' ')[0]}`}
+                </div>
+                <div className="inline-block mt-1">
+                  <span className="text-[9px] font-mono uppercase px-3 py-0.5 rounded-full bg-[#A52136] text-white font-extrabold tracking-wider">
                     {roastLevel}
-                  </div>
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -324,16 +554,16 @@ export default function BlendBuilderPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.15 }}
-              className="p-6 rounded-3xl bg-white border border-border-subtle shadow-sm space-y-4"
+              className="p-6 rounded-3xl bg-white border-2 border-gray-200 shadow-md space-y-4"
             >
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <div className="flex items-center justify-between border-b-2 border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-brand-maroon" />
-                  <h3 className="font-editorial text-base font-bold text-brand-navy">
+                  <Sparkles className="w-4 h-4 text-[#A52136]" />
+                  <h3 className="font-editorial text-base font-extrabold text-[#162A43]">
                     Prediksi Profil Rasa Racikan
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-brand-navy/10 text-brand-navy">
+                <span className="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full bg-[#162A43]/10 text-[#162A43]">
                   Live Dynamic
                 </span>
               </div>
@@ -347,9 +577,9 @@ export default function BlendBuilderPage() {
                 showBars={true}
               />
 
-              <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle text-[11px] font-sans text-on-surface-variant leading-relaxed">
-                <span className="font-bold text-brand-navy block mb-0.5">Catatan Rasa Terprediksi:</span>
-                Kombinasi ini menonjolkan keasaman segar dari <em>{componentA.name.split(' ')[0]}</em> dengan ketebalan body &amp; manis karamel dari <em>{componentB.name.split(' ')[0]}</em> disangrai pada level <strong>{roastLevel}</strong>.
+              <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-gray-200 text-xs font-sans text-[#2D3748] leading-relaxed">
+                <span className="font-extrabold text-[#162A43] block mb-0.5">Catatan Karakter Sangrai:</span>
+                Kombinasi menonjolkan keasaman segar dari <strong className="text-[#162A43]">{componentA.name.split(' ')[0]}</strong> berpadu manis karamel &amp; krema tebal dari <strong className="text-[#162A43]">{componentB.name.split(' ')[0]}</strong> disangrai pada level <strong className="text-[#A52136]">{roastLevel}</strong>.
               </div>
             </motion.div>
           </div>
@@ -361,25 +591,34 @@ export default function BlendBuilderPage() {
             transition={{ duration: 0.45, delay: 0.1 }}
             className="lg:col-span-7 space-y-6"
           >
-            <header className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-maroon/10 text-brand-maroon text-[11px] font-mono font-bold mb-2">
+            <header className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#A52136]/10 text-[#8B1E2D] border border-[#A52136]/25 text-[11px] font-mono font-extrabold mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Custom Roastery Blend Simulator</span>
+                <span>CUSTOM ROASTERY BLEND SIMULATOR</span>
               </div>
-              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-tight tracking-tight">
+              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-[#162A43] leading-tight tracking-tight">
                 B.Y.O.B - Build Your Own Blend
               </h1>
-              <p className="text-sm sm:text-base text-on-surface-variant">
-                Pilih kombinasi single origin favorit Anda dan atur rasio persentase. Profil rasa &amp; HPP dihitung secara presisi real-time.
+              <p className="text-sm sm:text-base text-[#4A5568] font-medium leading-relaxed">
+                Pilih kombinasi single origin favorit Anda dan atur rasio persentase. Profil rasa &amp; harga dihitung secara presisi real-time.
               </p>
             </header>
 
-            {/* Dual Ratio Progress Bar with Framer Motion */}
-            <div className="space-y-2 pt-2">
-              <div className="w-full h-9 rounded-full overflow-hidden flex bg-gray-200 border border-border-subtle relative shadow-inner">
-                {/* Segment A (Pink / Maroon) */}
+            {/* Dual/Triple Ratio Progress Bar with Balance Indicator */}
+            <div className="space-y-2.5 pt-2">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="font-extrabold text-[#162A43] uppercase tracking-wider">
+                  Rasio Racikan Blend
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-[10px]">
+                  ✓ Total: {ratioA + ratioB + (hasComponentC ? ratioC : 0)}% (Seimbang)
+                </span>
+              </div>
+
+              <div className="w-full h-10 rounded-full overflow-hidden flex bg-gray-200 border-2 border-gray-300 relative shadow-inner">
+                {/* Segment A (Crimson) */}
                 <motion.div
-                  className="bg-brand-maroon h-full flex items-center justify-center font-mono text-xs font-bold text-white transition-all duration-300"
+                  className="bg-[#A52136] h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioA}%` }}
                 >
                   A ({ratioA}%)
@@ -387,7 +626,7 @@ export default function BlendBuilderPage() {
 
                 {/* Segment B (Navy) */}
                 <motion.div
-                  className="bg-brand-navy h-full flex items-center justify-center font-mono text-xs font-bold text-white transition-all duration-300"
+                  className="bg-[#162A43] h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioB}%` }}
                 >
                   B ({ratioB}%)
@@ -395,189 +634,264 @@ export default function BlendBuilderPage() {
 
                 {hasComponentC && (
                   <motion.div
-                    className="bg-brand-teal h-full flex items-center justify-center font-mono text-xs font-bold text-white transition-all duration-300"
+                    className="bg-[#246A73] h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                     style={{ width: `${ratioC}%` }}
                   >
                     C ({ratioC}%)
                   </motion.div>
                 )}
               </div>
+
+              {/* Quick Blend Ratio Presets for 2-Bean and 3-Bean modes */}
+              {!hasComponentC ? (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-mono text-[#465C70] font-bold mr-1">Preset 2-Biji:</span>
+                  {[
+                    { label: '70 / 30 (Classic House)', a: 70, b: 30 },
+                    { label: '60 / 40 (Rich Balance)', a: 60, b: 40 },
+                    { label: '50 / 50 (Equal Harmony)', a: 50, b: 50 },
+                    { label: '80 / 20 (Dominant Base)', a: 80, b: 20 },
+                  ].map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => {
+                        setRatioA(p.a);
+                        setRatioB(p.b);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer shadow-xs ${
+                        ratioA === p.a && ratioB === p.b
+                          ? 'bg-[#162A43] text-white border-[#162A43]'
+                          : 'bg-white border-gray-300 text-[#162A43] hover:border-[#162A43] hover:bg-[#F8FAFC]'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-mono text-[#465C70] font-bold mr-1">Preset 3-Biji:</span>
+                  {[
+                    { label: '50 / 30 / 20', a: 50, b: 30, c: 20 },
+                    { label: '40 / 40 / 20', a: 40, b: 40, c: 20 },
+                    { label: '60 / 20 / 20', a: 60, b: 20, c: 20 },
+                    { label: '34 / 33 / 33', a: 34, b: 33, c: 33 },
+                  ].map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => {
+                        setRatioA(p.a);
+                        setRatioB(p.b);
+                        setRatioC(p.c);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer shadow-xs ${
+                        ratioA === p.a && ratioB === p.b && ratioC === p.c
+                          ? 'bg-[#162A43] text-white border-[#162A43]'
+                          : 'bg-white border-gray-300 text-[#162A43] hover:border-[#162A43] hover:bg-[#F8FAFC]'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Component A Selector */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-border-subtle hover:border-brand-maroon transition-colors shadow-sm">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-7 h-7 rounded-full bg-brand-maroon text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
-                    A
-                  </div>
-                  <select
-                    value={componentA.id}
-                    onChange={(e) => {
-                      const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
-                      if (found) setComponentA(found);
-                    }}
-                    className="w-full bg-transparent border-none text-xs sm:text-sm font-semibold text-on-surface focus:ring-0 cursor-pointer"
-                  >
-                    {AVAILABLE_BEANS.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.process})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center gap-1 pl-3 border-l border-border-subtle shrink-0">
-                  <input
-                    type="number"
-                    min="10"
-                    max="90"
-                    value={ratioA}
-                    onChange={(e) => handleRatioAChange(Number(e.target.value))}
-                    className="w-10 text-right bg-transparent border-none font-mono text-sm font-bold text-on-surface focus:ring-0 p-0"
-                  />
-                  <span className="font-mono text-xs text-gray-400">%</span>
-                </div>
-              </div>
-
-              {/* Component B Selector */}
-              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-border-subtle hover:border-brand-navy transition-colors shadow-sm">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-7 h-7 rounded-full bg-brand-navy text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
-                    B
-                  </div>
-                  <select
-                    value={componentB.id}
-                    onChange={(e) => {
-                      const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
-                      if (found) setComponentB(found);
-                    }}
-                    className="w-full bg-transparent border-none text-xs sm:text-sm font-semibold text-on-surface focus:ring-0 cursor-pointer"
-                  >
-                    {AVAILABLE_BEANS.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.process})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center gap-1 pl-3 border-l border-border-subtle shrink-0">
-                  <input
-                    type="number"
-                    min="10"
-                    max="90"
-                    value={ratioB}
-                    onChange={(e) => handleRatioBChange(Number(e.target.value))}
-                    className="w-10 text-right bg-transparent border-none font-mono text-sm font-bold text-on-surface focus:ring-0 p-0"
-                  />
-                  <span className="font-mono text-xs text-gray-400">%</span>
-                </div>
-              </div>
-
-              {/* Expandable Component C */}
-              {hasComponentC && (
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-border-subtle hover:border-brand-teal transition-colors shadow-sm">
+              <div className="p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#A52136] transition-colors shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-7 h-7 rounded-full bg-brand-teal text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
-                      C
+                    <div className="w-8 h-8 rounded-full bg-[#A52136] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                      A
                     </div>
                     <select
-                      value={componentC.id}
+                      value={componentA.id}
                       onChange={(e) => {
                         const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
-                        if (found) setComponentC(found);
+                        if (found) setComponentA(found);
                       }}
-                      className="w-full bg-transparent border-none text-xs sm:text-sm font-semibold text-on-surface focus:ring-0 cursor-pointer"
+                      className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-[#162A43] focus:ring-0 cursor-pointer"
                     >
                       {AVAILABLE_BEANS.map((b) => (
                         <option key={b.id} value={b.id}>
-                          {b.name} ({b.process})
+                          {b.name} ({formatRupiah(b.pricePerKg)}/kg)
                         </option>
                       ))}
                     </select>
                   </div>
-                  <div className="flex items-center gap-1 pl-3 border-l border-border-subtle shrink-0">
+                  <div className="flex items-center gap-1 pl-3 border-l-2 border-gray-200 shrink-0">
                     <input
                       type="number"
                       min="5"
-                      max="30"
-                      value={ratioC}
-                      onChange={(e) => setRatioC(Number(e.target.value))}
-                      className="w-10 text-right bg-transparent border-none font-mono text-sm font-bold text-on-surface focus:ring-0 p-0"
+                      max="90"
+                      value={ratioA}
+                      onChange={(e) => handleRatioAChange(Number(e.target.value))}
+                      className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-[#162A43] focus:ring-0 p-0"
                     />
-                    <span className="font-mono text-xs text-gray-400">%</span>
+                    <span className="font-mono text-xs font-extrabold text-[#465C70]">%</span>
+                  </div>
+                </div>
+                {/* Visual Range Slider for Component A */}
+                <div className="flex items-center gap-3 pt-1">
+                  <input
+                    type="range"
+                    min="5"
+                    max="90"
+                    step="1"
+                    value={ratioA}
+                    onChange={(e) => handleRatioAChange(Number(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#A52136]"
+                  />
+                </div>
+              </div>
+
+              {/* Component B Selector */}
+              <div className="p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#162A43] transition-colors shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-8 h-8 rounded-full bg-[#162A43] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                      B
+                    </div>
+                    <select
+                      value={componentB.id}
+                      onChange={(e) => {
+                        const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
+                        if (found) setComponentB(found);
+                      }}
+                      className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-[#162A43] focus:ring-0 cursor-pointer"
+                    >
+                      {AVAILABLE_BEANS.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name} ({formatRupiah(b.pricePerKg)}/kg)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-1 pl-3 border-l-2 border-gray-200 shrink-0">
+                    <input
+                      type="number"
+                      min="5"
+                      max="90"
+                      value={ratioB}
+                      onChange={(e) => handleRatioBChange(Number(e.target.value))}
+                      className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-[#162A43] focus:ring-0 p-0"
+                    />
+                    <span className="font-mono text-xs font-extrabold text-[#465C70]">%</span>
+                  </div>
+                </div>
+                {/* Visual Range Slider for Component B */}
+                <div className="flex items-center gap-3 pt-1">
+                  <input
+                    type="range"
+                    min="5"
+                    max="90"
+                    step="1"
+                    value={ratioB}
+                    onChange={(e) => handleRatioBChange(Number(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#162A43]"
+                  />
+                </div>
+              </div>
+
+              {/* Expandable Component C (Flexible up to 90% with auto-balancing) */}
+              {hasComponentC && (
+                <div className="p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#246A73] transition-colors shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-8 h-8 rounded-full bg-[#246A73] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                        C
+                      </div>
+                      <select
+                        value={componentC.id}
+                        onChange={(e) => {
+                          const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
+                          if (found) setComponentC(found);
+                        }}
+                        className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-[#162A43] focus:ring-0 cursor-pointer"
+                      >
+                        {AVAILABLE_BEANS.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name} ({formatRupiah(b.pricePerKg)}/kg)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2 pl-3 border-l-2 border-gray-200 shrink-0">
+                      <input
+                        type="number"
+                        min="5"
+                        max="90"
+                        value={ratioC}
+                        onChange={(e) => handleRatioCChange(Number(e.target.value))}
+                        className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-[#162A43] focus:ring-0 p-0"
+                      />
+                      <span className="font-mono text-xs font-extrabold text-[#465C70]">%</span>
+                      <button
+                        type="button"
+                        onClick={handleRemoveComponentC}
+                        className="text-xs text-[#A52136] hover:bg-[#A52136]/10 p-1.5 rounded-lg font-bold cursor-pointer"
+                        title="Hapus Biji C"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  {/* Visual Range Slider for Component C */}
+                  <div className="flex items-center gap-3 pt-1">
+                    <input
+                      type="range"
+                      min="5"
+                      max="90"
+                      step="1"
+                      value={ratioC}
+                      onChange={(e) => handleRatioCChange(Number(e.target.value))}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#246A73]"
+                    />
                   </div>
                 </div>
               )}
 
-              {/* Add a third coffee button */}
+              {/* Add Bean Button for Component C */}
               {!hasComponentC && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setHasComponentC(true);
-                    setRatioA(50);
-                    setRatioB(35);
-                    setRatioC(15);
-                  }}
-                  className="w-full py-3.5 border border-border-subtle rounded-2xl text-on-surface-variant hover:text-brand-navy hover:border-brand-navy transition-all font-mono text-xs flex items-center justify-center gap-2 border-dashed bg-white"
+                  onClick={handleAddComponentC}
+                  className="w-full py-4 border-2 border-dashed border-gray-300 hover:border-[#162A43] rounded-2xl text-[#162A43] hover:bg-[#EAF0F6] transition-all font-mono text-xs flex items-center justify-center gap-2 bg-white font-bold shadow-xs cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Tambahkan Biji Kopi Ketiga (Component C)</span>
+                  <span>+ Tambahkan Biji Kopi Ketiga (Component C)</span>
                 </button>
               )}
             </div>
 
-            {/* ROAST LEVEL PROFILE SELECTOR */}
-            <div className="space-y-2.5 pt-2">
-              <label className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
-                Pilih Profil Sangrai (Roast Profile)
+            {/* ROAST LEVEL PROFILE - LOCKED TO DARK ESPRESSO AS REQUESTED */}
+            <div className="space-y-2 pt-2">
+              <label className="block text-xs font-mono text-[#162A43] uppercase font-extrabold tracking-wider">
+                Profil Sangrai (Roast Profile)
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {[
-                  {
-                    id: 'Filter Light-Medium' as RoastProfile,
-                    label: 'Light-Medium',
-                    desc: 'Floral, bright acidity, juicy pour over',
-                  },
-                  {
-                    id: 'Medium All-Rounder' as RoastProfile,
-                    label: 'Medium (Balanced)',
-                    desc: 'Sweet caramel, balanced, V60 / Espresso',
-                  },
-                  {
-                    id: 'Dark Espresso Roast' as RoastProfile,
-                    label: 'Dark Espresso',
-                    desc: 'Bold cocoa, heavy crema, milk-based',
-                  },
-                ].map((item) => {
-                  const isSelected = roastLevel === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setRoastLevel(item.id)}
-                      className={`p-3.5 rounded-2xl border text-left transition-all relative ${
-                        isSelected
-                          ? 'border-brand-navy bg-brand-navy text-white shadow-md'
-                          : 'border-border-subtle bg-white text-on-surface hover:border-brand-navy'
-                      }`}
-                    >
-                      <div className="font-mono text-xs font-bold flex items-center justify-between">
-                        <span>{item.label}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-300" />}
-                      </div>
-                      <div className={`text-[10px] mt-1 leading-tight ${isSelected ? 'text-gray-200' : 'text-on-surface-variant'}`}>
-                        {item.desc}
-                      </div>
-                    </button>
-                  );
-                })}
+              <div className="p-4 rounded-2xl bg-[#1E293B] text-white border border-[#334155] shadow-lg flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-amber-400" />
+                    <span className="font-mono text-sm font-bold text-white">Dark Espresso Roast</span>
+                    <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-[#A52136] text-white">
+                      Fixed Profile
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-200 leading-relaxed font-normal">
+                    Diformulasikan khusus untuk mesin espresso, moka pot, &amp; es kopi susu dengan ekstraksi krema tebal dan rasa cokelat manis pekat tanpa asam menusuk.
+                  </p>
+                </div>
+                <Check className="w-5 h-5 text-emerald-400 shrink-0 ml-4" />
               </div>
             </div>
 
             {/* Size Selector */}
             <div className="space-y-2">
-              <label className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
+              <label className="block text-xs font-mono text-[#162A43] uppercase font-extrabold tracking-wider">
                 Ukuran Kemasan
               </label>
               <div className="flex gap-3">
@@ -586,10 +900,10 @@ export default function BlendBuilderPage() {
                     key={s}
                     type="button"
                     onClick={() => setSelectedSize(s)}
-                    className={`px-5 py-2.5 rounded-full font-mono text-xs font-bold transition-all ${
+                    className={`px-6 py-3 rounded-xl font-mono text-xs font-extrabold transition-all cursor-pointer ${
                       selectedSize === s
-                        ? 'bg-brand-navy text-white shadow-md'
-                        : 'bg-white border border-border-subtle text-on-surface hover:border-brand-navy'
+                        ? 'bg-[#162A43] text-white shadow-md'
+                        : 'bg-white border-2 border-gray-200 text-[#162A43] hover:border-[#162A43]'
                     }`}
                   >
                     {s}
@@ -598,19 +912,44 @@ export default function BlendBuilderPage() {
               </div>
             </div>
 
-            {/* Price Display */}
-            <div className="space-y-1 pt-2">
-              <span className="text-xs font-mono text-on-surface-variant uppercase font-bold block">
-                Total Harga BYOB
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-xs font-mono text-brand-maroon uppercase font-bold">RETAIL</span>
-                <span className="font-mono text-3xl sm:text-4xl font-bold text-brand-navy">
-                  {formatRupiah(activePrice)}
-                </span>
-                <span className="text-xs font-mono text-on-surface-variant">
-                  / {selectedSize}
-                </span>
+            {/* Price Display with Live Formula */}
+            <div className="p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-md space-y-3.5">
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <span className="text-[10px] font-mono text-[#8B1E2D] uppercase font-black tracking-wider block">
+                    HARGA RACIKAN {selectedSize}
+                  </span>
+                  <div className="font-mono text-3xl sm:text-4xl font-black text-[#162A43] mt-0.5">
+                    {formatRupiah(activePrice)}
+                  </div>
+                </div>
+                <div className="text-right font-mono text-xs text-[#4A5568]">
+                  <span>Rate: </span>
+                  <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
+                  <span> / kg</span>
+                </div>
+              </div>
+
+              {/* Formula Breakdown */}
+              <div className="p-3.5 rounded-xl bg-[#F8FAFC] border-2 border-gray-200 text-[11px] font-mono space-y-2 text-[#1E293B]">
+                <div className="flex justify-between items-center text-[#2D3748]">
+                  <span>• {ratioA}% {componentA.name.split(' ')[0]} ({formatRupiah(componentA.pricePerKg)}/kg)</span>
+                  <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.costA)}</span>
+                </div>
+                <div className="flex justify-between items-center text-[#2D3748]">
+                  <span>• {ratioB}% {componentB.name.split(' ')[0]} ({formatRupiah(componentB.pricePerKg)}/kg)</span>
+                  <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.costB)}</span>
+                </div>
+                {hasComponentC && (
+                  <div className="flex justify-between items-center text-[#2D3748]">
+                    <span>• {ratioC}% {componentC.name.split(' ')[0]} ({formatRupiah(componentC.pricePerKg)}/kg)</span>
+                    <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.costC)}</span>
+                  </div>
+                )}
+                <div className="border-t-2 border-gray-200 pt-2 flex justify-between items-center font-black text-xs text-[#162A43]">
+                  <span>Total Harga Dasar / kg</span>
+                  <span>{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
+                </div>
               </div>
             </div>
 
@@ -620,11 +959,11 @@ export default function BlendBuilderPage() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={isAdded}
-                className="flex-1 bg-brand-navy text-white font-mono font-bold text-sm py-4 px-8 rounded-2xl hover:bg-brand-navy-light transition-all shadow-lg flex items-center justify-center gap-2"
+                className="flex-1 bg-[#162A43] hover:bg-[#2C3136] text-white font-mono font-extrabold text-sm py-4 px-8 rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isAdded ? (
                   <>
-                    <Check className="w-5 h-5 text-emerald-400" />
+                    <Check className="w-5 h-5 text-emerald-300" />
                     <span>Tersimpan di Keranjang!</span>
                   </>
                 ) : (
@@ -638,34 +977,36 @@ export default function BlendBuilderPage() {
               <button
                 type="button"
                 onClick={handleShare}
-                className="px-5 py-4 rounded-2xl border border-border-subtle bg-white text-on-surface hover:border-brand-navy transition-colors flex items-center gap-2 text-xs font-mono font-bold shadow-sm"
+                className="px-6 py-4 rounded-2xl border-2 border-gray-200 bg-white text-[#162A43] hover:border-[#162A43] transition-colors flex items-center gap-2 text-xs font-mono font-extrabold shadow-sm cursor-pointer"
               >
                 <Share2 className="w-4 h-4" />
-                <span>{copied ? 'Tersalin!' : 'Bagikan Racikan'}</span>
+                <span>{copied ? 'Tersalin!' : 'Bagikan'}</span>
               </button>
             </div>
 
             {/* Our Picks Preset Pill */}
-            <div className="space-y-2 pt-2">
-              <span className="text-xs font-mono text-on-surface-variant uppercase font-bold block">
+            <div className="space-y-2.5 pt-2">
+              <span className="text-xs font-mono text-[#162A43] uppercase font-extrabold block tracking-wider">
                 Rekomendasi Racikan Roaster 52 Coffee
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => applyPreset('Gayo', 'Kerinci', 50, 50, 'Filter Light-Medium')}
-                  className="text-left p-3.5 rounded-2xl bg-white border border-border-subtle hover:border-brand-navy hover:bg-surface-container-low transition-all font-mono text-xs font-semibold text-on-surface shadow-sm"
+                  onClick={() => applyPreset('java-ijen-full-wash', 'arjuna-budug-asu', 70, 30)}
+                  className="text-left p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#162A43] hover:bg-[#F8FAFC] transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-bold text-brand-navy">50/50 Gayo + Kerinci</div>
-                  <div className="text-[10px] text-on-surface-variant mt-0.5">Fruity Blueberry &amp; Sweet Cedar</div>
+                  <div className="font-extrabold text-[#162A43] text-sm">70/30 Java Ijen + Arjuna Budug</div>
+                  <div className="text-[11px] text-[#4A5568] mt-1 font-medium">Fruity Tangerine, Sweet Caramel &amp; Clean Body</div>
+                  <div className="text-xs font-extrabold text-[#8B1E2D] mt-1.5">Rp 253.000 / kg</div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => applyPreset('Ijen', 'Dampit', 70, 30, 'Dark Espresso Roast')}
-                  className="text-left p-3.5 rounded-2xl bg-white border border-border-subtle hover:border-brand-navy hover:bg-surface-container-low transition-all font-mono text-xs font-semibold text-on-surface shadow-sm"
+                  onClick={() => applyPreset('java-ijen-full-wash', 'dampit-fine-robusta', 70, 30)}
+                  className="text-left p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#162A43] hover:bg-[#F8FAFC] transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-bold text-brand-navy">70/30 Ijen + Dampit Robusta</div>
-                  <div className="text-[10px] text-on-surface-variant mt-0.5">Classic Espresso House Blend (Thick Crema)</div>
+                  <div className="font-extrabold text-[#162A43] text-sm">70/30 Java Ijen + Dampit Robusta</div>
+                  <div className="text-[11px] text-[#4A5568] mt-1 font-medium">Classic House Blend (Heavy Crema &amp; Dark Cocoa)</div>
+                  <div className="text-xs font-extrabold text-[#8B1E2D] mt-1.5">Rp 220.000 / kg</div>
                 </button>
               </div>
             </div>
@@ -675,122 +1016,54 @@ export default function BlendBuilderPage() {
         {/* ========================================================================= */}
         {/* 3. DETAILS COMPARISON TABLE                                               */}
         {/* ========================================================================= */}
-        <section className="space-y-4 pt-8 border-t border-border-subtle">
-          <h2 className="font-editorial text-2xl font-bold text-brand-navy">
+        <section className="space-y-4 pt-8 border-t-2 border-gray-200">
+          <h2 className="font-editorial text-2xl font-bold text-[#162A43]">
             Spesifikasi Komponen Racikan
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-sans">
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Component A</span>
-              <span className="font-bold text-on-surface">{componentA.name}</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Component A</span>
+              <span className="font-extrabold text-[#162A43]">{componentA.name} ({formatRupiah(componentA.pricePerKg)}/kg)</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Component B</span>
-              <span className="font-bold text-on-surface">{componentB.name}</span>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Process (A)</span>
-              <span className="font-bold text-on-surface">{componentA.process}</span>
-            </div>
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Process (B)</span>
-              <span className="font-bold text-on-surface">{componentB.process}</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Component B</span>
+              <span className="font-extrabold text-[#162A43]">{componentB.name} ({formatRupiah(componentB.pricePerKg)}/kg)</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Region (A)</span>
-              <span className="font-bold text-on-surface">{componentA.region}</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Process (A)</span>
+              <span className="font-extrabold text-[#162A43]">{componentA.process}</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Region (B)</span>
-              <span className="font-bold text-on-surface">{componentB.region}</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Process (B)</span>
+              <span className="font-extrabold text-[#162A43]">{componentB.process}</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Varietals (A)</span>
-              <span className="font-bold text-on-surface">{componentA.varietals}</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Region (A)</span>
+              <span className="font-extrabold text-[#162A43]">{componentA.region}</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-              <span className="text-on-surface-variant font-mono">Varietals (B)</span>
-              <span className="font-bold text-on-surface">{componentB.varietals}</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Region (B)</span>
+              <span className="font-extrabold text-[#162A43]">{componentB.region}</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Varietals (A)</span>
+              <span className="font-extrabold text-[#162A43]">{componentA.varietals}</span>
+            </div>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-[#465C70] font-mono font-bold">Varietals (B)</span>
+              <span className="font-extrabold text-[#162A43]">{componentB.varietals}</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-            <span className="text-on-surface-variant font-mono text-xs block font-bold">Catatan Rasa Gabungan</span>
-            <p className="font-editorial text-sm sm:text-base font-bold text-brand-navy">
+          <div className="p-5 rounded-2xl bg-white border-2 border-gray-200 space-y-1.5 shadow-sm">
+            <span className="text-[#465C70] font-mono text-xs block font-bold uppercase tracking-wider">Catatan Rasa Gabungan</span>
+            <p className="font-editorial text-base font-extrabold text-[#162A43]">
               {componentA.notes} • {componentB.notes}
             </p>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 4. TRANSPARENCY ACCORDIONS                                                */}
-        {/* ========================================================================= */}
-        <section className="space-y-4 pt-4">
-          {/* Accordion 1: Green Information */}
-          <div className="border border-border-subtle rounded-2xl bg-white overflow-hidden shadow-sm">
-            <button
-              type="button"
-              onClick={() => setOpenGreenInfo(!openGreenInfo)}
-              className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
-            >
-              <span>Transparansi Biaya Biji Mentah (Green Beans)</span>
-              {openGreenInfo ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-            </button>
-
-            {openGreenInfo && (
-              <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border-subtle/50">
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between items-center font-mono text-xs">
-                  <span className="text-on-surface-variant">Blended Landed Cost (1 kg, green)</span>
-                  <span className="font-bold text-brand-navy">{formatRupiah(blendedLandedCost)}</span>
-                </div>
-                <p className="text-[11px] text-on-surface-variant font-sans">
-                  Dihitung dari harga landed green bean masing-masing origin sesuai bobot rasio sangrai. Estimasi susut bobot saat roasting: 19.93%.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Accordion 2: Price Breakdown */}
-          <div className="border border-border-subtle rounded-2xl bg-white overflow-hidden shadow-sm">
-            <button
-              type="button"
-              onClick={() => setOpenPriceBreakdown(!openPriceBreakdown)}
-              className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
-            >
-              <span>Rincian Struktur Harga &amp; HPP Sangrai</span>
-              {openPriceBreakdown ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-            </button>
-
-            {openPriceBreakdown && (
-              <div className="px-5 pb-5 pt-1 space-y-3 border-t border-border-subtle/50 font-sans text-xs">
-                <p className="text-on-surface-variant leading-relaxed">
-                  <strong>COGS/HPP (Harga Pokok Produksi)</strong> mencakup seluruh biaya produksi mengubah green bean menjadi roasted beans siap seduh:
-                </p>
-                <ul className="space-y-1 text-on-surface-variant pl-4 list-disc text-[11px]">
-                  <li>Green coffee yang dibutuhkan untuk memproduksi <em>1 kg</em> roasted beans setelah susut bobot sangrai <strong>19.93%</strong>.</li>
-                  <li>Biaya listrik &amp; gas operasional mesin sangrai per <em>1 kg</em> sebesar <strong>Rp 10.000</strong>.</li>
-                </ul>
-
-                <div className="space-y-2 font-mono text-xs pt-1">
-                  <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-                    <span className="text-on-surface-variant">HPP Sangrai (1 kg)</span>
-                    <span className="font-bold text-on-surface">{formatRupiah(hppPerKg)}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-                    <span className="text-on-surface-variant">Kemasan Valve Pouch &amp; Label (1 kg)</span>
-                    <span className="font-bold text-on-surface">{formatRupiah(packagingCost1kg)}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
-                    <span className="text-on-surface-variant">Gross Profit Roastery (1 kg)</span>
-                    <span className="font-bold text-brand-teal-dark">{formatRupiah(Math.max(25000, grossProfit1kg))}</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </section>
       </div>

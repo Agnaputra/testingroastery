@@ -4,7 +4,7 @@ import { FiftyTwoLogo } from './logo';
 
 export function Footer() {
   return (
-    <footer className="bg-[#101A26] text-white pt-16 pb-12 border-t border-white/10 w-full mt-auto">
+    <footer className="bg-[#2C3136] text-white pt-16 pb-12 border-t border-white/10 w-full mt-auto">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
           {/* Newsletter */}
@@ -12,16 +12,16 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <FiftyTwoLogo size="md" textColor="light" />
             </div>
-            <p className="text-xs text-gray-400 max-w-sm leading-relaxed">
+            <p className="text-xs text-gray-300 max-w-sm leading-relaxed font-sans">
               Dapatkan info jadwal sangrai terbaru, diskon micro-lot eksklusif, dan panduan kalibrasi seduh mingguan dari roastery kami di Malang.
             </p>
             <div className="flex gap-2 max-w-sm">
               <input
                 type="email"
                 placeholder="Masukkan email Anda"
-                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-[#D8B168] flex-1"
+                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-[#8FB9BC] flex-1 font-sans"
               />
-              <button className="px-5 py-3 rounded-xl bg-[#D8B168] hover:bg-[#C9A255] text-[#162A43] font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-md">
+              <button className="px-5 py-3 rounded-xl bg-[#8FB9BC] hover:bg-[#7ea7aa] text-[#2C3136] font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-md">
                 Subscribe
               </button>
             </div>
@@ -29,10 +29,10 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="lg:col-span-2 space-y-3 font-mono text-xs">
-            <span className="text-[11px] uppercase tracking-widest text-[#D8B168] font-bold block">
+            <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
               Slowbar Menu
             </span>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-gray-300">
               <li>
                 <Link href="/catalog?category=filter" className="hover:text-white transition-colors">
                   Filter Beans
@@ -58,10 +58,10 @@ export function Footer() {
 
           {/* Tools & Guides */}
           <div className="lg:col-span-2 space-y-3 font-mono text-xs">
-            <span className="text-[11px] uppercase tracking-widest text-[#D8B168] font-bold block">
+            <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
               Tools &amp; Info
             </span>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-gray-300">
               <li>
                 <Link href="/guide" className="hover:text-white transition-colors">
                   Brewing Guide
@@ -87,17 +87,17 @@ export function Footer() {
 
           {/* Operational & Address */}
           <div className="lg:col-span-3 space-y-3 font-mono text-xs">
-            <span className="text-[11px] uppercase tracking-widest text-[#D8B168] font-bold block">
+            <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
               Tasting Room Malang
             </span>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-gray-300 leading-relaxed">
               📍 Jl. KH. Agus Salim No. 11, Klojen, Kota Malang, Jawa Timur.
             </p>
-            <p className="text-gray-400">
+            <p className="text-gray-300">
               🕒 Senin - Jumat: 11.00 - 16.00 WIB
             </p>
             <a
-              className="inline-block text-[#D8B168] hover:underline font-semibold mt-1"
+              className="inline-block text-[#8FB9BC] hover:underline font-semibold mt-1"
               href="https://instagram.com/52coffeeroastery"
               target="_blank"
               rel="noreferrer"

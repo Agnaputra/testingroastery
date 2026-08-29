@@ -80,13 +80,13 @@ function ProductDetailContent() {
     if (orderMode === 'cup') {
       addItem({
         productId: product.id,
-        name: `${product.slowbarAlias || product.name} (Slowbar Cup - ${servingTemp === 'hot' ? 'Hot' : 'Iced'})`,
+        name: `${product.slowbarAlias || product.name} (${servingTemp === 'hot' ? 'Hot Filter' : 'Ice Filter'})`,
         slug: product.slug,
         imageUrl: product.imageUrl,
         weightGrams: 1,
         weightLabel: '1 Cup',
         grind: 'whole',
-        grindLabel: `Manual Brew (${servingTemp.toUpperCase()})`,
+        grindLabel: `Slowbar Brew (${servingTemp === 'hot' ? 'Hot Filter' : 'Ice Filter'})`,
         unitPrice: product.cupPrice || product.basePrice,
         quantity: quantity,
         series: product.series,
@@ -175,7 +175,13 @@ function ProductDetailContent() {
             {product.series}
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="capitalize">{product.categoryLabel || product.category}</span>
+          <span className="capitalize font-mono">
+            {orderMode === 'cup'
+              ? 'Slowbar Menu'
+              : product.category === 'espresso'
+              ? 'Espresso Based'
+              : 'Filter Based'}
+          </span>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-brand-navy font-semibold truncate max-w-xs">{cleanName}</span>
         </div>
@@ -229,12 +235,19 @@ function ProductDetailContent() {
                 <span className="px-3 py-1 rounded-full bg-brand-maroon text-white font-bold text-[10px] uppercase tracking-wider">
                   {product.series}
                 </span>
+                <span className="px-3 py-1 rounded-full bg-brand-navy/10 text-brand-navy font-bold text-[10px] uppercase tracking-wider font-mono">
+                  {orderMode === 'cup'
+                    ? 'BEVERAGES (SLOWBAR)'
+                    : product.category === 'espresso'
+                    ? 'ESPRESSO BASED'
+                    : 'FILTER BASED'}
+                </span>
                 {product.slowbarAlias && (
                   <span className="px-3 py-1 rounded-full bg-brand-pill text-brand-navy font-bold text-[10px] uppercase tracking-wider border border-border-subtle">
                     Slowbar Alias: {product.slowbarAlias}
                   </span>
                 )}
-                <span className="px-3 py-1 rounded-full bg-brand-navy/10 text-brand-navy font-bold text-[10px] uppercase tracking-wider font-mono">
+                <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-bold text-[10px] uppercase tracking-wider font-mono">
                   Roast: {product.roastLevel}
                 </span>
               </div>
@@ -252,135 +265,225 @@ function ProductDetailContent() {
               </p>
             </div>
 
-            {/* ORDER TYPE TOGGLE (Slowbar Cup vs Beans Pouch) */}
-            {product.cupPrice && (
-              <div className="space-y-2">
-                <span className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
-                  Format Pesanan
+            {/* ========================================================================= */}
+            {/* AT A GLANCE (Compact & Lean Hierarchy)                                    */}
+            {/* ========================================================================= */}
+            <div className="space-y-2.5 pt-2 border-t border-border-subtle">
+              {/* Tasting Notes Box */}
+              <div className="p-3 sm:p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                <span className="text-[9px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
+                  TASTING NOTES
                 </span>
-                <div className="grid grid-cols-2 gap-2 max-w-lg p-1.5 bg-surface-container-low rounded-2xl border border-border-subtle relative">
-                  <button
-                    type="button"
-                    onClick={() => setOrderMode('cup')}
-                    className={`relative py-3 px-4 rounded-xl text-xs transition-colors duration-200 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 z-10 ${
-                      orderMode === 'cup'
-                        ? 'text-white font-bold'
-                        : 'text-on-surface-variant hover:text-brand-navy font-medium'
-                    }`}
-                  >
-                    {orderMode === 'cup' && (
-                      <motion.div
-                        layoutId="activeOrderModePill"
-                        className="absolute inset-0 bg-brand-navy rounded-xl shadow-md -z-10"
-                        transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                      />
-                    )}
-                    <div className="flex items-center gap-1.5">
-                      <Coffee className="w-3.5 h-3.5" />
-                      <span>Seduhan Cangkir</span>
-                    </div>
-                    <span className="font-mono text-[11px] opacity-90">{formatRupiah(product.cupPrice)}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setOrderMode('beans')}
-                    className={`relative py-3 px-4 rounded-xl text-xs transition-colors duration-200 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 z-10 ${
-                      orderMode === 'beans'
-                        ? 'text-white font-bold'
-                        : 'text-on-surface-variant hover:text-brand-navy font-medium'
-                    }`}
-                  >
-                    {orderMode === 'beans' && (
-                      <motion.div
-                        layoutId="activeOrderModePill"
-                        className="absolute inset-0 bg-brand-navy rounded-xl shadow-md -z-10"
-                        transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                      />
-                    )}
-                    <div className="flex items-center gap-1.5">
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>Biji Kopi (Pouch)</span>
-                    </div>
-                    <span className="font-mono text-[11px] opacity-90">Mulai {formatRupiah(product.basePrice)}</span>
-                  </button>
+                <p className="font-editorial text-base sm:text-lg font-bold text-brand-navy leading-snug">
+                  {product.tastingNotes.join(', ')}
+                </p>
+              </div>
+
+              {/* Freshness Box */}
+              <div className="p-3 sm:p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
+                    FRESHNESS &amp; ROAST DATE
+                  </span>
+                  <span className="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    &lt; 7 Hari Fresh Sangrai
+                  </span>
                 </div>
+                <p className="text-xs font-semibold text-brand-navy">
+                  Disangrai fresh kurang dari 7 hari yang lalu di Roastery Malang
+                </p>
+                <p className="text-[10px] text-on-surface-variant leading-normal">
+                  Puncak rasa optimal: resting min. 2 minggu (espresso) &amp; 3 minggu (filter).
+                </p>
+              </div>
+
+              {/* Metadata 3x2 Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5">
+                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">FARM</span>
+                  <p className="text-[11px] font-bold text-on-surface truncate">{product.region.split(',')[0] || 'Gunung Argopuro'}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">REGION</span>
+                  <p className="text-[11px] font-bold text-on-surface truncate">{product.origin.split(',')[0] || 'East Java'}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PRODUCER</span>
+                  <p className="text-[11px] font-bold text-on-surface truncate">52 Roastery Partner</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PROCESS</span>
+                  <p className="text-[11px] font-bold text-on-surface truncate">{product.process}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">ALTITUDE</span>
+                  <p className="text-[11px] font-bold text-on-surface truncate">{product.altitude}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">VARIETALS</span>
+                  <p className="text-[11px] font-bold text-on-surface truncate">{product.varietal}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ========================================================================= */}
+            {/* ONE-CLICK BREW GUIDE (HANYA MUNCUL DI FILTER & ESPRESSO ROAST PROFILE)   */}
+            {/* ========================================================================= */}
+            {orderMode !== 'cup' && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-brand-maroon">
+                    <Coffee className="w-4 h-4" />
+                    <span>Resep Ekstraksi Barista 52 Coffee</span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant font-mono">
+                    {product.brewingRecipe.dose} • Rasio {product.brewingRecipe.ratio} • Suhu {product.brewingRecipe.temp}
+                  </p>
+                </div>
+                <Link
+                  href={`/guide?bean=${encodeURIComponent(product.name)}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-navy text-white text-xs font-mono font-bold hover:bg-brand-navy-light transition-colors shadow-sm shrink-0"
+                >
+                  <span>Seduh di Guide</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             )}
 
-            {/* TAB CONTENT TRANSITION */}
-            <AnimatePresence mode="wait">
-              {orderMode === 'cup' && product.cupPrice ? (
-                /* MODE 1: SLOWBAR CUP */
-                <motion.div
-                  key="slowbar-cup-mode"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-4 p-5 rounded-2xl bg-brand-pill/60 border border-border-subtle"
-                >
-                  <div className="flex items-center justify-between font-mono text-xs">
-                    <span className="text-brand-navy font-bold uppercase tracking-wider">Format Penyajian:</span>
-                    <span className="px-3 py-1 rounded-full bg-brand-maroon text-white font-bold text-[10px]">
-                      1 Cangkir (Single Cup)
-                    </span>
+            {/* ========================================================================= */}
+            {/* PURCHASE SECTION (SLOWBAR CUP vs BEANS POUCH)                             */}
+            {/* ========================================================================= */}
+            {orderMode === 'cup' && product.cupPrice ? (
+              /* MODE 1: SLOWBAR CUP */
+              <div className="space-y-4 pt-2 border-t border-border-subtle">
+                <div className="space-y-2.5 p-3.5 sm:p-4 rounded-2xl bg-brand-pill/60 border border-border-subtle">
+                  <span className="text-[11px] font-mono text-on-surface-variant uppercase font-semibold block">
+                    Pilihan Seduhan Slowbar:
+                  </span>
+                  <div className="flex gap-2.5 relative">
+                    <button
+                      type="button"
+                      onClick={() => setServingTemp('hot')}
+                      className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 cursor-pointer ${
+                        servingTemp === 'hot'
+                          ? 'text-white'
+                          : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
+                      }`}
+                    >
+                      {servingTemp === 'hot' && (
+                        <motion.div
+                          layoutId="activeServingTempPill"
+                          className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
+                          transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <Flame className="w-3.5 h-3.5" />
+                      <span>Hot Filter</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setServingTemp('iced')}
+                      className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 cursor-pointer ${
+                        servingTemp === 'iced'
+                          ? 'text-white'
+                          : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
+                      }`}
+                    >
+                      {servingTemp === 'iced' && (
+                        <motion.div
+                          layoutId="activeServingTempPill"
+                          className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
+                          transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <Droplets className="w-3.5 h-3.5" />
+                      <span>Ice Filter</span>
+                    </button>
                   </div>
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-mono text-on-surface-variant uppercase font-semibold block">
-                      Pilihan Suhu Seduhan Barista:
+                </div>
+
+                {/* Total Price & Stepper & Add to Cart */}
+                <div className="space-y-4 pt-1">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
+                      Total Harga
                     </span>
-                    <div className="flex gap-2.5 relative">
-                      <button
-                        type="button"
-                        onClick={() => setServingTemp('hot')}
-                        className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 ${
-                          servingTemp === 'hot'
-                            ? 'text-white'
-                            : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
-                        }`}
-                      >
-                        {servingTemp === 'hot' && (
-                          <motion.div
-                            layoutId="activeServingTempPill"
-                            className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
-                            transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                          />
-                        )}
-                        <Flame className="w-3.5 h-3.5" />
-                        <span>Hot (V60 Seduh Panas)</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setServingTemp('iced')}
-                        className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 ${
-                          servingTemp === 'iced'
-                            ? 'text-white'
-                            : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
-                        }`}
-                      >
-                        {servingTemp === 'iced' && (
-                          <motion.div
-                            layoutId="activeServingTempPill"
-                            className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
-                            transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                          />
-                        )}
-                        <Droplets className="w-3.5 h-3.5" />
-                        <span>Iced (Japanese Drip Dingin)</span>
-                      </button>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-mono text-3xl sm:text-4xl font-bold text-brand-navy">
+                        {formatRupiah((product.cupPrice || product.basePrice) * quantity)}
+                      </span>
+                      <span className="text-xs font-mono text-on-surface-variant">
+                        / {quantity} Cangkir
+                      </span>
                     </div>
                   </div>
-                </motion.div>
-              ) : (
-                /* MODE 2: BIJI KOPI KEMASAN POUCH */
-                <motion.div
-                  key="beans-pouch-mode"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-2.5"
-                >
+
+                  <div className="flex items-center gap-3">
+                    {/* Stepper */}
+                    <div className="flex items-center border border-border-subtle rounded-xl bg-surface-container-low p-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        aria-label="Kurangi jumlah"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="w-10 text-center font-mono font-bold text-sm text-brand-navy">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        aria-label="Tambah jumlah"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={isAdded}
+                      className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {isAdded ? (
+                        <>
+                          <Check className="w-5 h-5 text-emerald-300" />
+                          <span>Cup Berhasil Ditambahkan!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Coffee className="w-4 h-4" />
+                          <span>Pesan Cangkir Slowbar</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Option to buy beans pouch below */}
+                <div className="p-4 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-0.5">
+                    <span className="font-mono font-bold text-brand-navy block">Ingin Seduh Sendiri di Rumah?</span>
+                    <span className="text-on-surface-variant text-[11px]">Tersedia kemasan biji kopi Retail Pouch (100g, 200g, 500g)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOrderMode('beans')}
+                    className="px-4 py-2.5 rounded-xl bg-white border border-brand-navy text-brand-navy font-mono font-bold hover:bg-brand-navy hover:text-white transition-colors shrink-0 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>Beli Biji Kopi (Pouch) →</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* MODE 2: BEANS POUCH */
+              <div className="space-y-5 pt-2 border-t border-border-subtle">
+                <div className="space-y-2.5">
                   <label className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
                     Pilih Ukuran Biji Kopi (Kemasan Retail Pouch)
                   </label>
@@ -390,7 +493,7 @@ function ProductDetailContent() {
                         key={size.weightLabel}
                         type="button"
                         onClick={() => setSelectedVariant(size)}
-                        className={`px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all ${
+                        className={`px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer ${
                           selectedVariant.weightGrams === size.weightGrams
                             ? 'bg-brand-navy text-white shadow-md'
                             : 'bg-white border border-border-subtle text-gray-700 hover:border-brand-navy'
@@ -400,159 +503,89 @@ function ProductDetailContent() {
                       </button>
                     ))}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Price & Quantity & Add to Cart Section */}
-            <div className="pt-4 border-t border-border-subtle space-y-4">
-              <div className="flex items-baseline justify-between">
-                <span className="text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
-                  Total Harga
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl sm:text-4xl font-bold text-brand-navy">
-                    {formatRupiah(currentPrice * quantity)}
-                  </span>
-                  <span className="text-xs font-mono text-on-surface-variant">
-                    / {quantity} {orderMode === 'cup' ? 'Cup' : selectedVariant.weightLabel}
-                  </span>
                 </div>
+
+                {/* Total Price & Stepper & Add to Cart */}
+                <div className="space-y-4 pt-1">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
+                      Total Harga
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-mono text-3xl sm:text-4xl font-bold text-brand-navy">
+                        {formatRupiah(selectedVariant.price * quantity)}
+                      </span>
+                      <span className="text-xs font-mono text-on-surface-variant">
+                        / {quantity} {selectedVariant.weightLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {/* Stepper */}
+                    <div className="flex items-center border border-border-subtle rounded-xl bg-surface-container-low p-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        aria-label="Kurangi jumlah"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="w-10 text-center font-mono font-bold text-sm text-brand-navy">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        aria-label="Tambah jumlah"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={isAdded}
+                      className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {isAdded ? (
+                        <>
+                          <Check className="w-5 h-5 text-emerald-300" />
+                          <span>Biji Kopi Ditambahkan!</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="w-4 h-4" />
+                          <span>Beli Biji Kopi Pouch</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Option to switch to slowbar cup if available */}
+                {product.cupPrice && (
+                  <div className="p-4 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                    <div className="space-y-0.5">
+                      <span className="font-mono font-bold text-brand-navy block">Tersedia Seduhan Cangkir di Slowbar</span>
+                      <span className="text-on-surface-variant text-[11px]">Nikmati seduhan presisi oleh barista di Slowbar Malang ({formatRupiah(product.cupPrice)})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setOrderMode('cup')}
+                      className="px-4 py-2.5 rounded-xl bg-white border border-brand-navy text-brand-navy font-mono font-bold hover:bg-brand-navy hover:text-white transition-colors shrink-0 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Coffee className="w-3.5 h-3.5" />
+                      <span>Pesan Per Cangkir →</span>
+                    </button>
+                  </div>
+                )}
               </div>
-
-              {/* Quantity & CTA Row */}
-              <div className="flex items-center gap-3">
-                {/* Stepper */}
-                <div className="flex items-center border border-border-subtle rounded-xl bg-surface-container-low p-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs"
-                    aria-label="Kurangi jumlah"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-10 text-center font-mono font-bold text-sm text-brand-navy">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs"
-                    aria-label="Tambah jumlah"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Add to Cart Button */}
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={isAdded}
-                  className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  {isAdded ? (
-                    <>
-                      <Check className="w-5 h-5 text-emerald-300" />
-                      <span>{orderMode === 'cup' ? 'Cup Berhasil Ditambahkan!' : 'Biji Kopi Ditambahkan!'}</span>
-                    </>
-                  ) : (
-                    <span>{orderMode === 'cup' ? 'Pesan Cangkir Slowbar' : 'Beli Biji Kopi Pouch'}</span>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* ========================================================================= */}
-            {/* ONE-CLICK BREW GUIDE BRIDGE CARD                                          */}
-            {/* ========================================================================= */}
-            <div className="p-5 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-              <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-brand-maroon">
-                  <Coffee className="w-4 h-4" />
-                  <span>Resep Ekstraksi Barista 52 Coffee</span>
-                </div>
-                <p className="text-xs text-on-surface-variant">
-                  {product.brewingRecipe.dose} • Rasio {product.brewingRecipe.ratio} • Suhu {product.brewingRecipe.temp}
-                </p>
-              </div>
-              <Link
-                href={`/guide?bean=${encodeURIComponent(product.name)}`}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-navy text-white text-xs font-mono font-bold hover:bg-brand-navy-light transition-colors shadow-sm shrink-0"
-              >
-                <span>Seduh di Guide</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            {/* ========================================================================= */}
-            {/* AT A GLANCE                                                               */}
-            {/* ========================================================================= */}
-            <div className="space-y-4 pt-4 border-t border-border-subtle">
-              <span className="font-mono text-xs text-gray-400 uppercase tracking-widest font-bold block">
-                AT A GLANCE
-              </span>
-
-              {/* Tasting Notes Box */}
-              <div className="p-5 rounded-2xl bg-surface-container-low border border-border-subtle space-y-1">
-                <span className="text-[10px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
-                  TASTING NOTES
-                </span>
-                <p className="font-editorial text-lg sm:text-xl font-bold text-brand-navy">
-                  {product.tastingNotes.join(', ')}
-                </p>
-              </div>
-
-              {/* Freshness Box */}
-              <div className="p-5 rounded-2xl bg-surface-container-low border border-border-subtle space-y-2">
-                <span className="text-[10px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
-                  FRESHNESS &amp; ROAST DATE
-                </span>
-                <div className="w-full h-2 rounded-full bg-gray-200 relative overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 w-full rounded-full"></div>
-                  <div className="absolute top-0 left-[15%] w-2 h-2 rounded-full bg-white border border-gray-400 shadow-sm"></div>
-                </div>
-                <p className="text-xs font-semibold text-brand-navy">
-                  Disangrai fresh kurang dari 7 hari yang lalu di Roastery Malang
-                </p>
-              </div>
-
-              {/* Roast Rest Advisory Note */}
-              <div className="text-xs text-on-surface-variant space-y-3 leading-relaxed font-sans pt-1">
-                <p>
-                  Biji kopi 52 Coffee mencapai puncak rasa terbaiknya setelah melalui masa resting minimal 2 minggu untuk espresso dan 3 minggu untuk filter.
-                </p>
-              </div>
-
-              {/* Metadata 3x2 Grid */}
-              <div className="grid grid-cols-3 gap-3 pt-2">
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">FARM</span>
-                  <p className="text-xs font-bold text-on-surface">{product.region.split(',')[0] || 'Budug Asu'}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">REGION</span>
-                  <p className="text-xs font-bold text-on-surface">{product.origin.split(',')[0] || 'Arjuna'}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">PRODUCER</span>
-                  <p className="text-xs font-bold text-on-surface">52 Roastery Partner</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">PROCESS</span>
-                  <p className="text-xs font-bold text-on-surface">{product.process}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">ALTITUDE</span>
-                  <p className="text-xs font-bold text-on-surface">{product.altitude}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
-                  <span className="text-[9px] font-mono text-gray-400 uppercase font-bold block">VARIETALS</span>
-                  <p className="text-xs font-bold text-on-surface">{product.varietal}</p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

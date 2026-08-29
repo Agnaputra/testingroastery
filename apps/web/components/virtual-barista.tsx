@@ -29,11 +29,11 @@ interface ChatMessage {
 }
 
 const QUICK_PROMPTS = [
-  'Rekomendasi biji kopi fruity & floral (Sumbing / Sidra)',
-  'Biji kopi terbaik untuk V60 manual brew (Ijen / Walida)',
-  'Blend espresso manis untuk es kopi susu (Dampit / Arjuna)',
-  'Spesifikasi Grand Reserve Inmaculada Pink Bourbon',
-  'Tips rasio seduh & suhu air V60 harian',
+  'Rekomendasi racikan BYOB (Build Your Own Blend)',
+  'Price Calculator roastery itu buat apa?',
+  'Kopi apa yang aman untuk lambung & maag?',
+  'Biji kopi fruity & floral terbaik untuk V60',
+  'Dimana lokasi & jam buka roastery di Malang?',
 ];
 
 export function VirtualBaristaWidget() {
@@ -46,7 +46,7 @@ export function VirtualBaristaWidget() {
     {
       id: 'welcome',
       sender: 'barista',
-      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery. Ada yang bisa saya bantu rekomendasikan hari ini? Ceritakan profil rasa favoritmu (fruity, floral, winey, chocolate) atau metode seduh yang ingin kamu gunakan.',
+      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery Malang. Ada yang bisa saya bantu hari ini? Kamu bisa tanya rekomendasi beans, racik BYOB blend, cara hitung HPP dengan Price Calculator, atau panduan seduh V60.',
       timestamp: 'Baru saja',
     },
   ]);
@@ -162,7 +162,16 @@ export function VirtualBaristaWidget() {
 
       const clean = lower.replace(/[^\w\s]/gi, '').trim();
 
-      if (
+      if (lower.includes('byob') || lower.includes('by ob') || lower.includes('custom blend') || lower.includes('racik')) {
+        matched = PRODUCTS.filter((p) =>
+          ['dampit-natural-espresso', 'kintamani-full-wash-arabica-espresso', 'brazil-santos-espresso'].includes(p.slug)
+        );
+        reply = 'BYOB (Build Your Own Blend) adalah simulator racik blend kami di /blend-builder! Profil sangrai dikhususkan pada Dark Espresso Roast. Rekomendasi racikan:\n1. 70% Java Ijen + 30% Dampit Robusta (Rp 220.000/kg — Classic House Blend & Crema Tebal)\n2. 70% Java Ijen + 30% Arjuna Budug (Rp 253.000/kg — Fruity Caramel Espresso)';
+      } else if (lower.includes('price calculator') || lower.includes('kalkulator harga') || lower.includes('hpp') || lower.includes('cogs')) {
+        reply = 'Price Calculator (/tools/price-calculator) adalah tool kalkulasi finansial roastery untuk menghitung HPP produksi kopi setelah susut roasting 19.93%, biaya listrik roasting Rp 10.000/kg, packaging valve pouch, serta menghitung target margin laba kotor kedai kopi.';
+      } else if (lower.includes('lokasi') || lower.includes('alamat') || lower.includes('dimana') || lower.includes('malang')) {
+        reply = 'Roastery & Tasting Room 52 Coffee berlokasi di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (dekat Alun-Alun). Jam operasional: Senin - Jumat, 11:00 - 16:00 WIB. Instagram: @52coffeeroastery.';
+      } else if (
         lower.includes('lambung') ||
         lower.includes('maag') ||
         lower.includes('gerd') ||
@@ -177,7 +186,7 @@ export function VirtualBaristaWidget() {
         lower.includes('mild')
       ) {
         matched = PRODUCTS.filter((p) =>
-          ['kintamani-full-wash-arabica', 'ijen-yellow-bourbon', 'sumbing-deep-washed'].includes(p.slug)
+          ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana', 'sumbing-supernova-celestia'].includes(p.slug)
         );
         reply = 'Untuk kawan seduh yang mencari kopi Ringan, Lembut, dan Ramah/Aman untuk Lambung, kurasi terbaik kami:\n1. Kintamani Full Wash (Medium Roast Arabica — Nyaman di perut dengan aftertaste sweet chocolate)\n2. Ijen Yellow Bourbon Honey (Low Acidity — Manis madu & kacang almond)\n3. Java Exotic Sumbing Deep Washed (Clean body & brown sugar manis)\n\nTips: Seduh dengan metode Cold Brew atau V60 suhu air 88-90°C agar asam klorogenat ekstra lembut!';
       } else if (
@@ -191,7 +200,7 @@ export function VirtualBaristaWidget() {
         (lower.includes('filter') && !lower.includes('roast'))
       ) {
         matched = PRODUCTS.filter((p) =>
-          ['argopuro-walida-natural-anaerobic', 'sindoro-strawberry-triple-yeast', 'ijen-carbonic-maceration'].includes(p.slug)
+          ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai', 'ijen-carbonic-maceration-asmara'].includes(p.slug)
         );
         reply = 'Untuk seduhan Filter Manual Brew (V60, Aeropress, Kalita), kurasi terbaik kami:\n1. Argopuro Walida Natural Anaerobic (Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Manis Selai Stroberi & Vanilla)\n3. Ijen Carbonic Maceration (Peach & Jasmine Floral)';
       } else if (
@@ -206,7 +215,7 @@ export function VirtualBaristaWidget() {
         lower.includes('robusta')
       ) {
         matched = PRODUCTS.filter((p) =>
-          ['dampit-natural-robusta', 'kintamani-full-wash-arabica', 'brazil-santos-arabica'].includes(p.slug)
+          ['dampit-natural-espresso', 'kintamani-full-wash-arabica-espresso', 'brazil-santos-espresso'].includes(p.slug)
         );
         reply = 'Untuk seduhan Espresso & Kopi Susu Aren, primadona kami:\n1. Dampit Natural Robusta Malang (Dark Chocolate & Crema Tebal)\n2. Kintamani Full Wash Arabica (Sweet Chocolate & Smooth)\n3. Brazil Santos (Roasted Peanut & Nutty)';
       } else if (
@@ -218,30 +227,23 @@ export function VirtualBaristaWidget() {
         lower.includes('populer') ||
         lower.includes('paling enak') ||
         lower.includes('rekomendasi') ||
-        lower.includes('rekomen') ||
-        lower.includes('apa yang rekomendasi')
+        lower.includes('rekomen')
       ) {
         matched = PRODUCTS.filter((p) =>
-          ['argopuro-walida-natural-anaerobic', 'sindoro-strawberry-triple-yeast', 'dampit-natural-robusta'].includes(p.slug)
+          ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai', 'dampit-natural-espresso'].includes(p.slug)
         );
-        reply = 'Rekomendasi Best Seller & Terfavorit di 52 Coffee & Roastery:\n1. Argopuro Walida Natural Anaerobic (Filter V60 — Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Filter V60 — Selai Stroberi & Vanilla)\n3. Dampit Fine Robusta Malang (Espresso / Es Kopi Susu Aren)';
+        reply = 'Rekomendasi Best Seller & Terfavorit di 52 Coffee & Roastery:\n1. Argopuro Walida Natural Anaerobic (Filter V60 — Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Filter V60 — Selai Stroberi & Vanilla)\n3. Dampit Fine Robusta Malang (Espresso / Es Kopi Susu Aren)\n4. B.Y.O.B Custom House Blend (Dark Espresso)';
       } else if (lower.includes('fruity') || lower.includes('buah') || lower.includes('strawberry') || lower.includes('berry')) {
         matched = PRODUCTS.filter((p) => p.flavorCategory.includes('Fruity')).slice(0, 3);
         reply = 'Untuk profil Fruity & Exotic, saya sangat merekomendasikan Sindoro Strawberry Triple Yeast dengan aroma selai stroberi kental, atau Argopuro Walida dengan karakter plum dan cherry yang sangat juicy!';
       } else if (lower.includes('floral') || lower.includes('jasmine') || lower.includes('geisha') || lower.includes('bunga')) {
         matched = PRODUCTS.filter((p) => p.flavorCategory.includes('Floral')).slice(0, 2);
         reply = 'Bagi pencinta aroma Floral Elegan, pilihan mahkota kami adalah El Triunfo Geisha Tolima Colombia (Jasmine & Bergamot) serta Ijen Carbonic Maceration dengan harum melati dan peach manis!';
-      } else if (lower.includes('argopuro') || lower.includes('walida')) {
-        matched = PRODUCTS.filter((p) => p.slug === 'argopuro-walida-natural-anaerobic');
-        reply = 'Argopuro Walida Natural Anaerobic adalah rilisan baru dengan dominasi rasa plum matang, blood orange segar, dan dark cherry yang juicy!';
-      } else if (lower.includes('ijen')) {
-        matched = PRODUCTS.filter((p) => p.series === 'Ijen Series');
-        reply = 'Koleksi Ijen Series adalah lini signature 52 Coffee! Ditanam di lereng kaldera Ijen 1.400-1.600 MASL. Pilih Carbonic Maceration untuk rasa Peach & Jasmine, Lactic untuk sensasi Mango Lychee Creamy, atau Yellow Bourbon untuk kelembutan madu!';
       } else if (lower.includes('rasio') || lower.includes('v60') || lower.includes('seduh') || lower.includes('resep')) {
-        reply = 'Untuk seduh V60 biji kopi kami, kami sarankan Dosis 15g, Air 225ml (Rasio 1:15), Suhu 92°C. Blooming 45g selama 40 detik, lalu tuang 2 tahap spiral hingga 225ml dengan drawdown tuntas di 02:15. Coba juga fitur Brew Calculator kami!';
+        reply = 'Untuk seduh V60 biji kopi kami, kami sarankan Dosis 15g, Air 225ml (Rasio 1:15), Suhu 92°C. Blooming 45g selama 40 detik, lalu tuang 2 tahap spiral hingga 225ml dengan drawdown tuntas di 02:15. Coba juga fitur Brew Calculator kami di /tools/brew-calculator!';
       } else {
         matched = PRODUCTS.filter((p) => p.isFeatured).slice(0, 2);
-        reply = `Halo! Kami memiliki beragam kurasi biji kopi segar yang disangrai di Malang. Kamu bisa memilih:\n1. Filter Manual Brew (Fruity, Floral, atau Sweet Strawberry)\n2. Espresso & Kopi Susu (Chocolate, Nutty, Crema Tebal)\n3. Grand Reserve Micro-Lot (Geisha & Sidra Langka)\n\nProfil rasa mana yang ingin kamu eksplorasi?`;
+        reply = `Halo! Kami memiliki beragam kurasi biji kopi segar yang disangrai di Malang. Kamu bisa memilih:\n1. Filter Manual Brew (Fruity, Floral, atau Sweet Strawberry)\n2. Espresso & Kopi Susu (Chocolate, Nutty, Crema Tebal)\n3. B.Y.O.B Custom Blend Simulator (/blend-builder)\n4. Grand Reserve Micro-Lot (Geisha & Sidra Langka)\n\nProfil rasa atau topik mana yang ingin kamu eksplorasi?`;
       }
 
       setIsLoading(false);
@@ -542,6 +544,7 @@ export function VirtualBaristaWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Tanya rasa, origin, atau rekomendasi..."
+                maxLength={500}
                 className="flex-1 px-4 py-2.5 text-xs sm:text-sm bg-surface-container-low rounded-full border border-border-subtle focus:outline-none focus:border-brand-navy text-on-surface placeholder:text-on-surface-variant"
               />
               <button

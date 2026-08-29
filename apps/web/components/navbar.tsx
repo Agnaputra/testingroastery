@@ -225,9 +225,9 @@ export function Navbar() {
                           : 'hover:bg-surface-container-low text-on-surface hover:text-brand-navy'
                       }`}
                     >
-                      <div className="font-bold text-sm">Price Calculator</div>
+                      <div className="font-bold text-sm">B2B Wholesale &amp; HPP</div>
                       <div className={`text-[11px] font-normal font-sans ${isDarkNavbar ? 'text-gray-400' : 'text-on-surface-variant'}`}>
-                        Estimasi HPP &amp; margin roast
+                        Simulasi modal &amp; margin kedai kopi
                       </div>
                     </Link>
 
@@ -398,7 +398,7 @@ export function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block py-1.5 font-semibold ${isDarkNavbar ? 'text-gray-200 hover:text-white' : 'text-on-surface hover:text-brand-navy'}`}
                 >
-                  • Price Calculator
+                  • B2B Wholesale &amp; Kalkulator HPP
                 </Link>
                 <Link
                   href="/guide"
