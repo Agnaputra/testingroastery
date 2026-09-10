@@ -41,7 +41,7 @@ export function FlavorRadarChart({
   title,
 }: FlavorRadarChartProps) {
   const center = size / 2;
-  const radius = size * 0.38;
+  const radius = size * (showLabels ? 0.3 : 0.38);
   const numAxes = AXES.length;
   const angleStep = (Math.PI * 2) / numAxes;
 
@@ -126,7 +126,9 @@ export function FlavorRadarChart({
           width={size}
           height={size}
           viewBox={`0 0 ${size} ${size}`}
-          className="overflow-visible select-none drop-shadow-sm"
+          className="h-auto max-w-full select-none drop-shadow-sm"
+          role="img"
+          aria-label="Profil rasa kopi: acidity, sweetness, body, floral, aftertaste, dan balance"
         >
           {/* Concentric Web Grid Polygons */}
           {levels.map((lvl, lvlIdx) => {
@@ -204,11 +206,6 @@ export function FlavorRadarChart({
               const x = center + labelRadius * Math.cos(angle);
               const y = center + labelRadius * Math.sin(angle);
 
-              // Text anchor calculation based on angle
-              let textAnchor: 'middle' | 'start' | 'end' = 'middle';
-              if (Math.cos(angle) > 0.3) textAnchor = 'start';
-              else if (Math.cos(angle) < -0.3) textAnchor = 'end';
-
               const val = metrics[axis.key]?.toFixed(1) || '0.0';
 
               return (
@@ -216,11 +213,11 @@ export function FlavorRadarChart({
                   key={`label-${axis.key}`}
                   x={x}
                   y={y}
-                  textAnchor={textAnchor}
+                  textAnchor="middle"
                   dominantBaseline="central"
                   className="font-mono text-[10px] fill-on-surface font-semibold tracking-tight"
                 >
-                  {axis.short} <tspan className="fill-brand-maroon font-bold">({val})</tspan>
+                  {axis.short}<tspan x={x} dy="14" className="fill-brand-maroon font-bold">{val}/10</tspan>
                 </text>
               );
             })}

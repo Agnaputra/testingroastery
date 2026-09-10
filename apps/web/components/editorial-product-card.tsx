@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Eye, Plus, Check, Coffee } from 'lucide-react';
+import { Eye, Plus, Check } from 'lucide-react';
 import { CoffeeProduct, formatRupiah } from '../lib/data';
 import { QuickViewModal } from './quick-view-modal';
 import { useCartStore } from '../lib/store/useCartStore';
@@ -46,10 +45,10 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
 
   return (
     <>
-      <div className="group relative bg-[#F9FAFB] hover:bg-white border border-border-subtle hover:border-brand-navy/30 transition-all duration-300 p-4 sm:p-5 flex flex-col justify-between rounded-2xl overflow-hidden hover:shadow-xl">
+      <article className="group relative min-w-0 bg-white border border-border-subtle hover:border-brand-navy/40 transition-colors duration-200 p-4 sm:p-5 flex flex-col justify-between rounded-xl overflow-hidden">
         {/* Top Badges */}
-        <div className="w-full flex items-center justify-between gap-1.5 text-[10px] font-mono mb-2">
-          <span className="uppercase tracking-wider text-brand-maroon font-bold truncate max-w-[130px]">
+        <div className="w-full flex flex-wrap items-center justify-between gap-2 text-xs mb-2">
+          <span className="text-brand-maroon font-semibold">
             {product.series.replace(' Series', '')}
           </span>
           {isCup ? (
@@ -64,24 +63,27 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
         </div>
 
         {/* Center: Studio Product Shot with Clean Hover Lift */}
-        <Link href={detailUrl} className="relative w-full aspect-square max-w-[180px] mx-auto my-3 flex items-center justify-center block">
+        <Link href={detailUrl} className="relative w-full aspect-[6/5] mx-auto my-4 flex items-center justify-center overflow-hidden rounded-lg bg-surface-container-low">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-108 group-hover:-translate-y-1 transition-transform duration-500 ease-out"
+            loading="lazy"
+            width={300}
+            height={250}
+            className="w-full h-full object-contain mix-blend-multiply motion-safe:group-hover:scale-[1.04] transition-transform duration-300 ease-out"
           />
         </Link>
 
         {/* Content Info (Clean & Concise for 4-column Grid) */}
         <div className="w-full space-y-2 mt-auto pt-2 border-t border-border-subtle/70">
           {/* Origin Subtitle */}
-          <div className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider truncate">
+          <div className="text-xs text-on-surface-variant truncate">
             {product.origin}
           </div>
 
           {/* Title */}
-          <Link href={detailUrl} className="block group-hover:text-brand-teal transition-colors">
-            <h3 className="font-editorial text-base sm:text-lg font-bold tracking-tight text-brand-navy line-clamp-1 leading-snug">
+          <Link href={detailUrl} className="block">
+            <h3 className="font-editorial text-lg font-semibold tracking-tight text-brand-navy min-h-[3.5rem] leading-7">
               {isCup && product.slowbarAlias ? product.slowbarAlias : product.name}
             </h3>
             {isCup && product.slowbarAlias && (
@@ -92,24 +94,24 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
           </Link>
 
           {/* Tasting Notes (Color-coded Sensory Tag Badges) */}
-          <div className="flex flex-wrap items-center gap-1.5 py-1">
+          <div className="flex min-h-10 flex-wrap items-center gap-1.5 py-1">
             {product.tastingNotes.slice(0, 2).map((note) => (
               <SensoryTag key={note} note={note} size="sm" />
             ))}
           </div>
 
           {/* Bottom Row: Price & Quick Action */}
-          <div className="flex items-center justify-between pt-2 border-t border-border-subtle/50">
+          <div className="flex flex-wrap gap-3 items-center justify-between pt-4 border-t border-border-subtle/70">
             <div className="font-mono">
               {isCup ? (
                 <div className="text-brand-maroon font-bold text-sm sm:text-base leading-none">
                   {formatRupiah(product.cupPrice || product.basePrice)}
-                  <span className="text-[10px] font-normal text-on-surface-variant block mt-0.5">/ cangkir</span>
+                  <span className="text-xs font-normal text-on-surface-variant block mt-1">/ cangkir</span>
                 </div>
               ) : (
                 <div className="text-brand-navy font-bold text-sm sm:text-base leading-none">
                   {formatRupiah(product.basePrice)}
-                  <span className="text-[10px] font-normal text-on-surface-variant block mt-0.5">/ pouch</span>
+                  <span className="text-xs font-normal text-on-surface-variant block mt-1">/ {product.defaultWeight}</span>
                 </div>
               )}
             </div>
@@ -121,15 +123,17 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
                   e.preventDefault();
                   setQuickViewOpen(true);
                 }}
-                className="p-2 rounded-xl bg-white hover:bg-surface-container-low text-brand-navy border border-border-subtle transition-all text-xs font-bold shadow-xs hover:scale-105"
-                title="Quick View Info"
+                className="icon-button rounded-lg bg-white hover:bg-surface-container-low text-brand-navy border border-border-subtle"
+                aria-label={`Lihat ringkasan ${product.name}`}
+                title="Lihat ringkasan"
               >
                 <Eye className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
                 onClick={handleDirectAdd}
-                className="p-2 rounded-xl bg-brand-navy text-white hover:bg-brand-navy-light transition-all active:scale-90 shadow-xs hover:scale-105"
+                className="icon-button rounded-lg bg-brand-navy text-white hover:bg-brand-navy-light"
+                aria-label={added ? `${product.name} ditambahkan` : `Tambah ${product.name} ke keranjang`}
                 title={isCup ? 'Pesan Cup' : 'Tambah ke Keranjang'}
               >
                 {added ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Plus className="w-3.5 h-3.5" />}
@@ -137,7 +141,7 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
             </div>
           </div>
         </div>
-      </div>
+      </article>
 
       <QuickViewModal
         product={quickViewOpen ? product : null}

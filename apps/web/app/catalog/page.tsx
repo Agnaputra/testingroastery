@@ -149,21 +149,22 @@ function CatalogContent() {
   };
 
   return (
-    <div className="w-full bg-surface-white text-on-surface font-sans min-h-screen pb-24 antialiased">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12">
+    <div className="w-full bg-surface-white text-on-surface font-sans min-h-screen pb-24 antialiased [&_button]:min-h-11">
+      <div className="site-container">
         {/* ===================================================================== */}
         {/* 1. BREADCRUMB & 52 COFFEE CATALOG HEADER                              */}
         {/* ===================================================================== */}
-        <div className="pt-10 pb-4 text-center">
+        <div className="pt-10 sm:pt-14 pb-6 text-center">
           <div className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant mb-4">
-            <Link href="/" className="hover:text-brand-navy transition-colors">Home</Link>
+            <Link href="/" className="hover:text-brand-navy transition-colors">Beranda</Link>
             <span className="mx-2">/</span>
-            <span className="text-brand-navy font-semibold">Catalog</span>
+            <span className="text-brand-navy font-semibold">Koleksi Kopi</span>
           </div>
 
-          <h1 className="font-editorial text-4xl sm:text-6xl lg:text-7xl font-bold text-brand-navy tracking-tight uppercase mb-6">
-            52 Coffee Catalog
+          <h1 className="font-editorial text-4xl sm:text-5xl lg:text-6xl font-semibold text-brand-navy tracking-tight mb-4">
+            Temukan karakter kopimu.
           </h1>
+          <p className="mx-auto mb-8 max-w-xl text-sm leading-7 text-on-surface-variant">Pilih origin, profil sangrai, dan ukuran yang pas untuk seduhanmu.</p>
 
           {/* 1. PRIMARY EDITORIAL TABS (WHOLEBEANS/RETAIL vs SLOWBAR) */}
           <div className="flex items-center justify-center border-b border-border-subtle max-w-sm sm:max-w-md mx-auto">
@@ -177,7 +178,7 @@ function CatalogContent() {
                 mainTab === 'beans' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
               }`}
             >
-              <span>Wholebeans/Retail</span>
+              <span>Biji Kopi</span>
               {mainTab === 'beans' && (
                 <motion.div
                   layoutId="activeCatalogTabLine"
@@ -256,8 +257,15 @@ function CatalogContent() {
         {/* 2. PERMANENTLY OPEN SERIES FILTER BAR & SORT TOOLBAR                  */}
         {/* ===================================================================== */}
         <div className="mt-8 mb-8 space-y-4">
-          {/* Series Selection Bar (Always Open) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-border-subtle space-y-2.5">
+          <div className="sm:hidden">
+            <label htmlFor="mobile-coffee-series" className="mb-2 block text-xs font-semibold text-on-surface-variant">Pilih series kopi</label>
+            <select id="mobile-coffee-series" value={selectedSeries} onChange={(event) => { setSelectedSeries(event.target.value); setVisibleCount(12); }} className="min-h-12 w-full rounded-lg border border-border-subtle bg-surface-container-low px-4 text-sm text-brand-navy">
+              <option value="all">Semua Series</option>
+              {allSeriesList.map((series) => <option key={series} value={series}>{series}</option>)}
+            </select>
+          </div>
+          {/* Expanded series selection on larger screens */}
+          <div className="hidden sm:block p-5 rounded-xl bg-surface-container-low border border-border-subtle space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant font-bold block">
                 Pilih Series (Origin Nusantara &amp; Dunia)
@@ -301,7 +309,7 @@ function CatalogContent() {
           </div>
 
           {/* Results Count & Sort By Toolbar */}
-          <div className="border-y border-border-subtle py-3 flex items-center justify-between font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
+          <div className="border-y border-border-subtle py-3 flex flex-wrap gap-x-4 gap-y-2 items-center justify-between font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
             {/* Results Count */}
             <span className="text-[11px] font-mono text-on-surface-variant font-normal normal-case">
               Menampilkan {displayedProducts.length} dari {filteredProducts.length} {mainTab === 'slowbar' ? 'menu seduh cangkir' : 'biji kopi'}
@@ -313,7 +321,7 @@ function CatalogContent() {
                 onClick={() => setSortOpen(!sortOpen)}
                 className="flex items-center gap-2 hover:text-brand-teal transition-colors cursor-pointer"
               >
-                <span>SORT BY {sortOpen ? '–' : '+'}</span>
+                <span>Urutkan {sortOpen ? '–' : '+'}</span>
               </button>
 
               {sortOpen && (
@@ -368,7 +376,7 @@ function CatalogContent() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
+              className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6"
             >
               {displayedProducts.map((product) => (
                 <EditorialProductCard

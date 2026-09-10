@@ -4,6 +4,7 @@ import { Navbar } from '../components/navbar';
 import { Footer } from '../components/footer';
 import { CartDrawer } from '../components/cart-drawer';
 import { VirtualBaristaWidget } from '../components/virtual-barista';
+import { MotionProvider } from '../components/motion-provider';
 
 export const metadata: Metadata = {
   title: '52 Coffee & Roastery — Artisanal Roasting, Precision Extraction (Malang)',
@@ -46,11 +47,14 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-roastery-cream text-roastery-dark min-h-screen flex flex-col selection:bg-roastery-caramel selection:text-white">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CartDrawer />
-        <VirtualBaristaWidget />
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-5 focus:py-3 focus:text-brand-navy">Langsung ke konten</a>
+        <MotionProvider>
+          <Navbar />
+          <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
+          <Footer />
+          <CartDrawer />
+          <VirtualBaristaWidget />
+        </MotionProvider>
       </body>
     </html>
   );

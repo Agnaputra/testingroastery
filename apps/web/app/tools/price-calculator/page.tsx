@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   Calculator,
@@ -12,10 +13,7 @@ import {
   Copy,
   Check,
   Phone,
-  ArrowRight,
-  TrendingUp,
   CheckCircle2,
-  Package,
 } from 'lucide-react';
 import { formatRupiah } from '../../../lib/data';
 
@@ -150,15 +148,15 @@ export default function B2BWholesaleCalculatorPage() {
     if (monthlyBeanKg >= 50) {
       tierName = 'Tier 3 (Master Partner)';
       discountPercent = 15;
-      tierBonus = 'Diskon Grosir 15% + Custom Sangrai Khusus + Free Ongkir Malang/Sby';
+      tierBonus = 'Diskon grosir 15% + profil sangrai khusus + gratis ongkir Malang/Surabaya';
     } else if (monthlyBeanKg >= 25) {
-      tierName = 'Tier 2 (Pro Cafe Partner)';
+      tierName = 'Tier 2 (Mitra Pro)';
       discountPercent = 10;
       tierBonus = 'Diskon Grosir 10% + Kalibrasi Barista Gratis Tiap Bulan';
     } else if (monthlyBeanKg >= 10) {
       tierName = 'Tier 1 (Starter Partner)';
       discountPercent = 5;
-      tierBonus = 'Diskon Grosir 5% + Sample Pack Batch Terbaru';
+      tierBonus = 'Diskon grosir 5% + paket sampel batch terbaru';
     }
 
     const discountSavings = Math.round(monthlyBeanCost * (discountPercent / 100));
@@ -193,7 +191,7 @@ export default function B2BWholesaleCalculatorPage() {
   };
 
   const handleCopyCalculation = () => {
-    const text = `☕ Simulasi HPP & Laba Kedai Kopi (52 Coffee Roastery):\n• Pilihan Biji: ${isCustomPrice ? 'Custom Price' : selectedBean.name} (${formatRupiah(activeBeanPrice)}/kg)\n• Dosis: ${doseGrams}g/cup (Yield: ~${calc.cupsPerKg} cup/kg)\n• HPP Kopi Murni: ${formatRupiah(calc.coffeeCostPerCup)}/cup\n• Bahan Tambahan (Susu/Cup): ${formatRupiah(extraCost)}/cup\n• TOTAL HPP: ${formatRupiah(calc.totalHppPerCup)}/cup\n• Harga Jual Menu: ${formatRupiah(sellingPrice)}/cup\n• LABA BERSIH: ${formatRupiah(calc.grossProfitPerCup)}/cup (${calc.marginPercent}% Margin)\n\n📊 Estimasi Bulanan (${dailyCups} cup/hari • ${calc.monthlyCups} cup/bln):\n- Kebutuhan Kopi: ${calc.monthlyBeanKg} kg/bln\n- Estimasi Omzet: ${formatRupiah(calc.monthlyRevenue)}\n- Estimasi Laba Kotor: ${formatRupiah(calc.netMonthlyProfitWithDiscount)}/bln\n- Status Mitra: ${calc.tierName} (${calc.tierBonus})`;
+    const text = `Simulasi HPP & Laba Kedai Kopi — 52 Coffee & Roastery\n• Pilihan biji: ${isCustomPrice ? 'Harga khusus' : selectedBean.name} (${formatRupiah(activeBeanPrice)}/kg)\n• Dosis: ${doseGrams} g/cangkir (hasil: ~${calc.cupsPerKg} cangkir/kg)\n• HPP kopi: ${formatRupiah(calc.coffeeCostPerCup)}/cangkir\n• Bahan tambahan: ${formatRupiah(extraCost)}/cangkir\n• Total HPP: ${formatRupiah(calc.totalHppPerCup)}/cangkir\n• Harga jual: ${formatRupiah(sellingPrice)}/cangkir\n• Laba kotor: ${formatRupiah(calc.grossProfitPerCup)}/cangkir (margin ${calc.marginPercent}%)\n\nEstimasi bulanan (${dailyCups} cangkir/hari • ${calc.monthlyCups} cangkir/bulan):\n• Kebutuhan kopi: ${calc.monthlyBeanKg} kg/bulan\n• Estimasi omzet: ${formatRupiah(calc.monthlyRevenue)}\n• Estimasi laba kotor: ${formatRupiah(calc.netMonthlyProfitWithDiscount)}/bulan\n• Status mitra: ${calc.tierName} (${calc.tierBonus})`;
 
     if (typeof window !== 'undefined') {
       navigator.clipboard?.writeText(text);
@@ -212,36 +210,45 @@ export default function B2BWholesaleCalculatorPage() {
       {/* ========================================================================= */}
       {/* 1. HERO SECTION (B2B Wholesale & Business Calculator)                     */}
       {/* ========================================================================= */}
-      <section className="relative w-full min-h-[440px] sm:min-h-[500px] pt-28 pb-16 flex items-center justify-start overflow-hidden bg-[#101A26]">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 z-0 w-full h-full mix-blend-luminosity opacity-45 bg-cover bg-center"
-          style={{ backgroundImage: `url('/images/canva-roaster-drum.jpg')` }}
-        />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#101A26] via-[#101A26]/85 to-[#101A26]/40" />
-
-        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white space-y-4">
+      <section className="relative w-full overflow-hidden bg-brand-charcoal py-14 sm:py-20">
+        <div className="absolute inset-0 opacity-30" aria-hidden="true">
+          <div className="absolute -right-28 -top-44 h-[34rem] w-[34rem] rounded-full border-[72px] border-[#465c70]" />
+          <div className="absolute -bottom-56 -left-36 h-[32rem] w-[42rem] rounded-[50%] border-[64px] border-[#52627a]" />
+        </div>
+        <div className="relative z-20 mx-auto grid w-full max-w-7xl items-center gap-10 px-4 text-white sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="max-w-3xl space-y-3"
+            className="max-w-3xl space-y-5"
           >
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md">
+            <div className="inline-flex items-center space-x-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5">
               <Calculator className="w-3.5 h-3.5 text-[#D8B168]" />
               <span className="font-mono text-[11px] text-gray-200 tracking-widest uppercase font-bold">
-                B2B WHOLESALE &amp; PROFIT SIMULATOR
+                Kalkulator B2B &amp; Wholesale
               </span>
             </div>
 
-            <h1 className="font-editorial text-4xl sm:text-6xl font-bold text-white leading-tight tracking-tight">
-              B2B Wholesale &amp; <br />
-              <span className="text-[#D8B168]">Kalkulator HPP Kedai Kopi.</span>
+            <h1 className="max-w-2xl font-editorial text-4xl font-bold leading-[1.04] tracking-[-0.03em] text-white sm:text-6xl">
+              Hitung HPP dan proyeksi laba kedai Anda.
             </h1>
 
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed font-sans max-w-2xl">
-              Simulasikan estimasi biaya modal biji kopi per cangkir, bahan pendukung (susu &amp; cup), margin laba bersih, hingga kebutuhan pasokan kopi bulanan kedai Anda bersama 52 Coffee Roastery.
+              Simulasikan biaya biji kopi per cangkir, bahan tambahan, margin, dan kebutuhan pasokan bulanan bersama 52 Coffee &amp; Roastery.
             </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.12 }}
+            className="relative mx-auto aspect-[1.74/1] w-full max-w-[610px] overflow-hidden rounded-2xl border border-white/15 bg-[#182237] shadow-[0_28px_70px_rgba(0,0,0,.28)]"
+          >
+            <div className="absolute -right-12 -top-32 h-64 w-80 rounded-[50%] border-[34px] border-[#47536c]/65" aria-hidden="true" />
+            <div className="absolute -bottom-32 -left-24 h-56 w-[34rem] rounded-[50%] border-[42px] border-[#4b5872]/80" aria-hidden="true" />
+            <div className="absolute inset-0 flex items-center justify-center gap-4 px-8">
+              <Image src="/images/logo.png" alt="" width={112} height={82} className="h-auto w-24 brightness-0 invert sm:w-28" aria-hidden="true" />
+              <span className="font-editorial text-2xl font-bold leading-tight text-white sm:text-3xl">52 Coffee<br />Roastery</span>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -249,18 +256,18 @@ export default function B2BWholesaleCalculatorPage() {
       {/* ========================================================================= */}
       {/* 2. INTERACTIVE SIMULATOR (2-Column Layout)                                */}
       {/* ========================================================================= */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <section className="mx-auto max-w-7xl space-y-12 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
           {/* LEFT COLUMN: Controls & Input Parameters (7 Cols) */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white lg:col-span-7">
             {/* 1. Bean Preset & Wholesale Price */}
-            <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-gray-200 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#162A43] font-extrabold flex items-center gap-2">
+            <div className="space-y-5 border-b border-gray-200 p-5 sm:p-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="flex items-center gap-2 text-sm font-bold text-[#162A43]">
                   <Coffee className="w-4 h-4 text-[#A52136]" />
-                  <span>1. Pilihan Biji Kopi 52 Roastery (Wholesale 1kg)</span>
+                  <span>1. Pilih Biji Kopi Grosir (1 kg)</span>
                 </span>
-                <span className="text-xs font-mono font-bold text-[#A52136]">
+                <span className="font-mono text-sm font-bold text-[#A52136]">
                   {formatRupiah(activeBeanPrice)} / kg
                 </span>
               </div>
@@ -276,13 +283,14 @@ export default function B2BWholesaleCalculatorPage() {
                         setSelectedBean(b);
                         setIsCustomPrice(false);
                       }}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                      aria-pressed={!isCustomPrice && selectedBean.id === b.id}
+                      className={`flex min-h-20 cursor-pointer flex-col justify-between rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246A73] focus-visible:ring-offset-2 ${
                         !isCustomPrice && selectedBean.id === b.id
                           ? 'bg-[#162A43] text-white border-[#162A43] shadow-sm'
-                          : 'bg-[#F8FAFC] text-[#162A43] border-gray-200 hover:border-gray-300'
+                          : 'bg-white text-[#162A43] border-gray-200 hover:border-[#8FB9BC]'
                       }`}
                     >
-                      <div className="font-bold text-xs truncate">{b.name}</div>
+                      <div className="text-xs font-bold leading-snug">{b.name}</div>
                       <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
                         <span className={!isCustomPrice && selectedBean.id === b.id ? 'text-gray-300' : 'text-gray-500'}>
                           {b.category}
@@ -296,14 +304,15 @@ export default function B2BWholesaleCalculatorPage() {
                 </div>
 
                 {/* Custom Price Toggle */}
-                <div className="pt-2 flex items-center gap-3">
-                  <label className="text-xs font-mono font-bold text-gray-600">
-                    Atau Input Harga Grosir Manual:
+                <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
+                  <label className="text-sm font-medium text-gray-600">
+                    Atau masukkan harga grosir manual
                   </label>
                   <div className="flex items-center gap-1 bg-[#F8FAFC] border border-gray-300 px-3 py-1.5 rounded-xl">
                     <span className="text-xs font-mono text-gray-500 font-bold">Rp</span>
                     <input
                       type="number"
+                      aria-label="Harga grosir manual per kilogram"
                       step="5000"
                       value={customBeanPrice}
                       onChange={(e) => {
@@ -318,14 +327,14 @@ export default function B2BWholesaleCalculatorPage() {
             </div>
 
             {/* 2. Dose per Cup (Gramasi) */}
-            <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-gray-200 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#162A43] font-extrabold flex items-center gap-2">
+            <div className="space-y-4 border-b border-gray-200 p-5 sm:p-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="flex items-center gap-2 text-sm font-bold text-[#162A43]">
                   <Layers className="w-4 h-4 text-[#246A73]" />
-                  <span>2. Dosis Bubuk Kopi per Cangkir (Gramasi)</span>
+                  <span>2. Atur Dosis Kopi per Cangkir</span>
                 </span>
                 <span className="text-sm font-mono font-black text-[#246A73]">
-                  {doseGrams} Gram / Cup
+                  {doseGrams} g / cangkir
                 </span>
               </div>
 
@@ -340,7 +349,8 @@ export default function B2BWholesaleCalculatorPage() {
                     key={p.val}
                     type="button"
                     onClick={() => setDoseGrams(p.val)}
-                    className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
+                    aria-pressed={doseGrams === p.val}
+                    className={`min-h-11 cursor-pointer rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
                       doseGrams === p.val
                         ? 'bg-[#246A73] text-white border-[#246A73]'
                         : 'bg-[#F8FAFC] text-gray-700 border-gray-300 hover:border-gray-400'
@@ -353,6 +363,7 @@ export default function B2BWholesaleCalculatorPage() {
 
               <input
                 type="range"
+                aria-label="Dosis kopi per cangkir"
                 min="12"
                 max="24"
                 step="0.5"
@@ -360,19 +371,19 @@ export default function B2BWholesaleCalculatorPage() {
                 onChange={(e) => setDoseGrams(Number(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#246A73]"
               />
-              <div className="text-[11px] font-mono text-gray-500">
-                💡 Dari 1 kg biji kopi ({formatRupiah(activeBeanPrice)}), Anda menghasilkan sekitar <strong>~{calc.cupsPerKg} cup</strong> kopi.
+              <div className="text-xs text-gray-600">
+                Dari 1 kg biji kopi ({formatRupiah(activeBeanPrice)}), Anda menghasilkan sekitar <strong>~{calc.cupsPerKg} cangkir</strong> kopi.
               </div>
             </div>
 
             {/* 3. Drink Type & Extra Cost */}
-            <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-gray-200 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#162A43] font-extrabold">
-                  3. Biaya Bahan Tambahan (Susu, Gula, Cup &amp; Sedotan)
+            <div className="space-y-4 border-b border-gray-200 p-5 sm:p-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm font-bold text-[#162A43]">
+                  3. Pilih Menu &amp; Biaya Bahan Tambahan
                 </span>
                 <span className="text-sm font-mono font-black text-[#162A43]">
-                  {formatRupiah(extraCost)} / cup
+                  {formatRupiah(extraCost)} / cangkir
                 </span>
               </div>
 
@@ -382,13 +393,14 @@ export default function B2BWholesaleCalculatorPage() {
                     key={d.id}
                     type="button"
                     onClick={() => handleSelectDrinkPreset(d)}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    aria-pressed={selectedDrink.id === d.id}
+                    className={`min-h-16 cursor-pointer rounded-xl border p-2.5 text-left transition-colors ${
                       selectedDrink.id === d.id
                         ? 'bg-[#162A43] text-white border-[#162A43]'
                         : 'bg-[#F8FAFC] text-gray-700 border-gray-300 hover:border-gray-400'
                     }`}
                   >
-                    <div className="font-bold text-[11px] truncate">{d.name}</div>
+                    <div className="text-[11px] font-bold leading-snug">{d.name}</div>
                     <div className="text-[10px] font-mono opacity-80 mt-0.5">
                       +{formatRupiah(d.extraCost)}
                     </div>
@@ -397,9 +409,10 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
 
               <div className="pt-1 flex items-center gap-3">
-                <label className="text-xs font-mono text-gray-600">Sesuaikan Biaya Tambahan:</label>
+                <label className="text-sm text-gray-600">Sesuaikan biaya</label>
                 <input
                   type="range"
+                  aria-label="Biaya bahan tambahan per cangkir"
                   min="500"
                   max="8000"
                   step="250"
@@ -411,11 +424,11 @@ export default function B2BWholesaleCalculatorPage() {
             </div>
 
             {/* 4. Selling Price & Daily Cups Target */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 divide-y divide-gray-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
               {/* Selling Price */}
-              <div className="p-5 rounded-3xl bg-white border-2 border-gray-200 space-y-2.5 shadow-xs">
+              <div className="space-y-3 p-5 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono uppercase text-[#162A43] font-bold">
+                  <span className="text-sm font-semibold text-[#162A43]">
                     Harga Jual Menu
                   </span>
                   <span className="text-base font-mono font-black text-[#162A43]">
@@ -424,6 +437,7 @@ export default function B2BWholesaleCalculatorPage() {
                 </div>
                 <input
                   type="range"
+                  aria-label="Harga jual menu"
                   min="12000"
                   max="45000"
                   step="1000"
@@ -440,17 +454,18 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
 
               {/* Daily Target */}
-              <div className="p-5 rounded-3xl bg-white border-2 border-gray-200 space-y-2.5 shadow-xs">
+              <div className="space-y-3 p-5 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono uppercase text-[#162A43] font-bold">
-                    Target Cup / Hari
+                  <span className="text-sm font-semibold text-[#162A43]">
+                    Target Cangkir / Hari
                   </span>
                   <span className="text-base font-mono font-black text-[#A52136]">
-                    {dailyCups} Cup
+                    {dailyCups} cangkir
                   </span>
                 </div>
                 <input
                   type="range"
+                  aria-label="Target penjualan cangkir per hari"
                   min="20"
                   max="300"
                   step="10"
@@ -459,23 +474,23 @@ export default function B2BWholesaleCalculatorPage() {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#A52136]"
                 />
                 <div className="flex justify-between text-[10px] font-mono text-gray-400">
-                  <span>20 cup</span>
-                  <span>100 cup</span>
-                  <span>200 cup</span>
-                  <span>300 cup</span>
+                  <span>20</span>
+                  <span>100</span>
+                  <span>200</span>
+                  <span>300</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* RIGHT COLUMN: Live Calculation Results (5 Cols) */}
-          <div className="lg:col-span-5 space-y-5">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white lg:sticky lg:top-24 lg:col-span-5">
             {/* Unit Economics Highlight Cards */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 divide-x divide-gray-200 border-b border-gray-200">
               {/* Total HPP per Cup */}
-              <div className="p-5 rounded-3xl bg-white border-2 border-gray-200 shadow-md space-y-1">
+              <div className="space-y-1 p-5 sm:p-6">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 font-bold block">
-                  TOTAL HPP PER CUP
+                  Total HPP / Cangkir
                 </span>
                 <div className="font-mono text-2xl sm:text-3xl font-black text-[#162A43]">
                   {formatRupiah(calc.totalHppPerCup)}
@@ -487,13 +502,13 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
 
               {/* Gross Profit Margin per Cup */}
-              <div className="p-5 rounded-3xl bg-[#162A43] text-white shadow-md space-y-1">
+              <div className="space-y-1 bg-[#162A43] p-5 text-white sm:p-6">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[#8FB9BC] font-bold block">
-                    LABA / CUP
+                    Laba / Cangkir
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold">
-                    {calc.marginPercent}% Margin
+                    Margin {calc.marginPercent}%
                   </span>
                 </div>
                 <div className="font-mono text-2xl sm:text-3xl font-black text-white">
@@ -506,16 +521,16 @@ export default function B2BWholesaleCalculatorPage() {
             </div>
 
             {/* Monthly Business Projections Card */}
-            <div className="p-6 rounded-3xl bg-white border-2 border-gray-200 shadow-md space-y-4">
+            <div className="space-y-5 p-5 sm:p-6">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#D8B168]" />
                   <h3 className="font-editorial text-lg font-bold text-[#162A43]">
-                    Proyeksi Finansial Bulanan (30 Hari)
+                    Proyeksi 30 Hari
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#162A43]/10 text-[#162A43]">
-                  {calc.monthlyCups} Cup / Bulan
+                  {calc.monthlyCups} cangkir / bulan
                 </span>
               </div>
 
@@ -539,10 +554,10 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
 
               {/* Wholesale Tier Discount Notification */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFC] border border-gray-200 text-xs space-y-1">
+              <div className="space-y-1 rounded-xl bg-[#F1F5F7] p-3.5 text-xs">
                 <div className="flex items-center gap-1.5 text-[#162A43] font-bold">
                   <Award className="w-4 h-4 text-[#D8B168]" />
-                  <span>Mitra 52 Roastery: {calc.tierName}</span>
+                  <span>Mitra 52 Coffee &amp; Roastery: {calc.tierName}</span>
                 </div>
                 <p className="text-[11px] text-gray-500 leading-relaxed font-sans">
                   {calc.tierBonus}
@@ -554,7 +569,7 @@ export default function B2BWholesaleCalculatorPage() {
                 <button
                   type="button"
                   onClick={handleCopyCalculation}
-                  className="flex-1 py-3 px-4 rounded-xl bg-white border-2 border-gray-300 hover:border-[#162A43] text-[#162A43] font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                  className="flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-3 text-xs font-bold text-[#162A43] transition-colors hover:border-[#162A43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246A73] focus-visible:ring-offset-2"
                 >
                   {copied ? (
                     <>
@@ -570,11 +585,11 @@ export default function B2BWholesaleCalculatorPage() {
                 </button>
                 <a
                   href={`https://wa.me/6281234567890?text=${encodeURIComponent(
-                    `Halo Tim B2B 52 Coffee! Saya ingin konsultasi pasokan biji kopi wholesale.\nEstimasi kebutuhan kedai saya: ~${calc.monthlyBeanKg} kg/bulan (${dailyCups} cup/hari).\nBiji yang diminati: ${isCustomPrice ? 'Custom Price' : selectedBean.name}.`
+                    `Halo Tim B2B 52 Coffee! Saya ingin berkonsultasi mengenai pasokan biji kopi grosir.\nEstimasi kebutuhan kedai saya: ~${calc.monthlyBeanKg} kg/bulan (${dailyCups} cangkir/hari).\nBiji yang diminati: ${isCustomPrice ? 'Harga khusus' : selectedBean.name}.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 px-4 rounded-xl bg-[#A52136] hover:bg-[#8B1E2D] text-white font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm text-center"
+                  className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#A52136] px-4 py-3 text-center text-xs font-bold text-white transition-colors hover:bg-[#8B1E2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A52136] focus-visible:ring-offset-2"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>Konsultasi WhatsApp</span>
@@ -613,7 +628,7 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Sample pack gratis setiap ada batch crop baru</span>
+                <span>Paket sampel gratis untuk batch panen baru</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -629,8 +644,8 @@ export default function B2BWholesaleCalculatorPage() {
             </div>
             <div className="space-y-1">
               <span className="text-[10px] font-mono uppercase text-[#8FB9BC] font-bold">25 - 50 KG / BULAN</span>
-              <h3 className="font-editorial text-xl font-bold text-white">Pro Cafe Partner</h3>
-              <p className="text-xs text-gray-300">Untuk coffee shop reguler dengan volume 100-200 cup/hari.</p>
+              <h3 className="font-editorial text-xl font-bold text-white">Mitra Pro</h3>
+              <p className="text-xs text-gray-300">Untuk kedai reguler dengan volume 100-200 cangkir/hari.</p>
             </div>
             <div className="pt-2 border-t border-white/10 space-y-2 text-xs font-sans text-gray-200">
               <div className="flex items-center gap-2">
@@ -666,7 +681,7 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Free delivery Malang, Surabaya &amp; sekitarnya</span>
+                <span>Gratis pengiriman area Malang, Surabaya &amp; sekitarnya</span>
               </div>
             </div>
           </div>
@@ -683,7 +698,7 @@ export default function B2BWholesaleCalculatorPage() {
               Siap Bermitra dengan 52 Coffee?
             </h3>
             <p className="text-xs sm:text-sm text-gray-300 font-sans max-w-md">
-              Kunjungi formulir kemitraan resmi atau hubungi tim roaster kami untuk sample cupping gratis.
+              Kunjungi formulir kemitraan atau hubungi tim roaster kami untuk meminta sesi cupping dan sampel kopi.
             </p>
           </div>
 

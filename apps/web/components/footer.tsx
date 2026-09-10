@@ -1,118 +1,109 @@
 import React from 'react';
 import Link from 'next/link';
 import { FiftyTwoLogo } from './logo';
+import { ArrowUpRight, Clock3, Instagram, MapPin } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-[#2C3136] text-white pt-16 pb-12 border-t border-white/10 w-full mt-auto">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+    <footer className="bg-brand-charcoal text-white pt-16 pb-24 sm:pb-10 border-t border-white/10 w-full mt-auto">
+      <div className="site-container space-y-12">
+        <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-10">
           {/* Newsletter */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="col-span-2 lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
               <FiftyTwoLogo size="md" textColor="light" />
             </div>
-            <p className="text-xs text-gray-300 max-w-sm leading-relaxed font-sans">
-              Dapatkan info jadwal sangrai terbaru, diskon micro-lot eksklusif, dan panduan kalibrasi seduh mingguan dari roastery kami di Malang.
+            <p className="text-sm text-white/70 max-w-xs leading-7">
+              Dari origin pilihan hingga cangkir harianmu. Dikurasi dan disangrai dengan presisi di Malang.
             </p>
-            <div className="flex gap-2 max-w-sm">
-              <input
-                type="email"
-                placeholder="Masukkan email Anda"
-                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-[#8FB9BC] flex-1 font-sans"
-              />
-              <button className="px-5 py-3 rounded-xl bg-[#8FB9BC] hover:bg-[#7ea7aa] text-[#2C3136] font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-md">
-                Subscribe
-              </button>
-            </div>
+            <a href="https://instagram.com/52coffeeroastery" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-brand-mist hover:text-white">
+              <Instagram aria-hidden="true" className="h-4 w-4" /> Ikuti cerita kami <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+            </a>
           </div>
 
           {/* Quick Links */}
-          <div className="lg:col-span-2 space-y-3 font-mono text-xs">
+          <div className="lg:col-span-2 space-y-4 text-sm">
             <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
-              Slowbar Menu
+              Koleksi Kopi
             </span>
-            <ul className="space-y-2 text-gray-300">
+            <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
                 <Link href="/catalog?category=filter" className="hover:text-white transition-colors">
-                  Filter Beans
+                  Filter Roast
                 </Link>
               </li>
               <li>
                 <Link href="/catalog?category=espresso" className="hover:text-white transition-colors">
-                  Espresso Blends
+                  Espresso Roast
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?category=reserve" className="hover:text-white transition-colors">
+                <Link href="/catalog?series=Grand%20Reserve" className="hover:text-white transition-colors">
                   Grand Reserve
                 </Link>
               </li>
               <li>
                 <Link href="/blend-builder" className="hover:text-white transition-colors">
-                  Custom Blend (BYOB)
+                  Peracik Blend
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Tools & Guides */}
-          <div className="lg:col-span-2 space-y-3 font-mono text-xs">
+          <div className="lg:col-span-2 space-y-4 text-sm">
             <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
-              Tools &amp; Info
+              Jelajahi
             </span>
-            <ul className="space-y-2 text-gray-300">
+            <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
                 <Link href="/guide" className="hover:text-white transition-colors">
-                  Brewing Guide
+                  Panduan Seduh
                 </Link>
               </li>
               <li>
                 <Link href="/tools/brew-calculator" className="hover:text-white transition-colors">
-                  Brew Calculator
+                  Kalkulator Seduh
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-white transition-colors">
-                  About Roastery
+                  Tentang Roastery
                 </Link>
               </li>
               <li>
                 <Link href="/work-with-us" className="hover:text-white transition-colors">
-                  B2B Wholesale
+                  Kemitraan B2B
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Operational & Address */}
-          <div className="lg:col-span-3 space-y-3 font-mono text-xs">
+          <div className="col-span-2 lg:col-span-4 lg:pl-8 space-y-4 text-sm">
             <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
-              Tasting Room Malang
+              Temui kami di Malang
             </span>
-            <p className="text-gray-300 leading-relaxed">
-              📍 Jl. KH. Agus Salim No. 11, Klojen, Kota Malang, Jawa Timur.
+            <p className="flex items-start gap-3 text-white/75 leading-7">
+              <MapPin aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-brand-teal" /> Jl. KH. Agus Salim No. 11, Klojen, Kota Malang, Jawa Timur.
             </p>
-            <p className="text-gray-300">
-              🕒 Senin - Jumat: 11.00 - 16.00 WIB
+            <p className="flex items-start gap-3 text-white/75 leading-7">
+              <Clock3 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-brand-teal" /> Senin–Jumat: 11.00–16.00 WIB
             </p>
             <a
-              className="inline-block text-[#8FB9BC] hover:underline font-semibold mt-1"
+              className="inline-flex min-h-11 items-center gap-2 text-brand-mist hover:underline"
               href="https://instagram.com/52coffeeroastery"
               target="_blank"
               rel="noreferrer"
             >
-              📸 @52coffeeroastery
+              <Instagram aria-hidden="true" className="h-4 w-4" /> @52coffeeroastery
             </a>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 font-mono gap-4">
-          <p>© {new Date().getFullYear()} 52 Coffee &amp; Roastery Malang. Crafted with Purpose, Roasted with Care.</p>
-          <div className="flex gap-6">
-            <Link href="/guide" className="hover:text-gray-300">Privacy Policy</Link>
-            <Link href="/guide" className="hover:text-gray-300">Terms of Service</Link>
-          </div>
+        <div className="pt-7 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between text-xs leading-6 text-white/60 gap-4">
+          <p>© {new Date().getFullYear()} 52 Coffee &amp; Roastery.</p>
+          <Link href="/about" className="inline-flex min-h-11 items-center gap-2 hover:text-white">Artisanal roasting. Precision extraction.<ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
         </div>
       </div>
     </footer>

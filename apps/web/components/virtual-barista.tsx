@@ -19,6 +19,7 @@ import {
 import { PRODUCTS, CoffeeProduct, formatRupiah } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
 import { FiftyTwoBeanMark } from './logo';
+import { OPEN_VIRTUAL_BARISTA } from '../lib/virtual-barista-events';
 
 interface ChatMessage {
   id: string;
@@ -38,7 +39,13 @@ const QUICK_PROMPTS = [
 
 export function VirtualBaristaWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(true);
+
+  useEffect(() => {
+    const open = () => setIsOpen(true);
+    window.addEventListener(OPEN_VIRTUAL_BARISTA, open);
+    return () => window.removeEventListener(OPEN_VIRTUAL_BARISTA, open);
+  }, []);
+
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
@@ -60,7 +67,7 @@ export function VirtualBaristaWidget() {
 
   useEffect(() => {
     if (isOpen) {
-      setShowTooltip(false);
+
       scrollToBottom();
     }
   }, [messages, isOpen]);
@@ -254,74 +261,38 @@ export function VirtualBaristaWidget() {
   return (
     <>
       {/* Floating Launcher Button */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5 font-sans select-none">
-        {/* Helper Tooltip Badge */}
-        <AnimatePresence>
-          {showTooltip && !isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 5, scale: 0.9 }}
-              className="relative max-w-[260px] bg-white border border-brand-navy/15 rounded-2xl p-3 shadow-2xl text-xs font-sans text-brand-navy flex items-start gap-2.5 cursor-pointer hover:border-brand-navy/30 transition-colors"
-              onClick={() => setIsOpen(true)}
-            >
-              <div className="w-6 h-6 rounded-full bg-brand-maroon/10 text-brand-maroon flex items-center justify-center shrink-0 mt-0.5">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1 text-[11px] leading-snug">
-                <span className="font-bold block text-brand-navy">Bingung pilih beans?</span>
-                <span className="text-on-surface-variant">Tanya AI Barista rekomendasi rasa &amp; origin</span>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowTooltip(false);
-                }}
-                className="text-gray-400 hover:text-gray-600 p-0.5"
-                title="Tutup"
-              >
-                <X className="w-3 h-3" />
-              </button>
-              {/* Tooltip Arrow pointing down */}
-              <div className="absolute -bottom-1.5 right-8 w-3 h-3 bg-white border-b border-r border-brand-navy/15 transform rotate-45" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-2.5 font-sans select-none">
 
-        {/* Floating Toggle Button with Glowing Aurora Beacon */}
+        {/* Virtual Barista launcher */}
         {!isOpen && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-3 bg-gradient-to-r from-brand-navy via-[#1b2b40] to-brand-navy text-white px-4 py-3 rounded-full shadow-2xl border border-white/20 transition-all duration-300 ring-4 ring-brand-navy/10 hover:ring-brand-teal/30 cursor-pointer"
-            aria-label="Open Virtual Barista"
+            className="group relative flex items-center gap-3 bg-brand-navy text-white p-3 sm:px-4 rounded-full shadow-lg border border-white/20 transition-colors hover:bg-brand-charcoal cursor-pointer"
+            aria-label="Buka Virtual Barista"
           >
-            {/* Pulsing Beacon Avatar */}
+            {/* Roastery avatar */}
             <div className="relative">
               <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-teal to-brand-teal-light p-[2px] shadow-sm">
                 <div className="w-full h-full rounded-full bg-brand-navy flex items-center justify-center">
                   <FiftyTwoBeanMark className="w-4 h-4 text-brand-teal-light" />
                 </div>
               </div>
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-brand-navy rounded-full animate-pulse shadow-sm" />
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-brand-teal border-2 border-brand-navy rounded-full" />
             </div>
 
             {/* Label Text */}
             <div className="text-left pr-1 hidden sm:block">
               <div className="text-xs font-editorial font-bold leading-tight flex items-center gap-1">
                 <span>Virtual Barista AI</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-brand-teal/20 text-brand-teal-light text-[9px] font-mono font-bold">
-                  PRO
-                </span>
               </div>
               <div className="text-[10px] font-mono text-gray-300">
                 Tanya Rekomendasi Rasa
               </div>
             </div>
 
-            <Sparkles className="w-4 h-4 text-brand-teal-light group-hover:rotate-12 transition-transform" />
+            <Sparkles aria-hidden="true" className="hidden sm:block w-4 h-4 text-brand-teal-light" />
           </motion.button>
         )}
       </div>

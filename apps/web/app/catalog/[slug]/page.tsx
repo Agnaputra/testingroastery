@@ -44,26 +44,14 @@ function ProductDetailContent() {
   const slug = params?.slug as string;
   const product = getProductBySlug(slug);
 
-  if (!product) {
-    return (
-      <div className="max-w-[1280px] mx-auto px-4 py-20 text-center space-y-4">
-        <h1 className="font-editorial text-2xl font-bold">Produk Tidak Ditemukan</h1>
-        <p className="text-sm text-on-surface-variant">Biji kopi yang kamu cari mungkin sedang berganti batch sangrai.</p>
-        <Link href="/catalog" className="btn-primary inline-flex text-xs">
-          Kembali ke Katalog
-        </Link>
-      </div>
-    );
-  }
-
   const searchParams = useSearchParams();
   const modeParam = searchParams.get('mode');
-  const initialMode = modeParam === 'cup' && product.cupPrice ? 'cup' : 'beans';
+  const initialMode = modeParam === 'cup' && product?.cupPrice ? 'cup' : 'beans';
   const [orderMode, setOrderMode] = useState<'cup' | 'beans'>(initialMode);
   const [servingTemp, setServingTemp] = useState<'hot' | 'iced'>('hot');
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(
-    product.variants[0] || { price: product.basePrice, weightLabel: '100g', weightGrams: 100, inStock: true }
+    product?.variants[0] || { price: product?.basePrice || 0, weightLabel: '100g', weightGrams: 100, inStock: true }
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -75,6 +63,44 @@ function ProductDetailContent() {
   const [openStory, setOpenStory] = useState(false);
 
   const { addItem } = useCartStore();
+
+  // Sensory Radar Metrics for this single origin / product
+  const productSensory: FlavorMetrics = useMemo(() => {
+    if (!product) {
+      return { acidity: 0, sweetness: 0, body: 0, floral: 0, aftertaste: 0, balance: 0 };
+    }
+    const acid = Math.min(10, Math.max(2, (product.acidity || 3.5) * 2));
+    const sweet = Math.min(10, Math.max(2, (product.sweetness || 3.8) * 2));
+    const bod = Math.min(10, Math.max(2, (product.body || 3.5) * 2));
+    const flor = product.flavorCategory.includes('Floral')
+      ? 9.0
+      : product.flavorCategory.includes('Fruity')
+      ? 8.5
+      : 6.0;
+    const after = Number(Math.min(10, (sweet + bod) * 0.55).toFixed(1));
+    const bal = Number(Math.min(10, (acid + sweet + bod) / 3 + 1.2).toFixed(1));
+
+    return {
+      acidity: acid,
+      sweetness: sweet,
+      body: bod,
+      floral: flor,
+      aftertaste: after,
+      balance: bal,
+    };
+  }, [product]);
+
+  if (!product) {
+    return (
+      <div className="max-w-[1280px] mx-auto px-4 py-20 text-center space-y-4">
+        <h1 className="font-editorial text-2xl font-bold">Produk Tidak Ditemukan</h1>
+        <p className="text-sm text-on-surface-variant">Biji kopi yang kamu cari mungkin sedang berganti batch sangrai.</p>
+        <Link href="/catalog" className="btn-primary inline-flex text-xs">
+          Kembali ke Katalog
+        </Link>
+      </div>
+    );
+  }
 
   const handleAddToCart = () => {
     if (orderMode === 'cup') {
@@ -112,29 +138,6 @@ function ProductDetailContent() {
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
-
-  // Sensory Radar Metrics for this single origin / product
-  const productSensory: FlavorMetrics = useMemo(() => {
-    const acid = Math.min(10, Math.max(2, (product.acidity || 3.5) * 2));
-    const sweet = Math.min(10, Math.max(2, (product.sweetness || 3.8) * 2));
-    const bod = Math.min(10, Math.max(2, (product.body || 3.5) * 2));
-    const flor = product.flavorCategory.includes('Floral')
-      ? 9.0
-      : product.flavorCategory.includes('Fruity')
-      ? 8.5
-      : 6.0;
-    const after = Number(Math.min(10, (sweet + bod) * 0.55).toFixed(1));
-    const bal = Number(Math.min(10, (acid + sweet + bod) / 3 + 1.2).toFixed(1));
-
-    return {
-      acidity: acid,
-      sweetness: sweet,
-      body: bod,
-      floral: flor,
-      aftertaste: after,
-      balance: bal,
-    };
-  }, [product]);
 
   // Calculated transparency figures
   const landedGreenCost = Math.round((product.basePrice * 0.58) / 1000) * 1000 || 169993;
@@ -309,7 +312,7 @@ function ProductDetailContent() {
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PRODUCER</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">52 Roastery Partner</p>
+                  <p className="text-[11px] font-bold text-on-surface truncate">Mitra 52 Coffee &amp; Roastery</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PROCESS</span>
