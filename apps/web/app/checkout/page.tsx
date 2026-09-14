@@ -146,7 +146,7 @@ export default function CheckoutPage() {
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-border-subtle max-w-md mx-auto text-left text-xs font-mono space-y-2.5 shadow-sm">
+        <div className="p-6 rounded-xl bg-white border border-border-subtle max-w-md mx-auto text-left text-xs font-mono space-y-2.5 shadow-sm">
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Penerima:</span>
             <span className="font-bold text-on-surface">{fullName}</span>
@@ -175,8 +175,8 @@ export default function CheckoutPage() {
           <Link href="/catalog" className="btn-secondary text-xs bg-white">
             Belanja Biji Kopi Lainnya
           </Link>
-          <Link href="/tools/brew-calculator" className="btn-secondary text-xs bg-white">
-            Buka Kalkulator Seduh
+          <Link href="/guide" className="btn-secondary text-xs bg-white">
+            Buka Panduan &amp; Kalkulator Seduh
           </Link>
         </div>
       </div>
@@ -201,13 +201,13 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="site-container page-section space-y-8">
       {/* Top Breadcrumb / Back Navigation */}
       <div className="flex items-center justify-between text-xs font-mono">
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-roastery-border text-roastery-charcoal hover:text-roastery-crimson hover:border-roastery-crimson transition-all shadow-sm group"
+            className="inline-flex min-h-11 items-center gap-1.5 text-on-surface-variant transition-colors hover:text-brand-navy group"
           >
             <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
             <span>Beranda</span>
@@ -217,21 +217,21 @@ export default function CheckoutPage() {
             Katalog
           </Link>
           <span className="text-roastery-muted">/</span>
-          <span className="text-roastery-dark font-semibold">Checkout</span>
+          <span className="text-roastery-dark font-semibold">Pembayaran</span>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-roastery-teal font-medium">
           <ShieldCheck className="w-4 h-4" />
-          <span>SSL 256-Bit Encrypted Checkout</span>
+          <span>Simulasi pembayaran</span>
         </div>
       </div>
 
       {/* Header */}
       <div className="border-b border-roastery-border pb-6">
-        <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-roastery-dark">
-          Checkout & Pengiriman
+        <h1 className="section-display">
+          Pembayaran dan pengiriman
         </h1>
-        <p className="text-xs sm:text-sm text-roastery-muted mt-1">
-          Lengkapi data penerima dan pilih metode pengiriman untuk pesanan biji kopimu.
+        <p className="section-lead mt-2">
+          Lengkapi data penerima, lalu pilih metode pengiriman dan pembayaran untuk pesanan Anda.
         </p>
       </div>
 
@@ -249,81 +249,88 @@ export default function CheckoutPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Nama Lengkap *</label>
+                <label htmlFor="checkout-name" className="field-label">Nama lengkap <span aria-hidden="true">*</span></label>
                 <input
+                  id="checkout-name"
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Contoh: Budi Santoso"
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson"
+                  className="field-control"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Nomor WhatsApp *</label>
+                <label htmlFor="checkout-phone" className="field-label">Nomor WhatsApp <span aria-hidden="true">*</span></label>
                 <input
+                  id="checkout-phone"
                   type="tel"
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="0812xxxxxxxx"
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson"
+                  className="field-control"
                 />
               </div>
 
               <div className="sm:col-span-2 space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Email (Untuk Notifikasi Resi)</label>
+                <label htmlFor="checkout-email" className="field-label">Email untuk notifikasi resi</label>
                 <input
+                  id="checkout-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="budi@example.com"
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson"
+                  className="field-control"
                 />
               </div>
 
               <div className="sm:col-span-2 space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Alamat Lengkap Pengiriman *</label>
+                <label htmlFor="checkout-address" className="field-label">Alamat lengkap pengiriman <span aria-hidden="true">*</span></label>
                 <textarea
+                  id="checkout-address"
                   required
                   rows={2}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kecamatan..."
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson resize-none"
+                  className="field-control min-h-24 resize-y"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Kota / Kabupaten</label>
+                <label htmlFor="checkout-city" className="field-label">Kota / kabupaten</label>
                 <input
+                  id="checkout-city"
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson"
+                  className="field-control"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Kode Pos</label>
+                <label htmlFor="checkout-postal" className="field-label">Kode pos</label>
                 <input
+                  id="checkout-postal"
                   type="text"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                   placeholder="65118"
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson"
+                  className="field-control"
                 />
               </div>
 
               <div className="sm:col-span-2 space-y-1">
-                <label className="text-xs font-mono uppercase text-roastery-muted">Catatan Khusus untuk Roaster / Barista</label>
+                <label htmlFor="checkout-notes" className="field-label">Catatan untuk roaster atau barista</label>
                 <input
+                  id="checkout-notes"
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Misal: Mohon kirim biji kopi yang di-roast minggu ini ya"
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-roastery-light rounded-xl border border-roastery-border focus:outline-none focus:border-roastery-crimson"
+                  className="field-control"
                 />
               </div>
             </div>
@@ -386,14 +393,14 @@ export default function CheckoutPage() {
               <span className="w-6 h-6 rounded-full bg-roastery-teal text-white font-mono text-xs flex items-center justify-center font-bold">
                 3
               </span>
-              <span>Metode Pembayaran (Midtrans Gateway)</span>
+              <span>Simulasi metode pembayaran</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { id: 'qris', name: 'QRIS Real-Time', sub: 'GoPay, OVO, ShopeePay, BCA', icon: QrCode },
-                { id: 'bca-va', name: 'BCA Virtual Account', sub: 'Otomatis Verifikasi 24 Jam', icon: Building2 },
-                { id: 'mandiri-va', name: 'Mandiri Virtual Account', sub: 'Livin by Mandiri / ATM', icon: Building2 },
+                { id: 'qris', name: 'QRIS', sub: 'GoPay, OVO, ShopeePay, BCA', icon: QrCode },
+                { id: 'bca-va', name: 'Virtual Account BCA', sub: 'Simulasi verifikasi pembayaran', icon: Building2 },
+                { id: 'mandiri-va', name: 'Virtual Account Mandiri', sub: 'Livin’ by Mandiri atau ATM', icon: Building2 },
                 { id: 'card', name: 'Kartu Kredit / Debit', sub: 'Visa, Mastercard, JCB', icon: CreditCard },
               ].map((method) => {
                 const isSelected = selectedPayment === method.id;
@@ -544,7 +551,7 @@ export default function CheckoutPage() {
       {/* Midtrans Snap Simulation Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-roastery-border animate-slide-up text-roastery-dark">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-lg space-y-5 border border-roastery-border animate-slide-up text-roastery-dark">
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-roastery-crimson text-white font-bold flex items-center justify-center text-xs">
@@ -563,7 +570,7 @@ export default function CheckoutPage() {
             {selectedPayment === 'qris' && (
               <div className="text-center space-y-3 py-2">
                 <p className="text-xs text-gray-600">Scan QRIS Nasional (GPN) via BCA, Mandiri, GoPay, OVO, ShopeePay:</p>
-                <div className="bg-white p-3 rounded-2xl border-2 border-[#8B1E2D] shadow-sm inline-block max-w-[260px] mx-auto text-center">
+                <div className="inline-block max-w-[260px] rounded-xl border border-brand-maroon-dark bg-white p-3 text-center shadow-sm">
                   <div className="relative w-56 h-72 mx-auto overflow-hidden rounded-xl bg-white">
                     <Image
                       src="/images/qris-nana-store.jpg"
@@ -575,7 +582,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="mt-2 pt-2 border-t border-gray-100 font-mono text-[11px] text-gray-700">
-                    <p className="font-bold text-[#162A43]">NANA STORE - TELECOMMUNICATION</p>
+                    <p className="font-bold text-brand-charcoal">NANA STORE - TELECOMMUNICATION</p>
                     <p className="text-[10px] text-gray-500">NMID: ID1026579452370 • A01</p>
                   </div>
                 </div>

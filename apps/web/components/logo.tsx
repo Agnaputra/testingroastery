@@ -67,11 +67,12 @@ export function FiftyTwoLogo({
 
 export function FiftyTwoBeanMark({ className = 'w-8 h-8' }: { className?: string }) {
   return (
-    <img
+    <Image
       src="/images/logo-icon.png"
-      alt="52 Coffee Roastery Logo Mark"
+      alt="Logo 52 Coffee & Roastery"
+      width={56}
+      height={56}
       className={`object-contain ${className}`}
     />
   );
 }
-

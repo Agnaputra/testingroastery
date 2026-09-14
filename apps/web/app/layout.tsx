@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-page-custom-font -- Brand fonts are loaded once by this App Router root layout. */
 import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '../components/navbar';
@@ -46,7 +47,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-roastery-cream text-roastery-dark min-h-screen flex flex-col selection:bg-roastery-caramel selection:text-white">
+      <body className="min-h-screen flex flex-col selection:bg-brand-navy selection:text-white">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-5 focus:py-3 focus:text-brand-navy">Langsung ke konten</a>
         <MotionProvider>
           <Navbar />

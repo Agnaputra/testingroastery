@@ -1,120 +1,146 @@
 'use client';
 
-import React, { useState } from 'react';
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
+import { useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
 import {
   ArrowRight,
-  Plus,
+  ArrowUpRight,
   Check,
-  Coffee,
-  Sparkles,
-  Flame,
-  Award,
-  ChevronRight,
   ChevronDown,
-  FlaskConical,
-  CupSoda,
+  Plus,
 } from 'lucide-react';
-import { useCartStore } from '../lib/store/useCartStore';
-import { formatRupiah } from '../lib/data';
 import { HeroSection } from '../components/hero/HeroSection';
 import { SensorySection } from '../components/sensory/SensorySection';
+import { PRODUCTS, formatRupiah } from '../lib/data';
+import { useCartStore } from '../lib/store/useCartStore';
+import styles from './page.module.css';
 
 interface ProductItem {
   id: string;
   name: string;
   slug: string;
   category: string;
-  weight: string;
+  weightGrams: number;
+  weightLabel: string;
   price: number;
   series: string;
-  notes: string;
+  notes: string[];
   imageUrl: string;
 }
 
-const FEATURED_PRODUCTS: ProductItem[] = [
-  {
-    id: 'sumbing-supernova',
-    name: 'Sumbing Supernova Wash',
-    slug: 'sumbing-supernova-celestia',
-    category: 'FILTER BASED',
-    weight: '200g Whole Beans',
-    price: 139000,
-    series: 'Java Exotic Series',
-    notes: 'Explosive Berry, Complex, Lavender Candy',
-    imageUrl: '/images/bag-sumbing.jpg',
-  },
-  {
-    id: 'prau-black-honey',
-    name: 'Prau Black Honey Triple Yeast',
-    slug: 'prau-black-honey-triple-yeast',
-    category: 'FILTER BASED',
-    weight: '200g Whole Beans',
-    price: 115000,
-    series: 'Java Exotic Series',
-    notes: 'Brown Sugar, Peach, Blackcurrant',
-    imageUrl: '/images/bag-prau.jpg',
-  },
-  {
-    id: 'inmaculada-pink-bourbon',
-    name: 'Inmaculada Pink Bourbon Huila',
-    slug: 'inmaculada-pink-bourbon-marfil',
-    category: 'GRAND RESERVE',
-    weight: '200g Whole Beans',
-    price: 687000,
-    series: 'Grand Reserve Micro-Lot',
-    notes: 'White Peach, Mandarin, Jasmine Honey',
-    imageUrl: '/images/bag-grand-reserve.jpg',
-  },
-  {
-    id: 'argopuro-walida-anaerob',
-    name: 'Argopuro Walida Natural Anaerob',
-    slug: 'argopuro-walida-natural-anaerob',
-    category: 'JAVA EXOTIC',
-    weight: '200g Whole Beans',
-    price: 125000,
-    series: 'Argopuro Series',
-    notes: 'Blueberry, Rose, Dark Chocolate',
-    imageUrl: '/images/bag-walida.jpg',
-  },
+const FEATURED_CONFIG = [
+  { slug: 'sumbing-supernova-celestia', imageUrl: '/images/bag-sumbing.jpg' },
+  { slug: 'prau-natural-el-davisio-surya', imageUrl: '/images/bag-prau.jpg' },
+  { slug: 'inmaculada-pink-bourbon-marfil', imageUrl: '/images/bag-grand-reserve.jpg' },
+  { slug: 'argopuro-walida-anaerob-arcapada', imageUrl: '/images/bag-walida.jpg' },
 ];
+
+const FEATURED_PRODUCTS: ProductItem[] = FEATURED_CONFIG.flatMap(({ slug, imageUrl }) => {
+  const product = PRODUCTS.find((item) => item.slug === slug);
+  if (!product) return [];
+
+  const variant = product.variants.find((item) => item.weightGrams === 200) ?? product.variants[0];
+  return [{
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    category: product.categoryLabel,
+    weightGrams: variant.weightGrams,
+    weightLabel: variant.weightLabel,
+    price: variant.price,
+    series: product.series,
+    notes: product.tastingNotes,
+    imageUrl,
+  }];
+});
 
 const CATEGORIES = [
   {
     id: 'filter',
-    title: 'Filter Roast Profiles',
+    title: 'Filter Roast',
     subtitle: 'Ijen, Java Exotic, Walida, Sunda',
-    icon: Coffee,
     href: '/catalog?category=filter',
   },
   {
     id: 'espresso',
-    title: 'Espresso Roast Profiles',
-    subtitle: 'Robusta Dampit & Arabica (200g-1kg)',
-    icon: Flame,
+    title: 'Espresso Roast',
+    subtitle: 'Robusta Dampit & Arabica',
     href: '/catalog?category=espresso',
   },
   {
     id: 'reserve',
-    title: 'Grand Reserve Micro-Lot',
-    subtitle: 'Geisha, Sidra, Sudan Rume, Yemen',
-    icon: Award,
+    title: 'Grand Reserve',
+    subtitle: 'Pilihan micro-lot',
     href: '/catalog?category=reserve',
   },
   {
     id: 'beverages',
-    title: 'Slowbar Manual Brew (Cup)',
-    subtitle: 'Asmara, Celestia, Soberano Cup',
-    icon: CupSoda,
+    title: 'Seduhan Slowbar',
+    subtitle: 'Koleksi kopi per cangkir',
     href: '/catalog?category=beverages',
   },
   {
     id: 'byob',
-    title: 'BYOB Custom Blend',
-    subtitle: 'Simulator Profil Sangrai Kedai Kopi',
-    icon: FlaskConical,
+    title: 'Racik BYOB',
+    subtitle: 'Simulator profil sangrai',
     href: '/blend-builder',
+  },
+];
+
+const MARQUEE_ITEMS = ['PILIHAN ROASTERY', 'PILIHAN ROASTERY', 'PILIHAN ROASTERY'];
+
+const PROCESS_STEPS = [
+  {
+    id: 'asal',
+    number: '01',
+    word: 'ASAL',
+    title: 'Karakter dimulai sebelum kopi tiba di roastery.',
+    description:
+      'Dari lereng Kaldera Ijen, Gunung Sumbing, hingga pilihan micro-lot dunia, setiap kopi dikurasi agar karakter asalnya tetap terbaca di cangkir.',
+    detail: 'Kaldera Ijen · Gunung Sumbing · Argopuro Walida',
+    imageUrl: '/images/the-roastery-behind-your-business.png',
+    imageAlt: 'Kolase origin, biji kopi, dan proses produksi 52 Coffee Roastery',
+    imagePosition: 'center',
+    actionHref: '/about',
+    actionLabel: 'Kenali filosofi kami',
+  },
+  {
+    id: 'sangrai',
+    number: '02',
+    word: 'SANGRAI',
+    title: 'Profil rasa dibentuk lewat sangrai yang presisi.',
+    description:
+      'Setiap batch disangrai menggunakan teknologi infrared untuk membentuk profil ekstraksi yang konsisten, manis, dan jernih.',
+    detail: 'Small-batch · Profil ekstraksi · Konsistensi',
+    imageUrl: '/images/roaster-footage.png',
+    imageAlt: 'Tim 52 Coffee bekerja di depan mesin sangrai',
+    imagePosition: 'center 42%',
+    actionHref: '/about',
+    actionLabel: 'Lihat proses roastery',
+  },
+  {
+    id: 'seduh',
+    number: '03',
+    word: 'SEDUH',
+    title: 'Rasa diselesaikan lewat cara seduhmu.',
+    description:
+      'Gunakan panduan seduh untuk menyesuaikan rasio, dosis, dan waktu agar karakter kopi yang sudah dibentuk saat roasting tetap terasa jelas.',
+    detail: 'Rasio · Dosis · Waktu',
+    imageUrl: '/images/canva-hero-pour.jpg',
+    imageAlt: 'Proses menuang air untuk seduhan pour-over 52 Coffee',
+    imagePosition: 'center',
+    actionHref: '/guide',
+    actionLabel: 'Buka panduan seduh',
   },
 ];
 
@@ -150,377 +176,436 @@ export default function HomePage() {
   const { addItem } = useCartStore();
   const [addedId, setAddedId] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [activeProcess, setActiveProcess] = useState(0);
+  const [draggingProducts, setDraggingProducts] = useState(false);
+  const marqueeRef = useRef<HTMLElement>(null);
+  const processRef = useRef<HTMLElement>(null);
+  const productRailRef = useRef<HTMLDivElement>(null);
+  const productDragRef = useRef({
+    active: false,
+    didDrag: false,
+    pointerId: -1,
+    startX: 0,
+    startScrollLeft: 0,
+  });
+  const reducedMotion = useReducedMotion();
+  const { scrollYProgress: marqueeProgress } = useScroll({
+    target: marqueeRef,
+    offset: ['start end', 'end start'],
+  });
+  const marqueeX = useTransform(marqueeProgress, [0, 1], ['4%', '-18%']);
+  const { scrollYProgress: processProgress } = useScroll({
+    target: processRef,
+    offset: ['start start', 'end end'],
+  });
+  const processStep = PROCESS_STEPS[activeProcess];
 
-  const handleQuickAdd = (p: ProductItem) => {
+  useMotionValueEvent(processProgress, 'change', (progress) => {
+    const nextProcess = Math.min(PROCESS_STEPS.length - 1, Math.floor(progress * PROCESS_STEPS.length));
+    setActiveProcess((current) => (current === nextProcess ? current : nextProcess));
+  });
+
+  const handleProductPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+
+    productDragRef.current = {
+      active: true,
+      didDrag: false,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: event.currentTarget.scrollLeft,
+    };
+  };
+
+  const handleProductPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = productDragRef.current;
+    if (!drag.active || drag.pointerId !== event.pointerId) return;
+
+    const distance = event.clientX - drag.startX;
+    if (!drag.didDrag && Math.abs(distance) < 6) return;
+
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    drag.didDrag = true;
+    setDraggingProducts(true);
+    event.currentTarget.scrollLeft = drag.startScrollLeft - distance;
+  };
+
+  const handleProductPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = productDragRef.current;
+    if (drag.pointerId !== event.pointerId) return;
+
+    drag.active = false;
+    setDraggingProducts(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (drag.didDrag) {
+      window.setTimeout(() => {
+        productDragRef.current.didDrag = false;
+      }, 0);
+    }
+  };
+
+  const preventClickAfterDrag = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!productDragRef.current.didDrag) return;
+    event.preventDefault();
+    event.stopPropagation();
+    productDragRef.current.didDrag = false;
+  };
+
+  const handleQuickAdd = (product: ProductItem) => {
     addItem({
-      productId: p.id,
-      name: p.name,
-      slug: p.slug,
-      imageUrl: p.imageUrl,
-      weightGrams: 200,
-      weightLabel: '200g',
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      imageUrl: product.imageUrl,
+      weightGrams: product.weightGrams,
+      weightLabel: product.weightLabel,
       grind: 'whole',
       grindLabel: 'Whole Beans (Biji Utuh)',
-      unitPrice: p.price,
+      unitPrice: product.price,
       quantity: 1,
-      series: p.series,
-      tastingNotes: p.notes.split(', '),
+      series: product.series,
+      tastingNotes: product.notes,
     });
-    setAddedId(p.id);
-    setTimeout(() => setAddedId(null), 1500);
+    setAddedId(product.id);
+    window.setTimeout(() => setAddedId(null), 1500);
   };
 
   return (
-    <div className="w-full overflow-x-clip bg-[#FAFAFA] text-[#1A1A1A] font-sans antialiased">
-      {/* ========================================================================= */}
-      {/* 1. HERO SECTION (Interactive 3D Specialty Coffee Experience)             */}
-      {/* ========================================================================= */}
+    <div className={styles.page}>
       <HeroSection />
 
-      {/* ========================================================================= */}
-      {/* 2. ABOUT US SECTION (Dual Image Gallery & Editorial Story)               */}
-      {/* ========================================================================= */}
-      <section className="py-24 max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Dual Offset Gallery */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="lg:col-span-6 grid grid-cols-2 gap-4 items-center"
-          >
-            <div className="rounded-3xl overflow-hidden aspect-[3/4] shadow-xl border border-gray-200">
-              <img
-                src="/images/canva-barista-roaster.jpg"
-                alt="52 Coffee Roasting Process"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-              />
-            </div>
-            <div className="rounded-3xl overflow-hidden aspect-[3/4] shadow-xl border border-gray-200 mt-8">
-              <img
-                src="/images/canva-lamarzocco-espresso.jpg"
-                alt="52 Coffee Tasting Room Malang"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-              />
-            </div>
-          </motion.div>
+      <section className={styles.manifesto} aria-labelledby="manifesto-heading">
+        <p>52 Coffee &amp; Roastery / Malang</p>
+        <h2 id="manifesto-heading">
+          Kami menyangrai kopi. Karakter asal, profil rasa, dan ritual seduh yang mengikutinya adalah bagian dari cerita setiap cangkir.
+        </h2>
+      </section>
 
-          {/* Right Story */}
+      <section ref={marqueeRef} className={styles.marquee} aria-label="Pilihan roastery">
+        <div className={styles.marqueeViewport}>
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="lg:col-span-6 space-y-5"
+            className={styles.marqueeTrack}
+            aria-hidden="true"
+            style={reducedMotion ? undefined : { x: marqueeX }}
           >
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#8B1E2D] font-bold block">
-              ABOUT US
-            </span>
-            <h2 className="font-editorial text-3xl sm:text-5xl font-bold text-[#162A43] leading-tight">
-              The Malang Roastery Where Quality Comes First
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Selamat datang di 52 Coffee &amp; Roastery. Sejak berdiri di Malang, dedikasi kami adalah menghadirkan specialty coffee terbaik dari lereng Kaldera Ijen, Gunung Sumbing, hingga varietal langka dunia seperti Colombia Geisha.
-            </p>
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Setiap batch disangrai dengan presisi tinggi menggunakan teknologi infrared untuk memastikan profil ekstraksi yang konsisten, manis, dan jernih di setiap cangkir Anda.
-            </p>
-            <div className="pt-3">
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 text-xs font-mono font-bold text-[#162A43] hover:text-[#8B1E2D] transition-colors border-b-2 border-[#162A43] pb-1"
-              >
-                <span>Pelajari Filosofi Tim Kami</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+            {[0, 1].map((group) => (
+              <div className={styles.marqueeGroup} key={group}>
+                {MARQUEE_ITEMS.map((item, itemIndex) => (
+                  <span key={`${group}-${itemIndex}`}>{item}<i>•</i></span>
+                ))}
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 3. CATEGORIES SECTION ("What We Roast & Brew")                           */}
-      {/* ========================================================================= */}
-      <section className="py-20 bg-[#F3F4F6] border-y border-gray-200">
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 space-y-10">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-gray-500 font-bold block">
-              CATEGORIES
-            </span>
-            <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-[#162A43]">
-              What We Roast &amp; Brew
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {CATEGORIES.map((cat, idx) => {
-              const Icon = cat.icon;
-              return (
-                <motion.div
-                  key={cat.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: idx * 0.08 }}
-                >
-                  <Link
-                    href={cat.href}
-                    className="group bg-white rounded-2xl p-5 border border-gray-200 hover:border-[#162A43] hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-40"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-[#EAF0F6] text-[#162A43] flex items-center justify-center group-hover:bg-[#162A43] group-hover:text-white transition-colors">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm text-[#162A43] group-hover:text-[#8B1E2D] transition-colors">
-                          {cat.title}
-                        </h4>
-                        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                      <p className="text-[11px] text-gray-500 truncate mt-0.5">
-                        {cat.subtitle}
-                      </p>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 3.5. 52 SENSORY FLAVOR SPECTRUM & TASTING NOTES SECTION                   */}
-      {/* ========================================================================= */}
-      <SensorySection />
-
-      {/* ========================================================================= */}
-      {/* 4. PROMO / HIGHLIGHT BANNER (Dark Cinematic Feature)                     */}
-      {/* ========================================================================= */}
-      <section className="py-16 max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="relative rounded-3xl overflow-hidden bg-[#162A43] text-white p-8 sm:p-16 flex items-center shadow-2xl min-h-[380px]"
-        >
-          {/* Background image overlay */}
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity"
-            style={{ backgroundImage: `url('/images/canva-roaster-drum.jpg')` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#162A43] via-[#162A43]/80 to-transparent" />
-
-          <div className="relative z-10 max-w-xl space-y-4">
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#D8B168] font-bold block">
-              LIMITED MICRO-LOT RELEASE
-            </span>
-            <h3 className="font-editorial text-3xl sm:text-5xl font-extrabold text-white leading-tight">
-              Inmaculada Pink Bourbon Huila / Grand Reserve
-            </h3>
-            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-              Varietal Pink Bourbon dari ketinggian 1.950 MASL Huila Colombia dengan proses Natural Anaerobic. Karakter White Peach, Mandarin, dan Jasmine Honey.
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/catalog/inmaculada-pink-bourbon-marfil"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#D8B168] hover:bg-[#C9A255] text-[#162A43] font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-lg"
-              >
-                <span>Dapatkan Batch Terbatas</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 5. PRODUCTS SHOWCASE ("Our Favorite Products")                           */}
-      {/* ========================================================================= */}
-      <section className="py-20 bg-[#F8FAFC]">
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-200 pb-6">
+      <section className={styles.featured} aria-labelledby="featured-heading">
+        <div className={styles.sectionShell}>
+          <motion.header
+            className={styles.sectionHeader}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.55 }}
+          >
             <div>
-              <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#8B1E2D] font-bold block mb-1">
-                PRODUCTS
-              </span>
-              <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-[#162A43]">
-                Our Favorite Products
-              </h2>
+              <p className={styles.eyebrow}>Pilihan roastery / 04</p>
+              <h2 id="featured-heading">Kopi dengan<br />suara yang berbeda.</h2>
             </div>
-            <Link
-              href="/catalog"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#D8B168] hover:bg-[#C9A255] text-[#162A43] font-bold text-xs font-mono tracking-wider transition-all shadow-md self-start sm:self-auto"
-            >
-              <span>Lihat Semua Produk</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+            <div className={styles.headerAside}>
+              <p>Empat profil untuk mengenali rentang rasa 52 Coffee—dari floral dan fruity hingga karakter yang lebih intens.</p>
+              <Link href="/catalog" className={styles.textLink}>
+                Lihat seluruh koleksi <ArrowRight aria-hidden="true" size={17} />
+              </Link>
+              <span className={styles.dragHint} aria-hidden="true">← Tarik koleksi →</span>
+            </div>
+          </motion.header>
 
-          {/* 4 Clean Studio Product Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURED_PRODUCTS.map((product, idx) => (
-              <motion.div
+          <div
+            ref={productRailRef}
+            className={styles.productGrid}
+            data-dragging={draggingProducts}
+            aria-label="Koleksi kopi pilihan. Geser secara horizontal untuk menjelajah."
+            onPointerDown={handleProductPointerDown}
+            onPointerMove={handleProductPointerMove}
+            onPointerUp={handleProductPointerEnd}
+            onPointerCancel={handleProductPointerEnd}
+            onPointerLeave={(event) => {
+              const { pointerId } = productDragRef.current;
+              if (pointerId < 0 || !event.currentTarget.hasPointerCapture(pointerId)) {
+                productDragRef.current.active = false;
+                setDraggingProducts(false);
+              }
+            }}
+            onClickCapture={preventClickAfterDrag}
+          >
+            {FEATURED_PRODUCTS.map((product, index) => (
+              <motion.article
                 key={product.id}
+                className={styles.productCard}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white rounded-2xl p-4 border border-gray-200 hover:shadow-xl hover:border-[#162A43]/40 transition-all duration-300 flex flex-col justify-between group"
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.45, delay: index * 0.04 }}
               >
-                <div>
-                  {/* Category Pill & Quick Add Button */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="px-2.5 py-1 rounded-full bg-gray-100 text-[10px] font-mono uppercase font-bold text-[#162A43]">
-                      {product.category}
-                    </span>
-                    <button
-                      onClick={() => handleQuickAdd(product)}
-                      className="w-8 h-8 rounded-full bg-[#F1F5F9] group-hover:bg-[#162A43] text-[#162A43] group-hover:text-white flex items-center justify-center transition-all shadow-sm"
-                      title="Tambah ke Keranjang"
-                    >
-                      {addedId === product.id ? (
-                        <Check className="w-4 h-4 text-emerald-500" />
-                      ) : (
-                        <Plus className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Clean Studio Product Image */}
-                  <Link
-                    href={`/catalog/${product.slug}`}
-                    className="block aspect-square rounded-xl overflow-hidden bg-white mb-4 relative p-2"
-                  >
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </Link>
-
-                  {/* Product Details */}
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-mono text-gray-500 block">
-                      {product.weight}
-                    </span>
-                    <Link
-                      href={`/catalog/${product.slug}`}
-                      className="font-editorial text-base font-bold text-[#162A43] group-hover:text-[#8B1E2D] transition-colors line-clamp-1 block"
-                    >
-                      {product.name}
-                    </Link>
-                    <p className="text-xs text-gray-500 line-clamp-1">
-                      {product.notes}
-                    </p>
-                  </div>
+                <div className={styles.productTopline}>
+                  <span>{product.series}</span>
+                  <span>{product.category}</span>
                 </div>
-
-                {/* Price Footer */}
-                <div className="pt-4 mt-3 border-t border-gray-100 flex items-center justify-between font-mono">
-                  <span className="text-sm font-bold text-[#8B1E2D]">
-                    {formatRupiah(product.price)}
-                  </span>
-                  <Link
-                    href={`/catalog/${product.slug}`}
-                    className="text-[11px] font-bold text-[#162A43] hover:underline"
-                  >
-                    Detail →
-                  </Link>
+                <Link href={`/catalog/${product.slug}`} className={styles.productImageLink}>
+                  <Image
+                    src={product.imageUrl}
+                    alt={`Kemasan ${product.name}`}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    className={styles.productImage}
+                  />
+                </Link>
+                <div className={styles.productInfo}>
+                  <p>{product.series}</p>
+                  <h3><Link href={`/catalog/${product.slug}`}>{product.name}</Link></h3>
+                  <span>{product.notes.join(' · ')}</span>
                 </div>
-              </motion.div>
+                <div className={styles.productFooter}>
+                  <div>
+                    <strong>{formatRupiah(product.price)}</strong>
+                    <span>{product.weightLabel}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAdd(product)}
+                    aria-label={`Tambah ${product.name} ke keranjang`}
+                    className={styles.quickAdd}
+                    data-added={addedId === product.id}
+                  >
+                    {addedId === product.id ? <Check aria-hidden="true" size={17} /> : <Plus aria-hidden="true" size={17} />}
+                    <span aria-live="polite">{addedId === product.id ? 'Ditambahkan' : 'Tambah'}</span>
+                  </button>
+                </div>
+              </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 6. ORIGIN REGIONS & PARTNERS LOGO STRIP                                  */}
-      {/* ========================================================================= */}
-      <section className="py-14 border-y border-gray-200 bg-white">
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12">
-          <div className="flex flex-wrap items-center justify-center sm:justify-between gap-8 opacity-70 grayscale hover:grayscale-0 transition-all font-mono text-xs uppercase tracking-widest font-bold text-[#162A43]">
-            <span>🌋 KALDERA IJEN RAUNG</span>
-            <span>🏔️ ARGOPURO WALIDA</span>
-            <span>🌿 GUNUNG SUMBING</span>
-            <span>⛰️ SINDORO DIENG</span>
-            <span>🏆 HUILA COLOMBIA</span>
-            <span>⚡ RUBASSE INFRARED</span>
+      <section className={styles.catalogIndex} aria-labelledby="catalog-index-heading">
+        <div className={styles.sectionShell}>
+          <div className={styles.indexIntro}>
+            <p>Pilih jalur eksplorasi</p>
+            <h2 id="catalog-index-heading">Dari profil rasa hingga racikan kedai.</h2>
+          </div>
+          <nav className={styles.categoryGrid} aria-label="Kategori koleksi kopi">
+            {CATEGORIES.map((category) => (
+              <Link href={category.href} key={category.id} className={styles.categoryLink}>
+                <span className={styles.categoryText}>
+                  <strong>{category.title}</strong>
+                  <small>{category.subtitle}</small>
+                </span>
+                <ArrowUpRight aria-hidden="true" size={18} />
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </section>
+
+      <SensorySection />
+
+      <section ref={processRef} className={styles.process} aria-labelledby="process-heading">
+        <div className={styles.processSticky}>
+          <div className={styles.processStage}>
+            <div className={styles.processMedia}>
+              <AnimatePresence initial={false} mode="wait">
+                <motion.figure
+                  key={processStep.id}
+                  initial={reducedMotion ? false : { opacity: .72, scale: 1.035, clipPath: 'inset(0 0 100% 0)' }}
+                  animate={{ opacity: 1, scale: 1, clipPath: 'inset(0 0 0% 0)' }}
+                  exit={reducedMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, scale: .985, clipPath: 'inset(100% 0 0 0)' }}
+                  transition={{ duration: reducedMotion ? 0 : .46, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Image
+                    src={processStep.imageUrl}
+                    alt={processStep.imageAlt}
+                    fill
+                    sizes="(min-width: 1024px) 42vw, (min-width: 768px) 48vw, calc(100vw - 36px)"
+                    style={{ objectPosition: processStep.imagePosition }}
+                    className={styles.coverImage}
+                  />
+                  <figcaption>{processStep.number} / {processStep.word}</figcaption>
+                </motion.figure>
+              </AnimatePresence>
+            </div>
+
+            <AnimatePresence initial={false} mode="wait">
+              <motion.article
+                key={processStep.id}
+                id="process-panel"
+                role="region"
+                aria-labelledby="process-heading"
+                className={styles.processCopy}
+                initial={reducedMotion ? false : { opacity: 0, x: 34 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: -24 }}
+                transition={{ duration: reducedMotion ? 0 : .38, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <p className={styles.eyebrow}>Perjalanan rasa / {processStep.number}</p>
+                <h2 id="process-heading">{processStep.title}</h2>
+                <p className={styles.leadCopy}>{processStep.description}</p>
+                <p className={styles.processDetail}>{processStep.detail}</p>
+                <Link href={processStep.actionHref} className={styles.inverseLink}>
+                  {processStep.actionLabel} <ArrowRight aria-hidden="true" size={17} />
+                </Link>
+              </motion.article>
+            </AnimatePresence>
+          </div>
+
+          <div className={styles.processSteps} aria-label="Tahap perjalanan rasa">
+            {PROCESS_STEPS.map((step, index) => (
+              <button
+                type="button"
+                key={step.id}
+                aria-pressed={activeProcess === index}
+                aria-controls="process-panel"
+                onClick={() => setActiveProcess(index)}
+              >
+                <span>{step.number}</span>
+                <strong>{step.word}</strong>
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 7. FAQ SECTION (Collapsible Accordion + Roastery Photo)                  */}
-      {/* ========================================================================= */}
-      <section className="py-24 max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Column: FAQ Header & Real Building Photo */}
-          <div className="lg:col-span-5 space-y-6">
-            <div>
-              <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#8B1E2D] font-bold block mb-1">
-                INFO
-              </span>
-              <h2 className="font-editorial text-4xl font-bold text-[#162A43]">
-                FAQ
-              </h2>
-              <p className="text-sm text-gray-600 mt-2">
-                Pertanyaan umum seputar sangrai, pengiriman, dan layanan slowbar kami di Malang.
+      <section className={styles.story} aria-labelledby="story-heading">
+        <div className={styles.sectionShell}>
+          <div className={styles.storyGrid}>
+            <motion.div
+              className={styles.storyCopy}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.55 }}
+            >
+              <p className={styles.eyebrow}>Filosofi 52</p>
+              <h2 id="story-heading">Dari karakter asal, menuju cangkir yang personal.</h2>
+              <p>
+                Selamat datang di 52 Coffee &amp; Roastery. Dedikasi kami adalah menghadirkan specialty coffee dalam pengalaman yang mudah dijelajahi—dari memilih biji hingga menemukan cara seduhnya.
               </p>
-            </div>
-
-            <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-xl border border-gray-200 relative">
-              <img
-                src="/images/canva-cafe-table.jpg"
-                alt="52 Coffee Tasting Room"
-                className="w-full h-full object-cover"
+              <Link href="/guide" className={styles.inverseLink}>
+                Buka panduan &amp; kalkulator seduh <ArrowRight aria-hidden="true" size={17} />
+              </Link>
+            </motion.div>
+            <figure className={styles.storyMedia}>
+              <Image
+                src="/images/hero-52coffee-dripbox.png"
+                alt="52 Coffee drip box dalam penataan studio"
+                fill
+                sizes="(min-width: 1024px) 56vw, 100vw"
+                className={styles.coverImage}
               />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white text-xs font-mono">
-                52 Coffee Slowbar &amp; Tasting Room • Malang
+              <figcaption>52 Coffee / Drip Box</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.b2b} aria-labelledby="b2b-heading">
+        <div className={styles.b2bCopy}>
+          <p className={styles.eyebrow}>Kemitraan / B2B</p>
+          <h2 id="b2b-heading">Kopi untuk ruang yang kamu bangun.</h2>
+          <p>
+            Jelajahi kebutuhan wholesale, racikan BYOB, dan dukungan untuk membentuk profil kopi yang sesuai dengan arah kedaimu.
+          </p>
+          <Link href="/work-with-us" className={styles.lightButton}>
+            Mulai percakapan <ArrowUpRight aria-hidden="true" size={17} />
+          </Link>
+        </div>
+        <figure className={styles.b2bMedia}>
+          <Image
+            src="/images/byob-craft-collage.jpg"
+            alt="Kolase proses meracik kopi dan penyajian minuman"
+            fill
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className={styles.coverImage}
+          />
+          <figcaption>Racik / Uji / Sajikan</figcaption>
+        </figure>
+      </section>
+
+      <section className={styles.faq} aria-labelledby="faq-heading">
+        <div className={styles.sectionShell}>
+          <div className={styles.faqGrid}>
+            <div className={styles.faqIntro}>
+              <p className={styles.eyebrow}>Informasi / FAQ</p>
+              <h2 id="faq-heading">Yang sering ditanyakan sebelum menyeduh.</h2>
+              <p>Pertanyaan umum seputar sangrai, pengiriman, pilihan gilingan, dan layanan 52 Coffee.</p>
+              <div className={styles.faqImage}>
+                <Image
+                  src="/images/canva-cafe-moodboard.jpg"
+                  alt="Espresso mengalir dari mesin kopi ke dalam cangkir"
+                  fill
+                  sizes="(min-width: 1024px) 34vw, 100vw"
+                  className={styles.coverImage}
+                />
               </div>
             </div>
+
+            <div className={styles.faqList}>
+              {FAQS.map((faq, index) => {
+                const isOpen = openFaq === index;
+                const panelId = `faq-panel-${index}`;
+                const buttonId = `faq-button-${index}`;
+                return (
+                  <div className={styles.faqItem} key={faq.question}>
+                    <button
+                      type="button"
+                      id={buttonId}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => setOpenFaq(isOpen ? null : index)}
+                    >
+                      <span>{faq.question}</span>
+                      <ChevronDown aria-hidden="true" size={21} data-open={isOpen} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          id={panelId}
+                          role="region"
+                          aria-labelledby={buttonId}
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.24 }}
+                          className={styles.faqPanel}
+                        >
+                          <p>{faq.answer}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* Right Column: Accordion List */}
-          <div className="lg:col-span-7 space-y-3">
-            {FAQS.map((faq, idx) => {
-              const isOpen = openFaq === idx;
-              return (
-                <div
-                  key={idx}
-                  className="rounded-2xl border border-gray-200 bg-white overflow-hidden transition-all shadow-sm"
-                >
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#162A43] hover:text-[#8B1E2D] transition-colors"
-                  >
-                    <span>{faq.question}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 shrink-0 text-gray-400 transition-transform duration-300 ${
-                        isOpen ? 'rotate-180 text-[#8B1E2D]' : ''
-                      }`}
-                    />
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-gray-100 bg-[#F9FAFB]">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+      <section className={styles.finalCta} aria-labelledby="final-cta-heading">
+        <div className={styles.sectionShell}>
+          <p className={styles.eyebrow}>Mulai dari satu cangkir</p>
+          <h2 id="final-cta-heading">WAKTUNYA<br />SEDUH.</h2>
+          <div className={styles.finalCtaFooter}>
+            <p>Temukan kopi yang cocok dengan cara kamu menikmati hari.</p>
+            <div>
+              <Link href="/catalog" className={styles.darkButton}>Pesan kopi <ArrowRight aria-hidden="true" size={17} /></Link>
+              <Link href="/guide" className={styles.textLink}>Buka panduan seduh <ArrowUpRight aria-hidden="true" size={17} /></Link>
+            </div>
           </div>
         </div>
       </section>

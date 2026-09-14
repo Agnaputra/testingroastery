@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 export interface FlavorMetrics {
@@ -23,12 +23,12 @@ interface FlavorRadarChartProps {
 }
 
 const AXES: { key: keyof FlavorMetrics; label: string; short: string }[] = [
-  { key: 'acidity', label: 'Acidity (Keasaman)', short: 'Acidity' },
-  { key: 'sweetness', label: 'Sweetness (Kemanisan)', short: 'Sweetness' },
-  { key: 'body', label: 'Body (Ketebalan)', short: 'Body' },
-  { key: 'floral', label: 'Floral & Aroma', short: 'Floral' },
-  { key: 'aftertaste', label: 'Aftertaste', short: 'Aftertaste' },
-  { key: 'balance', label: 'Balance & Clean Cup', short: 'Balance' },
+  { key: 'acidity', label: 'Keasaman', short: 'Keasaman' },
+  { key: 'sweetness', label: 'Kemanisan', short: 'Kemanisan' },
+  { key: 'body', label: 'Ketebalan', short: 'Body' },
+  { key: 'floral', label: 'Aroma floral', short: 'Floral' },
+  { key: 'aftertaste', label: 'Rasa akhir', short: 'Akhir' },
+  { key: 'balance', label: 'Keseimbangan', short: 'Seimbang' },
 ];
 
 export function FlavorRadarChart({
@@ -83,7 +83,7 @@ export function FlavorRadarChart({
   const activeColor = colorMap[color] || colorMap.maroon;
 
   // Calculate polygon coordinates for a given set of normalized values (0 - 1)
-  const getCoordinates = (values: number[]) => {
+  const getCoordinates = useCallback((values: number[]) => {
     return values.map((val, i) => {
       const angle = i * angleStep - Math.PI / 2; // start from top
       const r = val * radius;
@@ -91,7 +91,7 @@ export function FlavorRadarChart({
       const y = center + r * Math.sin(angle);
       return { x, y };
     });
-  };
+  }, [angleStep, center, radius]);
 
   // Convert metric values (0-10) to normalized values (0-1)
   const normalizedValues = useMemo(() => {
@@ -101,11 +101,11 @@ export function FlavorRadarChart({
   const polygonPoints = useMemo(() => {
     const coords = getCoordinates(normalizedValues);
     return coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-  }, [normalizedValues, center, radius, angleStep]);
+  }, [getCoordinates, normalizedValues]);
 
   const activeCoords = useMemo(() => {
     return getCoordinates(normalizedValues);
-  }, [normalizedValues, center, radius, angleStep]);
+  }, [getCoordinates, normalizedValues]);
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -115,13 +115,13 @@ export function FlavorRadarChart({
             {title}
           </h4>
           <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${activeColor.badge}`}>
-            SCA Cupping Profile
+            Profil cupping SCA
           </span>
         </div>
       )}
 
       {/* Radar SVG Container */}
-      <div className="relative flex items-center justify-center p-2 bg-surface-container-low/50 rounded-2xl border border-border-subtle overflow-hidden">
+      <div className="relative flex items-center justify-center p-2 bg-surface-container-low/50 rounded-xl border border-border-subtle overflow-hidden">
         <svg
           width={size}
           height={size}

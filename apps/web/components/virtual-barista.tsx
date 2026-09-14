@@ -247,7 +247,7 @@ export function VirtualBaristaWidget() {
         matched = PRODUCTS.filter((p) => p.flavorCategory.includes('Floral')).slice(0, 2);
         reply = 'Bagi pencinta aroma Floral Elegan, pilihan mahkota kami adalah El Triunfo Geisha Tolima Colombia (Jasmine & Bergamot) serta Ijen Carbonic Maceration dengan harum melati dan peach manis!';
       } else if (lower.includes('rasio') || lower.includes('v60') || lower.includes('seduh') || lower.includes('resep')) {
-        reply = 'Untuk seduh V60 biji kopi kami, kami sarankan Dosis 15g, Air 225ml (Rasio 1:15), Suhu 92°C. Blooming 45g selama 40 detik, lalu tuang 2 tahap spiral hingga 225ml dengan drawdown tuntas di 02:15. Coba juga fitur Brew Calculator kami di /tools/brew-calculator!';
+        reply = 'Untuk seduh V60 biji kopi kami, kami sarankan Dosis 15g, Air 225ml (Rasio 1:15), Suhu 92°C. Blooming 45g selama 40 detik, lalu tuang 2 tahap spiral hingga 225ml dengan drawdown tuntas di 02:15. Coba juga Panduan & Kalkulator Seduh kami di /guide!';
       } else {
         matched = PRODUCTS.filter((p) => p.isFeatured).slice(0, 2);
         reply = `Halo! Kami memiliki beragam kurasi biji kopi segar yang disangrai di Malang. Kamu bisa memilih:\n1. Filter Manual Brew (Fruity, Floral, atau Sweet Strawberry)\n2. Espresso & Kopi Susu (Chocolate, Nutty, Crema Tebal)\n3. B.Y.O.B Custom Blend Simulator (/blend-builder)\n4. Grand Reserve Micro-Lot (Geisha & Sidra Langka)\n\nProfil rasa atau topik mana yang ingin kamu eksplorasi?`;
@@ -305,7 +305,7 @@ export function VirtualBaristaWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 25, scale: 0.94 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[430px] h-[600px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-border-subtle flex flex-col overflow-hidden"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[430px] h-[600px] max-h-[85vh] bg-white rounded-xl shadow-lg border border-border-subtle flex flex-col overflow-hidden"
           >
             {/* Header with Roastery Identity */}
             <div className="bg-gradient-to-r from-brand-navy via-[#162537] to-brand-navy text-white p-4 flex items-center justify-between border-b border-white/10 shadow-sm">
@@ -375,7 +375,7 @@ export function VirtualBaristaWidget() {
 
                     <div className={`space-y-2 max-w-[85%]`}>
                       <div
-                        className={`p-3.5 rounded-2xl text-xs sm:text-[13px] leading-relaxed font-sans shadow-xs whitespace-pre-line ${
+                        className={`p-3.5 rounded-xl text-xs sm:text-[13px] leading-relaxed font-sans shadow-xs whitespace-pre-line ${
                           isBarista
                             ? 'bg-white border border-border-subtle text-on-surface'
                             : 'bg-brand-navy text-white rounded-br-none'
@@ -395,7 +395,7 @@ export function VirtualBaristaWidget() {
                           {msg.recommendedProducts.map((prod) => (
                             <div
                               key={prod.id}
-                              className="p-3 rounded-2xl bg-white border border-border-subtle shadow-xs flex items-center justify-between gap-3 hover:border-brand-navy/30 transition-all"
+                              className="p-3 rounded-xl bg-white border border-border-subtle shadow-xs flex items-center justify-between gap-3 hover:border-brand-navy/30 transition-all"
                             >
                               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
@@ -477,12 +477,12 @@ export function VirtualBaristaWidget() {
               })}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-on-surface-variant text-xs p-2.5 bg-white rounded-2xl border border-border-subtle max-w-[240px] shadow-xs">
-                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce" />
-                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-bounce [animation-delay:0.4s]" />
+                <div className="flex items-center gap-2 text-on-surface-variant text-xs p-2.5 bg-white rounded-xl border border-border-subtle max-w-[240px] shadow-xs">
+                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-pulse [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 rounded-full bg-brand-navy animate-pulse [animation-delay:0.4s]" />
                   <span className="font-mono text-[11px] text-brand-navy font-semibold">
-                    AI Barista sedang meracik...
+                    Barista virtual sedang menyiapkan jawaban...
                   </span>
                 </div>
               )}

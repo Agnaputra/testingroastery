@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  ArrowRight,
+  Coffee,
   RotateCcw,
   SlidersHorizontal,
 } from 'lucide-react';
@@ -63,7 +65,6 @@ function CatalogContent() {
     initialSeries || 'all'
   );
   const [sortBy, setSortBy] = useState<'name' | 'price-asc' | 'price-desc'>('name');
-  const [sortOpen, setSortOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
 
   // Extract and sort all unique series by PDF menu order
@@ -149,32 +150,45 @@ function CatalogContent() {
   };
 
   return (
-    <div className="w-full bg-surface-white text-on-surface font-sans min-h-screen pb-24 antialiased [&_button]:min-h-11">
+    <div className="min-h-screen bg-[#f7f7f4] pb-24 text-brand-charcoal [&_button]:min-h-11">
+      <section className="border-b border-black/10">
+        <div className="site-container grid gap-8 py-14 sm:py-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(280px,.7fr)] lg:items-end lg:py-20">
+          <div>
+            <p className="mb-5 flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-maroon">
+              <Coffee size={14} aria-hidden="true" />
+              Koleksi sangrai 52 Coffee
+            </p>
+            <h1 className="max-w-[13ch] font-headline text-[clamp(2.8rem,6.5vw,6.5rem)] font-semibold leading-[0.9] tracking-[-0.06em] text-brand-charcoal">
+              Temukan kopi yang terasa personal.
+            </h1>
+          </div>
+          <div className="max-w-md lg:justify-self-end">
+            <p className="text-sm leading-7 text-on-surface-variant sm:text-base">
+              Jelajahi origin, proses, dan profil rasa yang disangrai untuk ritual seduh Anda.
+            </p>
+            <div className="mt-6 flex items-center justify-between border-t border-black/15 pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
+              <span>{PRODUCTS.length} pilihan kopi</span>
+              <span>Disangrai di Malang</span>
+            </div>
+          </div>
+        </div>
+      </section>
       <div className="site-container">
         {/* ===================================================================== */}
         {/* 1. BREADCRUMB & 52 COFFEE CATALOG HEADER                              */}
         {/* ===================================================================== */}
-        <div className="pt-10 sm:pt-14 pb-6 text-center">
-          <div className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant mb-4">
-            <Link href="/" className="hover:text-brand-navy transition-colors">Beranda</Link>
-            <span className="mx-2">/</span>
-            <span className="text-brand-navy font-semibold">Koleksi Kopi</span>
-          </div>
-
-          <h1 className="font-editorial text-4xl sm:text-5xl lg:text-6xl font-semibold text-brand-navy tracking-tight mb-4">
-            Temukan karakter kopimu.
-          </h1>
-          <p className="mx-auto mb-8 max-w-xl text-sm leading-7 text-on-surface-variant">Pilih origin, profil sangrai, dan ukuran yang pas untuk seduhanmu.</p>
-
+        <div className="pt-9 sm:pt-11 pb-8 text-center">
           {/* 1. PRIMARY EDITORIAL TABS (WHOLEBEANS/RETAIL vs SLOWBAR) */}
-          <div className="flex items-center justify-center border-b border-border-subtle max-w-sm sm:max-w-md mx-auto">
+          <div role="tablist" aria-label="Jenis penyajian kopi" className="flex items-center justify-center border-b border-border-subtle max-w-sm sm:max-w-md mx-auto">
             <button
               type="button"
+              role="tab"
+              aria-selected={mainTab === 'beans'}
               onClick={() => {
                 setMainTab('beans');
                 setVisibleCount(12);
               }}
-              className={`relative flex-1 pb-3 pt-2 font-mono text-xs sm:text-sm uppercase tracking-wider font-bold transition-colors duration-200 text-center cursor-pointer ${
+              className={`relative flex-1 pb-3 pt-2 text-sm font-semibold transition-colors duration-200 text-center cursor-pointer ${
                 mainTab === 'beans' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
               }`}
             >
@@ -190,11 +204,13 @@ function CatalogContent() {
 
             <button
               type="button"
+              role="tab"
+              aria-selected={mainTab === 'slowbar'}
               onClick={() => {
                 setMainTab('slowbar');
                 setVisibleCount(12);
               }}
-              className={`relative flex-1 pb-3 pt-2 font-mono text-xs sm:text-sm uppercase tracking-wider font-bold transition-colors duration-200 text-center cursor-pointer ${
+              className={`relative flex-1 pb-3 pt-2 text-sm font-semibold transition-colors duration-200 text-center cursor-pointer ${
                 mainTab === 'slowbar' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
               }`}
             >
@@ -221,6 +237,7 @@ function CatalogContent() {
               >
                 <button
                   type="button"
+                  aria-pressed={beansSubTab === 'filter'}
                   onClick={() => {
                     setBeansSubTab('filter');
                     setVisibleCount(12);
@@ -236,6 +253,7 @@ function CatalogContent() {
 
                 <button
                   type="button"
+                  aria-pressed={beansSubTab === 'espresso'}
                   onClick={() => {
                     setBeansSubTab('espresso');
                     setVisibleCount(12);
@@ -325,7 +343,7 @@ function CatalogContent() {
               </button>
 
               {sortOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border-subtle shadow-xl rounded-xl p-2 z-40 space-y-1 normal-case text-xs font-sans">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border-subtle shadow-md rounded-xl p-2 z-40 space-y-1 normal-case text-xs font-sans">
                   <button
                     onClick={() => {
                       setSortBy('name');
@@ -392,7 +410,7 @@ function CatalogContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="py-24 text-center space-y-4 bg-surface-container-low border border-border-subtle rounded-3xl p-10"
+              className="py-24 text-center space-y-4 bg-surface-container-low border border-border-subtle rounded-xl p-10"
             >
               <h3 className="font-editorial text-2xl font-bold text-brand-navy">
                 Tidak ada biji kopi yang cocok dengan filter.

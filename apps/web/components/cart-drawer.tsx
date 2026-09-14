@@ -92,7 +92,7 @@ export function CartDrawer() {
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col animate-slide-up border-l border-border-subtle">
+        <div className="w-screen max-w-md bg-white shadow-lg flex flex-col animate-slide-up border-l border-border-subtle">
           {/* Drawer Header */}
           <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-surface-container-low">
             <div className="flex items-center gap-2.5">
@@ -163,7 +163,7 @@ export function CartDrawer() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-3.5 p-3.5 rounded-2xl border border-border-subtle bg-white hover:border-brand-navy/30 transition-colors shadow-xs"
+                    className="flex gap-3.5 p-3.5 rounded-xl border border-border-subtle bg-white hover:border-brand-navy/30 transition-colors shadow-xs"
                   >
                     {/* Thumbnail */}
                     <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-surface-container-low border border-border-subtle">

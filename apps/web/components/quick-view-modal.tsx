@@ -33,12 +33,12 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
       setSelectedGrind('whole');
       setQuantity(1);
     }
-  }, [product.id]);
+  }, [product]);
 
   const { addItem } = useCartStore();
 
   const handleAddToCart = () => {
-    const grindLabel = GRIND_OPTIONS.find((g) => g.id === selectedGrind)?.label || 'Whole Beans';
+    const grindLabel = GRIND_OPTIONS.find((g) => g.id === selectedGrind)?.label || 'Biji utuh';
     addItem({
       productId: product.id,
       name: product.name,
@@ -68,8 +68,8 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Quick View ${product.name}`}
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-border-subtle overflow-hidden z-10 animate-slide-up max-h-[90vh] flex flex-col"
+        aria-label={`Lihat cepat ${product.name}`}
+        className="relative w-full max-w-2xl bg-white rounded-xl shadow-lg border border-border-subtle overflow-hidden z-10 animate-slide-up max-h-[90vh] flex flex-col"
       >
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-border-subtle flex items-center justify-between bg-surface-container-low/60">
@@ -91,7 +91,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
           <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="relative w-full sm:w-44 aspect-square rounded-2xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
+            <div className="relative w-full sm:w-44 aspect-square rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
               <Image
                 src={product.imageUrl}
                 alt={product.name}

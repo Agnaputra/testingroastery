@@ -1,26 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
-import Link from 'next/link';
+import { useCallback, useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Sparkles,
-  Droplets,
-  Flame,
-  Scale,
-  Clock,
   CheckCircle2,
-  AlertCircle,
   Play,
   Pause,
   RotateCcw,
   Coffee,
   Sliders,
-  ChevronRight,
   Volume2,
   VolumeX,
-  ArrowLeft,
 } from 'lucide-react';
 
 interface BrewStep {
@@ -40,6 +32,7 @@ interface BrewTopic {
   description: string;
   defaultDose: number;
   ratioMultiplier: number;
+  defaultTemp: number;
   grindSize: string;
   waterTemp: string;
   targetSeconds: number;
@@ -58,6 +51,7 @@ const TOPICS: BrewTopic[] = [
       'Teknik seduh standar kami di Slowbar 52 Coffee Malang untuk mengekstraksi aroma floral melati, keasaman manis buah tropis, dan rasa manis alami secara seimbang.',
     defaultDose: 15,
     ratioMultiplier: 15,
+    defaultTemp: 92,
     grindSize: 'Medium-Fine (Sehalus garam laut meja)',
     waterTemp: '91°C - 93°C',
     targetSeconds: 150,
@@ -102,14 +96,150 @@ const TOPICS: BrewTopic[] = [
     recommendedBeans: ['Ijen Carbonic Maceration (Asmara)', 'Sunda Aromanis Honey', 'Sumbing Supernova'],
   },
   {
-    id: 'japanese-iced',
+    id: 'kalita-wave',
     num: '02',
+    tag: 'FLAT BOTTOM',
+    title: 'Kalita Wave (Balanced Filter)',
+    description:
+      'Flat-bottom brewer dengan tiga lubang yang menjaga ekstraksi tetap rata, menghasilkan sweetness yang seimbang dan body yang lembut.',
+    defaultDose: 16,
+    ratioMultiplier: 15.5,
+    defaultTemp: 91,
+    grindSize: 'Medium-Coarse',
+    waterTemp: '90°C - 93°C',
+    targetSeconds: 150,
+    steps: [
+      {
+        startSec: 0,
+        endSec: 40,
+        timeLabel: '00:00 - 00:40',
+        action: 'Blooming',
+        waterPercent: 0.25,
+        desc: 'Basahi seluruh bubuk kopi secara merata, lalu tunggu hingga gas CO2 terlepas.',
+      },
+      {
+        startSec: 40,
+        endSec: 90,
+        timeLabel: '00:40 - 01:30',
+        action: 'Pulse Pouring',
+        waterPercent: 0.4,
+        desc: 'Tuang bertahap dengan ritme halus untuk menjaga level air dan ekstraksi tetap stabil.',
+      },
+      {
+        startSec: 90,
+        endSec: 150,
+        timeLabel: '01:30 - 02:30',
+        action: 'Final Pour & Drawdown',
+        waterPercent: 0.35,
+        desc: 'Capai target air, beri satu gentle swirl, lalu biarkan drawdown selesai.',
+      },
+    ],
+    keyTips: [
+      'Jaga tinggi air tetap konsisten agar ekstraksi pada bed kopi merata.',
+      'Jika rasa terlalu tipis, haluskan gilingan satu klik sebelum menaikkan dosis.',
+    ],
+    recommendedBeans: ['Sunda Aromanis Honey', 'Sumbing Supernova'],
+  },
+  {
+    id: 'aeropress',
+    num: '03',
+    tag: 'IMMERSION PRESS',
+    title: 'AeroPress (Inverted)',
+    description:
+      'Metode rendam dan tekan dengan tekanan lembut untuk menghasilkan body padat serta karakter buah yang intens dan bersih.',
+    defaultDose: 16,
+    ratioMultiplier: 13.5,
+    defaultTemp: 89,
+    grindSize: 'Medium-Fine',
+    waterTemp: '87°C - 92°C',
+    targetSeconds: 105,
+    steps: [
+      {
+        startSec: 0,
+        endSec: 30,
+        timeLabel: '00:00 - 00:30',
+        action: 'Tuang & Stirring',
+        waterPercent: 0.5,
+        desc: 'Tuang setengah air, lalu aduk perlahan sebanyak lima putaran.',
+      },
+      {
+        startSec: 30,
+        endSec: 60,
+        timeLabel: '00:30 - 01:00',
+        action: 'Top-up & Steeping',
+        waterPercent: 0.5,
+        desc: 'Tambahkan sisa air dan pasang filter cap yang telah dibasahi.',
+      },
+      {
+        startSec: 60,
+        endSec: 105,
+        timeLabel: '01:00 - 01:45',
+        action: 'Flip & Press',
+        waterPercent: 0,
+        desc: 'Balikkan brewer ke server, lalu tekan perlahan dan konstan selama sekitar 30 detik.',
+      },
+    ],
+    keyTips: [
+      'Tekan perlahan; tekanan berlebih dapat membawa rasa pahit dan sedimen ke cangkir.',
+      'Gunakan dua filter kertas bila ingin hasil yang lebih jernih.',
+    ],
+    recommendedBeans: ['Ijen Carbonic Maceration (Asmara)', 'Argopuro Walida Natural (Arcapada)'],
+  },
+  {
+    id: 'french-press',
+    num: '04',
+    tag: 'FULL IMMERSION',
+    title: 'French Press (Rich Body)',
+    description:
+      'Immersion penuh tanpa filter kertas yang mempertahankan minyak alami kopi untuk body tebal, tekstur kaya, dan rasa karamel.',
+    defaultDose: 20,
+    ratioMultiplier: 14,
+    defaultTemp: 94,
+    grindSize: 'Coarse (Seukuran garam laut kasar)',
+    waterTemp: '92°C - 95°C',
+    targetSeconds: 270,
+    steps: [
+      {
+        startSec: 0,
+        endSec: 30,
+        timeLabel: '00:00 - 00:30',
+        action: 'Tuang Seluruh Air',
+        waterPercent: 1,
+        desc: 'Tuang seluruh air dan pastikan semua bubuk kopi terendam merata.',
+      },
+      {
+        startSec: 30,
+        endSec: 240,
+        timeLabel: '00:30 - 04:00',
+        action: 'Steeping',
+        waterPercent: 0,
+        desc: 'Diamkan hingga menit keempat, pecahkan crust, lalu buang busa di permukaan.',
+      },
+      {
+        startSec: 240,
+        endSec: 270,
+        timeLabel: '04:00 - 04:30',
+        action: 'Plunge & Serve',
+        waterPercent: 0,
+        desc: 'Turunkan plunger dengan lembut dan segera tuang seluruh kopi ke cangkir atau server.',
+      },
+    ],
+    keyTips: [
+      'Jangan biarkan kopi tetap di dalam French Press setelah plunger ditekan.',
+      'Gilingan terlalu halus membuat tekanan berat dan cangkir lebih berlumpur.',
+    ],
+    recommendedBeans: ['52 House Blend Espresso', 'Robusta Dampit Fine Honey'],
+  },
+  {
+    id: 'japanese-iced',
+    num: '05',
     tag: 'ICED FILTER',
     title: 'Japanese Iced Drip (Es Seduh)',
     description:
       'Metode seduh panas langsung di atas es batu di server untuk mengunci aroma volatil buah dan menghasilkan kesegaran filter dingin yang kompleks.',
     defaultDose: 18,
     ratioMultiplier: 15,
+    defaultTemp: 94,
     grindSize: 'Medium-Fine (Sedikit lebih halus dari V60)',
     waterTemp: '93°C - 95°C',
     targetSeconds: 120,
@@ -147,13 +277,14 @@ const TOPICS: BrewTopic[] = [
   },
   {
     id: 'espresso-calibration',
-    num: '03',
+    num: '06',
     tag: 'ESPRESSO BAR',
     title: 'Kalibrasi Espresso 52 Blend',
     description:
       'Parameter ekstraksi espresso harian untuk racikan House Blend 52 Coffee, menghasilkan crema tebal keemasan dan rasa manis cokelat susu yang seimbang.',
     defaultDose: 18,
     ratioMultiplier: 2,
+    defaultTemp: 93,
     grindSize: 'Fine Espresso Grind',
     waterTemp: '92.5°C - 93.5°C (9 Bar)',
     targetSeconds: 30,
@@ -198,18 +329,26 @@ function BrewGuideContent() {
   const [activeTopicId, setActiveTopicId] = useState<string>('v60-filter');
   const currentTopic = TOPICS.find((t) => t.id === activeTopicId) || TOPICS[0];
 
-  // Interactive Dose State
+  // Interactive calculator state
   const [dose, setDose] = useState<number>(currentTopic.defaultDose);
+  const [ratio, setRatio] = useState<number>(currentTopic.ratioMultiplier);
+  const [temperature, setTemperature] = useState<number>(currentTopic.defaultTemp);
 
   // Sound State
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
 
-  // Sync dose when switching topics
+  // Sync recommended parameters when switching methods
   useEffect(() => {
     setDose(currentTopic.defaultDose);
-  }, [activeTopicId, currentTopic.defaultDose]);
+    setRatio(currentTopic.ratioMultiplier);
+    setTemperature(currentTopic.defaultTemp);
+  }, [currentTopic.defaultDose, currentTopic.ratioMultiplier, currentTopic.defaultTemp]);
 
-  const totalWater = dose * currentTopic.ratioMultiplier;
+  const isEspresso = currentTopic.id === 'espresso-calibration';
+  const totalWater = Math.round(dose * ratio);
+  const ratioMin = isEspresso ? 1.5 : 10;
+  const ratioMax = isEspresso ? 3 : 18;
+  const yieldUnit = isEspresso ? 'g' : 'ml';
 
   // Interactive Live Timer State
   const [timerRunning, setTimerRunning] = useState<boolean>(false);
@@ -217,7 +356,7 @@ function BrewGuideContent() {
   const lastChimedSec = useRef<number>(-1);
 
   // Play synthetic Web Audio chimes without external audio assets
-  const playChime = (type: 'start' | 'pour' | 'finish' = 'pour') => {
+  const playChime = useCallback((type: 'start' | 'pour' | 'finish' = 'pour') => {
     if (!soundEnabled) return;
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -254,7 +393,7 @@ function BrewGuideContent() {
     } catch (e) {
       // Ignore if autoplay blocked
     }
-  };
+  }, [soundEnabled]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -280,7 +419,7 @@ function BrewGuideContent() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [timerRunning, currentTopic.steps, currentTopic.targetSeconds, soundEnabled]);
+  }, [timerRunning, currentTopic.steps, currentTopic.targetSeconds, playChime]);
 
   const toggleTimer = () => {
     if (!timerRunning && seconds === 0) {
@@ -307,11 +446,11 @@ function BrewGuideContent() {
   );
 
   return (
-    <div className="w-full bg-[#131313] text-gray-100 font-sans min-h-screen">
+    <div className="min-h-screen w-full bg-brand-charcoal font-sans text-white">
       {/* ========================================================================= */}
       {/* 1. HERO SECTION                                                           */}
       {/* ========================================================================= */}
-      <section className="relative min-h-[380px] sm:min-h-[440px] pt-24 pb-12 w-full flex items-center justify-start overflow-hidden">
+      <section className="relative m-2 min-h-[400px] overflow-hidden rounded-[18px] border-[3px] border-brand-mist bg-[#182131] px-0 pb-14 pt-24 shadow-[0_0_0_8px_#a7b2bb] sm:m-3 sm:min-h-[460px] sm:pb-16">
         <div
           className="absolute inset-0 z-0 bg-cover bg-center opacity-45 mix-blend-luminosity"
           style={{
@@ -325,27 +464,27 @@ function BrewGuideContent() {
           }}
         />
 
-        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white space-y-3">
+        <div className="relative z-20 site-container flex min-h-[260px] flex-col justify-end space-y-5 text-white sm:min-h-[310px]">
           <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-xs font-mono text-[11px] text-brand-teal-light tracking-widest uppercase font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Slowbar Tasting Room / 52 Coffee Malang</span>
+              <Sparkles aria-hidden="true" className="w-3.5 h-3.5" />
+              <span>Tasting room 52 Coffee Malang</span>
             </div>
 
             {beanParam && (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-maroon/80 border border-brand-maroon font-mono text-[11px] text-white font-bold animate-fade-in">
-                <Coffee className="w-3.5 h-3.5" />
+                <Coffee aria-hidden="true" className="w-3.5 h-3.5" />
                 <span>Menyeduh: {beanParam}</span>
               </div>
             )}
           </div>
 
-          <h1 className="font-editorial text-4xl sm:text-6xl font-bold max-w-3xl leading-tight">
-            Precision Brew <span className="text-[#e6bdb8]">Companion.</span>
+          <h1 className="max-w-4xl font-headline text-[clamp(2.65rem,6.7vw,5.6rem)] font-bold uppercase leading-[.92] tracking-[-.055em]">
+            Panduan &amp; <span className="text-brand-mist">Kalkulator Seduh</span>
           </h1>
 
-          <p className="text-xs sm:text-sm max-w-xl text-gray-300 leading-relaxed font-sans">
-            Panduan rasio seduh interaktif, interval tuangan air otomatis, dan timer bersuara (*audio chimes*) yang digunakan barista di Slowbar 52 Coffee Malang.
+          <p className="max-w-2xl font-sans text-sm leading-7 text-white/[.72] sm:text-base sm:leading-8">
+            Pilih satu dari enam metode, sesuaikan dosis, rasio, dan suhu, lalu ikuti timer serta tahapan seduh dalam satu halaman.
           </p>
         </div>
       </section>
@@ -353,21 +492,22 @@ function BrewGuideContent() {
       {/* ========================================================================= */}
       {/* 2. INTERACTIVE BREW GUIDE INTERFACE                                       */}
       {/* ========================================================================= */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <section className="site-container py-8 space-y-8">
         {/* Method Switcher Tabs & Sound Toggle */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10">
+          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-xl bg-white/5 border border-white/10">
             {TOPICS.map((topic) => {
               const isActive = activeTopicId === topic.id;
               return (
                 <button
                   key={topic.id}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() => {
                     setActiveTopicId(topic.id);
                     resetTimer();
                   }}
-                  className={`relative px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-2 z-10 ${
+                  className={`relative min-h-11 px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-2 z-10 ${
                     isActive ? 'text-white' : 'text-gray-400 hover:text-white'
                   }`}
                 >
@@ -388,16 +528,17 @@ function BrewGuideContent() {
           {/* Sound Toggle Button */}
           <button
             type="button"
+            aria-pressed={soundEnabled}
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`px-4 py-2.5 rounded-xl font-mono text-xs font-bold border transition-all flex items-center gap-2 ${
+            className={`min-h-11 px-4 py-2.5 rounded-xl font-mono text-xs font-bold border transition-all flex items-center gap-2 ${
               soundEnabled
                 ? 'bg-brand-maroon/20 border-brand-maroon text-amber-200'
                 : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
             }`}
             title={soundEnabled ? 'Suara audio aktif' : 'Suara audio dibisukan'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-300" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
-            <span>{soundEnabled ? 'Audio Chimes On' : 'Mute Audio'}</span>
+            {soundEnabled ? <Volume2 aria-hidden="true" className="w-4 h-4 text-amber-300" /> : <VolumeX aria-hidden="true" className="w-4 h-4 text-gray-500" />}
+            <span>{soundEnabled ? 'Suara aktif' : 'Suara mati'}</span>
           </button>
         </div>
 
@@ -406,7 +547,7 @@ function BrewGuideContent() {
           {/* LEFT: Live Interactive Brewing Timer & Dose Calculator (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             {/* TIMER CARD */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl space-y-6 text-center">
+            <div className="p-6 sm:p-8 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg space-y-6 text-center">
               <div className="flex items-center justify-between text-xs font-mono text-gray-400">
                 <span className="uppercase tracking-widest font-bold text-brand-teal-light">
                   {currentTopic.tag}
@@ -416,7 +557,7 @@ function BrewGuideContent() {
 
               {/* Huge Monospace Timer Display */}
               <div className="py-2">
-                <div className="font-mono text-6xl sm:text-7xl font-bold tracking-tight text-white drop-shadow-md">
+                <div className="font-mono text-6xl sm:text-7xl font-bold tracking-tight text-white drop-shadow-md" aria-live="polite">
                   {formatTimer(seconds)}
                 </div>
                 <div className="text-xs font-mono text-gray-400 mt-2">
@@ -448,7 +589,7 @@ function BrewGuideContent() {
                 <button
                   type="button"
                   onClick={toggleTimer}
-                  className={`flex-1 py-4 px-6 rounded-2xl font-mono text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg ${
+                  className={`flex-1 py-4 px-6 rounded-xl font-mono text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg ${
                     timerRunning
                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
                       : 'bg-brand-maroon hover:bg-brand-maroon-light text-white'
@@ -456,12 +597,12 @@ function BrewGuideContent() {
                 >
                   {timerRunning ? (
                     <>
-                      <Pause className="w-4 h-4" />
+                      <Pause aria-hidden="true" className="w-4 h-4" />
                       <span>Pause Seduh</span>
                     </>
                   ) : (
                     <>
-                      <Play className="w-4 h-4 fill-white" />
+                      <Play aria-hidden="true" className="w-4 h-4 fill-white" />
                       <span>{seconds > 0 ? 'Lanjutkan' : 'Mulai Seduh (Start)'}</span>
                     </>
                   )}
@@ -470,25 +611,25 @@ function BrewGuideContent() {
                 <button
                   type="button"
                   onClick={resetTimer}
-                  className="p-4 rounded-2xl bg-white/10 hover:bg-white/15 text-gray-300 transition-colors"
+                  className="p-4 rounded-xl bg-white/10 hover:bg-white/15 text-gray-300 transition-colors"
                   aria-label="Reset timer"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw aria-hidden="true" className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             {/* DOSE & RATIO CALCULATOR CARD */}
-            <div className="p-6 rounded-3xl bg-white/5 border border-white/10 space-y-5">
+            <div className="p-6 rounded-xl bg-white/5 border border-white/10 space-y-5">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-brand-teal-light" />
+                  <Sliders aria-hidden="true" className="w-4 h-4 text-brand-teal-light" />
                   <h3 className="font-editorial text-base font-bold text-white">
                     Kalkulator Rasio Seduh
                   </h3>
                 </div>
                 <span className="font-mono text-xs text-brand-teal-light font-bold">
-                  Rasio 1:{currentTopic.ratioMultiplier}
+                  Rasio 1:{ratio}
                 </span>
               </div>
 
@@ -501,6 +642,7 @@ function BrewGuideContent() {
                 <div className="flex items-center gap-2">
                   <input
                     type="range"
+                    aria-label="Gramasi kopi"
                     min="10"
                     max="30"
                     step="0.5"
@@ -511,18 +653,62 @@ function BrewGuideContent() {
                 </div>
               </div>
 
+              {/* Ratio Control */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                  <span>Rasio Kopi dan Air:</span>
+                  <span className="text-white font-bold text-sm">1 : {ratio}</span>
+                </div>
+                <input
+                  type="range"
+                  aria-label="Rasio kopi dan air"
+                  min={ratioMin}
+                  max={ratioMax}
+                  step="0.5"
+                  value={ratio}
+                  onChange={(e) => setRatio(parseFloat(e.target.value))}
+                  className="w-full accent-brand-teal cursor-pointer h-2 bg-white/10 rounded-lg"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-gray-500">
+                  <span>1:{ratioMin}</span>
+                  <span>Rekomendasi 1:{currentTopic.ratioMultiplier}</span>
+                  <span>1:{ratioMax}</span>
+                </div>
+              </div>
+
+              {/* Temperature Control */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-gray-400">
+                  <span>Suhu Air:</span>
+                  <span className="text-white font-bold text-sm">{temperature}°C</span>
+                </div>
+                <input
+                  type="range"
+                  aria-label="Suhu air seduh"
+                  min="85"
+                  max="96"
+                  step="1"
+                  value={temperature}
+                  onChange={(e) => setTemperature(parseInt(e.target.value, 10))}
+                  className="w-full accent-amber-400 cursor-pointer h-2 bg-white/10 rounded-lg"
+                />
+                <p className="text-[10px] font-mono text-gray-500">
+                  Rekomendasi metode: {currentTopic.waterTemp}
+                </p>
+              </div>
+
               {/* Total Water Yield Output */}
-              <div className="p-4 rounded-2xl bg-brand-navy/60 border border-white/10 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-brand-navy/60 border border-white/10 flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="text-[10px] font-mono uppercase text-gray-300 font-bold block">
-                    Total Air Panas (Yield):
+                    {isEspresso ? 'Target Yield Espresso:' : 'Total Air Seduh:'}
                   </span>
                   <span className="text-xs text-gray-300 font-sans">
-                    Suhu optimal {currentTopic.waterTemp}
+                    Suhu pilihan {temperature}°C
                   </span>
                 </div>
-                <div className="font-mono text-2xl font-bold text-amber-300">
-                  {totalWater} ml
+                <div className="font-mono text-2xl font-bold text-amber-300" aria-live="polite">
+                  {totalWater} {yieldUnit}
                 </div>
               </div>
 
@@ -568,9 +754,9 @@ function BrewGuideContent() {
                 return (
                   <motion.div
                     key={`step-${idx}`}
-                    className={`p-5 rounded-2xl border transition-all duration-300 relative ${
+                    className={`p-5 rounded-xl border transition-all duration-300 relative ${
                       isActive
-                        ? 'bg-brand-navy/90 border-brand-maroon shadow-xl ring-1 ring-brand-maroon/50'
+                        ? 'bg-brand-navy/90 border-brand-maroon shadow-md ring-1 ring-brand-maroon/50'
                         : isCompleted
                         ? 'bg-white/5 border-emerald-500/30 opacity-75'
                         : 'bg-white/5 border-white/10'
@@ -587,7 +773,7 @@ function BrewGuideContent() {
                               : 'bg-white/10 text-gray-400'
                           }`}
                         >
-                          {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : `0${idx + 1}`}
+                          {isCompleted ? <CheckCircle2 aria-hidden="true" className="w-4 h-4" /> : `0${idx + 1}`}
                         </div>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
@@ -609,7 +795,11 @@ function BrewGuideContent() {
                       {/* Interval & Grams Target */}
                       <div className="text-right font-mono shrink-0">
                         <div className="text-xs font-bold text-amber-300">
-                          {step.waterPercent > 0 ? `+${waterAmount} ml` : 'Finishing'}
+                          {step.waterPercent > 0
+                            ? `+${waterAmount} ${yieldUnit}`
+                            : idx === currentTopic.steps.length - 1
+                              ? 'Finishing'
+                              : 'Tunggu'}
                         </div>
                         <div className="text-[10px] text-gray-400 mt-0.5">
                           {step.timeLabel}
@@ -622,7 +812,7 @@ function BrewGuideContent() {
             </div>
 
             {/* Pro Barista Tips */}
-            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+            <div className="p-5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
               <span className="text-[11px] font-mono text-amber-300 font-bold uppercase tracking-wider block">
                 Catatan Penting Barista 52 Coffee:
               </span>

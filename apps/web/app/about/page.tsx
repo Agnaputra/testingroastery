@@ -17,31 +17,28 @@ import {
   HeartHandshake,
   CheckCircle2,
 } from 'lucide-react';
+import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
 
 export default function AboutPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+    <div className="page-shell">
+      <PageIntro
+        align="center"
+        compact
+        kicker="Transparansi dari kebun hingga cangkir"
+        icon={<Sparkles size={14} />}
+        title="Filosofi sangrai dan ketelusuran kopi"
+        description="Dari Malang, kami menjaga setiap proses agar karakter asal kopi tetap jernih, dapat ditelusuri, dan mudah dinikmati."
+      />
 
-      {/* Header Banner */}
-      <div className="border-b border-roastery-border pb-8 text-center max-w-3xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-roastery-border shadow-sm text-xs font-mono text-roastery-crimson">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>TRANSPARENT COFFEE & SPECIALTY ROASTERY</span>
-        </div>
-        <h1 className="font-editorial text-4xl sm:text-6xl font-bold text-roastery-dark leading-tight">
-          Filosofi Sangrai & Ketelusuran Kopi 52 Coffee
-        </h1>
-        <p className="text-sm sm:text-base text-roastery-muted font-sans leading-relaxed">
-          Berasal dari jantung Kota Malang, kami mendedikasikan setiap proses untuk menghasilkan kopi dengan rasa jernih, transparan dari kebun hingga cangkir, dan dapat dinikmati dengan presisi.
-        </p>
-      </div>
+      <div className="site-container page-section space-y-16">
 
       {/* Hero Showcase Image & Roastery Ethos */}
-      <div className="editorial-card p-6 sm:p-10 bg-white grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-sm">
+      <div className="ui-surface p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div className="lg:col-span-6 space-y-5">
-          <span className="badge-crimson font-mono">Our Craft in Malang</span>
+          <span className="badge-crimson">Dikerjakan di Malang</span>
           <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-roastery-dark leading-tight">
-            Micro-Batch Roasting dengan Kontrol Suhu Presisi
+            Sangrai mikro dengan kontrol suhu presisi
           </h2>
           <p className="text-xs sm:text-sm text-roastery-charcoal leading-relaxed">
             Di 52 Coffee & Roastery, kami menyangrai kopi dalam kelompok kecil (small-batch 1-5kg). Pendekatan ini memungkinkan kami memantau kurva suhu (Rate of Rise / RoR), aliran udara (airflow), dan waktu development phase dengan ketelitian hingga 0.1°C.
@@ -62,7 +59,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-6 relative aspect-[4/3] rounded-2xl overflow-hidden bg-roastery-light border border-roastery-border shadow-md">
+        <div className="lg:col-span-6 relative aspect-[4/3] rounded-xl overflow-hidden bg-roastery-light border border-roastery-border shadow-md">
           <Image
             src="/images/canva-roaster-drum.jpg"
             alt="52 Coffee Roasting Process"
@@ -75,14 +72,12 @@ export default function AboutPage() {
 
       {/* 3 Pillars of Transparency */}
       <div className="space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-mono uppercase tracking-widest text-roastery-crimson">
-            3 Pilar Utama 52 Coffee
-          </span>
-          <h2 className="font-editorial text-3xl font-bold text-roastery-dark">
-            Komitmen Transparansi Kami
-          </h2>
-        </div>
+        <SectionIntro
+          align="center"
+          kicker="Tiga pilar utama"
+          title="Komitmen transparansi kami"
+          description="Standar yang kami pegang dari pemilihan origin hingga kopi tiba di tangan pelanggan."
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="editorial-card p-6 bg-white space-y-3 shadow-sm">
@@ -126,7 +121,7 @@ export default function AboutPage() {
       {/* Tasting Room Location Malang */}
       <div className="editorial-card p-8 sm:p-12 bg-roastery-dark text-white border border-roastery-charcoal grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         <div className="space-y-4">
-          <span className="badge-crimson font-mono bg-roastery-crimson/25 text-roastery-crimson-light border-roastery-crimson/40">Visit Tasting Room Malang</span>
+          <span className="badge-crimson bg-roastery-crimson/25 text-roastery-crimson-light border-roastery-crimson/40">Kunjungi tasting room Malang</span>
           <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-white">
             Mari Mampir dan Berdiskusi Kopi Bersama Kami
           </h2>
@@ -161,7 +156,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="relative aspect-video rounded-2xl overflow-hidden bg-roastery-charcoal border border-white/10 shadow-lg">
+        <div className="relative aspect-video rounded-xl overflow-hidden bg-roastery-charcoal border border-white/10 shadow-lg">
           <Image
             src="/images/canva-cafe-table.jpg"
             alt="52 Coffee Tasting Room Malang"
@@ -170,6 +165,7 @@ export default function AboutPage() {
             className="object-cover"
           />
         </div>
+      </div>
       </div>
     </div>
   );

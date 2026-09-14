@@ -1,128 +1,215 @@
 'use client';
 
-import { Component, useCallback, useEffect, useRef, useState } from 'react';
-import type { PointerEvent, ReactNode } from 'react';
-import dynamic from 'next/dynamic';
+import type { KeyboardEvent, PointerEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, MessageCircle, Pause, Play } from 'lucide-react';
-import { motion, useInView, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { openVirtualBarista } from '../../lib/virtual-barista-events';
-import type { HeroMotionInput, SceneQuality } from './types';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import styles from './HeroSection.module.css';
 
-const CoffeeScene = dynamic(() => import('./CoffeeScene'), { ssr: false });
+const HERO_SLIDES = [
+  {
+    src: '/images/canva-brewista-pour.jpg',
+    alt: 'Barista menuang air untuk seduhan manual 52 Coffee',
+    label: 'Seduh',
+    note: 'Ritual harian',
+    position: 'center 46%',
+  },
+  {
+    src: '/images/byob-roaster-craft.jpg',
+    alt: 'Roaster 52 Coffee mencatat hasil peracikan kopi',
+    label: 'Racik',
+    note: 'Dibuat presisi',
+    position: 'center 42%',
+  },
+  {
+    src: '/images/canva-lamarzocco-espresso.jpg',
+    alt: 'Ekstraksi espresso di mesin kopi 52 Coffee',
+    label: 'Slowbar',
+    note: 'Temui kami',
+    position: 'center 45%',
+  },
+  {
+    src: '/images/canva-cafe-table.jpg',
+    alt: 'Sajian kopi dan pastry di meja 52 Coffee',
+    label: 'Nikmati',
+    note: 'Di meja yang sama',
+    position: 'center 52%',
+  },
+  {
+    src: '/images/roaster-footage.png',
+    alt: 'Tim 52 Coffee bekerja di depan mesin sangrai',
+    label: 'Sangrai',
+    note: 'Dikerjakan di Malang',
+    position: 'center 42%',
+  },
+];
 
-class SceneBoundary extends Component<{ children: ReactNode; onUnavailable: () => void }, { failed: boolean }> {
-  state = { failed: false };
+function circularOffset(index: number, activeIndex: number) {
+  let offset = index - activeIndex;
+  const midpoint = HERO_SLIDES.length / 2;
 
-  static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch() { this.props.onUnavailable(); }
-  render() { return this.state.failed ? null : this.props.children; }
+  if (offset > midpoint) offset -= HERO_SLIDES.length;
+  if (offset < -midpoint) offset += HERO_SLIDES.length;
+  return offset;
 }
 
 export function HeroSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const motionInput = useRef<HeroMotionInput>({ pointerX: 0, pointerY: 0, scroll: 0 });
+  const [activeSlide, setActiveSlide] = useState(2);
+  const [cursorVisible, setCursorVisible] = useState(false);
+  const hoverSlideRef = useRef(activeSlide);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reducedMotion = useReducedMotion();
-  const inView = useInView(sectionRef, { margin: '80px 0px 80px 0px' });
-  const [quality, setQuality] = useState<SceneQuality>('mobile');
-  const [canPoint, setCanPoint] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [pageVisible, setPageVisible] = useState(true);
-  const [ready, setReady] = useState(false);
-  const [unavailable, setUnavailable] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const animate = mounted && !reducedMotion && !paused;
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, -20]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.9, 0.8]);
+  const cursorX = useMotionValue(0);
+  const cursorY = useMotionValue(0);
+  const smoothCursorX = useSpring(cursorX, { stiffness: 620, damping: 44, mass: 0.32 });
+  const smoothCursorY = useSpring(cursorY, { stiffness: 620, damping: 44, mass: 0.32 });
+  const activeItem = HERO_SLIDES[activeSlide];
 
-  useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 1100px)');
-    const tablet = window.matchMedia('(min-width: 768px)');
-    const pointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const update = () => {
-      setQuality(desktop.matches ? 'desktop' : tablet.matches ? 'tablet' : 'mobile');
-      setCanPoint(pointer.matches);
-    };
-    const visibility = () => setPageVisible(!document.hidden);
-    update();
-    visibility();
-    setMounted(true);
-    [desktop, tablet, pointer].forEach((query) => query.addEventListener('change', update));
-    document.addEventListener('visibilitychange', visibility);
-    return () => {
-      [desktop, tablet, pointer].forEach((query) => query.removeEventListener('change', update));
-      document.removeEventListener('visibilitychange', visibility);
-    };
+  useEffect(() => () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
   }, []);
 
-  useEffect(() => {
-    if (!animate || !canPoint) {
-      motionInput.current.pointerX = 0;
-      motionInput.current.pointerY = 0;
-      motionInput.current.scroll = 0;
-    }
-  }, [animate, canPoint]);
+  const selectFromPointer = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'touch') return;
 
-  useMotionValueEvent(scrollYProgress, 'change', (value) => {
-    motionInput.current.scroll = animate ? Math.min(1, Math.max(0, value)) : 0;
-  });
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const relativeX = Math.min(bounds.width - 1, Math.max(0, event.clientX - bounds.left));
+    const relativeY = Math.min(bounds.height, Math.max(0, event.clientY - bounds.top));
+    const nextSlide = Math.min(
+      HERO_SLIDES.length - 1,
+      Math.floor((relativeX / bounds.width) * HERO_SLIDES.length),
+    );
 
-  const handlePointer = (event: PointerEvent<HTMLElement>) => {
-    if (!animate || !canPoint || event.pointerType === 'touch') return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    motionInput.current.pointerX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-    motionInput.current.pointerY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    cursorX.set(relativeX);
+    cursorY.set(relativeY);
+    setCursorVisible(true);
+    if (hoverSlideRef.current === nextSlide) return;
+
+    hoverSlideRef.current = nextSlide;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => setActiveSlide(nextSlide), 85);
   };
-  const onReady = useCallback(() => setReady(true), []);
-  const onUnavailable = useCallback(() => { setUnavailable(true); setReady(false); }, []);
+
+  const stopPointerSelection = () => {
+    setCursorVisible(false);
+    hoverSlideRef.current = activeSlide;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+  };
+
+  const handleKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      setActiveSlide((current) => (current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      setActiveSlide((current) => (current + 1) % HERO_SLIDES.length);
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      setActiveSlide(0);
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      setActiveSlide(HERO_SLIDES.length - 1);
+    }
+  };
 
   return (
-    <section ref={sectionRef} className={styles.hero} lang="en" aria-labelledby="hero-heading"
-      onPointerMove={handlePointer}
-      onPointerLeave={() => { motionInput.current.pointerX = 0; motionInput.current.pointerY = 0; }}
-      data-hero-quality={quality} data-hero-motion={animate ? 'enabled' : 'paused'}>
-      <div className={`site-container ${styles.layout}`}>
-        <motion.div className={styles.copy} style={animate ? { y: copyY, opacity: copyOpacity } : undefined}>
-          <div className={styles.entrance}>
-            <p className={styles.eyebrow}>SPECIALTY COFFEE FOR A BRIGHTER DAY</p>
-            <h1 id="hero-heading" className={styles.headline}>Coffee,<span>made personal.</span></h1>
-            <p className={styles.description}>Discover coffee that fits your taste. From carefully sourced beans to your perfect brew, we&apos;re here to make every cup meaningful.</p>
-            <div className={styles.actions}>
-              <Link href="/catalog" className="btn-primary min-h-12 gap-5 rounded-xl text-sm">Shop Coffee<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
-              <button type="button" onClick={openVirtualBarista} className={styles.secondary}>
-                <MessageCircle aria-hidden="true" className="h-4 w-4 shrink-0" />Chat with Virtual Barista
-              </button>
-            </div>
-            <p className={styles.signature}>Thoughtfully roasted in Malang, Indonesia.</p>
-          </div>
+    <section className={styles.hero} aria-labelledby="hero-heading" aria-describedby="hero-description">
+      <div className={styles.frame}>
+        <Link href="/catalog" className={styles.orderPill}>
+          <span aria-hidden="true" /> Pesan Kopi <ArrowRight aria-hidden="true" size={15} />
+        </Link>
+
+        <motion.h1
+          id="hero-heading"
+          className={styles.wordmark}
+          initial={{ opacity: 0, scale: .94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: reducedMotion ? 0 : .85, ease: [0.16, 1, 0.3, 1] }}
+        >
+          52 COFFEE
+        </motion.h1>
+
+        <div
+          className={styles.carousel}
+          role="group"
+          tabIndex={0}
+          aria-label="Galeri 52 Coffee. Gerakkan pointer atau gunakan tombol panah kiri dan kanan."
+          onPointerMove={selectFromPointer}
+          onPointerLeave={stopPointerSelection}
+          onKeyDown={handleKeyboard}
+        >
+          {HERO_SLIDES.map((item, index) => {
+            const offset = circularOffset(index, activeSlide);
+            const distance = Math.abs(offset);
+            const scale = distance === 0 ? 1 : distance === 1 ? .76 : .56;
+
+            return (
+              <motion.button
+                type="button"
+                key={item.src}
+                className={styles.carouselItem}
+                animate={{
+                  x: `${offset * 27}vw`,
+                  y: `${distance * 7.2}vh`,
+                  rotate: offset * 7,
+                  scale,
+                  opacity: distance > 2 ? 0 : distance === 2 ? .58 : 1,
+                }}
+                transition={reducedMotion
+                  ? { duration: 0 }
+                  : { type: 'spring', stiffness: 155, damping: 24, mass: .92 }}
+                onClick={() => { hoverSlideRef.current = index; setActiveSlide(index); }}
+                onFocus={() => { hoverSlideRef.current = index; setActiveSlide(index); }}
+                aria-label={`Tampilkan visual ${item.label}: ${item.note}`}
+                aria-current={activeSlide === index ? 'true' : undefined}
+                data-active={activeSlide === index}
+                style={{ zIndex: 8 - distance }}
+              >
+                <span className={styles.media}>
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    priority={index === 2}
+                    sizes="(min-width: 1024px) 31vw, (min-width: 768px) 38vw, 66vw"
+                    style={{ objectPosition: item.position }}
+                  />
+                </span>
+                <span className={styles.itemMeta}>
+                  <span>{item.label}</span>
+                  <small>{item.note}</small>
+                </span>
+              </motion.button>
+            );
+          })}
+
+          <motion.div
+            className={styles.cursorCue}
+            aria-hidden="true"
+            data-visible={cursorVisible}
+            style={{ x: smoothCursorX, y: smoothCursorY }}
+          >
+            <ArrowLeft size={14} /> Gerakkan <ArrowRight size={14} />
+          </motion.div>
+        </div>
+
+        <motion.div
+          className={styles.heroCopy}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : .65, delay: reducedMotion ? 0 : .16 }}
+        >
+          <p id="hero-description">Karakter asal, presisi sangrai, dan ritual seduh dalam satu pengalaman.</p>
+          <span aria-live="polite">{String(activeSlide + 1).padStart(2, '0')} / 05 — {activeItem.label}</span>
         </motion.div>
 
-        <div className={styles.visual}>
-          <div className={styles.fallback} data-hidden={ready} aria-hidden="true">
-            <Image src="/images/bag-sumbing-cutout.png" alt="" fill sizes="(min-width: 1024px) 500px, 80vw" priority />
-          </div>
-          <div className={styles.canvas} data-ready={ready} aria-hidden="true">
-            {mounted && !unavailable && (
-              <SceneBoundary onUnavailable={onUnavailable}>
-                <CoffeeScene motionInput={motionInput} quality={quality} animate={animate}
-                  active={inView && pageVisible} onReady={onReady} onUnavailable={onUnavailable} />
-              </SceneBoundary>
-            )}
-          </div>
-          <div className={styles.visualFooter}>
-            <span>52 Coffee &amp; Roastery</span>
-            {ready && !reducedMotion && (
-              <button type="button" onClick={() => setPaused((value) => !value)} className={styles.motionToggle}
-                aria-label={paused ? 'Play coffee animation' : 'Pause coffee animation'} aria-pressed={paused}>
-                {paused ? <Play aria-hidden="true" size={13} /> : <Pause aria-hidden="true" size={13} />}
-                {paused ? 'Play motion' : 'Pause motion'}
-              </button>
-            )}
-          </div>
-        </div>
+        <p className={styles.location}>Malang · Indonesia</p>
+        <p className={styles.scrollCue}>Gulir <span aria-hidden="true">↓</span></p>
       </div>
     </section>
   );

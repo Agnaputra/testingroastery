@@ -79,7 +79,7 @@ Voucher promo: '52COFFEE' (10% OFF), Gratis Ongkir min. Rp 250.000.
 Fitur & Tools Roastery yang Tersedia di Website:
 1. BYOB (Build Your Own Blend) di menu /blend-builder: Simulator racik blend sendiri dengan kalkulasi harga transparan per kg dan prediksi profil rasa radar. Profil sangrai dikhususkan pada 'Dark Espresso Roast' untuk mesin espresso & kopi susu.
 2. Price Calculator (Kalkulator Harga / HPP) di menu /tools/price-calculator: Simulator finansial kedai kopi untuk menghitung HPP biji sangrai, susut bobot roasting (~19.93%), biaya listrik gas (Rp 10.000/kg), kemasan pouch, serta target margin keuntungan retail.
-3. Brew Calculator di menu /tools/brew-calculator: Kalkulator rasio seduh presisi V60, Aeropress, French Press, dan Cold Brew.
+3. Panduan & Kalkulator Seduh di menu /guide: Kalkulator rasio, suhu, timer, dan panduan langkah seduh untuk V60, Kalita Wave, AeroPress, French Press, Japanese Iced Drip, dan espresso.
 4. Slowbar & Retail Catalog di /catalog: Pilihan single origin Java Exotic, Kaldera Ijen, Walida, hingga Grand Reserve Micro-Lot.
 5. B2B Wholesale / Work With Us di /work-with-us: Solusi pasokan biji kopi roasted & green bean untuk kedai kopi di seluruh Indonesia.
 6. Order Tracker di /track: Lacak status pemrosesan dan resi pengiriman kurir.
@@ -288,8 +288,8 @@ Panduan Barista:
         'argopuro-walida-anaerob-arcapada',
         'sindoro-strawberry-selai'
       );
-      reply = `⏱️ **Brew Calculator & Panduan Seduh Presisi 52 Coffee**\n\n` +
-        `Untuk menghasilkan cangkir seduhan yang seimbang, manis maksimal, dan bebas over-ekstraksi, kami menyediakan tool **[Brew Calculator](/tools/brew-calculator)** dan **[Brew Guide](/guide)**.\n\n` +
+      reply = `⏱️ **Panduan & Kalkulator Seduh Presisi 52 Coffee**\n\n` +
+        `Untuk menghasilkan cangkir seduhan yang seimbang, manis maksimal, dan bebas over-ekstraksi, gunakan **[Panduan & Kalkulator Seduh](/guide)** dalam satu halaman.\n\n` +
         `**Panduan Standar Seduh V60 52 Roastery:**\n` +
         `• **Dosis Biji**: 15 gram (Giling Medium - sehalus pasir pantai)\n` +
         `• **Air Seduh**: 225 ml (Rasio 1:15), Suhu 91°C - 93°C\n` +
@@ -298,7 +298,7 @@ Panduan Barista:
         `  2. *First Pour*: Tuang spiral perlahan hingga 135 ml (di detik 00:45).\n` +
         `  3. *Final Pour*: Tuang perlahan di tengah hingga 225 ml (di detik 01:20).\n` +
         `• **Target Total Time (Drawdown)**: 02:15 - 02:30 menit.\n\n` +
-        `Coba gunakan **[Brew Calculator Interaktif](/tools/brew-calculator)** untuk menghitung otomatis takaran air sesuai gramatur kopimu!`;
+        `Coba gunakan **[Panduan & Kalkulator Seduh Interaktif](/guide)** untuk menghitung otomatis takaran air sekaligus mengikuti timer dan tahap penyeduhan!`;
     }
 
     // --- PRIORITY 0D: LOKASI / ALAMAT / JAM BUKA / KONTAK MALANG ---
@@ -700,7 +700,7 @@ Panduan Barista:
         `2. **Kopi Ringan & Ramah Lambung** — Kintamani Full Wash & Ijen Yellow Bourbon.\n` +
         `3. **Filter Fruity & Floral** — Argopuro Walida & Sindoro Strawberry.\n` +
         `4. **Espresso & Kopi Susu** — Dampit Robusta & Brazil Santos.\n` +
-        `5. **Price & Brew Calculator** — Simulasi HPP dan rasio seduh presisi.\n\n` +
+        `5. **Kalkulator HPP & Panduan Seduh** — Simulasi biaya di Price Calculator serta rasio dan timer seduh di /guide.\n\n` +
         `Ceritakan profil rasa atau metode seduh yang kamu inginkan, dan saya akan merekomendasikan pilihan terbaik!`;
     }
 

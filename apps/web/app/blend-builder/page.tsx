@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronRight,
   Plus,
   ShoppingBag,
   Check,
@@ -21,6 +20,7 @@ import {
 import { useCartStore } from '../../lib/store/useCartStore';
 import { formatRupiah } from '../../lib/data';
 import { FlavorRadarChart, FlavorMetrics } from '../../components/flavor-radar-chart';
+import { PageIntro } from '../../components/ui/page-structure';
 
 interface BlendComponent {
   id: string;
@@ -379,7 +379,7 @@ export default function BlendBuilderPage() {
       weightGrams: selectedSize === '200 g' ? 200 : selectedSize === '500 g' ? 500 : 1000,
       weightLabel: selectedSize,
       grind: 'whole',
-      grindLabel: `Whole Beans (${roastLevel})`,
+      grindLabel: `Biji utuh (${roastLevel})`,
       unitPrice: activePrice,
       quantity: 1,
       series: 'BYOB Custom Blend',
@@ -407,19 +407,18 @@ export default function BlendBuilderPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="w-full bg-[#F4F6F8] text-[#162A43] min-h-screen py-10 px-4 sm:px-10 font-sans"
+      className="page-shell"
     >
-      <div className="max-w-[1280px] mx-auto space-y-10">
-        {/* ========================================================================= */}
-        {/* 1. BREADCRUMB                                                             */}
-        {/* ========================================================================= */}
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/catalog" className="text-[#465C70] hover:text-[#162A43] font-bold transition-colors">
-            Shop
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-[#465C70]" />
-          <span className="text-[#162A43] font-extrabold">Custom Blend Simulator (BYOB)</span>
-        </div>
+      <PageIntro
+        tone="dark"
+        compact
+        kicker="Peracik blend / BYOB"
+        icon={<Sparkles size={14} />}
+        title="Racik profil kopi Anda sendiri."
+        description="Pilih dua atau tiga origin, atur komposisinya, lalu baca perubahan karakter rasa dan estimasi harga secara langsung."
+      />
+
+      <div className="site-container page-section space-y-10">
 
         {/* ========================================================================= */}
         {/* 2. 2-COLUMN MAIN BYOB SECTION                                             */}
@@ -431,17 +430,17 @@ export default function BlendBuilderPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45 }}
-              className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-gray-200 shadow-md space-y-4"
+              className="bg-white rounded-xl p-5 sm:p-6 border-2 border-gray-200 shadow-md space-y-4"
             >
               {/* Header Badge */}
               <div className="flex items-center justify-between border-b-2 border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#A52136]" />
-                  <span className="font-editorial text-sm font-extrabold text-[#162A43]">
+                  <Sparkles className="w-4 h-4 text-brand-maroon" />
+                  <span className="font-editorial text-sm font-extrabold text-brand-charcoal">
                     Visualisasi Racikan Biji
                   </span>
                 </div>
-                <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-[#162A43]/10 text-[#162A43]">
+                <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-brand-charcoal/10 text-brand-charcoal">
                   {hasComponentC ? '3-Bean Blend' : '2-Bean Blend'}
                 </span>
               </div>
@@ -449,54 +448,58 @@ export default function BlendBuilderPage() {
               {/* Component Pouches Showcase Grid */}
               <div className={`grid ${hasComponentC ? 'grid-cols-3 gap-2 sm:gap-3' : 'grid-cols-2 gap-3 sm:gap-4'} items-stretch`}>
                 {/* Component A Card */}
-                <div className="bg-[#F8FAFC] border-2 border-gray-200 hover:border-[#A52136] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
+                <div className="bg-surface border-2 border-gray-200 hover:border-brand-maroon rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
                   <div className="w-full flex items-center justify-between mb-1.5">
-                    <span className="px-2 py-0.5 rounded-full bg-[#A52136] text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
+                    <span className="px-2 py-0.5 rounded-full bg-brand-maroon text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
                       A
                     </span>
-                    <span className="font-mono text-xs sm:text-sm font-black text-[#A52136]">
+                    <span className="font-mono text-xs sm:text-sm font-black text-brand-maroon">
                       {ratioA}%
                     </span>
                   </div>
                   <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-white border border-gray-200 p-1.5 flex items-center justify-center my-1 group-hover:scale-105 transition-transform">
-                    <img
+                    <Image
                       src={componentA.image}
                       alt={componentA.name}
-                      className="w-full h-full object-contain filter drop-shadow-sm"
+                      fill
+                      sizes="(max-width: 640px) 40vw, 180px"
+                      className="object-contain p-1.5 drop-shadow-sm"
                     />
                   </div>
                   <div className="w-full mt-1 space-y-0.5">
-                    <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-[#162A43] truncate">
+                    <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-brand-charcoal truncate">
                       {componentA.name.replace(/Arabica|Robusta/g, '').trim()}
                     </div>
-                    <div className="text-[9px] font-mono text-[#64748B] truncate font-semibold">
+                    <div className="text-[9px] font-mono text-on-surface-variant truncate font-semibold">
                       {componentA.process}
                     </div>
                   </div>
                 </div>
 
                 {/* Component B Card */}
-                <div className="bg-[#F8FAFC] border-2 border-gray-200 hover:border-[#162A43] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
+                <div className="bg-surface border-2 border-gray-200 hover:border-brand-charcoal rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
                   <div className="w-full flex items-center justify-between mb-1.5">
-                    <span className="px-2 py-0.5 rounded-full bg-[#162A43] text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
+                    <span className="px-2 py-0.5 rounded-full bg-brand-charcoal text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
                       B
                     </span>
-                    <span className="font-mono text-xs sm:text-sm font-black text-[#162A43]">
+                    <span className="font-mono text-xs sm:text-sm font-black text-brand-charcoal">
                       {ratioB}%
                     </span>
                   </div>
                   <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-white border border-gray-200 p-1.5 flex items-center justify-center my-1 group-hover:scale-105 transition-transform">
-                    <img
+                    <Image
                       src={componentB.image}
                       alt={componentB.name}
-                      className="w-full h-full object-contain filter drop-shadow-sm"
+                      fill
+                      sizes="(max-width: 640px) 40vw, 180px"
+                      className="object-contain p-1.5 drop-shadow-sm"
                     />
                   </div>
                   <div className="w-full mt-1 space-y-0.5">
-                    <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-[#162A43] truncate">
+                    <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-brand-charcoal truncate">
                       {componentB.name.replace(/Arabica|Robusta/g, '').trim()}
                     </div>
-                    <div className="text-[9px] font-mono text-[#64748B] truncate font-semibold">
+                    <div className="text-[9px] font-mono text-on-surface-variant truncate font-semibold">
                       {componentB.process}
                     </div>
                   </div>
@@ -504,27 +507,29 @@ export default function BlendBuilderPage() {
 
                 {/* Component C Card (if active) */}
                 {hasComponentC && (
-                  <div className="bg-[#F8FAFC] border-2 border-gray-200 hover:border-[#246A73] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
+                  <div className="bg-surface border-2 border-gray-200 hover:border-brand-navy rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all shadow-xs group">
                     <div className="w-full flex items-center justify-between mb-1.5">
-                      <span className="px-2 py-0.5 rounded-full bg-[#246A73] text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
+                      <span className="px-2 py-0.5 rounded-full bg-brand-navy text-white text-[9px] sm:text-[10px] font-mono font-extrabold shadow-xs">
                         C
                       </span>
-                      <span className="font-mono text-xs sm:text-sm font-black text-[#246A73]">
+                      <span className="font-mono text-xs sm:text-sm font-black text-brand-navy">
                         {ratioC}%
                       </span>
                     </div>
                     <div className="w-full aspect-square relative rounded-xl overflow-hidden bg-white border border-gray-200 p-1.5 flex items-center justify-center my-1 group-hover:scale-105 transition-transform">
-                      <img
+                      <Image
                         src={componentC.image}
                         alt={componentC.name}
-                        className="w-full h-full object-contain filter drop-shadow-sm"
+                        fill
+                        sizes="(max-width: 640px) 28vw, 160px"
+                        className="object-contain p-1.5 drop-shadow-sm"
                       />
                     </div>
                     <div className="w-full mt-1 space-y-0.5">
-                      <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-[#162A43] truncate">
+                      <div className="font-editorial text-[11px] sm:text-xs font-extrabold text-brand-charcoal truncate">
                         {componentC.name.replace(/Arabica|Robusta/g, '').trim()}
                       </div>
-                      <div className="text-[9px] font-mono text-[#64748B] truncate font-semibold">
+                      <div className="text-[9px] font-mono text-on-surface-variant truncate font-semibold">
                         {componentC.process}
                       </div>
                     </div>
@@ -533,8 +538,8 @@ export default function BlendBuilderPage() {
               </div>
 
               {/* Custom BYOB Blend Packaging Label Banner */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#162A43] to-[#1E293B] text-white text-center shadow-lg border border-gray-700/50 space-y-1">
-                <div className="text-[9px] font-mono uppercase tracking-widest font-extrabold text-[#8FB9BC]">
+              <div className="rounded-xl border border-white/10 bg-brand-charcoal p-4 text-center text-white space-y-1">
+                <div className="text-[9px] font-mono uppercase tracking-widest font-extrabold text-brand-teal">
                   52 COFFEE ROASTERY • ARTISAN BLEND
                 </div>
                 <div className="font-editorial text-sm sm:text-base font-extrabold text-white">
@@ -542,7 +547,7 @@ export default function BlendBuilderPage() {
                   {hasComponentC && ` + ${ratioC}% ${componentC.name.split(' ')[0]}`}
                 </div>
                 <div className="inline-block mt-1">
-                  <span className="text-[9px] font-mono uppercase px-3 py-0.5 rounded-full bg-[#A52136] text-white font-extrabold tracking-wider">
+                  <span className="text-[9px] font-mono uppercase px-3 py-0.5 rounded-full bg-brand-maroon text-white font-extrabold tracking-wider">
                     {roastLevel}
                   </span>
                 </div>
@@ -554,17 +559,17 @@ export default function BlendBuilderPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.15 }}
-              className="p-6 rounded-3xl bg-white border-2 border-gray-200 shadow-md space-y-4"
+              className="p-6 rounded-xl bg-white border-2 border-gray-200 shadow-md space-y-4"
             >
               <div className="flex items-center justify-between border-b-2 border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#A52136]" />
-                  <h3 className="font-editorial text-base font-extrabold text-[#162A43]">
+                  <Sparkles className="w-4 h-4 text-brand-maroon" />
+                  <h3 className="font-editorial text-base font-extrabold text-brand-charcoal">
                     Prediksi Profil Rasa Racikan
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full bg-[#162A43]/10 text-[#162A43]">
-                  Live Dynamic
+                <span className="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full bg-brand-charcoal/10 text-brand-charcoal">
+                  Diperbarui langsung
                 </span>
               </div>
 
@@ -577,9 +582,9 @@ export default function BlendBuilderPage() {
                 showBars={true}
               />
 
-              <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-gray-200 text-xs font-sans text-[#2D3748] leading-relaxed">
-                <span className="font-extrabold text-[#162A43] block mb-0.5">Catatan Karakter Sangrai:</span>
-                Kombinasi menonjolkan keasaman segar dari <strong className="text-[#162A43]">{componentA.name.split(' ')[0]}</strong> berpadu manis karamel &amp; krema tebal dari <strong className="text-[#162A43]">{componentB.name.split(' ')[0]}</strong> disangrai pada level <strong className="text-[#A52136]">{roastLevel}</strong>.
+              <div className="p-3.5 rounded-xl bg-surface border border-gray-200 text-xs font-sans text-on-surface leading-relaxed">
+                <span className="font-extrabold text-brand-charcoal block mb-0.5">Catatan Karakter Sangrai:</span>
+                Kombinasi menonjolkan keasaman segar dari <strong className="text-brand-charcoal">{componentA.name.split(' ')[0]}</strong> berpadu manis karamel &amp; krema tebal dari <strong className="text-brand-charcoal">{componentB.name.split(' ')[0]}</strong> disangrai pada level <strong className="text-brand-maroon">{roastLevel}</strong>.
               </div>
             </motion.div>
           </div>
@@ -591,23 +596,10 @@ export default function BlendBuilderPage() {
             transition={{ duration: 0.45, delay: 0.1 }}
             className="lg:col-span-7 space-y-6"
           >
-            <header className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#A52136]/10 text-[#8B1E2D] border border-[#A52136]/25 text-[11px] font-mono font-extrabold mb-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>CUSTOM ROASTERY BLEND SIMULATOR</span>
-              </div>
-              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-[#162A43] leading-tight tracking-tight">
-                B.Y.O.B - Build Your Own Blend
-              </h1>
-              <p className="text-sm sm:text-base text-[#4A5568] font-medium leading-relaxed">
-                Pilih kombinasi single origin favorit Anda dan atur rasio persentase. Profil rasa &amp; harga dihitung secara presisi real-time.
-              </p>
-            </header>
-
             {/* Dual/Triple Ratio Progress Bar with Balance Indicator */}
             <div className="space-y-2.5 pt-2">
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="font-extrabold text-[#162A43] uppercase tracking-wider">
+                <span className="font-extrabold text-brand-charcoal uppercase tracking-wider">
                   Rasio Racikan Blend
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-[10px]">
@@ -618,7 +610,7 @@ export default function BlendBuilderPage() {
               <div className="w-full h-10 rounded-full overflow-hidden flex bg-gray-200 border-2 border-gray-300 relative shadow-inner">
                 {/* Segment A (Crimson) */}
                 <motion.div
-                  className="bg-[#A52136] h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
+                  className="bg-brand-maroon h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioA}%` }}
                 >
                   A ({ratioA}%)
@@ -626,7 +618,7 @@ export default function BlendBuilderPage() {
 
                 {/* Segment B (Navy) */}
                 <motion.div
-                  className="bg-[#162A43] h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
+                  className="bg-brand-charcoal h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioB}%` }}
                 >
                   B ({ratioB}%)
@@ -634,7 +626,7 @@ export default function BlendBuilderPage() {
 
                 {hasComponentC && (
                   <motion.div
-                    className="bg-[#246A73] h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
+                    className="bg-brand-navy h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                     style={{ width: `${ratioC}%` }}
                   >
                     C ({ratioC}%)
@@ -645,12 +637,12 @@ export default function BlendBuilderPage() {
               {/* Quick Blend Ratio Presets for 2-Bean and 3-Bean modes */}
               {!hasComponentC ? (
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[10px] font-mono text-[#465C70] font-bold mr-1">Preset 2-Biji:</span>
+                  <span className="text-[10px] font-mono text-brand-navy font-bold mr-1">Preset 2-Biji:</span>
                   {[
-                    { label: '70 / 30 (Classic House)', a: 70, b: 30 },
-                    { label: '60 / 40 (Rich Balance)', a: 60, b: 40 },
-                    { label: '50 / 50 (Equal Harmony)', a: 50, b: 50 },
-                    { label: '80 / 20 (Dominant Base)', a: 80, b: 20 },
+                    { label: '70 / 30 (Klasik)', a: 70, b: 30 },
+                    { label: '60 / 40 (Seimbang)', a: 60, b: 40 },
+                    { label: '50 / 50 (Setara)', a: 50, b: 50 },
+                    { label: '80 / 20 (Basis dominan)', a: 80, b: 20 },
                   ].map((p) => (
                     <button
                       key={p.label}
@@ -661,8 +653,8 @@ export default function BlendBuilderPage() {
                       }}
                       className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer shadow-xs ${
                         ratioA === p.a && ratioB === p.b
-                          ? 'bg-[#162A43] text-white border-[#162A43]'
-                          : 'bg-white border-gray-300 text-[#162A43] hover:border-[#162A43] hover:bg-[#F8FAFC]'
+                          ? 'bg-brand-charcoal text-white border-brand-charcoal'
+                          : 'bg-white border-gray-300 text-brand-charcoal hover:border-brand-charcoal hover:bg-surface'
                       }`}
                     >
                       {p.label}
@@ -671,7 +663,7 @@ export default function BlendBuilderPage() {
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[10px] font-mono text-[#465C70] font-bold mr-1">Preset 3-Biji:</span>
+                  <span className="text-[10px] font-mono text-brand-navy font-bold mr-1">Preset 3-Biji:</span>
                   {[
                     { label: '50 / 30 / 20', a: 50, b: 30, c: 20 },
                     { label: '40 / 40 / 20', a: 40, b: 40, c: 20 },
@@ -688,8 +680,8 @@ export default function BlendBuilderPage() {
                       }}
                       className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer shadow-xs ${
                         ratioA === p.a && ratioB === p.b && ratioC === p.c
-                          ? 'bg-[#162A43] text-white border-[#162A43]'
-                          : 'bg-white border-gray-300 text-[#162A43] hover:border-[#162A43] hover:bg-[#F8FAFC]'
+                          ? 'bg-brand-charcoal text-white border-brand-charcoal'
+                          : 'bg-white border-gray-300 text-brand-charcoal hover:border-brand-charcoal hover:bg-surface'
                       }`}
                     >
                       {p.label}
@@ -701,10 +693,10 @@ export default function BlendBuilderPage() {
 
             {/* Component A Selector */}
             <div className="space-y-3">
-              <div className="p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#A52136] transition-colors shadow-sm space-y-3">
+              <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-maroon transition-colors shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-8 h-8 rounded-full bg-[#A52136] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-brand-maroon text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                       A
                     </div>
                     <select
@@ -713,7 +705,7 @@ export default function BlendBuilderPage() {
                         const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
                         if (found) setComponentA(found);
                       }}
-                      className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-[#162A43] focus:ring-0 cursor-pointer"
+                      className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-brand-charcoal focus:ring-0 cursor-pointer"
                     >
                       {AVAILABLE_BEANS.map((b) => (
                         <option key={b.id} value={b.id}>
@@ -729,9 +721,9 @@ export default function BlendBuilderPage() {
                       max="90"
                       value={ratioA}
                       onChange={(e) => handleRatioAChange(Number(e.target.value))}
-                      className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-[#162A43] focus:ring-0 p-0"
+                      className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-brand-charcoal focus:ring-0 p-0"
                     />
-                    <span className="font-mono text-xs font-extrabold text-[#465C70]">%</span>
+                    <span className="font-mono text-xs font-extrabold text-brand-navy">%</span>
                   </div>
                 </div>
                 {/* Visual Range Slider for Component A */}
@@ -743,16 +735,16 @@ export default function BlendBuilderPage() {
                     step="1"
                     value={ratioA}
                     onChange={(e) => handleRatioAChange(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#A52136]"
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-maroon"
                   />
                 </div>
               </div>
 
               {/* Component B Selector */}
-              <div className="p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#162A43] transition-colors shadow-sm space-y-3">
+              <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal transition-colors shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-8 h-8 rounded-full bg-[#162A43] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-brand-charcoal text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                       B
                     </div>
                     <select
@@ -761,7 +753,7 @@ export default function BlendBuilderPage() {
                         const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
                         if (found) setComponentB(found);
                       }}
-                      className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-[#162A43] focus:ring-0 cursor-pointer"
+                      className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-brand-charcoal focus:ring-0 cursor-pointer"
                     >
                       {AVAILABLE_BEANS.map((b) => (
                         <option key={b.id} value={b.id}>
@@ -777,9 +769,9 @@ export default function BlendBuilderPage() {
                       max="90"
                       value={ratioB}
                       onChange={(e) => handleRatioBChange(Number(e.target.value))}
-                      className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-[#162A43] focus:ring-0 p-0"
+                      className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-brand-charcoal focus:ring-0 p-0"
                     />
-                    <span className="font-mono text-xs font-extrabold text-[#465C70]">%</span>
+                    <span className="font-mono text-xs font-extrabold text-brand-navy">%</span>
                   </div>
                 </div>
                 {/* Visual Range Slider for Component B */}
@@ -791,17 +783,17 @@ export default function BlendBuilderPage() {
                     step="1"
                     value={ratioB}
                     onChange={(e) => handleRatioBChange(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#162A43]"
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-charcoal"
                   />
                 </div>
               </div>
 
               {/* Expandable Component C (Flexible up to 90% with auto-balancing) */}
               {hasComponentC && (
-                <div className="p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#246A73] transition-colors shadow-sm space-y-3">
+                <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-navy transition-colors shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-8 h-8 rounded-full bg-[#246A73] text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                      <div className="w-8 h-8 rounded-full bg-brand-navy text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                         C
                       </div>
                       <select
@@ -810,7 +802,7 @@ export default function BlendBuilderPage() {
                           const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
                           if (found) setComponentC(found);
                         }}
-                        className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-[#162A43] focus:ring-0 cursor-pointer"
+                        className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-brand-charcoal focus:ring-0 cursor-pointer"
                       >
                         {AVAILABLE_BEANS.map((b) => (
                           <option key={b.id} value={b.id}>
@@ -826,13 +818,13 @@ export default function BlendBuilderPage() {
                         max="90"
                         value={ratioC}
                         onChange={(e) => handleRatioCChange(Number(e.target.value))}
-                        className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-[#162A43] focus:ring-0 p-0"
+                        className="w-10 text-right bg-transparent border-none font-mono text-base font-extrabold text-brand-charcoal focus:ring-0 p-0"
                       />
-                      <span className="font-mono text-xs font-extrabold text-[#465C70]">%</span>
+                      <span className="font-mono text-xs font-extrabold text-brand-navy">%</span>
                       <button
                         type="button"
                         onClick={handleRemoveComponentC}
-                        className="text-xs text-[#A52136] hover:bg-[#A52136]/10 p-1.5 rounded-lg font-bold cursor-pointer"
+                        className="text-xs text-brand-maroon hover:bg-brand-maroon/10 p-1.5 rounded-lg font-bold cursor-pointer"
                         title="Hapus Biji C"
                       >
                         ✕
@@ -848,7 +840,7 @@ export default function BlendBuilderPage() {
                       step="1"
                       value={ratioC}
                       onChange={(e) => handleRatioCChange(Number(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#246A73]"
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-navy"
                     />
                   </div>
                 </div>
@@ -859,25 +851,25 @@ export default function BlendBuilderPage() {
                 <button
                   type="button"
                   onClick={handleAddComponentC}
-                  className="w-full py-4 border-2 border-dashed border-gray-300 hover:border-[#162A43] rounded-2xl text-[#162A43] hover:bg-[#EAF0F6] transition-all font-mono text-xs flex items-center justify-center gap-2 bg-white font-bold shadow-xs cursor-pointer"
+                  className="w-full py-4 border border-dashed border-outline-variant hover:border-brand-charcoal rounded-xl text-brand-charcoal hover:bg-surface-container-low transition-colors font-mono text-xs flex items-center justify-center gap-2 bg-white font-bold cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>+ Tambahkan Biji Kopi Ketiga (Component C)</span>
+                  <span>+ Tambahkan biji kopi ketiga (Komponen C)</span>
                 </button>
               )}
             </div>
 
             {/* ROAST LEVEL PROFILE - LOCKED TO DARK ESPRESSO AS REQUESTED */}
             <div className="space-y-2 pt-2">
-              <label className="block text-xs font-mono text-[#162A43] uppercase font-extrabold tracking-wider">
+              <label className="block text-xs font-mono text-brand-charcoal uppercase font-extrabold tracking-wider">
                 Profil Sangrai (Roast Profile)
               </label>
-              <div className="p-4 rounded-2xl bg-[#1E293B] text-white border border-[#334155] shadow-lg flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-brand-charcoal text-white border border-white/15 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Flame className="w-4 h-4 text-amber-400" />
                     <span className="font-mono text-sm font-bold text-white">Dark Espresso Roast</span>
-                    <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-[#A52136] text-white">
+                    <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-brand-maroon text-white">
                       Fixed Profile
                     </span>
                   </div>
@@ -891,7 +883,7 @@ export default function BlendBuilderPage() {
 
             {/* Size Selector */}
             <div className="space-y-2">
-              <label className="block text-xs font-mono text-[#162A43] uppercase font-extrabold tracking-wider">
+              <label className="block text-xs font-mono text-brand-charcoal uppercase font-extrabold tracking-wider">
                 Ukuran Kemasan
               </label>
               <div className="flex gap-3">
@@ -902,8 +894,8 @@ export default function BlendBuilderPage() {
                     onClick={() => setSelectedSize(s)}
                     className={`px-6 py-3 rounded-xl font-mono text-xs font-extrabold transition-all cursor-pointer ${
                       selectedSize === s
-                        ? 'bg-[#162A43] text-white shadow-md'
-                        : 'bg-white border-2 border-gray-200 text-[#162A43] hover:border-[#162A43]'
+                        ? 'bg-brand-charcoal text-white shadow-md'
+                        : 'bg-white border-2 border-gray-200 text-brand-charcoal hover:border-brand-charcoal'
                     }`}
                   >
                     {s}
@@ -913,40 +905,40 @@ export default function BlendBuilderPage() {
             </div>
 
             {/* Price Display with Live Formula */}
-            <div className="p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-md space-y-3.5">
+            <div className="p-5 rounded-xl bg-white border-2 border-gray-200 shadow-md space-y-3.5">
               <div className="flex items-baseline justify-between">
                 <div>
-                  <span className="text-[10px] font-mono text-[#8B1E2D] uppercase font-black tracking-wider block">
+                  <span className="text-[10px] font-mono text-brand-maroon-dark uppercase font-black tracking-wider block">
                     HARGA RACIKAN {selectedSize}
                   </span>
-                  <div className="font-mono text-3xl sm:text-4xl font-black text-[#162A43] mt-0.5">
+                  <div className="font-mono text-3xl sm:text-4xl font-black text-brand-charcoal mt-0.5">
                     {formatRupiah(activePrice)}
                   </div>
                 </div>
-                <div className="text-right font-mono text-xs text-[#4A5568]">
+                <div className="text-right font-mono text-xs text-on-surface-variant">
                   <span>Rate: </span>
-                  <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
+                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
                   <span> / kg</span>
                 </div>
               </div>
 
               {/* Formula Breakdown */}
-              <div className="p-3.5 rounded-xl bg-[#F8FAFC] border-2 border-gray-200 text-[11px] font-mono space-y-2 text-[#1E293B]">
-                <div className="flex justify-between items-center text-[#2D3748]">
+              <div className="p-3.5 rounded-xl bg-surface border border-border-subtle text-[11px] font-mono space-y-2 text-on-surface">
+                <div className="flex justify-between items-center text-on-surface">
                   <span>• {ratioA}% {componentA.name.split(' ')[0]} ({formatRupiah(componentA.pricePerKg)}/kg)</span>
-                  <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.costA)}</span>
+                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costA)}</span>
                 </div>
-                <div className="flex justify-between items-center text-[#2D3748]">
+                <div className="flex justify-between items-center text-on-surface">
                   <span>• {ratioB}% {componentB.name.split(' ')[0]} ({formatRupiah(componentB.pricePerKg)}/kg)</span>
-                  <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.costB)}</span>
+                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costB)}</span>
                 </div>
                 {hasComponentC && (
-                  <div className="flex justify-between items-center text-[#2D3748]">
+                  <div className="flex justify-between items-center text-on-surface">
                     <span>• {ratioC}% {componentC.name.split(' ')[0]} ({formatRupiah(componentC.pricePerKg)}/kg)</span>
-                    <span className="font-extrabold text-[#162A43]">{formatRupiah(priceCalculation.costC)}</span>
+                    <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costC)}</span>
                   </div>
                 )}
-                <div className="border-t-2 border-gray-200 pt-2 flex justify-between items-center font-black text-xs text-[#162A43]">
+                <div className="border-t-2 border-gray-200 pt-2 flex justify-between items-center font-black text-xs text-brand-charcoal">
                   <span>Total Harga Dasar / kg</span>
                   <span>{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
                 </div>
@@ -959,7 +951,7 @@ export default function BlendBuilderPage() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={isAdded}
-                className="flex-1 bg-[#162A43] hover:bg-[#2C3136] text-white font-mono font-extrabold text-sm py-4 px-8 rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 bg-brand-charcoal hover:bg-brand-charcoal text-white font-mono font-extrabold text-sm py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isAdded ? (
                   <>
@@ -977,7 +969,7 @@ export default function BlendBuilderPage() {
               <button
                 type="button"
                 onClick={handleShare}
-                className="px-6 py-4 rounded-2xl border-2 border-gray-200 bg-white text-[#162A43] hover:border-[#162A43] transition-colors flex items-center gap-2 text-xs font-mono font-extrabold shadow-sm cursor-pointer"
+                className="px-6 py-4 rounded-xl border-2 border-gray-200 bg-white text-brand-charcoal hover:border-brand-charcoal transition-colors flex items-center gap-2 text-xs font-mono font-extrabold shadow-sm cursor-pointer"
               >
                 <Share2 className="w-4 h-4" />
                 <span>{copied ? 'Tersalin!' : 'Bagikan'}</span>
@@ -986,27 +978,27 @@ export default function BlendBuilderPage() {
 
             {/* Our Picks Preset Pill */}
             <div className="space-y-2.5 pt-2">
-              <span className="text-xs font-mono text-[#162A43] uppercase font-extrabold block tracking-wider">
+              <span className="text-xs font-mono text-brand-charcoal uppercase font-extrabold block tracking-wider">
                 Rekomendasi Racikan Roaster 52 Coffee
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => applyPreset('java-ijen-full-wash', 'arjuna-budug-asu', 70, 30)}
-                  className="text-left p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#162A43] hover:bg-[#F8FAFC] transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
+                  className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-extrabold text-[#162A43] text-sm">70/30 Java Ijen + Arjuna Budug</div>
-                  <div className="text-[11px] text-[#4A5568] mt-1 font-medium">Fruity Tangerine, Sweet Caramel &amp; Clean Body</div>
-                  <div className="text-xs font-extrabold text-[#8B1E2D] mt-1.5">Rp 253.000 / kg</div>
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 Java Ijen + Arjuna Budug</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">Fruity Tangerine, Sweet Caramel &amp; Clean Body</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">Rp 253.000 / kg</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('java-ijen-full-wash', 'dampit-fine-robusta', 70, 30)}
-                  className="text-left p-4 rounded-2xl bg-white border-2 border-gray-200 hover:border-[#162A43] hover:bg-[#F8FAFC] transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
+                  className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-extrabold text-[#162A43] text-sm">70/30 Java Ijen + Dampit Robusta</div>
-                  <div className="text-[11px] text-[#4A5568] mt-1 font-medium">Classic House Blend (Heavy Crema &amp; Dark Cocoa)</div>
-                  <div className="text-xs font-extrabold text-[#8B1E2D] mt-1.5">Rp 220.000 / kg</div>
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 Java Ijen + Dampit Robusta</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">Racikan klasik (Krema tebal &amp; kakao pekat)</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">Rp 220.000 / kg</div>
                 </button>
               </div>
             </div>
@@ -1017,51 +1009,51 @@ export default function BlendBuilderPage() {
         {/* 3. DETAILS COMPARISON TABLE                                               */}
         {/* ========================================================================= */}
         <section className="space-y-4 pt-8 border-t-2 border-gray-200">
-          <h2 className="font-editorial text-2xl font-bold text-[#162A43]">
+          <h2 className="font-editorial text-2xl font-bold text-brand-charcoal">
             Spesifikasi Komponen Racikan
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-sans">
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Component A</span>
-              <span className="font-extrabold text-[#162A43]">{componentA.name} ({formatRupiah(componentA.pricePerKg)}/kg)</span>
+              <span className="text-brand-navy font-mono font-bold">Komponen A</span>
+              <span className="font-extrabold text-brand-charcoal">{componentA.name} ({formatRupiah(componentA.pricePerKg)}/kg)</span>
             </div>
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Component B</span>
-              <span className="font-extrabold text-[#162A43]">{componentB.name} ({formatRupiah(componentB.pricePerKg)}/kg)</span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Process (A)</span>
-              <span className="font-extrabold text-[#162A43]">{componentA.process}</span>
-            </div>
-            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Process (B)</span>
-              <span className="font-extrabold text-[#162A43]">{componentB.process}</span>
+              <span className="text-brand-navy font-mono font-bold">Komponen B</span>
+              <span className="font-extrabold text-brand-charcoal">{componentB.name} ({formatRupiah(componentB.pricePerKg)}/kg)</span>
             </div>
 
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Region (A)</span>
-              <span className="font-extrabold text-[#162A43]">{componentA.region}</span>
+              <span className="text-brand-navy font-mono font-bold">Process (A)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentA.process}</span>
             </div>
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Region (B)</span>
-              <span className="font-extrabold text-[#162A43]">{componentB.region}</span>
+              <span className="text-brand-navy font-mono font-bold">Process (B)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentB.process}</span>
             </div>
 
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Varietals (A)</span>
-              <span className="font-extrabold text-[#162A43]">{componentA.varietals}</span>
+              <span className="text-brand-navy font-mono font-bold">Region (A)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentA.region}</span>
             </div>
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-[#465C70] font-mono font-bold">Varietals (B)</span>
-              <span className="font-extrabold text-[#162A43]">{componentB.varietals}</span>
+              <span className="text-brand-navy font-mono font-bold">Region (B)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentB.region}</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-brand-navy font-mono font-bold">Varietals (A)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentA.varietals}</span>
+            </div>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
+              <span className="text-brand-navy font-mono font-bold">Varietals (B)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentB.varietals}</span>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border-2 border-gray-200 space-y-1.5 shadow-sm">
-            <span className="text-[#465C70] font-mono text-xs block font-bold uppercase tracking-wider">Catatan Rasa Gabungan</span>
-            <p className="font-editorial text-base font-extrabold text-[#162A43]">
+          <div className="p-5 rounded-xl bg-white border-2 border-gray-200 space-y-1.5 shadow-sm">
+            <span className="text-brand-navy font-mono text-xs block font-bold uppercase tracking-wider">Catatan Rasa Gabungan</span>
+            <p className="font-editorial text-base font-extrabold text-brand-charcoal">
               {componentA.notes} • {componentB.notes}
             </p>
           </div>

@@ -18,7 +18,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
   return (
     <>
       <div
-        className={`group editorial-card flex flex-col justify-between bg-white border border-border-subtle hover:border-brand-navy/30 transition-all duration-300 hover:shadow-lg rounded-2xl overflow-hidden ${
+        className={`group editorial-card flex flex-col justify-between bg-white border border-border-subtle hover:border-brand-navy/30 transition-all duration-300 hover:shadow-lg rounded-xl overflow-hidden ${
           featured ? 'ring-1 ring-brand-maroon/30 shadow-md' : ''
         }`}
       >
@@ -65,7 +65,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
                   setQuickViewOpen(true);
                 }}
                 className="p-3 rounded-full bg-white text-brand-navy hover:bg-brand-navy hover:text-white transition-all shadow-lg hover:scale-105"
-                title="Quick View & Pilih Ukuran"
+                title="Lihat cepat dan pilih ukuran"
               >
                 <Eye className="w-4 h-4" />
               </button>
@@ -146,7 +146,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
               type="button"
               onClick={() => setQuickViewOpen(true)}
               className="sm:hidden p-2 rounded-lg bg-surface-container-low text-brand-navy hover:bg-brand-pill border border-border-subtle"
-              title="Quick View"
+              title="Lihat cepat"
             >
               <Eye className="w-4 h-4" />
             </button>

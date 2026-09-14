@@ -53,7 +53,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Pencarian Biji Kopi"
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-border-subtle overflow-hidden z-10 animate-slide-up"
+        className="relative w-full max-w-2xl bg-white rounded-xl shadow-lg border border-border-subtle overflow-hidden z-10 animate-slide-up"
       >
         {/* Search Input Bar */}
         <div className="p-4 sm:p-5 border-b border-border-subtle flex items-center gap-3 bg-surface-container-low/60">
@@ -101,7 +101,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             filtered.map((product) => (
               <div
                 key={product.id}
-                className="p-3.5 rounded-2xl border border-border-subtle bg-white hover:border-brand-navy/30 hover:bg-surface-container-low/40 transition-all flex items-center justify-between gap-3 group"
+                className="p-3.5 rounded-xl border border-border-subtle bg-white hover:border-brand-navy/30 hover:bg-surface-container-low/40 transition-all flex items-center justify-between gap-3 group"
               >
                 <Link
                   href={`/catalog/${product.slug}`}
@@ -157,7 +157,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         weightGrams: v.weightGrams,
                         weightLabel: v.weightLabel,
                         grind: 'whole',
-                        grindLabel: 'Whole Beans',
+                        grindLabel: 'Biji utuh',
                         unitPrice: v.price,
                         quantity: 1,
                         series: product.series,

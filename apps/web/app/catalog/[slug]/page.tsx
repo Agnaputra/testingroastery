@@ -3,6 +3,7 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { notFound, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
@@ -127,7 +128,7 @@ function ProductDetailContent() {
         weightGrams: selectedVariant.weightGrams,
         weightLabel: selectedVariant.weightLabel,
         grind: 'whole',
-        grindLabel: 'Whole Beans (Biji Utuh)',
+        grindLabel: 'Biji utuh',
         unitPrice: selectedVariant.price,
         quantity: quantity,
         series: product.series,
@@ -180,7 +181,7 @@ function ProductDetailContent() {
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="capitalize font-mono">
             {orderMode === 'cup'
-              ? 'Slowbar Menu'
+              ? 'Menu slowbar'
               : product.category === 'espresso'
               ? 'Espresso Based'
               : 'Filter Based'}
@@ -195,18 +196,21 @@ function ProductDetailContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* LEFT: Visual Mockup & Sensory Radar Chart (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-surface-container-low rounded-3xl p-8 sm:p-12 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
+            <div className="bg-surface-container-low rounded-xl p-8 sm:p-12 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
               <div className="w-full h-full relative flex items-center justify-center">
-                <img
+                <Image
                   src={displayImg}
                   alt={product.name}
-                  className="max-h-full max-w-full object-contain rounded-2xl transition-transform duration-500 group-hover:scale-105 filter drop-shadow-md"
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 36vw, 80vw"
+                  className="rounded-xl object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-md"
                 />
               </div>
             </div>
 
             {/* SENSORY RADAR CARD */}
-            <div className="p-6 rounded-3xl bg-white border border-border-subtle shadow-sm space-y-4">
+            <div className="p-6 rounded-xl bg-white border border-border-subtle shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-brand-maroon" />
@@ -215,7 +219,7 @@ function ProductDetailContent() {
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-brand-maroon/10 text-brand-maroon">
-                  Cupping Verified
+                  Terverifikasi cupping
                 </span>
               </div>
 
@@ -242,8 +246,8 @@ function ProductDetailContent() {
                   {orderMode === 'cup'
                     ? 'BEVERAGES (SLOWBAR)'
                     : product.category === 'espresso'
-                    ? 'ESPRESSO BASED'
-                    : 'FILTER BASED'}
+                    ? 'ESPRESSO'
+                    : 'FILTER'}
                 </span>
                 {product.slowbarAlias && (
                   <span className="px-3 py-1 rounded-full bg-brand-pill text-brand-navy font-bold text-[10px] uppercase tracking-wider border border-border-subtle">
@@ -251,7 +255,7 @@ function ProductDetailContent() {
                   </span>
                 )}
                 <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-bold text-[10px] uppercase tracking-wider font-mono">
-                  Roast: {product.roastLevel}
+                  Sangrai: {product.roastLevel}
                 </span>
               </div>
 
@@ -275,7 +279,7 @@ function ProductDetailContent() {
               {/* Tasting Notes Box */}
               <div className="p-3 sm:p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
                 <span className="text-[9px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
-                  TASTING NOTES
+                  CATATAN RASA
                 </span>
                 <p className="font-editorial text-base sm:text-lg font-bold text-brand-navy leading-snug">
                   {product.tastingNotes.join(', ')}
@@ -286,7 +290,7 @@ function ProductDetailContent() {
               <div className="p-3 sm:p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
-                    FRESHNESS &amp; ROAST DATE
+                    KESEGARAN &amp; TANGGAL SANGRAI
                   </span>
                   <span className="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                     &lt; 7 Hari Fresh Sangrai
@@ -303,27 +307,27 @@ function ProductDetailContent() {
               {/* Metadata 3x2 Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5">
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">FARM</span>
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">KEBUN</span>
                   <p className="text-[11px] font-bold text-on-surface truncate">{product.region.split(',')[0] || 'Gunung Argopuro'}</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">REGION</span>
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">DAERAH</span>
                   <p className="text-[11px] font-bold text-on-surface truncate">{product.origin.split(',')[0] || 'East Java'}</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PRODUCER</span>
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PRODUSEN</span>
                   <p className="text-[11px] font-bold text-on-surface truncate">Mitra 52 Coffee &amp; Roastery</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PROCESS</span>
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PROSES</span>
                   <p className="text-[11px] font-bold text-on-surface truncate">{product.process}</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">ALTITUDE</span>
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">KETINGGIAN</span>
                   <p className="text-[11px] font-bold text-on-surface truncate">{product.altitude}</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">VARIETALS</span>
+                  <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">VARIETAS</span>
                   <p className="text-[11px] font-bold text-on-surface truncate">{product.varietal}</p>
                 </div>
               </div>
@@ -333,7 +337,7 @@ function ProductDetailContent() {
             {/* ONE-CLICK BREW GUIDE (HANYA MUNCUL DI FILTER & ESPRESSO ROAST PROFILE)   */}
             {/* ========================================================================= */}
             {orderMode !== 'cup' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+              <div className="p-4 sm:p-5 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-brand-maroon">
                     <Coffee className="w-4 h-4" />
@@ -359,7 +363,7 @@ function ProductDetailContent() {
             {orderMode === 'cup' && product.cupPrice ? (
               /* MODE 1: SLOWBAR CUP */
               <div className="space-y-4 pt-2 border-t border-border-subtle">
-                <div className="space-y-2.5 p-3.5 sm:p-4 rounded-2xl bg-brand-pill/60 border border-border-subtle">
+                <div className="space-y-2.5 p-3.5 sm:p-4 rounded-xl bg-brand-pill/60 border border-border-subtle">
                   <span className="text-[11px] font-mono text-on-surface-variant uppercase font-semibold block">
                     Pilihan Seduhan Slowbar:
                   </span>
@@ -468,7 +472,7 @@ function ProductDetailContent() {
                 </div>
 
                 {/* Option to buy beans pouch below */}
-                <div className="p-4 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <div className="space-y-0.5">
                     <span className="font-mono font-bold text-brand-navy block">Ingin Seduh Sendiri di Rumah?</span>
                     <span className="text-on-surface-variant text-[11px]">Tersedia kemasan biji kopi Retail Pouch (100g, 200g, 500g)</span>
@@ -572,7 +576,7 @@ function ProductDetailContent() {
 
                 {/* Option to switch to slowbar cup if available */}
                 {product.cupPrice && (
-                  <div className="p-4 rounded-2xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                     <div className="space-y-0.5">
                       <span className="font-mono font-bold text-brand-navy block">Tersedia Seduhan Cangkir di Slowbar</span>
                       <span className="text-on-surface-variant text-[11px]">Nikmati seduhan presisi oleh barista di Slowbar Malang ({formatRupiah(product.cupPrice)})</span>
@@ -601,7 +605,7 @@ function ProductDetailContent() {
           </span>
 
           {/* Accordion 1: Green Information */}
-          <div className="border border-border-subtle rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
             <button
               type="button"
               onClick={() => setOpenGreenInfo(!openGreenInfo)}
@@ -625,7 +629,7 @@ function ProductDetailContent() {
           </div>
 
           {/* Accordion 2: Price Breakdown */}
-          <div className="border border-border-subtle rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
             <button
               type="button"
               onClick={() => setOpenPriceBreakdown(!openPriceBreakdown)}
@@ -659,7 +663,7 @@ function ProductDetailContent() {
           </div>
 
           {/* Accordion 3: Origin & Sourcing */}
-          <div className="border border-border-subtle rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
             <button
               type="button"
               onClick={() => setOpenOrigin(!openOrigin)}
@@ -680,7 +684,7 @@ function ProductDetailContent() {
           </div>
 
           {/* Accordion 4: Farm Story */}
-          <div className="border border-border-subtle rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
             <button
               type="button"
               onClick={() => setOpenStory(!openStory)}
@@ -702,7 +706,7 @@ function ProductDetailContent() {
       {/* ========================================================================= */}
       {/* MOBILE STICKY BOTTOM ACTION BAR                                           */}
       {/* ========================================================================= */}
-      <div className="fixed bottom-0 left-0 right-0 sm:hidden z-40 bg-white/95 backdrop-blur-md border-t border-border-subtle p-3.5 shadow-2xl flex items-center justify-between gap-3">
+      <div className="fixed bottom-0 left-0 right-0 sm:hidden z-40 bg-white/95 backdrop-blur-md border-t border-border-subtle p-3.5 shadow-lg flex items-center justify-between gap-3">
         <div className="min-w-0">
           <span className="text-[10px] font-mono text-on-surface-variant uppercase block">Total</span>
           <div className="font-mono font-bold text-base text-brand-navy truncate">

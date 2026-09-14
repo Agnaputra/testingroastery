@@ -23,8 +23,8 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="lg:col-span-2 space-y-4 text-sm">
-            <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
-              Koleksi Kopi
+            <span className="text-[11px] font-semibold text-brand-teal block">
+              Koleksi kopi
             </span>
             <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
@@ -52,18 +52,13 @@ export function Footer() {
 
           {/* Tools & Guides */}
           <div className="lg:col-span-2 space-y-4 text-sm">
-            <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
+            <span className="text-[11px] font-semibold text-brand-teal block">
               Jelajahi
             </span>
             <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
                 <Link href="/guide" className="hover:text-white transition-colors">
-                  Panduan Seduh
-                </Link>
-              </li>
-              <li>
-                <Link href="/tools/brew-calculator" className="hover:text-white transition-colors">
-                  Kalkulator Seduh
+                  Panduan &amp; Kalkulator Seduh
                 </Link>
               </li>
               <li>
@@ -81,7 +76,7 @@ export function Footer() {
 
           {/* Operational & Address */}
           <div className="col-span-2 lg:col-span-4 lg:pl-8 space-y-4 text-sm">
-            <span className="text-[11px] uppercase tracking-widest text-[#8FB9BC] font-bold block">
+            <span className="text-[11px] font-semibold text-brand-teal block">
               Temui kami di Malang
             </span>
             <p className="flex items-start gap-3 text-white/75 leading-7">
@@ -103,7 +98,7 @@ export function Footer() {
 
         <div className="pt-7 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between text-xs leading-6 text-white/60 gap-4">
           <p>© {new Date().getFullYear()} 52 Coffee &amp; Roastery.</p>
-          <Link href="/about" className="inline-flex min-h-11 items-center gap-2 hover:text-white">Artisanal roasting. Precision extraction.<ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
+          <Link href="/about" className="inline-flex min-h-11 items-center gap-2 hover:text-white">Sangrai terukur, rasa yang jernih.<ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
         </div>
       </div>
     </footer>

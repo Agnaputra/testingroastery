@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Eye, Plus, Check } from 'lucide-react';
 import { CoffeeProduct, formatRupiah } from '../lib/data';
 import { QuickViewModal } from './quick-view-modal';
@@ -27,13 +28,13 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
     const defaultVariant = product.variants[0];
     addItem({
       productId: product.id,
-      name: isCup ? `${product.slowbarAlias || product.name} (Slowbar Cup)` : product.name,
+      name: isCup ? `${product.slowbarAlias || product.name} (Cangkir slowbar)` : product.name,
       slug: product.slug,
       imageUrl: product.imageUrl,
       weightGrams: isCup ? 1 : (defaultVariant?.weightGrams || 100),
-      weightLabel: isCup ? '1 Cup' : (defaultVariant?.weightLabel || product.defaultWeight),
+      weightLabel: isCup ? '1 cangkir' : (defaultVariant?.weightLabel || product.defaultWeight),
       grind: 'whole',
-      grindLabel: isCup ? 'Manual Brew Cup' : 'Whole Beans',
+      grindLabel: isCup ? 'Seduhan manual' : 'Biji utuh',
       unitPrice: isCup ? (product.cupPrice || product.basePrice) : product.basePrice,
       quantity: 1,
       series: product.series,
@@ -53,7 +54,7 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
           </span>
           {isCup ? (
             <span className="px-2 py-0.5 rounded-full bg-brand-maroon/10 text-brand-maroon font-bold tracking-wider shrink-0">
-              Slowbar Cup
+              Cangkir slowbar
             </span>
           ) : (
             <span className="px-2 py-0.5 rounded-full bg-brand-navy/10 text-brand-navy font-bold tracking-wider shrink-0">
@@ -64,13 +65,12 @@ export function EditorialProductCard({ product, isBeverageMode = false }: Editor
 
         {/* Center: Studio Product Shot with Clean Hover Lift */}
         <Link href={detailUrl} className="relative w-full aspect-[6/5] mx-auto my-4 flex items-center justify-center overflow-hidden rounded-lg bg-surface-container-low">
-          <img
+          <Image
             src={product.imageUrl}
             alt={product.name}
-            loading="lazy"
-            width={300}
-            height={250}
-            className="w-full h-full object-contain mix-blend-multiply motion-safe:group-hover:scale-[1.04] transition-transform duration-300 ease-out"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-contain mix-blend-multiply motion-safe:group-hover:scale-[1.04] transition-transform duration-300 ease-out"
           />
         </Link>
 
