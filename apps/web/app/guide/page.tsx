@@ -446,7 +446,7 @@ function BrewGuideContent() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-brand-charcoal font-sans text-white">
+    <div className="nav-offset min-h-screen w-full bg-brand-charcoal font-sans text-white">
       {/* ========================================================================= */}
       {/* 1. HERO SECTION                                                           */}
       {/* ========================================================================= */}

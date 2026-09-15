@@ -20,6 +20,7 @@ interface FlavorRadarChartProps {
   showBars?: boolean;
   color?: 'maroon' | 'navy' | 'teal' | 'amber';
   title?: string;
+  surface?: 'card' | 'plain';
 }
 
 const AXES: { key: keyof FlavorMetrics; label: string; short: string }[] = [
@@ -39,6 +40,7 @@ export function FlavorRadarChart({
   showBars = true,
   color = 'maroon',
   title,
+  surface = 'card',
 }: FlavorRadarChartProps) {
   const center = size / 2;
   const radius = size * (showLabels ? 0.3 : 0.38);
@@ -121,7 +123,11 @@ export function FlavorRadarChart({
       )}
 
       {/* Radar SVG Container */}
-      <div className="relative flex items-center justify-center p-2 bg-surface-container-low/50 rounded-xl border border-border-subtle overflow-hidden">
+      <div className={`relative flex items-center justify-center overflow-hidden p-2 ${
+        surface === 'plain'
+          ? 'border-y border-black/10 bg-transparent'
+          : 'rounded-xl border border-border-subtle bg-surface-container-low/50'
+      }`}>
         <svg
           width={size}
           height={size}

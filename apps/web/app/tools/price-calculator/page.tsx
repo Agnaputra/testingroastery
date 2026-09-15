@@ -205,7 +205,7 @@ export default function B2BWholesaleCalculatorPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="page-shell"
+      className="page-shell nav-offset"
     >
       {/* ========================================================================= */}
       {/* 1. HERO SECTION (B2B Wholesale & Business Calculator)                     */}

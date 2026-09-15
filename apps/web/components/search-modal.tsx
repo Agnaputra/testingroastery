@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, X, ArrowRight, Sparkles, ShoppingBag } from 'lucide-react';
-import { PRODUCTS, CoffeeProduct, formatRupiah } from '../lib/data';
+import { PRODUCTS, formatRupiah, getProductDisplayImage } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
 
 interface SearchModalProps {
@@ -15,16 +15,54 @@ interface SearchModalProps {
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const { addItem } = useCartStore();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onCloseRef = useRef(onClose);
 
   useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    const focusFrame = window.requestAnimationFrame(() => inputRef.current?.focus());
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
+
+    document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -50,6 +88,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Pencarian Biji Kopi"
@@ -59,7 +98,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         <div className="p-4 sm:p-5 border-b border-border-subtle flex items-center gap-3 bg-surface-container-low/60">
           <Search className="w-5 h-5 text-brand-navy shrink-0" />
           <input
+            ref={inputRef}
             type="text"
+            aria-label="Cari biji kopi"
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -76,8 +117,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             </button>
           )}
           <button
+            type="button"
             onClick={onClose}
-            className="text-xs font-mono px-2 py-1 bg-white rounded-lg border border-border-subtle text-on-surface-variant hover:text-on-surface shadow-xs"
+            className="min-h-11 px-3 text-xs font-mono bg-white rounded-lg border border-border-subtle text-on-surface-variant hover:text-on-surface shadow-xs"
+            aria-label="Tutup pencarian"
           >
             ESC
           </button>
@@ -110,7 +153,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 >
                   <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
                     <Image
-                      src={product.imageUrl}
+                      src={getProductDisplayImage(product)}
                       alt={product.name}
                       fill
                       sizes="56px"
@@ -153,7 +196,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         productId: product.id,
                         name: product.name,
                         slug: product.slug,
-                        imageUrl: product.imageUrl,
+                        imageUrl: getProductDisplayImage(product),
                         weightGrams: v.weightGrams,
                         weightLabel: v.weightLabel,
                         grind: 'whole',
@@ -166,7 +209,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       onClose();
                     }}
                     className="p-2.5 rounded-xl bg-brand-navy hover:bg-brand-navy-light text-white transition-colors shadow-sm cursor-pointer"
-                    title="Tambah ke Keranjang"
+                    aria-label={`Tambah ${product.name} ke keranjang`}
                   >
                     <ShoppingBag className="w-4 h-4" />
                   </button>

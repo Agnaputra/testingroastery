@@ -21,7 +21,7 @@ import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
 
 export default function AboutPage() {
   return (
-    <div className="page-shell">
+    <div className="page-shell nav-offset">
       <PageIntro
         align="center"
         compact

@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRight,
   Coffee,
   RotateCcw,
-  SlidersHorizontal,
 } from 'lucide-react';
-import { PRODUCTS, CoffeeProduct } from '../../lib/data';
+import { PRODUCTS, CoffeeProduct, getProductDisplayImage } from '../../lib/data';
 import { EditorialProductCard } from '../../components/editorial-product-card';
 
 // Ordered according to official 52 Coffee Menu PDF
@@ -62,10 +59,20 @@ function CatalogContent() {
   });
 
   const [selectedSeries, setSelectedSeries] = useState<string>(
-    initialSeries || 'all'
+    initialSeries || (initialCategory?.toLowerCase() === 'reserve' ? 'Grand Reserve' : 'all')
   );
   const [sortBy, setSortBy] = useState<'name' | 'price-asc' | 'price-desc'>('name');
   const [visibleCount, setVisibleCount] = useState(12);
+
+  useEffect(() => {
+    const category = initialCategory?.toLowerCase();
+    setMainTab(category === 'beverages' || category === 'slowbar' ? 'slowbar' : 'beans');
+    setBeansSubTab(category === 'espresso' ? 'espresso' : 'filter');
+    setSelectedSeries(
+      initialSeries || (category === 'reserve' ? 'Grand Reserve' : 'all')
+    );
+    setVisibleCount(12);
+  }, [initialCategory, initialSeries]);
 
   // Extract and sort all unique series by PDF menu order
   const allSeriesList = useMemo(() => {
@@ -125,17 +132,9 @@ function CatalogContent() {
   // Handle image assignment for clean studio isolated bag preview
   const enrichedProducts = useMemo(() => {
     return filteredProducts.map((p) => {
-      let customImg = p.imageUrl;
-      if (!p.imageUrl || p.imageUrl.startsWith('http')) {
-        if (p.series === 'Java Exotic') customImg = '/images/bag-sumbing.jpg';
-        else if (p.series === 'Grand Reserve') customImg = '/images/bag-grand-reserve.jpg';
-        else if (p.series === 'Argopuro Walida' || p.series === 'Arjuna Series' || p.series === 'Dewata Series') customImg = '/images/bag-walida.jpg';
-        else if (p.series === 'Enrekang Series' || p.series === 'Arabica Espresso') customImg = '/images/bag-sumbing.jpg';
-        else customImg = '/images/bag-prau.jpg';
-      }
       return {
         ...p,
-        imageUrl: customImg,
+        imageUrl: getProductDisplayImage(p),
       };
     });
   }, [filteredProducts]);
@@ -150,7 +149,7 @@ function CatalogContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7f4] pb-24 text-brand-charcoal [&_button]:min-h-11">
+    <div className="min-h-screen bg-[#f7f7f4] pb-24 pt-[76px] text-brand-charcoal [&_button]:min-h-11">
       <section className="border-b border-black/10">
         <div className="site-container grid gap-8 py-14 sm:py-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(280px,.7fr)] lg:items-end lg:py-20">
           <div>
@@ -174,227 +173,137 @@ function CatalogContent() {
         </div>
       </section>
       <div className="site-container">
-        {/* ===================================================================== */}
-        {/* 1. BREADCRUMB & 52 COFFEE CATALOG HEADER                              */}
-        {/* ===================================================================== */}
-        <div className="pt-9 sm:pt-11 pb-8 text-center">
-          {/* 1. PRIMARY EDITORIAL TABS (WHOLEBEANS/RETAIL vs SLOWBAR) */}
-          <div role="tablist" aria-label="Jenis penyajian kopi" className="flex items-center justify-center border-b border-border-subtle max-w-sm sm:max-w-md mx-auto">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mainTab === 'beans'}
-              onClick={() => {
-                setMainTab('beans');
-                setVisibleCount(12);
-              }}
-              className={`relative flex-1 pb-3 pt-2 text-sm font-semibold transition-colors duration-200 text-center cursor-pointer ${
-                mainTab === 'beans' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
-              }`}
-            >
-              <span>Biji Kopi</span>
-              {mainTab === 'beans' && (
-                <motion.div
-                  layoutId="activeCatalogTabLine"
-                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand-navy"
-                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                />
-              )}
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mainTab === 'slowbar'}
-              onClick={() => {
-                setMainTab('slowbar');
-                setVisibleCount(12);
-              }}
-              className={`relative flex-1 pb-3 pt-2 text-sm font-semibold transition-colors duration-200 text-center cursor-pointer ${
-                mainTab === 'slowbar' ? 'text-brand-navy' : 'text-on-surface-variant hover:text-brand-navy'
-              }`}
-            >
-              <span>Slowbar</span>
-              {mainTab === 'slowbar' && (
-                <motion.div
-                  layoutId="activeCatalogTabLine"
-                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brand-navy"
-                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                />
-              )}
-            </button>
+        <div className="flex flex-col gap-5 border-b border-black/10 py-6 lg:flex-row lg:items-center lg:justify-between">
+          <div role="tablist" aria-label="Jenis penyajian kopi" className="flex items-center gap-7">
+            {([
+              ['beans', 'Biji kopi'],
+              ['slowbar', 'Slowbar'],
+            ] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={mainTab === value}
+                onClick={() => {
+                  setMainTab(value);
+                  setVisibleCount(12);
+                }}
+                className={`relative px-0 py-1 text-sm font-semibold transition-colors ${
+                  mainTab === value
+                    ? 'text-brand-charcoal'
+                    : 'text-on-surface-variant hover:text-brand-charcoal'
+                }`}
+              >
+                {label}
+                {mainTab === value && (
+                  <motion.span
+                    layoutId="activeCatalogTabLine"
+                    className="absolute inset-x-0 -bottom-[1.55rem] h-0.5 bg-brand-maroon"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  />
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* 2. SUB-FILTERS INSIDE WHOLEBEANS: FILTER vs ESPRESSO */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {mainTab === 'beans' && (
               <motion.div
-                initial={{ opacity: 0, y: -4 }}
+                key="bean-roasts"
+                initial={{ opacity: 0, y: -3 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
+                exit={{ opacity: 0, y: -3 }}
                 transition={{ duration: 0.18 }}
-                className="flex items-center justify-center gap-2.5 pt-4 font-mono text-[11px] uppercase tracking-wider"
+                className="flex items-center gap-6 font-mono text-[10px] font-semibold uppercase tracking-[0.15em]"
               >
-                <button
-                  type="button"
-                  aria-pressed={beansSubTab === 'filter'}
-                  onClick={() => {
-                    setBeansSubTab('filter');
-                    setVisibleCount(12);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 cursor-pointer border text-xs ${
-                    beansSubTab === 'filter'
-                      ? 'bg-brand-maroon text-white border-brand-maroon font-bold shadow-xs'
-                      : 'bg-surface-container-low text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
-                  }`}
-                >
-                  <span>Filter Roast</span>
-                </button>
-
-                <button
-                  type="button"
-                  aria-pressed={beansSubTab === 'espresso'}
-                  onClick={() => {
-                    setBeansSubTab('espresso');
-                    setVisibleCount(12);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-lg transition-all duration-200 cursor-pointer border text-xs ${
-                    beansSubTab === 'espresso'
-                      ? 'bg-brand-maroon text-white border-brand-maroon font-bold shadow-xs'
-                      : 'bg-surface-container-low text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
-                  }`}
-                >
-                  <span>Espresso Roast</span>
-                </button>
+                {([
+                  ['filter', 'Filter roast'],
+                  ['espresso', 'Espresso roast'],
+                ] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={beansSubTab === value}
+                    onClick={() => {
+                      setBeansSubTab(value);
+                      setVisibleCount(12);
+                    }}
+                    className={`border-b py-1 transition-colors ${
+                      beansSubTab === value
+                        ? 'border-brand-maroon text-brand-maroon'
+                        : 'border-transparent text-on-surface-variant hover:text-brand-charcoal'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* ===================================================================== */}
-        {/* 2. PERMANENTLY OPEN SERIES FILTER BAR & SORT TOOLBAR                  */}
-        {/* ===================================================================== */}
-        <div className="mt-8 mb-8 space-y-4">
-          <div className="sm:hidden">
-            <label htmlFor="mobile-coffee-series" className="mb-2 block text-xs font-semibold text-on-surface-variant">Pilih series kopi</label>
-            <select id="mobile-coffee-series" value={selectedSeries} onChange={(event) => { setSelectedSeries(event.target.value); setVisibleCount(12); }} className="min-h-12 w-full rounded-lg border border-border-subtle bg-surface-container-low px-4 text-sm text-brand-navy">
-              <option value="all">Semua Series</option>
-              {allSeriesList.map((series) => <option key={series} value={series}>{series}</option>)}
-            </select>
-          </div>
-          {/* Expanded series selection on larger screens */}
-          <div className="hidden sm:block p-5 rounded-xl bg-surface-container-low border border-border-subtle space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant font-bold block">
-                Pilih Series (Origin Nusantara &amp; Dunia)
+        <div className="mb-10 mt-8 grid gap-5 border-y border-black/10 py-5 md:grid-cols-[1fr_auto] md:items-end">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
+            Menampilkan {displayedProducts.length} dari {filteredProducts.length} produk
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block min-w-0 sm:w-56">
+              <span className="mb-2 block font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-on-surface-variant">
+                Series kopi
               </span>
-              {hasActiveFilters && (
-                <button
-                  onClick={resetAllFilters}
-                  className="inline-flex items-center gap-1.5 text-xs text-brand-maroon hover:underline font-mono font-bold cursor-pointer"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset Filter</span>
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedSeries('all')}
-                className={`px-3.5 py-1.5 rounded-full border transition-all text-xs font-mono cursor-pointer ${
-                  selectedSeries === 'all'
-                    ? 'bg-brand-navy text-white border-brand-navy font-bold shadow-xs'
-                    : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
-                }`}
+              <select
+                value={selectedSeries}
+                onChange={(event) => {
+                  setSelectedSeries(event.target.value);
+                  setVisibleCount(12);
+                }}
+                className="min-h-11 w-full border-0 border-b border-black/20 bg-transparent px-0 pr-8 text-sm font-semibold text-brand-charcoal outline-none focus:border-brand-maroon focus:ring-0"
               >
-                Semua Series
-              </button>
-              {allSeriesList.map((series) => (
-                <button
-                  key={series}
-                  onClick={() => setSelectedSeries(series)}
-                  className={`px-3.5 py-1.5 rounded-full border transition-all text-xs font-mono cursor-pointer ${
-                    selectedSeries === series
-                      ? 'bg-brand-navy text-white border-brand-navy font-bold shadow-xs'
-                      : 'bg-white text-on-surface-variant border-border-subtle hover:border-brand-navy hover:text-brand-navy'
-                  }`}
-                >
-                  {series}
-                </button>
-              ))}
-            </div>
+                <option value="all">Semua series</option>
+                {allSeriesList.map((series) => (
+                  <option key={series} value={series}>{series}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block min-w-0 sm:w-48">
+              <span className="mb-2 block font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-on-surface-variant">
+                Urutkan
+              </span>
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+                className="min-h-11 w-full border-0 border-b border-black/20 bg-transparent px-0 pr-8 text-sm font-semibold text-brand-charcoal outline-none focus:border-brand-maroon focus:ring-0"
+              >
+                <option value="name">Nama A-Z</option>
+                <option value="price-asc">Harga terendah</option>
+                <option value="price-desc">Harga tertinggi</option>
+              </select>
+            </label>
           </div>
 
-          {/* Results Count & Sort By Toolbar */}
-          <div className="border-y border-border-subtle py-3 flex flex-wrap gap-x-4 gap-y-2 items-center justify-between font-mono text-xs font-bold uppercase tracking-wider text-brand-navy">
-            {/* Results Count */}
-            <span className="text-[11px] font-mono text-on-surface-variant font-normal normal-case">
-              Menampilkan {displayedProducts.length} dari {filteredProducts.length} {mainTab === 'slowbar' ? 'menu seduh cangkir' : 'biji kopi'}
-            </span>
-
-            {/* Sort By Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setSortOpen(!sortOpen)}
-                className="flex items-center gap-2 hover:text-brand-teal transition-colors cursor-pointer"
-              >
-                <span>Urutkan {sortOpen ? '–' : '+'}</span>
-              </button>
-
-              {sortOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border-subtle shadow-md rounded-xl p-2 z-40 space-y-1 normal-case text-xs font-sans">
-                  <button
-                    onClick={() => {
-                      setSortBy('name');
-                      setSortOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
-                      sortBy === 'name' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    Nama (A-Z)
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortBy('price-asc');
-                      setSortOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
-                      sortBy === 'price-asc' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    Harga: Terendah → Tertinggi
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortBy('price-desc');
-                      setSortOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-brand-pill transition-colors ${
-                      sortBy === 'price-desc' ? 'font-bold text-brand-navy bg-brand-pill' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    Harga: Tertinggi → Terendah
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="inline-flex min-h-0 w-fit items-center gap-2 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-brand-maroon hover:underline md:col-start-2 md:justify-self-end"
+            >
+              <RotateCcw size={12} aria-hidden="true" />
+              Hapus filter
+            </button>
+          )}
         </div>
 
-        {/* ===================================================================== */}
-        {/* 4. 4-COLUMN COMPACT EDITORIAL PRODUCT GRID                           */}
-        {/* ===================================================================== */}
         <AnimatePresence mode="wait">
           {displayedProducts.length > 0 ? (
             <motion.div
               key={`${mainTab}-${beansSubTab}-${selectedSeries}-${sortBy}`}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6"
+              className="grid grid-cols-1 gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-6"
             >
               {displayedProducts.map((product) => (
                 <EditorialProductCard
@@ -410,34 +319,33 @@ function CatalogContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="py-24 text-center space-y-4 bg-surface-container-low border border-border-subtle rounded-xl p-10"
+              className="space-y-4 border-y border-black/10 py-24 text-center"
             >
-              <h3 className="font-editorial text-2xl font-bold text-brand-navy">
-                Tidak ada biji kopi yang cocok dengan filter.
+              <h3 className="font-headline text-2xl font-semibold tracking-tight text-brand-charcoal">
+                Tidak ada kopi pada pilihan ini.
               </h3>
-              <p className="text-xs text-on-surface-variant font-mono">
-                Coba gunakan kata kunci lain atau reset filter untuk melihat seluruh katalog.
+              <p className="text-sm text-on-surface-variant">
+                Pilih series lain atau tampilkan kembali seluruh koleksi.
               </p>
               <button
+                type="button"
                 onClick={resetAllFilters}
-                className="px-6 py-2.5 rounded-xl bg-brand-navy text-white text-xs font-mono font-bold hover:bg-brand-navy-light transition-all shadow-sm"
+                className="border-b border-brand-charcoal font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-charcoal"
               >
-                Reset Filter
+                Tampilkan semua
               </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ===================================================================== */}
-        {/* 5. BOTTOM "VIEW MORE" ACTION                                         */}
-        {/* ===================================================================== */}
         {visibleCount < filteredProducts.length && (
           <div className="mt-16 text-center">
             <button
+              type="button"
               onClick={() => setVisibleCount((prev) => prev + 8)}
-              className="px-8 py-3 rounded-full bg-brand-navy text-white font-mono text-xs font-bold hover:bg-brand-navy-light transition-all shadow-sm cursor-pointer hover:scale-105"
+              className="border border-brand-charcoal bg-transparent px-7 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-charcoal transition-colors hover:bg-brand-charcoal hover:text-white"
             >
-              Lihat Lebih Banyak ({filteredProducts.length - visibleCount} kopi tersisa)
+              Lihat {Math.min(8, filteredProducts.length - visibleCount)} kopi berikutnya
             </button>
           </div>
         )}

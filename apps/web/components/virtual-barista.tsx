@@ -16,7 +16,7 @@ import {
   Flame,
   Scale,
 } from 'lucide-react';
-import { PRODUCTS, CoffeeProduct, formatRupiah } from '../lib/data';
+import { PRODUCTS, CoffeeProduct, formatRupiah, getProductDisplayImage } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
 import { FiftyTwoBeanMark } from './logo';
 import { OPEN_VIRTUAL_BARISTA } from '../lib/virtual-barista-events';
@@ -32,7 +32,7 @@ interface ChatMessage {
 const QUICK_PROMPTS = [
   'Rekomendasi racikan BYOB (Build Your Own Blend)',
   'Price Calculator roastery itu buat apa?',
-  'Kopi apa yang aman untuk lambung & maag?',
+  'Kopi dengan rasa asam lebih ringan untuk lambung sensitif?',
   'Biji kopi fruity & floral terbaik untuk V60',
   'Dimana lokasi & jam buka roastery di Malang?',
 ];
@@ -187,7 +187,6 @@ export function VirtualBaristaWidget() {
         lower.includes('ringan') ||
         lower.includes('low acid') ||
         lower.includes('tidak asam') ||
-        lower.includes('aman') ||
         lower.includes('lembut') ||
         lower.includes('smooth') ||
         lower.includes('mild')
@@ -195,7 +194,7 @@ export function VirtualBaristaWidget() {
         matched = PRODUCTS.filter((p) =>
           ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana', 'sumbing-supernova-celestia'].includes(p.slug)
         );
-        reply = 'Untuk kawan seduh yang mencari kopi Ringan, Lembut, dan Ramah/Aman untuk Lambung, kurasi terbaik kami:\n1. Kintamani Full Wash (Medium Roast Arabica — Nyaman di perut dengan aftertaste sweet chocolate)\n2. Ijen Yellow Bourbon Honey (Low Acidity — Manis madu & kacang almond)\n3. Java Exotic Sumbing Deep Washed (Clean body & brown sugar manis)\n\nTips: Seduh dengan metode Cold Brew atau V60 suhu air 88-90°C agar asam klorogenat ekstra lembut!';
+        reply = 'Tidak ada kopi yang dapat dijamin aman untuk maag atau GERD karena respons setiap orang berbeda. Jika kamu mencari karakter rasa dengan persepsi asam lebih ringan, coba:\n1. Kintamani Full Wash (sweet chocolate, citrus lembut)\n2. Ijen Yellow Bourbon Honey (madu dan kacang almond)\n3. Java Exotic Sumbing Deep Washed (brown sugar dan black tea)\n\nMulai dari porsi kecil dan hindari minum saat perut kosong. Jika kamu memiliki GERD atau gejala berulang, ikuti saran tenaga kesehatan.';
       } else if (
         clean === 'manual' ||
         clean === 'manual brew' ||
@@ -400,7 +399,7 @@ export function VirtualBaristaWidget() {
                               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
                                   <Image
-                                    src={prod.imageUrl}
+                                    src={getProductDisplayImage(prod)}
                                     alt={prod.name}
                                     fill
                                     sizes="48px"
@@ -428,7 +427,7 @@ export function VirtualBaristaWidget() {
                                     productId: prod.id,
                                     name: prod.name,
                                     slug: prod.slug,
-                                    imageUrl: prod.imageUrl,
+                                    imageUrl: getProductDisplayImage(prod),
                                     weightGrams: variant.weightGrams,
                                     weightLabel: variant.weightLabel,
                                     grind: 'whole',

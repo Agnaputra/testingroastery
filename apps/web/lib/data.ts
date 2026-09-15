@@ -1431,6 +1431,32 @@ export function formatRupiah(amount: number): string {
   }).format(amount);
 }
 
+export function getProductDisplayImage(
+  product: Pick<CoffeeProduct, 'imageUrl' | 'series'>
+): string {
+  if (product.imageUrl && !product.imageUrl.startsWith('http')) {
+    return product.imageUrl;
+  }
+
+  if (product.series === 'Grand Reserve') return '/images/bag-grand-reserve.jpg';
+  if (
+    product.series === 'Argopuro Walida' ||
+    product.series === 'Arjuna Series' ||
+    product.series === 'Dewata Series'
+  ) {
+    return '/images/bag-walida.jpg';
+  }
+  if (
+    product.series === 'Java Exotic' ||
+    product.series === 'Enrekang Series' ||
+    product.series === 'Arabica Espresso'
+  ) {
+    return '/images/bag-sumbing.jpg';
+  }
+
+  return '/images/bag-prau.jpg';
+}
+
 export function getProductBySlug(slug: string): CoffeeProduct | undefined {
   return PRODUCTS.find((p) => p.slug === slug || p.id === slug);
 }
@@ -1446,4 +1472,3 @@ export function getProductsByCategory(category: 'filter' | 'espresso' | 'reserve
 export function getProductsBySeries(series: CoffeeSeries): CoffeeProduct[] {
   return PRODUCTS.filter((p) => p.series === series);
 }
-

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Sparkles, Coffee } from 'lucide-react';
@@ -52,9 +52,52 @@ export function CartDrawer() {
   } = useCartStore();
 
   const [mounted, setMounted] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeDrawer();
+        return;
+      }
+      if (event.key !== 'Tab' || !drawerRef.current) return;
+
+      const focusable = Array.from(
+        drawerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isDrawerOpen, closeDrawer]);
 
   if (!mounted) return null;
 
@@ -92,19 +135,27 @@ export function CartDrawer() {
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-lg flex flex-col animate-slide-up border-l border-border-subtle">
+        <div
+          ref={drawerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cart-drawer-title"
+          className="w-screen max-w-md bg-white shadow-lg flex flex-col animate-slide-up border-l border-border-subtle"
+        >
           {/* Drawer Header */}
           <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-surface-container-low">
             <div className="flex items-center gap-2.5">
               <ShoppingBag className="w-5 h-5 text-brand-navy" />
-              <h2 className="font-editorial text-lg font-bold text-brand-navy">
+              <h2 id="cart-drawer-title" className="font-editorial text-lg font-bold text-brand-navy">
                 Keranjang Seduh ({totalItems})
               </h2>
             </div>
             <button
+              type="button"
+              ref={closeButtonRef}
               onClick={closeDrawer}
-              className="p-1.5 rounded-full text-on-surface-variant hover:text-brand-navy hover:bg-brand-pill transition-colors"
-              aria-label="Close Cart"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-brand-pill hover:text-brand-navy"
+              aria-label="Tutup keranjang"
             >
               <X className="w-5 h-5" />
             </button>
@@ -180,17 +231,24 @@ export function CartDrawer() {
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <Link
-                            href={`/catalog/${item.slug}`}
-                            onClick={closeDrawer}
-                            className="font-editorial text-sm font-bold text-brand-navy hover:text-brand-teal line-clamp-1 transition-colors"
-                          >
-                            {item.name}
-                          </Link>
+                          {item.productId.startsWith('addon-') ? (
+                            <span className="line-clamp-1 font-editorial text-sm font-bold text-brand-navy">
+                              {item.name}
+                            </span>
+                          ) : (
+                            <Link
+                              href={`/catalog/${item.slug}`}
+                              onClick={closeDrawer}
+                              className="line-clamp-1 font-editorial text-sm font-bold text-brand-navy transition-colors hover:text-brand-teal"
+                            >
+                              {item.name}
+                            </Link>
+                          )}
                           <button
+                            type="button"
                             onClick={() => removeItem(item.id)}
-                            className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
-                            title="Hapus"
+                            className="-m-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center text-on-surface-variant transition-colors hover:text-red-600"
+                            aria-label={`Hapus ${item.name} dari keranjang`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

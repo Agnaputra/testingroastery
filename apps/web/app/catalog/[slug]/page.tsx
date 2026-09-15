@@ -28,6 +28,7 @@ import {
   getProductBySlug,
   ProductVariant,
   formatRupiah,
+  getProductDisplayImage,
 } from '../../../lib/data';
 import { useCartStore } from '../../../lib/store/useCartStore';
 import { FlavorRadarChart, FlavorMetrics } from '../../../components/flavor-radar-chart';
@@ -92,16 +93,10 @@ function ProductDetailContent() {
   }, [product]);
 
   if (!product) {
-    return (
-      <div className="max-w-[1280px] mx-auto px-4 py-20 text-center space-y-4">
-        <h1 className="font-editorial text-2xl font-bold">Produk Tidak Ditemukan</h1>
-        <p className="text-sm text-on-surface-variant">Biji kopi yang kamu cari mungkin sedang berganti batch sangrai.</p>
-        <Link href="/catalog" className="btn-primary inline-flex text-xs">
-          Kembali ke Katalog
-        </Link>
-      </div>
-    );
+    notFound();
   }
+
+  const displayImg = getProductDisplayImage(product);
 
   const handleAddToCart = () => {
     if (orderMode === 'cup') {
@@ -109,7 +104,7 @@ function ProductDetailContent() {
         productId: product.id,
         name: `${product.slowbarAlias || product.name} (${servingTemp === 'hot' ? 'Hot Filter' : 'Ice Filter'})`,
         slug: product.slug,
-        imageUrl: product.imageUrl,
+        imageUrl: displayImg,
         weightGrams: 1,
         weightLabel: '1 Cup',
         grind: 'whole',
@@ -124,7 +119,7 @@ function ProductDetailContent() {
         productId: product.id,
         name: product.name,
         slug: product.slug,
-        imageUrl: product.imageUrl,
+        imageUrl: displayImg,
         weightGrams: selectedVariant.weightGrams,
         weightLabel: selectedVariant.weightLabel,
         grind: 'whole',
@@ -149,27 +144,18 @@ function ProductDetailContent() {
     : Math.round(product.basePrice * 3.8);
   const grossProfit1kg = price1kg - hppPerKg - packagingPerKg;
 
-  // Resolve clean studio product bag image
-  let displayImg = product.imageUrl;
-  if (!product.imageUrl || product.imageUrl.startsWith('http')) {
-    if (product.series === 'Java Exotic') displayImg = '/images/bag-sumbing.jpg';
-    else if (product.series === 'Grand Reserve') displayImg = '/images/bag-grand-reserve.jpg';
-    else if (product.series === 'Argopuro Walida' || product.series === 'Arjuna Series') displayImg = '/images/bag-walida.jpg';
-    else displayImg = '/images/bag-prau.jpg';
-  }
-
   const currentPrice = orderMode === 'cup' ? (product.cupPrice || product.basePrice) : selectedVariant.price;
   const cleanName = product.name.replace(/\(.*?\)/g, '').trim();
 
   return (
-    <div className="w-full bg-surface-white text-on-surface min-h-screen py-10 px-4 sm:px-10 font-sans pb-28 sm:pb-16">
-      <div className="max-w-[1280px] mx-auto space-y-10">
+    <div className="min-h-screen w-full bg-[#f7f7f4] pb-28 pt-[calc(76px+2rem)] font-sans text-on-surface sm:pb-20 sm:pt-[calc(76px+2.5rem)]">
+      <div className="site-container space-y-12">
         {/* ========================================================================= */}
         {/* 1. BREADCRUMB                                                             */}
         {/* ========================================================================= */}
-        <div className="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
-          <Link href="/catalog" className="hover:text-brand-navy transition-colors">
-            Shop
+        <div className="flex min-w-0 items-center gap-2 overflow-hidden font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-on-surface-variant">
+          <Link href="/catalog" className="shrink-0 transition-colors hover:text-brand-maroon">
+            Koleksi kopi
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <Link
@@ -179,24 +165,24 @@ function ProductDetailContent() {
             {product.series}
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="capitalize font-mono">
+          <span className="hidden capitalize sm:inline">
             {orderMode === 'cup'
               ? 'Menu slowbar'
               : product.category === 'espresso'
               ? 'Espresso Based'
               : 'Filter Based'}
           </span>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-brand-navy font-semibold truncate max-w-xs">{cleanName}</span>
+          <ChevronRight className="hidden h-3.5 w-3.5 sm:block" />
+          <span className="truncate text-brand-charcoal">{cleanName}</span>
         </div>
 
         {/* ========================================================================= */}
         {/* 2. 2-COLUMN MAIN PRODUCT SECTION                                          */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* LEFT: Visual Mockup & Sensory Radar Chart (5 Cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-surface-container-low rounded-xl p-8 sm:p-12 border border-border-subtle flex items-center justify-center aspect-[3/4] relative shadow-sm group">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,.92fr)] lg:gap-x-16 lg:gap-y-10">
+          {/* LEFT: Large product visual */}
+          <div>
+            <div className="group relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#ecece8] p-8 sm:p-12">
               <div className="w-full h-full relative flex items-center justify-center">
                 <Image
                   src={displayImg}
@@ -204,45 +190,22 @@ function ProductDetailContent() {
                   fill
                   priority
                   sizes="(min-width: 1024px) 36vw, 80vw"
-                  className="rounded-xl object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-md"
+                  className="object-contain p-[4%] mix-blend-multiply transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.035]"
                 />
               </div>
             </div>
 
-            {/* SENSORY RADAR CARD */}
-            <div className="p-6 rounded-xl bg-white border border-border-subtle shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-brand-maroon" />
-                  <h3 className="font-editorial text-base font-bold text-brand-navy">
-                    Profil Sensorik SCA
-                  </h3>
-                </div>
-                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-brand-maroon/10 text-brand-maroon">
-                  Terverifikasi cupping
-                </span>
-              </div>
-
-              {/* Flavor Radar Component */}
-              <FlavorRadarChart
-                metrics={productSensory}
-                size={270}
-                color={product.series === 'Grand Reserve' ? 'amber' : 'maroon'}
-                showLabels={true}
-                showBars={true}
-              />
-            </div>
           </div>
 
           {/* RIGHT: Product Details & Purchase Form (7 Cols) */}
-          <div className="lg:col-span-7 space-y-7">
+          <div className="space-y-8 lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
             {/* Title & Metadata Hierarchy */}
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-                <span className="px-3 py-1 rounded-full bg-brand-maroon text-white font-bold text-[10px] uppercase tracking-wider">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[9px] font-semibold uppercase tracking-[0.14em]">
+                <span className="text-brand-maroon">
                   {product.series}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-brand-navy/10 text-brand-navy font-bold text-[10px] uppercase tracking-wider font-mono">
+                <span className="text-on-surface-variant">
                   {orderMode === 'cup'
                     ? 'BEVERAGES (SLOWBAR)'
                     : product.category === 'espresso'
@@ -250,53 +213,53 @@ function ProductDetailContent() {
                     : 'FILTER'}
                 </span>
                 {product.slowbarAlias && (
-                  <span className="px-3 py-1 rounded-full bg-brand-pill text-brand-navy font-bold text-[10px] uppercase tracking-wider border border-border-subtle">
-                    Slowbar Alias: {product.slowbarAlias}
+                  <span className="text-on-surface-variant">
+                    Slowbar: {product.slowbarAlias}
                   </span>
                 )}
-                <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-bold text-[10px] uppercase tracking-wider font-mono">
-                  Sangrai: {product.roastLevel}
+                <span className="text-on-surface-variant">
+                  {product.roastLevel} roast
                 </span>
               </div>
 
               {/* Clean Main Headline */}
-              <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy leading-tight tracking-tight">
+              <h1 className="max-w-[15ch] font-headline text-[clamp(2.6rem,4.5vw,4.75rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-brand-charcoal">
                 {orderMode === 'cup' && product.slowbarAlias
                   ? product.slowbarAlias
                   : cleanName}
               </h1>
 
               {/* Secondary Clean Subtitle */}
-              <p className="text-sm text-on-surface-variant font-sans font-medium">
-                {cleanName} <span className="text-border-subtle mx-1.5">•</span> <span className="font-mono text-xs text-brand-navy-light">{product.process}</span>
+              <p className="max-w-xl text-sm leading-6 text-on-surface-variant">
+                {product.origin} <span className="mx-1.5 text-border-subtle">•</span> {product.process}
               </p>
             </div>
 
             {/* ========================================================================= */}
             {/* AT A GLANCE (Compact & Lean Hierarchy)                                    */}
             {/* ========================================================================= */}
-            <div className="space-y-2.5 pt-2 border-t border-border-subtle">
+            <div className="space-y-0 border-t border-black/15">
               {/* Tasting Notes Box */}
-              <div className="p-3 sm:p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+              <div className="space-y-2 border-b border-black/15 py-5">
                 <span className="text-[9px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
                   CATATAN RASA
                 </span>
-                <p className="font-editorial text-base sm:text-lg font-bold text-brand-navy leading-snug">
+                <p className="font-headline text-xl font-semibold leading-snug tracking-tight text-brand-charcoal sm:text-2xl">
                   {product.tastingNotes.join(', ')}
                 </p>
               </div>
 
               {/* Freshness Box */}
-              <div className="p-3 sm:p-3.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-1">
+              <div className="space-y-2 border-b border-black/15 py-5">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] font-mono text-gray-400 uppercase font-bold tracking-wider block">
                     KESEGARAN &amp; TANGGAL SANGRAI
                   </span>
-                  <span className="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-teal-dark">
                     &lt; 7 Hari Fresh Sangrai
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-brand-navy">
+                <p className="text-sm font-semibold text-brand-charcoal">
                   Disangrai fresh kurang dari 7 hari yang lalu di Roastery Malang
                 </p>
                 <p className="text-[10px] text-on-surface-variant leading-normal">
@@ -305,30 +268,30 @@ function ProductDetailContent() {
               </div>
 
               {/* Metadata 3x2 Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5">
-                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+              <div className="grid grid-cols-2 border-b border-black/15 sm:grid-cols-3">
+                <div className="space-y-1 border-b border-r border-black/10 py-4 pr-3 sm:border-b-0">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">KEBUN</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">{product.region.split(',')[0] || 'Gunung Argopuro'}</p>
+                  <p className="break-words text-[11px] font-bold leading-4 text-on-surface">{product.region.split(',')[0] || 'Gunung Argopuro'}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                <div className="space-y-1 border-b border-black/10 px-3 py-4 sm:border-b-0 sm:border-r">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">DAERAH</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">{product.origin.split(',')[0] || 'East Java'}</p>
+                  <p className="break-words text-[11px] font-bold leading-4 text-on-surface">{product.origin.split(',')[0] || 'East Java'}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                <div className="space-y-1 border-b border-r border-black/10 py-4 pr-3 sm:border-b-0 sm:border-r-0 sm:px-3">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PRODUSEN</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">Mitra 52 Coffee &amp; Roastery</p>
+                  <p className="break-words text-[11px] font-bold leading-4 text-on-surface">Mitra 52 Coffee &amp; Roastery</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                <div className="space-y-1 border-black/10 px-3 py-4 sm:border-l sm:pl-0 sm:pr-3">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">PROSES</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">{product.process}</p>
+                  <p className="break-words text-[11px] font-bold leading-4 text-on-surface">{product.process}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                <div className="space-y-1 border-l border-black/10 px-3 py-4 sm:border-r">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">KETINGGIAN</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">{product.altitude}</p>
+                  <p className="break-words text-[11px] font-bold leading-4 text-on-surface">{product.altitude}</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-surface-container-low border border-border-subtle space-y-0.5">
+                <div className="space-y-1 border-l border-black/10 py-4 pl-3">
                   <span className="text-[8px] font-mono text-gray-400 uppercase font-bold block">VARIETAS</span>
-                  <p className="text-[11px] font-bold text-on-surface truncate">{product.varietal}</p>
+                  <p className="break-words text-[11px] font-bold leading-4 text-on-surface">{product.varietal}</p>
                 </div>
               </div>
             </div>
@@ -337,7 +300,7 @@ function ProductDetailContent() {
             {/* ONE-CLICK BREW GUIDE (HANYA MUNCUL DI FILTER & ESPRESSO ROAST PROFILE)   */}
             {/* ========================================================================= */}
             {orderMode !== 'cup' && (
-              <div className="p-4 sm:p-5 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+              <div className="flex flex-col items-start justify-between gap-4 border-b border-black/15 py-5 sm:flex-row sm:items-center">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-brand-maroon">
                     <Coffee className="w-4 h-4" />
@@ -349,9 +312,9 @@ function ProductDetailContent() {
                 </div>
                 <Link
                   href={`/guide?bean=${encodeURIComponent(product.name)}`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand-navy text-white text-xs font-mono font-bold hover:bg-brand-navy-light transition-colors shadow-sm shrink-0"
+                  className="inline-flex min-h-11 shrink-0 items-center gap-2 bg-brand-navy px-5 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-brand-navy-light"
                 >
-                  <span>Seduh di Guide</span>
+                  <span>Buka panduan seduh</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -362,8 +325,8 @@ function ProductDetailContent() {
             {/* ========================================================================= */}
             {orderMode === 'cup' && product.cupPrice ? (
               /* MODE 1: SLOWBAR CUP */
-              <div className="space-y-4 pt-2 border-t border-border-subtle">
-                <div className="space-y-2.5 p-3.5 sm:p-4 rounded-xl bg-brand-pill/60 border border-border-subtle">
+              <div className="space-y-5 border-t border-black/15 pt-6">
+                <div className="space-y-3">
                   <span className="text-[11px] font-mono text-on-surface-variant uppercase font-semibold block">
                     Pilihan Seduhan Slowbar:
                   </span>
@@ -371,16 +334,16 @@ function ProductDetailContent() {
                     <button
                       type="button"
                       onClick={() => setServingTemp('hot')}
-                      className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 cursor-pointer ${
+                    className={`relative z-10 flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 border px-4 py-2.5 font-mono text-xs font-bold transition-colors duration-200 ${
                         servingTemp === 'hot'
                           ? 'text-white'
-                          : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
+                          : 'border-black/15 bg-transparent text-on-surface-variant hover:border-brand-navy'
                       }`}
                     >
                       {servingTemp === 'hot' && (
                         <motion.div
                           layoutId="activeServingTempPill"
-                          className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
+                          className="absolute inset-0 -z-10 bg-brand-navy"
                           transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                         />
                       )}
@@ -390,16 +353,16 @@ function ProductDetailContent() {
                     <button
                       type="button"
                       onClick={() => setServingTemp('iced')}
-                      className={`relative flex-1 py-2.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors duration-200 flex items-center justify-center gap-2 z-10 cursor-pointer ${
+                    className={`relative z-10 flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 border px-4 py-2.5 font-mono text-xs font-bold transition-colors duration-200 ${
                         servingTemp === 'iced'
                           ? 'text-white'
-                          : 'bg-white border border-border-subtle text-on-surface-variant hover:border-brand-navy'
+                          : 'border-black/15 bg-transparent text-on-surface-variant hover:border-brand-navy'
                       }`}
                     >
                       {servingTemp === 'iced' && (
                         <motion.div
                           layoutId="activeServingTempPill"
-                          className="absolute inset-0 bg-brand-navy rounded-xl shadow-sm -z-10"
+                          className="absolute inset-0 -z-10 bg-brand-navy"
                           transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                         />
                       )}
@@ -427,11 +390,11 @@ function ProductDetailContent() {
 
                   <div className="flex items-center gap-3">
                     {/* Stepper */}
-                    <div className="flex items-center border border-border-subtle rounded-xl bg-surface-container-low p-1 shrink-0">
+                    <div className="flex shrink-0 items-center border border-black/15 bg-transparent">
                       <button
                         type="button"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        className="flex h-11 w-11 cursor-pointer items-center justify-center font-bold text-brand-navy transition-colors hover:bg-black/5"
                         aria-label="Kurangi jumlah"
                       >
                         <Minus className="w-4 h-4" />
@@ -442,7 +405,7 @@ function ProductDetailContent() {
                       <button
                         type="button"
                         onClick={() => setQuantity(quantity + 1)}
-                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        className="flex h-11 w-11 cursor-pointer items-center justify-center font-bold text-brand-navy transition-colors hover:bg-black/5"
                         aria-label="Tambah jumlah"
                       >
                         <Plus className="w-4 h-4" />
@@ -454,7 +417,7 @@ function ProductDetailContent() {
                       type="button"
                       onClick={handleAddToCart}
                       disabled={isAdded}
-                      className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 bg-brand-navy px-6 py-3.5 font-mono text-xs font-bold text-white transition-colors hover:bg-brand-navy-light sm:text-sm"
                     >
                       {isAdded ? (
                         <>
@@ -472,7 +435,7 @@ function ProductDetailContent() {
                 </div>
 
                 {/* Option to buy beans pouch below */}
-                <div className="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="flex flex-col items-start justify-between gap-3 border-t border-black/15 pt-5 text-xs sm:flex-row sm:items-center">
                   <div className="space-y-0.5">
                     <span className="font-mono font-bold text-brand-navy block">Ingin Seduh Sendiri di Rumah?</span>
                     <span className="text-on-surface-variant text-[11px]">Tersedia kemasan biji kopi Retail Pouch (100g, 200g, 500g)</span>
@@ -480,7 +443,7 @@ function ProductDetailContent() {
                   <button
                     type="button"
                     onClick={() => setOrderMode('beans')}
-                    className="px-4 py-2.5 rounded-xl bg-white border border-brand-navy text-brand-navy font-mono font-bold hover:bg-brand-navy hover:text-white transition-colors shrink-0 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 border border-brand-navy px-4 py-2.5 font-mono text-xs font-bold text-brand-navy transition-colors hover:bg-brand-navy hover:text-white"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     <span>Beli Biji Kopi (Pouch) →</span>
@@ -489,10 +452,10 @@ function ProductDetailContent() {
               </div>
             ) : (
               /* MODE 2: BEANS POUCH */
-              <div className="space-y-5 pt-2 border-t border-border-subtle">
+              <div className="space-y-6 border-t border-black/15 pt-6">
                 <div className="space-y-2.5">
                   <label className="block text-xs font-mono text-on-surface-variant uppercase font-bold tracking-wider">
-                    Pilih Ukuran Biji Kopi (Kemasan Retail Pouch)
+                    Pilih ukuran
                   </label>
                   <div className="flex flex-wrap gap-2.5">
                     {product.variants.map((size) => (
@@ -500,10 +463,10 @@ function ProductDetailContent() {
                         key={size.weightLabel}
                         type="button"
                         onClick={() => setSelectedVariant(size)}
-                        className={`px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer ${
+                        className={`min-h-11 cursor-pointer border px-5 py-2.5 font-mono text-xs font-bold transition-colors ${
                           selectedVariant.weightGrams === size.weightGrams
-                            ? 'bg-brand-navy text-white shadow-md'
-                            : 'bg-white border border-border-subtle text-gray-700 hover:border-brand-navy'
+                            ? 'border-brand-navy bg-brand-navy text-white'
+                            : 'border-black/15 bg-transparent text-gray-700 hover:border-brand-navy'
                         }`}
                       >
                         {size.weightLabel} — {formatRupiah(size.price)}
@@ -530,11 +493,11 @@ function ProductDetailContent() {
 
                   <div className="flex items-center gap-3">
                     {/* Stepper */}
-                    <div className="flex items-center border border-border-subtle rounded-xl bg-surface-container-low p-1 shrink-0">
+                    <div className="flex shrink-0 items-center border border-black/15 bg-transparent">
                       <button
                         type="button"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        className="flex h-11 w-11 cursor-pointer items-center justify-center font-bold text-brand-navy transition-colors hover:bg-black/5"
                         aria-label="Kurangi jumlah"
                       >
                         <Minus className="w-4 h-4" />
@@ -545,7 +508,7 @@ function ProductDetailContent() {
                       <button
                         type="button"
                         onClick={() => setQuantity(quantity + 1)}
-                        className="w-9 h-9 rounded-lg bg-white text-brand-navy font-bold flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xs cursor-pointer"
+                        className="flex h-11 w-11 cursor-pointer items-center justify-center font-bold text-brand-navy transition-colors hover:bg-black/5"
                         aria-label="Tambah jumlah"
                       >
                         <Plus className="w-4 h-4" />
@@ -557,7 +520,7 @@ function ProductDetailContent() {
                       type="button"
                       onClick={handleAddToCart}
                       disabled={isAdded}
-                      className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 bg-brand-navy px-6 py-3.5 font-mono text-xs font-bold text-white transition-colors hover:bg-brand-navy-light sm:text-sm"
                     >
                       {isAdded ? (
                         <>
@@ -567,7 +530,7 @@ function ProductDetailContent() {
                       ) : (
                         <>
                           <ShoppingBag className="w-4 h-4" />
-                          <span>Beli Biji Kopi Pouch</span>
+                          <span>Tambah ke keranjang</span>
                         </>
                       )}
                     </button>
@@ -576,7 +539,7 @@ function ProductDetailContent() {
 
                 {/* Option to switch to slowbar cup if available */}
                 {product.cupPrice && (
-                  <div className="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex flex-col items-start justify-between gap-3 border-t border-black/15 pt-5 text-xs sm:flex-row sm:items-center">
                     <div className="space-y-0.5">
                       <span className="font-mono font-bold text-brand-navy block">Tersedia Seduhan Cangkir di Slowbar</span>
                       <span className="text-on-surface-variant text-[11px]">Nikmati seduhan presisi oleh barista di Slowbar Malang ({formatRupiah(product.cupPrice)})</span>
@@ -584,7 +547,7 @@ function ProductDetailContent() {
                     <button
                       type="button"
                       onClick={() => setOrderMode('cup')}
-                      className="px-4 py-2.5 rounded-xl bg-white border border-brand-navy text-brand-navy font-mono font-bold hover:bg-brand-navy hover:text-white transition-colors shrink-0 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      className="flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 border border-brand-navy px-4 py-2.5 font-mono text-xs font-bold text-brand-navy transition-colors hover:bg-brand-navy hover:text-white"
                     >
                       <Coffee className="w-3.5 h-3.5" />
                       <span>Pesan Per Cangkir →</span>
@@ -594,30 +557,58 @@ function ProductDetailContent() {
               </div>
             )}
           </div>
+
+        <section className="space-y-7 border-t border-black/15 pt-8 lg:col-start-1 lg:row-start-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-brand-maroon" />
+              <h2 className="font-headline text-2xl font-semibold tracking-tight text-brand-charcoal">
+                Profil Sensorik SCA
+              </h2>
+            </div>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-on-surface-variant">
+              Peta rasa dari sesi cupping untuk membantu Anda membayangkan karakter kopi sebelum menyeduh.
+            </p>
+            <span className="mt-5 block font-mono text-[9px] font-semibold uppercase tracking-[0.13em] text-brand-maroon">
+              Terverifikasi cupping
+            </span>
+          </div>
+
+          <div className="max-w-2xl">
+            <FlavorRadarChart
+              metrics={productSensory}
+              size={300}
+              color={product.series === 'Grand Reserve' ? 'amber' : 'maroon'}
+              showLabels={true}
+              showBars={true}
+              surface="plain"
+            />
+          </div>
+        </section>
         </div>
 
         {/* ========================================================================= */}
         {/* 3. TRANSPARENCY ACCORDIONS SECTION                                        */}
         {/* ========================================================================= */}
-        <section className="space-y-4 pt-8 border-t border-border-subtle">
-          <span className="font-mono text-xs text-gray-400 uppercase tracking-widest font-bold block">
-            TRANSPARENCY &amp; SOURCING
+        <section className="border-t border-black/15 pt-10">
+          <span className="mb-6 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant">
+            Asal &amp; transparansi harga
           </span>
 
           {/* Accordion 1: Green Information */}
-          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
+          <div className="border-b border-black/15">
             <button
               type="button"
               onClick={() => setOpenGreenInfo(!openGreenInfo)}
-              className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
+              className="flex w-full items-center justify-between py-6 text-left font-headline text-lg font-semibold text-on-surface transition-colors hover:text-brand-maroon"
             >
               <span>Informasi Green Beans Mentah</span>
               {openGreenInfo ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
             {openGreenInfo && (
-              <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border-subtle/50">
-                <div className="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between items-center font-mono text-xs">
+              <div className="space-y-3 pb-6">
+                <div className="flex items-center justify-between border-y border-black/10 py-4 font-mono text-xs">
                   <span className="text-on-surface-variant">Landed Cost per 1 kg of Green Coffee</span>
                   <span className="font-bold text-brand-navy">{formatRupiah(landedGreenCost)}</span>
                 </div>
@@ -629,31 +620,31 @@ function ProductDetailContent() {
           </div>
 
           {/* Accordion 2: Price Breakdown */}
-          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
+          <div className="border-b border-black/15">
             <button
               type="button"
               onClick={() => setOpenPriceBreakdown(!openPriceBreakdown)}
-              className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
+              className="flex w-full items-center justify-between py-6 text-left font-headline text-lg font-semibold text-on-surface transition-colors hover:text-brand-maroon"
             >
               <span>Rincian Struktur Harga &amp; HPP Sangrai</span>
               {openPriceBreakdown ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
             {openPriceBreakdown && (
-              <div className="px-5 pb-5 pt-1 space-y-3 border-t border-border-subtle/50">
+              <div className="space-y-4 pb-6">
                 <p className="text-xs text-on-surface-variant font-sans">
                   <strong>HPP (Harga Pokok Produksi)</strong> mencakup green bean disesuaikan dengan 20% susut bobot roasting, ditambah Rp 10.000 listrik/gas per 1 kg.
                 </p>
                 <div className="space-y-2 font-mono text-xs">
-                  <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
+                  <div className="flex justify-between border-b border-black/10 py-3">
                     <span className="text-on-surface-variant">HPP Sangrai (1 kg)</span>
                     <span className="font-bold text-on-surface">{formatRupiah(hppPerKg)}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
+                  <div className="flex justify-between border-b border-black/10 py-3">
                     <span className="text-on-surface-variant">Kemasan Valve Pouch &amp; Label (1 kg)</span>
                     <span className="font-bold text-on-surface">{formatRupiah(packagingPerKg)}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex justify-between">
+                  <div className="flex justify-between py-3">
                     <span className="text-on-surface-variant">Gross Profit Roastery (1 kg)</span>
                     <span className="font-bold text-brand-teal-dark">{formatRupiah(Math.max(20000, grossProfit1kg))}</span>
                   </div>
@@ -663,18 +654,18 @@ function ProductDetailContent() {
           </div>
 
           {/* Accordion 3: Origin & Sourcing */}
-          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
+          <div className="border-b border-black/15">
             <button
               type="button"
               onClick={() => setOpenOrigin(!openOrigin)}
-              className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
+              className="flex w-full items-center justify-between py-6 text-left font-headline text-lg font-semibold text-on-surface transition-colors hover:text-brand-maroon"
             >
               <span>Terroir &amp; Karakteristik Origin</span>
               {openOrigin ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
             {openOrigin && (
-              <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border-subtle/50 text-xs text-on-surface-variant leading-relaxed">
+              <div className="max-w-3xl space-y-2 pb-6 text-sm leading-7 text-on-surface-variant">
                 <p>{product.description}</p>
                 <p className="font-mono text-[11px] text-brand-navy font-semibold">
                   Terroir: {product.region} • Altitude: {product.altitude}
@@ -684,18 +675,18 @@ function ProductDetailContent() {
           </div>
 
           {/* Accordion 4: Farm Story */}
-          <div className="border border-border-subtle rounded-xl bg-white overflow-hidden shadow-sm">
+          <div className="border-b border-black/15">
             <button
               type="button"
               onClick={() => setOpenStory(!openStory)}
-              className="w-full p-5 flex items-center justify-between font-editorial text-base font-bold text-on-surface hover:bg-surface-container-low transition-colors"
+              className="flex w-full items-center justify-between py-6 text-left font-headline text-lg font-semibold text-on-surface transition-colors hover:text-brand-maroon"
             >
               <span>Cerita Petani &amp; Roastery</span>
               {openStory ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
             </button>
 
             {openStory && (
-              <div className="px-5 pb-5 pt-1 space-y-2 border-t border-border-subtle/50 text-xs text-on-surface-variant leading-relaxed">
+              <div className="max-w-3xl space-y-2 pb-6 text-sm leading-7 text-on-surface-variant">
                 <p>{product.story}</p>
               </div>
             )}
@@ -706,7 +697,7 @@ function ProductDetailContent() {
       {/* ========================================================================= */}
       {/* MOBILE STICKY BOTTOM ACTION BAR                                           */}
       {/* ========================================================================= */}
-      <div className="fixed bottom-0 left-0 right-0 sm:hidden z-40 bg-white/95 backdrop-blur-md border-t border-border-subtle p-3.5 shadow-lg flex items-center justify-between gap-3">
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-black/10 bg-[#f7f7f4]/95 p-3.5 shadow-lg backdrop-blur-md sm:hidden">
         <div className="min-w-0">
           <span className="text-[10px] font-mono text-on-surface-variant uppercase block">Total</span>
           <div className="font-mono font-bold text-base text-brand-navy truncate">
@@ -717,7 +708,7 @@ function ProductDetailContent() {
           type="button"
           onClick={handleAddToCart}
           disabled={isAdded}
-          className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5"
+          className="flex min-h-12 flex-1 items-center justify-center gap-1.5 bg-brand-navy px-4 py-3 font-mono text-xs font-bold text-white transition-colors hover:bg-brand-navy-light"
         >
           {isAdded ? (
             <>

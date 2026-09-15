@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -29,7 +29,7 @@ interface ShippingOption {
 }
 
 export default function CheckoutPage() {
-  const { items, getSubtotal, clearCart } = useCartStore();
+  const { items, getSubtotal } = useCartStore();
   const [mounted, setMounted] = useState(false);
 
   // Form states
@@ -54,10 +54,50 @@ export default function CheckoutPage() {
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [copiedVA, setCopiedVA] = useState(false);
+  const paymentDialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!showPaymentModal) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowPaymentModal(false);
+        return;
+      }
+      if (event.key !== 'Tab' || !paymentDialogRef.current) return;
+
+      const focusable = Array.from(
+        paymentDialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [showPaymentModal]);
 
   if (!mounted) return null;
 
@@ -88,6 +128,10 @@ export default function CheckoutPage() {
   const currentShippingCost =
     shippingOptions.find((s) => s.id === selectedShipping)?.cost || 0;
   const grandTotal = Math.max(0, subtotal + currentShippingCost - discountAmount);
+  const virtualAccountNumber =
+    selectedPayment === 'bca-va' ? '8801293810294821' : '8920182399201102';
+  const formattedVirtualAccountNumber =
+    selectedPayment === 'bca-va' ? '8801 2938 1029 4821' : '8920 1823 9920 1102';
 
   const handleApplyVoucher = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +155,7 @@ export default function CheckoutPage() {
     const newOrderId = `52CR-${Date.now().toString().slice(-6)}`;
     setOrderId(newOrderId);
 
-    // Simulate Midtrans Snap Token creation
+    // Menyiapkan alur pembayaran demo; belum terhubung ke payment gateway.
     setTimeout(() => {
       setIsProcessing(false);
       setShowPaymentModal(true);
@@ -121,7 +165,6 @@ export default function CheckoutPage() {
   const handleFinishPayment = () => {
     setShowPaymentModal(false);
     setOrderCompleted(true);
-    clearCart();
   };
 
   const copyToClipboard = (text: string) => {
@@ -132,17 +175,17 @@ export default function CheckoutPage() {
 
   if (orderCompleted) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-6">
+      <div className="max-w-3xl mx-auto px-4 pb-16 pt-[calc(76px+4rem)] text-center space-y-6">
         <div className="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200 shadow-sm">
           <CheckCircle2 className="w-10 h-10" />
         </div>
         <div className="space-y-2">
-          <span className="badge-teal font-mono">Pesanan Terkonfirmasi</span>
+          <span className="badge-teal font-mono">Simulasi Selesai</span>
           <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-brand-navy">
             Terima Kasih, Kawan Seduh!
           </h1>
           <p className="text-sm text-on-surface-variant max-w-md mx-auto">
-            Pesanan dengan nomor <strong>#{orderId}</strong> sedang disiapkan oleh tim roastery kami di Jl. KH. Agus Salim No. 11 Malang.
+            Alur checkout demo untuk referensi <strong>#{orderId}</strong> telah selesai. Tidak ada pembayaran atau pesanan nyata yang diproses.
           </p>
         </div>
 
@@ -159,7 +202,7 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Status Pembayaran:</span>
-            <span className="text-brand-teal font-bold">LUNAS (Midtrans Verified)</span>
+            <span className="text-brand-teal font-bold">SIMULASI — TIDAK DITAGIHKAN</span>
           </div>
           <div className="flex justify-between pt-1 text-sm font-bold">
             <span>Total Pembayaran:</span>
@@ -168,12 +211,8 @@ export default function CheckoutPage() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-          <Link href={`/track?order=${orderId}`} className="btn-primary text-xs flex items-center gap-1.5">
-            <Truck className="w-3.5 h-3.5" />
-            <span>Lacak Status Pesanan #{orderId}</span>
-          </Link>
           <Link href="/catalog" className="btn-secondary text-xs bg-white">
-            Belanja Biji Kopi Lainnya
+            Kembali ke Katalog
           </Link>
           <Link href="/guide" className="btn-secondary text-xs bg-white">
             Buka Panduan &amp; Kalkulator Seduh
@@ -185,7 +224,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-24 text-center space-y-4">
+      <div className="max-w-xl mx-auto px-4 pb-24 pt-[calc(76px+6rem)] text-center space-y-4">
         <div className="w-16 h-16 rounded-full bg-roastery-light text-roastery-muted flex items-center justify-center mx-auto">
           <ShoppingBag className="w-8 h-8" />
         </div>
@@ -201,7 +240,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="site-container page-section space-y-8">
+    <div className="nav-offset site-container page-section space-y-8">
       {/* Top Breadcrumb / Back Navigation */}
       <div className="flex items-center justify-between text-xs font-mono">
         <div className="flex items-center gap-2">
@@ -387,7 +426,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* 3. Metode Pembayaran (Midtrans Ready) */}
+          {/* 3. Metode Pembayaran (demo) */}
           <div className="editorial-card p-6 bg-white space-y-4 shadow-sm">
             <h2 className="font-editorial text-lg font-bold text-roastery-dark flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-roastery-teal text-white font-mono text-xs flex items-center justify-center font-bold">
@@ -532,33 +571,39 @@ export default function CheckoutPage() {
               className="btn-primary w-full py-4 text-sm font-semibold tracking-wide disabled:opacity-50"
             >
               {isProcessing ? (
-                <span>Menghubungkan Midtrans...</span>
+                <span>Menyiapkan simulasi...</span>
               ) : (
                 <span className="flex items-center gap-2">
                   <Lock className="w-4 h-4" />
-                  <span>Bayar Sekarang ({formatRupiah(grandTotal)})</span>
+                  <span>Lanjut ke Simulasi ({formatRupiah(grandTotal)})</span>
                 </span>
               )}
             </button>
 
             <div className="text-center text-[11px] text-roastery-muted font-mono">
-              Pembayaran aman tersertifikasi Bank Indonesia & Midtrans Snap.
+              Mode demo — belum terhubung ke payment gateway dan tidak memproses transaksi nyata.
             </div>
           </div>
         </div>
       </form>
 
-      {/* Midtrans Snap Simulation Modal */}
+      {/* Payment flow simulation modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-lg space-y-5 border border-roastery-border animate-slide-up text-roastery-dark">
+          <div
+            ref={paymentDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payment-simulation-title"
+            className="bg-white rounded-xl max-w-md w-full p-6 shadow-lg space-y-5 border border-roastery-border animate-slide-up text-roastery-dark"
+          >
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-roastery-crimson text-white font-bold flex items-center justify-center text-xs">
                   52
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm">Midtrans Snap Payment</h3>
+                  <h3 id="payment-simulation-title" className="font-bold text-sm">Simulasi Pembayaran</h3>
                   <p className="text-[10px] text-gray-500 font-mono">Order ID: #{orderId}</p>
                 </div>
               </div>
@@ -569,49 +614,29 @@ export default function CheckoutPage() {
 
             {selectedPayment === 'qris' && (
               <div className="text-center space-y-3 py-2">
-                <p className="text-xs text-gray-600">Scan QRIS Nasional (GPN) via BCA, Mandiri, GoPay, OVO, ShopeePay:</p>
-                <div className="inline-block max-w-[260px] rounded-xl border border-brand-maroon-dark bg-white p-3 text-center shadow-sm">
-                  <div className="relative w-56 h-72 mx-auto overflow-hidden rounded-xl bg-white">
-                    <Image
-                      src="/images/qris-nana-store.jpg"
-                      alt="QRIS Nana Store Telecommunication"
-                      fill
-                      sizes="230px"
-                      className="object-contain"
-                      priority
-                    />
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-gray-100 font-mono text-[11px] text-gray-700">
-                    <p className="font-bold text-brand-charcoal">NANA STORE - TELECOMMUNICATION</p>
-                    <p className="text-[10px] text-gray-500">NMID: ID1026579452370 • A01</p>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex items-center justify-center">
-                  <a
-                    href="/images/qris-nana-store.jpg"
-                    download="QRIS-Nana-Store.jpg"
-                    className="text-xs font-mono px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 transition-colors inline-flex items-center gap-1.5 shadow-xs"
-                  >
-                    <span>Unduh Gambar QRIS</span>
-                  </a>
+                <p className="text-xs text-gray-600">Pratinjau QRIS untuk demonstrasi alur checkout:</p>
+                <div className="mx-auto flex h-56 w-56 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-brand-maroon/40 bg-gray-50 text-brand-maroon">
+                  <QrCode className="h-20 w-20" aria-hidden="true" />
+                  <p className="max-w-[18ch] font-mono text-[10px] font-bold uppercase tracking-wider">
+                    QR demo tidak dapat dipindai
+                  </p>
                 </div>
               </div>
             )}
 
             {(selectedPayment === 'bca-va' || selectedPayment === 'mandiri-va') && (
               <div className="space-y-3 py-2 text-xs">
-                <p className="text-gray-600">Silakan transfer ke nomor Virtual Account berikut:</p>
+                <p className="text-gray-600">Nomor Virtual Account berikut hanya untuk simulasi. Jangan melakukan transfer.</p>
                 <div className="p-4 bg-gray-50 rounded-xl border flex items-center justify-between">
                   <div>
                     <span className="text-[10px] uppercase font-mono text-gray-500 block">Nomor Virtual Account</span>
                     <span className="font-mono text-base font-bold text-gray-900">
-                      {selectedPayment === 'bca-va' ? '8801 2938 1029 4821' : '8920 1823 9920 1102'}
+                      {formattedVirtualAccountNumber}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => copyToClipboard('8801293810294821')}
+                    onClick={() => copyToClipboard(virtualAccountNumber)}
                     className="p-2 text-roastery-crimson hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-mono"
                   >
                     {copiedVA ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -619,7 +644,7 @@ export default function CheckoutPage() {
                   </button>
                 </div>
                 <p className="text-[11px] text-gray-500">
-                  Pembayaran akan diverifikasi secara instan tanpa perlu upload bukti transfer.
+                  Mode demo tidak mengirim data ke bank atau payment gateway.
                 </p>
               </div>
             )}
@@ -662,6 +687,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
+                autoFocus
                 className="flex-1 py-2.5 text-xs font-medium border rounded-xl hover:bg-gray-50"
               >
                 Tutup / Batal
@@ -671,7 +697,7 @@ export default function CheckoutPage() {
                 onClick={handleFinishPayment}
                 className="flex-1 py-2.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-md transition-colors"
               >
-                Simulasi Bayar Berhasil ✓
+                Selesaikan Simulasi
               </button>
             </div>
           </div>

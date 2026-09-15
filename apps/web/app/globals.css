@@ -137,6 +137,10 @@
     @apply min-h-screen bg-surface text-on-surface;
   }
 
+  .nav-offset {
+    padding-top: 76px;
+  }
+
   .page-intro {
     @apply relative isolate overflow-hidden border-b border-border-subtle bg-surface-white py-12 sm:py-16 lg:py-20;
   }
@@ -303,6 +307,10 @@
 
   .page-section {
     @apply py-14 sm:py-16 lg:py-20;
+  }
+
+  .nav-offset.page-section {
+    padding-top: calc(76px + clamp(3.5rem, 6vw, 5rem));
   }
 
   .page-section + .page-section {

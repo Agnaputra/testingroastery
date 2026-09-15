@@ -92,7 +92,7 @@ Panduan Barista:
 - Jika ditanya tentang BYOB / racik blend: jelaskan fitur BYOB di /blend-builder, profil sangrai Dark Espresso Roast, dan berikan rekomendasi racikan (misal: 70% Java Ijen + 30% Dampit Robusta seharga Rp 220.000/kg atau 70% Java Ijen + 30% Arjuna Budug seharga Rp 253.000/kg).
 - Jika ditanya tentang Price Calculator / Hitung HPP: jelaskan fungsinya di /tools/price-calculator untuk menghitung biaya produksi, susut sangrai 19.93%, kemasan, dan margin profit kedai kopi.
 - Jika ditanya tentang lokasi / alamat / jam buka: jelaskan lokasinya di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (Senin-Jumat 11:00-16:00 WIB).
-- Jika ditanya tentang kopi lambung / GERD: rekomendasikan Kintamani Full Wash atau Ijen Yellow Bourbon.
+- Jika ditanya tentang lambung / maag / GERD: jangan pernah menjamin kopi aman, menyembuhkan, mencegah gejala, atau menggantikan saran medis. Jelaskan bahwa acidity sebagai rasa tidak sama dengan kadar asam atau respons lambung. Boleh rekomendasikan karakter rasa dengan persepsi asam lebih ringan, sarankan porsi kecil dan tidak saat perut kosong, lalu arahkan pengguna dengan gejala berulang untuk mengikuti saran tenaga kesehatan.
 - Berikan rekomendasi yang terstruktur dan sebutkan tasting notes serta saran penyajiannya.`;
 
         const geminiHistory = (history || []).slice(-6).map((h: any) => ({
@@ -386,7 +386,6 @@ Panduan Barista:
       query.includes('nggak asam') ||
       query.includes('gak asam') ||
       query.includes('kurang asam') ||
-      query.includes('aman') ||
       query.includes('enteng') ||
       query.includes('lembut') ||
       query.includes('smooth') ||
@@ -405,38 +404,33 @@ Panduan Barista:
           'kintamani-full-wash-arabica-espresso',
           'dampit-natural-espresso'
         );
-        reply = `Untuk kawan seduh yang menginginkan kopi berkarakter **Strong, Tebal, & Mantap tapi Tetap Aman di Lambung**, ini rahasia & kurasi terbaik kami:\n\n` +
+        reply = `Tidak ada kopi yang dapat dijamin aman untuk maag atau GERD karena respons setiap orang berbeda. Jika kamu tetap ingin karakter **strong dan tebal dengan persepsi rasa asam lebih ringan**, pertimbangkan:\n\n` +
           `1. Brazil Santos (Arabica Medium-Dark Roast)\n` +
           `   • Rasa: Dark Chocolate tebal, Roasted Peanut gurih, & Caramel manis.\n` +
-          `   • Mengapa Aman: Biji Arabika alami dengan keasaman (acidity) sangat rendah, sehingga tidak memicu asam lambung berlebih meski rasanya tebal.\n\n` +
+          `   • Karakter sensorik: acidity rendah di lidah; ini bukan jaminan respons lambung.\n\n` +
           `2. Kintamani Full Wash (Arabica Medium Roast)\n` +
           `   • Rasa: Sweet Chocolate halus dengan aftertaste bersih.\n` +
-          `   • Mengapa Aman: Proses wash membuang asam liar, memberikan body seimbang tanpa rasa perih di lambung.\n\n` +
+          `   • Karakter sensorik: body seimbang dan rasa relatif lembut.\n\n` +
           `3. Dampit Natural Espresso (Fine Robusta Malang)\n` +
-          `   • Cocok diseduh menjadi Kopi Susu / Latte yang nendang tanpa rasa langu.\n\n` +
-          `Tips Barista agar Kopi Strong Tetap Nyaman di Lambung:\n` +
-          `• **Seduh Metode Cold Brew Pekat**: Rendaman dingin 12 jam menghasilkan ekstrak yang sangat pekat & bold, namun kadar asam klorogenatnya turun drastis hingga 67%!\n` +
-          `• **Tambahkan Susu Fresh (Cafe Latte / Flat White)**: Lemak dan kalsium susu membentuk lapisan pelindung pada dinding lambung sekaligus menetralkan keasaman.\n` +
-          `• **Waktu Seduh Terbaik**: Nikmati 30-60 menit setelah sarapan/makan ringan, hindari minum saat perut kosong.`;
+          `   • Cocok untuk Kopi Susu / Latte, tetapi kandungan kafeinnya tetap perlu dipertimbangkan.\n\n` +
+          `Mulai dari porsi kecil dan hindari minum saat perut kosong. Jika kamu memiliki GERD atau gejala berulang, ikuti saran tenaga kesehatan.`;
       } else {
         recommendedSlugs.push(
           'kintamani-full-wash-arabica-espresso',
           'ijen-yellow-bourbon-kencana',
           'sumbing-supernova-celestia'
         );
-        reply = `Untuk kawan seduh yang mencari kopi yang Ringan, Lembut, dan Ramah/Aman di Lambung, berikut kurasi terbaik kami:\n\n` +
+        reply = `Tidak ada kopi yang dapat dijamin aman untuk maag atau GERD karena respons setiap orang berbeda. Jika yang dicari adalah **karakter rasa dengan persepsi asam lebih ringan**, berikut opsi sensorik kami:\n\n` +
           `1. Kintamani Full Wash (Arabica Medium Roast)\n` +
           `   • Rasa: Sweet Chocolate, hint Citrus lembut, dan aftertaste manis bersih.\n` +
-          `   • Karakter: Proses washed menghilangkan keasaman liar sehingga sangat nyaman di perut.\n\n` +
+          `   • Karakter sensorik: body seimbang dan rasa relatif lembut.\n\n` +
           `2. Ijen Yellow Bourbon (Honey Process)\n` +
           `   • Rasa: Manis Madu hutan alami & Gurih Kacang Almond panggang.\n` +
-          `   • Karakter: Keasaman sangat rendah (low acidity) dengan body yang halus.\n\n` +
+          `   • Karakter sensorik: acidity rendah di lidah dengan body halus.\n\n` +
           `3. Java Exotic Sumbing Deep Washed\n` +
           `   • Rasa: Brown Sugar hangat, Red Apple manis, & Black Tea halus.\n` +
-          `   • Karakter: Clean cup tinggi dengan body medium yang tidak membebani pencernaan.\n\n` +
-          `Tips Barista untuk Lambung Sensitif:\n` +
-          `• Hindari seduhan Robusta pekat/dark roast yang tinggi kafein.\n` +
-          `• Seduh dengan metode Cold Brew (rendam dingin 12 jam) atau V60 dengan suhu air 88-90°C rasio 1:16 untuk hasil seduhan yang ekstra aman dan manis alami.`;
+          `   • Karakter sensorik: clean cup dengan body medium.\n\n` +
+          `Acidity sebagai atribut rasa tidak sama dengan keamanan medis. Mulai dari porsi kecil, hindari minum saat perut kosong, dan ikuti saran tenaga kesehatan jika kamu memiliki GERD atau gejala berulang.`;
       }
     }
 
@@ -660,7 +654,7 @@ Panduan Barista:
       reply = `Halo kawan seduh! Selamat datang di 52 Coffee & Roastery Malang.\n\n` +
         `Saya siap membantu memilihkan biji kopi yang paling cocok dengan selera seduhmu. Kamu bisa menanyakan:\n\n` +
         `• B.Y.O.B Simulator (Racik House Blend sendiri dengan Dark Espresso Roast)\n` +
-        `• Kopi yang Ringan & Aman untuk Lambung (Kintamani / Ijen Yellow Bourbon)\n` +
+        `• Kopi dengan persepsi asam lebih ringan (Kintamani / Ijen Yellow Bourbon)\n` +
         `• Koleksi Filter Fruity & Floral (Argopuro Walida / Sindoro Strawberry)\n` +
         `• Biji Espresso & Kopi Susu Aren (Dampit Robusta)\n` +
         `• Price Calculator & Panduan Seduh V60 Presisi\n\n` +
@@ -697,7 +691,7 @@ Panduan Barista:
       reply = `Di 52 Coffee & Roastery Malang, kami menyangrai aneka pilihan biji kopi artisanal segar dalam batch kecil.\n\n` +
         `Kamu bisa mengeksplorasi:\n` +
         `1. **B.Y.O.B Blend Simulator** (/blend-builder) — Racik house blend Dark Espresso custom.\n` +
-        `2. **Kopi Ringan & Ramah Lambung** — Kintamani Full Wash & Ijen Yellow Bourbon.\n` +
+        `2. **Kopi dengan persepsi asam lebih ringan** — Kintamani Full Wash & Ijen Yellow Bourbon.\n` +
         `3. **Filter Fruity & Floral** — Argopuro Walida & Sindoro Strawberry.\n` +
         `4. **Espresso & Kopi Susu** — Dampit Robusta & Brazil Santos.\n` +
         `5. **Kalkulator HPP & Panduan Seduh** — Simulasi biaya di Price Calculator serta rasio dan timer seduh di /guide.\n\n` +

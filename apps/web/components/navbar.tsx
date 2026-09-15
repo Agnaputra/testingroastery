@@ -26,9 +26,7 @@ export function Navbar() {
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [navVisible, setNavVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
-  const lastScrollYRef = useRef(0);
   const toolsRef = useRef<HTMLDivElement>(null);
   const toolsButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -38,29 +36,15 @@ export function Navbar() {
   useEffect(() => {
     setMobileMenuOpen(false);
     setToolsDropdownOpen(false);
-    setNavVisible(true);
   }, [pathname]);
   useEffect(() => {
-    lastScrollYRef.current = window.scrollY;
     setScrolled(window.scrollY > 18);
     let animationFrame = 0;
 
     const onScroll = () => {
       if (animationFrame) return;
       animationFrame = window.requestAnimationFrame(() => {
-        const currentScrollY = Math.max(window.scrollY, 0);
-        const delta = currentScrollY - lastScrollYRef.current;
-
-        setScrolled(currentScrollY > 18);
-        if (mobileMenuOpen || toolsDropdownOpen || currentScrollY < 32) {
-          setNavVisible(true);
-        } else if (delta > 9) {
-          setNavVisible(false);
-        } else if (delta < -9) {
-          setNavVisible(true);
-        }
-
-        lastScrollYRef.current = currentScrollY;
+        setScrolled(Math.max(window.scrollY, 0) > 18);
         animationFrame = 0;
       });
     };
@@ -70,7 +54,7 @@ export function Navbar() {
       window.removeEventListener('scroll', onScroll);
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
     };
-  }, [mobileMenuOpen, pathname, toolsDropdownOpen]);
+  }, [pathname]);
   useEffect(() => {
     const onClickOutside = (event: MouseEvent) => {
       if (toolsRef.current && !toolsRef.current.contains(event.target as Node)) setToolsDropdownOpen(false);
@@ -99,27 +83,25 @@ export function Navbar() {
 
   const totalItems = mounted ? getTotalItems() : 0;
   const isHome = pathname === '/';
-  const dark = pathname === '/' || pathname.startsWith('/catalog') || pathname === '/work-with-us' || pathname === '/guide' || pathname === '/blend-builder' || pathname.startsWith('/tools');
+  const hasDarkNavbarCanvas = isHome || pathname.startsWith('/guide');
   const active = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
   const toolsActive = TOOL_LINKS.some(({ href }) => active(href));
-  const navStyle = (selected: boolean) => dark
-    ? `flex min-h-10 items-center px-1 transition-colors ${selected ? 'text-brand-teal' : 'text-white/80 hover:text-white'}`
-    : `flex min-h-11 items-center border-b-2 transition-colors ${selected ? 'border-brand-navy text-brand-navy' : 'border-transparent text-on-surface-variant hover:text-brand-navy'}`;
-  const iconColor = dark
-    ? 'border border-white/30 bg-[#182131]/85 text-white hover:bg-[#182131]'
-    : 'text-brand-navy hover:bg-brand-pill';
-  const homeHeaderSurface = scrolled
+  const navStyle = (selected: boolean) => `flex min-h-10 items-center px-1 transition-colors ${
+    selected ? 'text-brand-teal' : 'text-white/80 hover:text-white'
+  }`;
+  const iconColor = 'border border-white/30 bg-[#182131]/90 text-white hover:bg-[#182131]';
+  const headerSurface = scrolled
     ? 'border-white/10 bg-brand-charcoal/95 shadow-[0_10px_30px_rgba(20,24,28,.18)] backdrop-blur-xl'
     : 'border-transparent bg-transparent';
 
   return (
     <>
-      <header className={`${isHome ? 'fixed' : 'sticky'} top-0 z-50 w-full border-b transition-[transform,background-color,border-color,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transform-none ${navVisible ? 'translate-y-0' : '-translate-y-full'} ${isHome ? `${homeHeaderSurface} text-white` : dark ? 'border-white/10 bg-[#182131] text-white' : 'border-border-subtle bg-white/95 backdrop-blur-lg'}`}>
-        <div className={`${dark ? 'mx-auto w-[calc(100%-28px)] px-1 sm:w-[calc(100%-52px)] sm:px-0' : 'site-container'} relative flex h-[76px] items-center justify-between gap-3`}>
-          <Link href="/" aria-label="52 Coffee & Roastery — Beranda" className={`shrink-0 ${dark ? 'px-1 py-2' : 'rounded-md'}`}>
-            <FiftyTwoLogo size="md" textColor={dark ? 'light' : 'dark'} className="max-[359px]:[&>div:last-child]:hidden" />
+      <header className={`fixed top-0 z-50 w-full border-b text-white transition-[background-color,border-color,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] ${headerSurface}`}>
+        <div className="relative mx-auto flex h-[76px] w-[calc(100%-28px)] items-center justify-between gap-3 px-1 sm:w-[calc(100%-52px)] sm:px-0">
+          <Link href="/" aria-label="52 Coffee & Roastery — Beranda" className="shrink-0 px-1 py-2">
+            <FiftyTwoLogo size="md" textColor={hasDarkNavbarCanvas || scrolled ? 'light' : 'dark'} className="max-[359px]:[&>div:last-child]:hidden" />
           </Link>
-          <nav aria-label="Navigasi utama" className={`absolute left-1/2 hidden -translate-x-1/2 items-center text-[13px] font-semibold xl:flex ${dark ? 'gap-7 rounded-full border border-white/55 bg-[#182131]/90 px-7 shadow-[0_8px_24px_rgba(20,24,28,.14)]' : 'gap-7 xl:gap-9'}`}>
+          <nav aria-label="Navigasi utama" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 rounded-full border border-white/55 bg-[#182131]/90 px-7 text-[13px] font-semibold shadow-[0_8px_24px_rgba(20,24,28,.14)] xl:flex">
             {MAIN_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={navStyle(active(href))}>{label}</Link>
             ))}
