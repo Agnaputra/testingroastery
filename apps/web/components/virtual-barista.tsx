@@ -16,10 +16,13 @@ import {
   Flame,
   Scale,
 } from 'lucide-react';
-import { PRODUCTS, CoffeeProduct, formatRupiah, getProductDisplayImage } from '../lib/data';
+import { CoffeeProduct, formatRupiah, getProductDisplayImage } from '../lib/data';
+import { getPublishedProducts } from '../lib/catalog-master';
 import { useCartStore } from '../lib/store/useCartStore';
 import { FiftyTwoBeanMark } from './logo';
 import { OPEN_VIRTUAL_BARISTA } from '../lib/virtual-barista-events';
+
+const PUBLISHED_PRODUCTS = getPublishedProducts();
 
 interface ChatMessage {
   id: string;
@@ -53,7 +56,7 @@ export function VirtualBaristaWidget() {
     {
       id: 'welcome',
       sender: 'barista',
-      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery Malang. Ada yang bisa saya bantu hari ini? Kamu bisa tanya rekomendasi beans, racik BYOB blend, cara hitung HPP dengan Price Calculator, atau panduan seduh V60.',
+      text: 'Halo kawan seduh! Saya Virtual Barista 52 Coffee & Roastery. Saya membantu memilih beans published, membaca tasting notes, dan menemukan panduan seduh atau BYOB yang sesuai kebutuhanmu.',
       timestamp: 'Baru saja',
     },
   ]);
@@ -152,7 +155,7 @@ export function VirtualBaristaWidget() {
 
       let matchedProducts: CoffeeProduct[] = [];
       if (data.recommendedSlugs && Array.isArray(data.recommendedSlugs)) {
-        matchedProducts = PRODUCTS.filter((p) => data.recommendedSlugs.includes(p.slug));
+        matchedProducts = PUBLISHED_PRODUCTS.filter((p) => data.recommendedSlugs.includes(p.slug));
       }
 
       const rawReply = (data.reply || 'Berikut rekomendasi kurasi biji kopi segar dari roastery kami di Malang yang sangat pas dengan selera kamu:').replace(/\*/g, '');
@@ -170,14 +173,14 @@ export function VirtualBaristaWidget() {
       const clean = lower.replace(/[^\w\s]/gi, '').trim();
 
       if (lower.includes('byob') || lower.includes('by ob') || lower.includes('custom blend') || lower.includes('racik')) {
-        matched = PRODUCTS.filter((p) =>
+        matched = PUBLISHED_PRODUCTS.filter((p) =>
           ['dampit-natural-espresso', 'kintamani-full-wash-arabica-espresso', 'brazil-santos-espresso'].includes(p.slug)
         );
-        reply = 'BYOB (Build Your Own Blend) adalah simulator racik blend kami di /blend-builder! Profil sangrai dikhususkan pada Dark Espresso Roast. Rekomendasi racikan:\n1. 70% Java Ijen + 30% Dampit Robusta (Rp 220.000/kg — Classic House Blend & Crema Tebal)\n2. 70% Java Ijen + 30% Arjuna Budug (Rp 253.000/kg — Fruity Caramel Espresso)';
+        reply = 'BYOB (Build Your Own Blend) di /blend-builder membantu kamu meracik dari beans Espresso Based yang published. Pilih komposisi, ukuran 250g/500g/1kg, lalu lihat prediksi rasa dan harga yang diperbarui dari data katalog.';
       } else if (lower.includes('price calculator') || lower.includes('kalkulator harga') || lower.includes('hpp') || lower.includes('cogs')) {
-        reply = 'Price Calculator (/tools/price-calculator) adalah tool kalkulasi finansial roastery untuk menghitung HPP produksi kopi setelah susut roasting 19.93%, biaya listrik roasting Rp 10.000/kg, packaging valve pouch, serta menghitung target margin laba kotor kedai kopi.';
+        reply = 'Kalkulator Harga Jual Kedai (/tools/price-calculator) membantu Anda menghitung estimasi biaya per cangkir, harga jual, margin, dan kebutuhan pasokan. Masukkan harga biji serta biaya operasional kedai Anda sendiri untuk menyusun proyeksi yang sesuai.';
       } else if (lower.includes('lokasi') || lower.includes('alamat') || lower.includes('dimana') || lower.includes('malang')) {
-        reply = 'Roastery & Tasting Room 52 Coffee berlokasi di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (dekat Alun-Alun). Jam operasional: Senin - Jumat, 11:00 - 16:00 WIB. Instagram: @52coffeeroastery.';
+        reply = 'Roastery & Tasting Room 52 Coffee berlokasi di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang. Jam operasional: Senin - Minggu, 10:00 - 20:00 WIB. Instagram: @52coffeeroastery.';
       } else if (
         lower.includes('lambung') ||
         lower.includes('maag') ||
@@ -191,7 +194,7 @@ export function VirtualBaristaWidget() {
         lower.includes('smooth') ||
         lower.includes('mild')
       ) {
-        matched = PRODUCTS.filter((p) =>
+        matched = PUBLISHED_PRODUCTS.filter((p) =>
           ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana', 'sumbing-supernova-celestia'].includes(p.slug)
         );
         reply = 'Tidak ada kopi yang dapat dijamin aman untuk maag atau GERD karena respons setiap orang berbeda. Jika kamu mencari karakter rasa dengan persepsi asam lebih ringan, coba:\n1. Kintamani Full Wash (sweet chocolate, citrus lembut)\n2. Ijen Yellow Bourbon Honey (madu dan kacang almond)\n3. Java Exotic Sumbing Deep Washed (brown sugar dan black tea)\n\nMulai dari porsi kecil dan hindari minum saat perut kosong. Jika kamu memiliki GERD atau gejala berulang, ikuti saran tenaga kesehatan.';
@@ -205,7 +208,7 @@ export function VirtualBaristaWidget() {
         (lower.includes('manual') && !lower.includes('buku')) ||
         (lower.includes('filter') && !lower.includes('roast'))
       ) {
-        matched = PRODUCTS.filter((p) =>
+        matched = PUBLISHED_PRODUCTS.filter((p) =>
           ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai', 'ijen-carbonic-maceration-asmara'].includes(p.slug)
         );
         reply = 'Untuk seduhan Filter Manual Brew (V60, Aeropress, Kalita), kurasi terbaik kami:\n1. Argopuro Walida Natural Anaerobic (Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Manis Selai Stroberi & Vanilla)\n3. Ijen Carbonic Maceration (Peach & Jasmine Floral)';
@@ -220,7 +223,7 @@ export function VirtualBaristaWidget() {
         lower.includes('crema') ||
         lower.includes('robusta')
       ) {
-        matched = PRODUCTS.filter((p) =>
+        matched = PUBLISHED_PRODUCTS.filter((p) =>
           ['dampit-natural-espresso', 'kintamani-full-wash-arabica-espresso', 'brazil-santos-espresso'].includes(p.slug)
         );
         reply = 'Untuk seduhan Espresso & Kopi Susu Aren, primadona kami:\n1. Dampit Natural Robusta Malang (Dark Chocolate & Crema Tebal)\n2. Kintamani Full Wash Arabica (Sweet Chocolate & Smooth)\n3. Brazil Santos (Roasted Peanut & Nutty)';
@@ -235,20 +238,20 @@ export function VirtualBaristaWidget() {
         lower.includes('rekomendasi') ||
         lower.includes('rekomen')
       ) {
-        matched = PRODUCTS.filter((p) =>
+        matched = PUBLISHED_PRODUCTS.filter((p) =>
           ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai', 'dampit-natural-espresso'].includes(p.slug)
         );
         reply = 'Rekomendasi Best Seller & Terfavorit di 52 Coffee & Roastery:\n1. Argopuro Walida Natural Anaerobic (Filter V60 — Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Filter V60 — Selai Stroberi & Vanilla)\n3. Dampit Fine Robusta Malang (Espresso / Es Kopi Susu Aren)\n4. B.Y.O.B Custom House Blend (Dark Espresso)';
       } else if (lower.includes('fruity') || lower.includes('buah') || lower.includes('strawberry') || lower.includes('berry')) {
-        matched = PRODUCTS.filter((p) => p.flavorCategory.includes('Fruity')).slice(0, 3);
+        matched = PUBLISHED_PRODUCTS.filter((p) => p.flavorCategory.includes('Fruity')).slice(0, 3);
         reply = 'Untuk profil Fruity & Exotic, saya sangat merekomendasikan Sindoro Strawberry Triple Yeast dengan aroma selai stroberi kental, atau Argopuro Walida dengan karakter plum dan cherry yang sangat juicy!';
       } else if (lower.includes('floral') || lower.includes('jasmine') || lower.includes('geisha') || lower.includes('bunga')) {
-        matched = PRODUCTS.filter((p) => p.flavorCategory.includes('Floral')).slice(0, 2);
+        matched = PUBLISHED_PRODUCTS.filter((p) => p.flavorCategory.includes('Floral')).slice(0, 2);
         reply = 'Bagi pencinta aroma Floral Elegan, pilihan mahkota kami adalah El Triunfo Geisha Tolima Colombia (Jasmine & Bergamot) serta Ijen Carbonic Maceration dengan harum melati dan peach manis!';
       } else if (lower.includes('rasio') || lower.includes('v60') || lower.includes('seduh') || lower.includes('resep')) {
-        reply = 'Untuk seduh V60 biji kopi kami, kami sarankan Dosis 15g, Air 225ml (Rasio 1:15), Suhu 92°C. Blooming 45g selama 40 detik, lalu tuang 2 tahap spiral hingga 225ml dengan drawdown tuntas di 02:15. Coba juga Panduan & Kalkulator Seduh kami di /guide!';
+        reply = 'Untuk memulai V60, gunakan Brewing Guidance di /guide untuk menyesuaikan dosis, rasio, suhu, timer, dan tahap tuang dengan beans yang dipilih.';
       } else {
-        matched = PRODUCTS.filter((p) => p.isFeatured).slice(0, 2);
+        matched = PUBLISHED_PRODUCTS.filter((p) => p.isFeatured).slice(0, 2);
         reply = `Halo! Kami memiliki beragam kurasi biji kopi segar yang disangrai di Malang. Kamu bisa memilih:\n1. Filter Manual Brew (Fruity, Floral, atau Sweet Strawberry)\n2. Espresso & Kopi Susu (Chocolate, Nutty, Crema Tebal)\n3. B.Y.O.B Custom Blend Simulator (/blend-builder)\n4. Grand Reserve Micro-Lot (Geisha & Sidra Langka)\n\nProfil rasa atau topik mana yang ingin kamu eksplorasi?`;
       }
 
@@ -284,10 +287,10 @@ export function VirtualBaristaWidget() {
             {/* Label Text */}
             <div className="text-left pr-1 hidden sm:block">
               <div className="text-xs font-editorial font-bold leading-tight flex items-center gap-1">
-                <span>Virtual Barista AI</span>
+                <span>Virtual Barista</span>
               </div>
               <div className="text-[10px] font-mono text-gray-300">
-                Tanya Rekomendasi Rasa
+                Pilih beans &amp; panduan seduh
               </div>
             </div>
 
@@ -304,10 +307,10 @@ export function VirtualBaristaWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 25, scale: 0.94 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[430px] h-[600px] max-h-[85vh] bg-white rounded-xl shadow-lg border border-border-subtle flex flex-col overflow-hidden"
+            className="fixed bottom-4 right-4 z-50 flex h-[600px] max-h-[85vh] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-md border border-border-subtle border-t-4 border-t-brand-maroon bg-white shadow-2xl sm:bottom-6 sm:right-6 sm:w-[430px]"
           >
             {/* Header with Roastery Identity */}
-            <div className="bg-gradient-to-r from-brand-navy via-[#162537] to-brand-navy text-white p-4 flex items-center justify-between border-b border-white/10 shadow-sm">
+            <div className="flex items-center justify-between border-b border-white/10 bg-brand-charcoal p-4 text-white">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-teal to-brand-teal-light p-[2px]">
@@ -321,7 +324,7 @@ export function VirtualBaristaWidget() {
                   <h3 className="font-editorial text-sm font-bold text-white flex items-center gap-1.5">
                     Virtual Barista 52
                     <span className="text-[10px] font-mono px-1.5 py-0.5 bg-brand-teal/30 text-brand-teal-light border border-brand-teal/40 rounded-md font-bold">
-                      RAG AI
+                      Katalog published
                     </span>
                   </h3>
                   <p className="text-[11px] text-gray-300 font-mono">
@@ -342,15 +345,16 @@ export function VirtualBaristaWidget() {
                       },
                     ])
                   }
-                  className="p-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-md text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
                   title="Reset Chat"
+                  aria-label="Mulai ulang percakapan"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-                  aria-label="Close Chat"
+                  className="flex h-11 w-11 items-center justify-center rounded-md text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                  aria-label="Tutup percakapan"
                 >
                   <X className="w-5 h-5" />
                 </button>

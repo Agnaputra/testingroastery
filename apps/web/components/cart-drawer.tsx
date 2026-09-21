@@ -140,7 +140,7 @@ export function CartDrawer() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="cart-drawer-title"
-          className="w-screen max-w-md bg-white shadow-lg flex flex-col animate-slide-up border-l border-border-subtle"
+          className="flex w-screen max-w-md animate-slide-up flex-col border-l border-t-4 border-border-subtle border-t-brand-maroon bg-white shadow-2xl"
         >
           {/* Drawer Header */}
           <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-surface-container-low">
@@ -178,9 +178,9 @@ export function CartDrawer() {
                 {Math.round(progressToFreeShipping)}%
               </span>
             </div>
-            <div className="w-full h-1.5 bg-border-subtle rounded-full overflow-hidden">
+            <div className="h-1.5 w-full overflow-hidden bg-border-subtle">
               <div
-                className="h-full bg-gradient-to-r from-brand-navy to-brand-teal transition-all duration-500 rounded-full"
+                className="h-full bg-brand-navy transition-all duration-500"
                 style={{ width: `${progressToFreeShipping}%` }}
               />
             </div>
@@ -214,10 +214,10 @@ export function CartDrawer() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-3.5 p-3.5 rounded-xl border border-border-subtle bg-white hover:border-brand-navy/30 transition-colors shadow-xs"
+                    className="flex gap-3.5 rounded-md border border-border-subtle bg-white p-3.5 transition-colors hover:border-brand-navy/40"
                   >
                     {/* Thumbnail */}
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-surface-container-low border border-border-subtle">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-surface-container-low">
                       <Image
                         src={item.imageUrl}
                         alt={item.name}
@@ -358,14 +358,14 @@ export function CartDrawer() {
               <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <button
                   onClick={closeDrawer}
-                  className="btn-secondary text-xs py-3.5 bg-white rounded-xl"
+                  className="btn-secondary rounded-md bg-white py-3.5 text-xs"
                 >
                   Belanja Lagi
                 </button>
                 <Link
                   href="/checkout"
                   onClick={closeDrawer}
-                  className="btn-primary text-xs py-3.5 w-full rounded-xl"
+                  className="btn-primary w-full rounded-md py-3.5 text-xs"
                 >
                   <span>Checkout</span>
                   <ArrowRight className="w-4 h-4" />

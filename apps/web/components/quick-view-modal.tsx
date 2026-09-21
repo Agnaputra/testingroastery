@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { X, Check, ShoppingBag, Plus, Minus, ArrowRight, ExternalLink } from 'lucide-react';
-import { CoffeeProduct, ProductVariant, GrindOption, GRIND_OPTIONS, formatRupiah } from '../lib/data';
+import { CoffeeProduct, ProductVariant, GrindOption, GRIND_OPTIONS, formatRupiah, getCustomerProductName } from '../lib/data';
 import { WeightSelector } from './weight-selector';
 import { GrindSelector } from './grind-selector';
 import { useCartStore } from '../lib/store/useCartStore';
@@ -22,6 +22,7 @@ export function QuickViewModal({ product, onClose }: QuickViewModalProps) {
 }
 
 function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClose: () => void }) {
+  const displayName = getCustomerProductName(product);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(product.variants[0]);
   const [selectedGrind, setSelectedGrind] = useState<GrindOption>('whole');
   const [quantity, setQuantity] = useState<number>(1);
@@ -41,7 +42,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
     const grindLabel = GRIND_OPTIONS.find((g) => g.id === selectedGrind)?.label || 'Biji utuh';
     addItem({
       productId: product.id,
-      name: product.name,
+      name: displayName,
       slug: product.slug,
       imageUrl: product.imageUrl,
       weightGrams: selectedVariant.weightGrams,
@@ -68,8 +69,8 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Lihat cepat ${product.name}`}
-        className="relative w-full max-w-2xl bg-white rounded-xl shadow-lg border border-border-subtle overflow-hidden z-10 animate-slide-up max-h-[90vh] flex flex-col"
+        aria-label={`Lihat cepat ${displayName}`}
+        className="relative z-10 flex max-h-[90vh] w-full max-w-2xl animate-slide-up flex-col overflow-hidden rounded-md border border-border-subtle border-t-4 border-t-brand-maroon bg-white shadow-2xl"
       >
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-border-subtle flex items-center justify-between bg-surface-container-low/60">
@@ -81,7 +82,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
             aria-label="Tutup"
           >
             <X className="w-5 h-5" />
@@ -91,10 +92,10 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
           <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="relative w-full sm:w-44 aspect-square rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
+            <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-surface-container-low sm:w-44">
               <Image
                 src={product.imageUrl}
-                alt={product.name}
+                alt={displayName}
                 fill
                 sizes="180px"
                 className="object-cover"
@@ -103,7 +104,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
 
             <div className="flex-1 min-w-0 space-y-2">
               <h3 className="font-editorial text-xl sm:text-2xl font-bold text-brand-navy">
-                {product.name}
+                {displayName}
               </h3>
               <p className="text-xs text-on-surface-variant font-mono">
                 {product.origin} • {product.altitude}
@@ -150,32 +151,32 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 sm:p-5 border-t border-border-subtle bg-surface-container-low/60 flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-4 border-t border-border-subtle bg-surface-container-low/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="font-mono">
-            <span className="text-[10px] text-on-surface-variant block uppercase font-bold">Harga Satuan</span>
+            <span className="text-[10px] text-on-surface-variant block uppercase font-bold">Total harga</span>
             <span className="text-xl sm:text-2xl font-bold text-brand-navy">
               {formatRupiah(selectedVariant.price * quantity)}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {/* Quantity Stepper */}
-            <div className="flex items-center border border-border-subtle rounded-xl bg-white p-1 shadow-xs">
+            <div className="flex w-fit items-center rounded-md border border-border-subtle bg-white p-1">
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-bold flex items-center justify-center hover:bg-gray-200 transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-sm bg-surface-container-low font-bold text-on-surface transition-colors hover:bg-gray-200"
                 aria-label="Kurangi"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="w-8 text-center font-mono font-bold text-xs text-brand-navy">
+              <span className="w-9 text-center font-mono text-xs font-bold text-brand-navy">
                 {quantity}
               </span>
               <button
                 type="button"
                 onClick={() => setQuantity(quantity + 1)}
-                className="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-bold flex items-center justify-center hover:bg-gray-200 transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-sm bg-surface-container-low font-bold text-on-surface transition-colors hover:bg-gray-200"
                 aria-label="Tambah"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -186,7 +187,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
               type="button"
               onClick={handleAddToCart}
               disabled={isAdded}
-              className="bg-brand-navy hover:bg-brand-navy-light text-white font-mono text-xs sm:text-sm font-bold py-3 px-5 sm:px-6 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+              className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-brand-navy px-5 py-3 font-mono text-xs font-bold text-white transition-colors hover:bg-brand-navy-light sm:w-auto sm:px-6 sm:text-sm"
             >
               {isAdded ? (
                 <>

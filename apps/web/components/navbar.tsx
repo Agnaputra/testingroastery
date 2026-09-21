@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -10,14 +10,13 @@ import { FiftyTwoLogo } from './logo';
 
 const MAIN_LINKS = [
   { href: '/', label: 'Beranda' },
-  { href: '/catalog', label: 'Koleksi Kopi' },
-  { href: '/work-with-us', label: 'Kemitraan B2B' },
+  { href: '/catalog', label: 'Catalog' },
+  { href: '/work-with-us', label: 'Kemitraan Bisnis' },
 ];
 const TOOL_LINKS = [
-  { href: '/guide', label: 'Panduan & Kalkulator Seduh', description: 'Atur resep, ikuti timer, dan langkah seduh' },
-  { href: '/blend-builder', label: 'Peracik Blend (BYOB)', description: 'Racik karakter kopi pilihanmu' },
-  { href: '/tools/price-calculator', label: 'Kalkulator HPP', description: 'Hitung modal dan margin kedai' },
-  { href: '/track', label: 'Lacak Pesanan', description: 'Periksa status pengiriman' },
+  { href: '/guide', label: 'Brewing Guidance', description: 'Atur resep, ikuti timer, dan langkah seduh' },
+  { href: '/blend-builder', label: 'Build Your Own Blend', description: 'Racik karakter kopi pilihanmu' },
+  { href: '/blend-builder', label: 'Build Your Own Blend (BYOB)', description: 'Racik karakter kopi pilihanmu' },
 ];
 
 export function Navbar() {
@@ -101,7 +100,7 @@ export function Navbar() {
           <Link href="/" aria-label="52 Coffee & Roastery — Beranda" className="shrink-0 px-1 py-2">
             <FiftyTwoLogo size="md" textColor={hasDarkNavbarCanvas || scrolled ? 'light' : 'dark'} className="max-[359px]:[&>div:last-child]:hidden" />
           </Link>
-          <nav aria-label="Navigasi utama" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 rounded-full border border-white/55 bg-[#182131]/90 px-7 text-[13px] font-semibold shadow-[0_8px_24px_rgba(20,24,28,.14)] xl:flex">
+          <nav aria-label="Navigasi utama" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 rounded-full border border-white/55 bg-[#182131]/90 px-6 text-[12px] font-semibold shadow-[0_8px_24px_rgba(20,24,28,.14)] xl:flex">
             {MAIN_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={navStyle(active(href))}>{label}</Link>
             ))}
@@ -109,7 +108,7 @@ export function Navbar() {
               if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setToolsDropdownOpen(false);
             }}>
               <button ref={toolsButtonRef} type="button" aria-expanded={toolsDropdownOpen} aria-controls="tools-navigation" onClick={() => setToolsDropdownOpen((open) => !open)} className={`${navStyle(toolsActive)} gap-2`}>
-                Panduan & Alat<ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${toolsDropdownOpen ? 'rotate-180' : ''}`} />
+                Coffee Lab<ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${toolsDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {toolsDropdownOpen && (
                 <div id="tools-navigation" className="absolute right-0 top-full mt-4 w-80 rounded-xl border border-border-subtle bg-white p-2 text-brand-navy shadow-floating">
@@ -143,7 +142,7 @@ export function Navbar() {
                 </Link>
               ))}
             </div>
-            <p className="mb-2 mt-5 border-t border-border-subtle px-3 pt-5 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">Panduan & Alat</p>
+            <p className="mb-2 mt-5 border-t border-border-subtle px-3 pt-5 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">Coffee Lab</p>
             {TOOL_LINKS.map(({ href, label }) => (
               <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} aria-current={active(href) ? 'page' : undefined} className={`flex min-h-11 items-center rounded-lg px-3 text-sm hover:bg-brand-pill ${active(href) ? 'bg-brand-pill font-semibold' : ''}`}>{label}</Link>
             ))}

@@ -23,6 +23,7 @@ export type CartItemInput = Omit<CartItem, 'id'>;
 interface CartStore {
   items: CartItem[];
   isDrawerOpen: boolean;
+  lastAddedName: string | null;
   
   // Actions
   addItem: (item: CartItemInput) => void;
@@ -32,6 +33,7 @@ interface CartStore {
   openDrawer: () => void;
   closeDrawer: () => void;
   toggleDrawer: () => void;
+  dismissToast: () => void;
   
   // Computed values
   getTotalItems: () => number;
@@ -43,6 +45,7 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isDrawerOpen: false,
+      lastAddedName: null,
 
       addItem: (itemInput) => {
         const id = `${itemInput.productId}-${itemInput.weightGrams}-${itemInput.grind}`;
@@ -52,11 +55,11 @@ export const useCartStore = create<CartStore>()(
         if (existingIndex > -1) {
           const updated = [...currentItems];
           updated[existingIndex].quantity += itemInput.quantity;
-          set({ items: updated, isDrawerOpen: true });
+          set({ items: updated, lastAddedName: itemInput.name });
         } else {
           set({
             items: [...currentItems, { ...itemInput, id }],
-            isDrawerOpen: true,
+            lastAddedName: itemInput.name,
           });
         }
       },
@@ -82,6 +85,7 @@ export const useCartStore = create<CartStore>()(
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),
       toggleDrawer: () => set({ isDrawerOpen: !get().isDrawerOpen }),
+      dismissToast: () => set({ lastAddedName: null }),
 
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
@@ -93,6 +97,7 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: '52coffee-cart-storage',
+      partialize: (state) => ({ items: state.items }),
       storage: createJSONStorage(() => (typeof window !== 'undefined' ? localStorage : {
         getItem: () => null,
         setItem: () => {},

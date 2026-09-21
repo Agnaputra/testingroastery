@@ -1,3 +1,4 @@
+import type { CatalogPublicationStatus } from './catalog-master';
 export interface ProductVariant {
   weightGrams: number;
   weightLabel: string;
@@ -63,16 +64,20 @@ export type CoffeeSeries =
   | 'Grand Reserve'
   | 'Robusta Espresso'
   | 'Arabica Espresso'
-  | 'Espresso Roast';
+  | 'Espresso Roast'
+  | 'Glassware'
+  | 'Coffee Machine';
 
 export interface CoffeeProduct {
   id: string;
   slug: string;
   name: string;
   slowbarAlias?: string;
-  category: 'filter' | 'espresso' | 'reserve';
+  category: 'filter' | 'espresso' | 'reserve' | 'glassware' | 'machine';
   categoryLabel: string;
   series: CoffeeSeries;
+  publicationStatus?: CatalogPublicationStatus;
+  masterRow?: number;
   origin: string;
   region: string;
   altitude: string;
@@ -110,6 +115,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Ijen Series',
+    publicationStatus: 'published',
+    masterRow: 12,
     origin: 'East Java, Indonesia',
     region: 'Gunung Ijen, Banyuwangi - Bondowoso',
     altitude: '1,400 - 1,600 MASL',
@@ -158,6 +165,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Ijen Series',
+    publicationStatus: 'published',
+    masterRow: 16,
     origin: 'East Java, Indonesia',
     region: 'Gunung Ijen, Bondowoso',
     altitude: '1,400 - 1,600 MASL',
@@ -205,6 +214,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Ijen Series',
+    publicationStatus: 'published',
+    masterRow: 14,
     origin: 'East Java, Indonesia',
     region: 'Gunung Ijen, Bondowoso',
     altitude: '1,400 - 1,600 MASL',
@@ -245,6 +256,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Ijen Series',
+    publicationStatus: 'published',
+    masterRow: 13,
     origin: 'East Java, Indonesia',
     region: 'Kawah Ijen, Bondowoso',
     altitude: '1,400 - 1,600 MASL',
@@ -285,6 +298,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Ijen Series',
+    publicationStatus: 'published',
+    masterRow: 17,
     origin: 'East Java, Indonesia',
     region: 'Gunung Ijen, Bondowoso',
     altitude: '1,500 MASL',
@@ -325,6 +340,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Ijen Series',
+    publicationStatus: 'published',
+    masterRow: 15,
     origin: 'East Java, Indonesia',
     region: 'Gunung Ijen, Bondowoso',
     altitude: '1,400 - 1,600 MASL',
@@ -369,6 +386,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Enrekang Series',
+    publicationStatus: 'published',
+    masterRow: 21,
     origin: 'South Sulawesi, Indonesia',
     region: 'Buntu Lenta, Enrekang',
     altitude: '1,500 - 1,800 MASL',
@@ -410,6 +429,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Enrekang Series',
+    publicationStatus: 'published',
+    masterRow: 19,
     origin: 'South Sulawesi, Indonesia',
     region: 'Buntu Lenta, Enrekang',
     altitude: '1,500 - 1,800 MASL',
@@ -450,6 +471,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Enrekang Series',
+    publicationStatus: 'published',
+    masterRow: 20,
     origin: 'South Sulawesi, Indonesia',
     region: 'Buntu Lenta, Enrekang',
     altitude: '1,500 - 1,800 MASL',
@@ -490,6 +513,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Enrekang Series',
+    publicationStatus: 'published',
+    masterRow: 22,
     origin: 'South Sulawesi, Indonesia',
     region: 'Kalaciri Dammang, Enrekang',
     altitude: '1,400 - 1,600 MASL',
@@ -530,6 +555,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Enrekang Series',
+    publicationStatus: 'published',
+    masterRow: 23,
     origin: 'South Sulawesi, Indonesia',
     region: 'Benteng Alla, Enrekang',
     altitude: '1,600 - 1,800 MASL',
@@ -574,6 +601,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Sunda Series',
+    publicationStatus: 'published',
+    masterRow: 11,
     origin: 'West Java, Indonesia',
     region: 'Gunung Puntang, Bandung',
     altitude: '1,300 - 1,600 MASL',
@@ -614,6 +643,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Sunda Series',
+    publicationStatus: 'published',
+    masterRow: 10,
     origin: 'West Java, Indonesia',
     region: 'Gunung Puntang, Bandung',
     altitude: '1,300 - 1,600 MASL',
@@ -658,6 +689,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Java Exotic',
+    publicationStatus: 'published',
+    masterRow: 1,
     origin: 'Central Java, Indonesia',
     region: 'Gunung Sumbing',
     altitude: '1,500 - 1,700 MASL',
@@ -699,6 +732,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Java Exotic',
+    publicationStatus: 'published',
+    masterRow: 2,
     origin: 'Central Java, Indonesia',
     region: 'Gunung Prau',
     altitude: '1,600 - 1,800 MASL',
@@ -739,6 +774,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Java Exotic',
+    publicationStatus: 'published',
+    masterRow: 3,
     origin: 'Central Java, Indonesia',
     region: 'Gunung Prau',
     altitude: '1,600 - 1,800 MASL',
@@ -778,6 +815,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Java Exotic',
+    publicationStatus: 'published',
+    masterRow: 5,
     origin: 'Central Java, Indonesia',
     region: 'Gunung Sindoro',
     altitude: '1,500 - 1,700 MASL',
@@ -818,6 +857,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Java Exotic',
+    publicationStatus: 'published',
+    masterRow: 8,
     origin: 'Central Java, Indonesia',
     region: 'Gunung Sindoro',
     altitude: '1,500 - 1,700 MASL',
@@ -861,6 +902,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Argopuro Walida',
+    publicationStatus: 'published',
+    masterRow: 39,
     origin: 'East Java, Indonesia',
     region: 'Gunung Argopuro, Probolinggo',
     altitude: '1,300 - 1,600 MASL',
@@ -902,6 +945,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'filter',
     categoryLabel: 'Filter Based',
     series: 'Argopuro Walida',
+    publicationStatus: 'published',
+    masterRow: 41,
     origin: 'East Java, Indonesia',
     region: 'Damarkandang, Argopuro',
     altitude: '1,400 - 1,600 MASL',
@@ -945,6 +990,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'reserve',
     categoryLabel: 'Grand Reserve',
     series: 'Grand Reserve',
+    publicationStatus: 'published',
+    masterRow: 30,
     origin: 'Colombia',
     region: 'Tolima, Colombia',
     altitude: '1,800 - 2,000 MASL',
@@ -994,6 +1041,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'reserve',
     categoryLabel: 'Grand Reserve',
     series: 'Grand Reserve',
+    publicationStatus: 'published',
+    masterRow: 29,
     origin: 'Colombia',
     region: 'Cauca, Colombia',
     altitude: '1,850 MASL',
@@ -1038,6 +1087,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'reserve',
     categoryLabel: 'Grand Reserve',
     series: 'Grand Reserve',
+    publicationStatus: 'published',
+    masterRow: 31,
     origin: 'Colombia',
     region: 'Huila, Colombia',
     altitude: '1,750 - 1,900 MASL',
@@ -1079,6 +1130,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'reserve',
     categoryLabel: 'Grand Reserve',
     series: 'Grand Reserve',
+    publicationStatus: 'published',
+    masterRow: 32,
     origin: 'Colombia',
     region: 'Huila, Colombia',
     altitude: '1,800 MASL',
@@ -1120,6 +1173,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'reserve',
     categoryLabel: 'Grand Reserve',
     series: 'Grand Reserve',
+    publicationStatus: 'published',
+    masterRow: 33,
     origin: 'Yemen',
     region: 'Haraz Mountain, Yemen',
     altitude: '2,000 - 2,200 MASL',
@@ -1166,6 +1221,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'espresso',
     categoryLabel: 'Espresso Based',
     series: 'Robusta Espresso',
+    publicationStatus: 'published',
+    masterRow: 24,
     origin: 'East Java, Indonesia',
     region: 'Dampit, Malang',
     altitude: '700 - 900 MASL',
@@ -1211,6 +1268,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'espresso',
     categoryLabel: 'Espresso Based',
     series: 'Robusta Espresso',
+    publicationStatus: 'published',
+    masterRow: 25,
     origin: 'East Java, Indonesia',
     region: 'Telemung, Banyuwangi',
     altitude: '600 - 800 MASL',
@@ -1250,6 +1309,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'espresso',
     categoryLabel: 'Espresso Based',
     series: 'Arabica Espresso',
+    publicationStatus: 'published',
+    masterRow: 18,
     origin: 'Bali, Indonesia',
     region: 'Kintamani, Bali',
     altitude: '1,200 - 1,400 MASL',
@@ -1289,6 +1350,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'espresso',
     categoryLabel: 'Espresso Based',
     series: 'Arabica Espresso',
+    publicationStatus: 'published',
+    masterRow: 27,
     origin: 'Aceh, Indonesia',
     region: 'Takengon, Aceh Tengah',
     altitude: '1,400 - 1,600 MASL',
@@ -1328,6 +1391,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'espresso',
     categoryLabel: 'Espresso Based',
     series: 'Arabica Espresso',
+    publicationStatus: 'published',
+    masterRow: 15,
     origin: 'East Java, Indonesia',
     region: 'Gunung Ijen, Bondowoso',
     altitude: '1,400 MASL',
@@ -1368,6 +1433,8 @@ export const PRODUCTS: CoffeeProduct[] = [
     category: 'espresso',
     categoryLabel: 'Espresso Based',
     series: 'Arabica Espresso',
+    publicationStatus: 'published',
+    masterRow: 28,
     origin: 'Brazil',
     region: 'Minas Gerais, Santos, Brazil',
     altitude: '900 - 1,200 MASL',
@@ -1399,7 +1466,168 @@ export const PRODUCTS: CoffeeProduct[] = [
       steps: ['Ekstraksi 37g espresso untuk Cafe Latte yang manis cokelat nutty tanpa asam.'],
     },
   },
+  // ==========================================
+  // GLASSWARE & SERVING EQUIPMENT
+  // ==========================================
+  {
+    id: 'glassware-heatproof-server-360',
+    slug: '52-heatproof-glass-server-360ml',
+    name: '52 Heatproof Glass Server 360ml',
+    category: 'glassware',
+    categoryLabel: 'Glassware',
+    series: 'Glassware',
+    origin: 'Malang / Import',
+    region: 'Equipment',
+    altitude: '-',
+    varietal: 'Borosilicate Glass',
+    process: 'Handcrafted',
+    roastLevel: 'Medium',
+    tastingNotes: ['Heat Resistant', 'Ergonomic Spout', 'Clear Clarity'],
+    flavorCategory: ['Sweet'],
+    description: 'Server kaca borosilikat tahan panas 360ml dengan cerat tuang presisi dan pegangan ergonomis, sempurna untuk manual brew 1-2 cangkir.',
+    story: 'Dirancang khusus untuk menemani proses seduh harian dan menjaga suhu seduhan tetap stabil saat dinikmati.',
+    basePrice: 120000,
+    defaultWeight: '1 Unit',
+    variants: [
+      { weightGrams: 300, weightLabel: '360ml', price: 120000, inStock: true },
+      { weightGrams: 500, weightLabel: '600ml', price: 145000, inStock: true },
+    ],
+    imageUrl: '/images/canva-cafe-moodboard.jpg',
+    acidity: 3,
+    sweetness: 3,
+    body: 3,
+    brewingRecipe: {
+      method: 'Manual Brew Server',
+      dose: '-',
+      water: '360ml - 600ml',
+      ratio: '-',
+      temp: 'Hingga 150°C',
+      time: '-',
+      steps: ['Bilas dengan air hangat sebelum menyeduh untuk menjaga stabilitas suhu seduhan.'],
+    },
+  },
+  {
+    id: 'glassware-double-wall-cup',
+    slug: '52-double-wall-tasting-glass-150ml',
+    name: '52 Double Wall Tasting Glass 150ml',
+    category: 'glassware',
+    categoryLabel: 'Glassware',
+    series: 'Glassware',
+    origin: 'Malang / Import',
+    region: 'Equipment',
+    altitude: '-',
+    varietal: 'Double-Wall Borosilicate',
+    process: 'Handblown',
+    roastLevel: 'Medium',
+    tastingNotes: ['Sensory Rim', 'Thermal Isolation', 'Comfort Grip'],
+    flavorCategory: ['Floral'],
+    description: 'Gelas tasting double-wall berdinding ganda 150ml. Bagian luar tetap sejuk di tangan sementara kopi di dalam tetap hangat.',
+    story: 'Bentuk rim didesain memfokuskan uap aroma kopi langsung ke indra penciuman saat diminum.',
+    basePrice: 85000,
+    defaultWeight: '1 Unit',
+    variants: [
+      { weightGrams: 150, weightLabel: '150ml', price: 85000, inStock: true },
+      { weightGrams: 250, weightLabel: '250ml', price: 95000, inStock: true },
+    ],
+    imageUrl: '/images/canva-cafe-table.jpg',
+    acidity: 3,
+    sweetness: 3,
+    body: 3,
+    brewingRecipe: {
+      method: 'Sensory Cup',
+      dose: '-',
+      water: '150ml',
+      ratio: '-',
+      temp: 'Sesuai suhu minum (60°C)',
+      time: '-',
+      steps: ['Nikmati kopi dalam tegukan kecil untuk mengeksplorasi spektrum rasa secara bertahap.'],
+    },
+  },
+  // ==========================================
+  // COFFEE MACHINE & PRECISION GRINDERS
+  // ==========================================
+  {
+    id: 'machine-fellow-ode-gen2',
+    slug: 'fellow-ode-gen-2-brew-grinder',
+    name: 'Fellow Ode Gen 2 Brew Grinder',
+    category: 'machine',
+    categoryLabel: 'Coffee Machine',
+    series: 'Coffee Machine',
+    origin: 'Fellow USA',
+    region: 'Specialty Equipment',
+    altitude: '-',
+    varietal: '64mm Flat Burrs',
+    process: 'Precision Engineered',
+    roastLevel: 'Light-Medium',
+    tastingNotes: ['Zero Retention', 'Uniform Particle', 'Quiet Motor'],
+    flavorCategory: ['Sweet', 'Nutty'],
+    description: 'Grinder kopi filter elektrik presisi dengan mata burr flat 64mm Gen 2, teknologi anti-statis ion, dan motor otomatis mati.',
+    story: 'Standar emas grinder filter rumahan dan bar specialty coffee untuk ekstraksi rasa yang sangat bersih dan manis.',
+    basePrice: 5400000,
+    defaultWeight: '1 Unit',
+    variants: [
+      { weightGrams: 4500, weightLabel: 'Unit Matte Black', price: 5400000, inStock: true },
+      { weightGrams: 4500, weightLabel: 'Unit Matte White', price: 5400000, inStock: true },
+    ],
+    imageUrl: '/images/hero-52coffee-dripbox.png',
+    acidity: 4,
+    sweetness: 4,
+    body: 4,
+    brewingRecipe: {
+      method: 'Electric Grinder',
+      dose: 'Single Dose (15g-30g)',
+      water: '-',
+      ratio: '-',
+      temp: '-',
+      time: '10 detik',
+      steps: ['Atur klik gilingan pada angka 4-6 untuk pour over V60, 2-3 untuk Aeropress.'],
+    },
+  },
+  {
+    id: 'machine-flair-58-espresso',
+    slug: 'flair-58-espresso-maker',
+    name: 'Flair 58 Manual Espresso Maker',
+    category: 'machine',
+    categoryLabel: 'Coffee Machine',
+    series: 'Coffee Machine',
+    origin: 'Flair Espresso',
+    region: 'Commercial Grade',
+    altitude: '-',
+    varietal: '58mm Portafilter',
+    process: 'Lever Pre-heat System',
+    roastLevel: 'Medium',
+    tastingNotes: ['Full 9-Bar Pressure', 'Crema Maksimal', 'Temperature Control'],
+    flavorCategory: ['Chocolaty'],
+    description: 'Mesin espresso tuas manual 58mm dengan sistem pemanas elektrik 3 tingkat, pressure gauge, dan portafilter standar komersil.',
+    story: 'Memberikan kontrol profil tekanan penuh kepada barista untuk mengekstraksi espresso kafe profesional di mana saja.',
+    basePrice: 8900000,
+    defaultWeight: '1 Unit',
+    variants: [
+      { weightGrams: 6000, weightLabel: 'Full Set 58mm', price: 8900000, inStock: true },
+    ],
+    imageUrl: '/images/canva-lamarzocco-espresso.jpg',
+    acidity: 4,
+    sweetness: 4,
+    body: 5,
+    brewingRecipe: {
+      method: 'Manual Lever Espresso',
+      dose: '18g',
+      water: '40g yield',
+      ratio: '1:2.2',
+      temp: '93°C (Level 2 Pre-heat)',
+      time: '30s',
+      steps: ['Pre-infusi 5-8 detik pada 3 bar, lalu naikkan ke 8-9 bar hingga mencapai target ekstraksi.'],
+    },
+  },
 ];
+
+export const TOKOPEDIA_URL =
+  'https://www.tokopedia.com/52-coffee--roastery?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAb21jcAUbQz1wZG9mAmV4dG4DYWVtAjExAHNydGM';
+export const WHATSAPP_NUMBER = '+62 857-9252-4863';
+export const WHATSAPP_URL = 'https://wa.me/6285792524863';
+export const TIKTOK_URL =
+  'https://www.tiktok.com/@52coffeeroastery?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAb21jcAUbQz1wZG9mAmV4dG4DYWVtAjExAHNydGM';
+export const INSTAGRAM_URL = 'https://instagram.com/52coffeeroastery';
 
 export const FLAVOR_CATEGORIES = [
   { id: 'all', label: 'Semua Profil' },
@@ -1431,6 +1659,11 @@ export function formatRupiah(amount: number): string {
   }).format(amount);
 }
 
+/** Public catalog names omit internal Slowbar aliases in parentheses. */
+export function getCustomerProductName(product: Pick<CoffeeProduct, 'name'>): string {
+  return product.name.replace(/\s*\([^)]*\)/g, '').trim();
+}
+
 export function getProductDisplayImage(
   product: Pick<CoffeeProduct, 'imageUrl' | 'series'>
 ): string {
@@ -1458,17 +1691,19 @@ export function getProductDisplayImage(
 }
 
 export function getProductBySlug(slug: string): CoffeeProduct | undefined {
-  return PRODUCTS.find((p) => p.slug === slug || p.id === slug);
+  return PRODUCTS.find(
+    (p) => (p.slug === slug || p.id === slug) && p.publicationStatus !== 'draft' && p.publicationStatus !== 'needs_owner_review'
+  );
 }
 
 export function getFeaturedProducts(): CoffeeProduct[] {
-  return PRODUCTS.filter((p) => p.isFeatured);
+  return PRODUCTS.filter((p) => p.isFeatured && p.publicationStatus !== 'draft' && p.publicationStatus !== 'needs_owner_review');
 }
 
 export function getProductsByCategory(category: 'filter' | 'espresso' | 'reserve'): CoffeeProduct[] {
-  return PRODUCTS.filter((p) => p.category === category);
+  return PRODUCTS.filter((p) => p.category === category && p.publicationStatus !== 'draft' && p.publicationStatus !== 'needs_owner_review');
 }
 
 export function getProductsBySeries(series: CoffeeSeries): CoffeeProduct[] {
-  return PRODUCTS.filter((p) => p.series === series);
+  return PRODUCTS.filter((p) => p.series === series && p.publicationStatus !== 'draft' && p.publicationStatus !== 'needs_owner_review');
 }

@@ -21,7 +21,7 @@ import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
 
 export default function AboutPage() {
   return (
-    <div className="page-shell nav-offset">
+    <div className="page-shell">
       <PageIntro
         align="center"
         compact
@@ -34,10 +34,10 @@ export default function AboutPage() {
       <div className="site-container page-section space-y-16">
 
       {/* Hero Showcase Image & Roastery Ethos */}
-      <div className="ui-surface p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div id="background" className="ui-surface editorial-workspace scroll-mt-28 p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div className="lg:col-span-6 space-y-5">
           <span className="badge-crimson">Dikerjakan di Malang</span>
-          <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-roastery-dark leading-tight">
+          <h2 id="roasters" className="scroll-mt-28 font-editorial text-2xl sm:text-3xl font-bold text-roastery-dark leading-tight">
             Sangrai mikro dengan kontrol suhu presisi
           </h2>
           <p className="text-xs sm:text-sm text-roastery-charcoal leading-relaxed">
@@ -80,7 +80,7 @@ export default function AboutPage() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="editorial-card p-6 bg-white space-y-3 shadow-sm">
+          <div className="editorial-card editorial-feature space-y-3 py-6">
             <div className="w-12 h-12 rounded-full bg-roastery-crimson/10 text-roastery-crimson flex items-center justify-center">
               <HeartHandshake className="w-6 h-6" />
             </div>
@@ -92,7 +92,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="editorial-card p-6 bg-white space-y-3 shadow-sm">
+          <div className="editorial-card editorial-feature space-y-3 py-6">
             <div className="w-12 h-12 rounded-full bg-roastery-slate/15 text-roastery-slate flex items-center justify-center">
               <Flame className="w-6 h-6" />
             </div>
@@ -104,7 +104,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="editorial-card p-6 bg-white space-y-3 shadow-sm">
+          <div className="editorial-card editorial-feature space-y-3 py-6">
             <div className="w-12 h-12 rounded-full bg-roastery-teal/20 text-roastery-teal flex items-center justify-center">
               <ShieldCheck className="w-6 h-6" />
             </div>
@@ -136,7 +136,7 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center gap-2 text-roastery-light">
               <Clock className="w-4 h-4 text-roastery-teal shrink-0" />
-              <span>Buka Senin - Jumat: 11.00 - 16.00 WIB</span>
+              <span>Buka Senin - Minggu: 10.00 - 20.00 WIB</span>
             </div>
           </div>
 

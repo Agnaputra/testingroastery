@@ -1,42 +1,20 @@
-# 52 Coffee & Roastery — Claude Code Agent Guidelines
+# Panduan Claude Code — 52 Coffee & Roastery
 
-Panduan ini khusus ditujukan untuk **Anthropic Claude Code** CLI & Claude AI.
+Baca [AGENTS.md](./AGENTS.md) sebagai panduan utama. Instruksi di sini hanya menambah alur kerja Claude Code.
 
----
+## Sebelum mengedit
 
-## 1. Integrasi Skills Lokal (`.agents/skills/`)
+- Periksa `git status`, file yang berkaitan, serta komponen dan token yang sudah ada. Pertahankan perubahan lokal pengguna.
+- Untuk UI, gunakan skill di `.agents/skills/` bila cocok dengan tugas, misalnya `frontend-design`, `anti-ui-slop`, atau `ui-ux-pro-max`. Baca `SKILL.md` skill yang digunakan; jangan menganggap setiap skill perlu dijalankan untuk setiap perubahan kecil.
+- Periksa status implementasi langsung di kode sebelum menyebut fitur pembayaran, pelacakan, RAG, atau NeMo aktif.
 
-Repositori ini memiliki skill desain tingkat tinggi yang terpasang di `.agents/skills/`:
-- **`anti-ui-slop`**: Mencegah keluaran antarmuka generik. Mengharuskan desain berbobot kuat, bebas dari template murahan, dan lolos finish gate.
-- **`frontend-design`**: Panduan tipografi berkarakter, whitespace editorial, dan pengambilan keputusan visual yang terarah.
-- **`ui-ux-pro-max`**: Standar audit interaksi, a11y, performa render, dan fluid responsiveness.
+## Pemeriksaan UI
 
-Gunakan standar skill tersebut setiap kali merancang, memodifikasi, atau mereview halaman web.
+- Tinjau halaman yang diubah pada lebar mobile (sekitar 360px), tablet (768px), dan desktop (1280px atau lebih) bila browser tersedia. Pastikan tidak ada overflow horizontal.
+- Kontrol ikon perlu accessible name pada tombol atau tautannya; ikon dekoratif gunakan `aria-hidden`. Jaga fokus keyboard, target sentuh, dan `prefers-reduced-motion`.
+- Pastikan kontras teks normal minimal 4.5:1 dan teks besar minimal 3:1. Ikuti tipografi dan token di `tailwind.config.ts` serta `globals.css`.
+- Jaga hero dan navbar menyatu tanpa pita latar kosong di atas halaman. Jangan menutup judul atau kontrol dengan navbar tetap.
 
----
+## Verifikasi
 
-## 2. Finish Gate Kualitas UI
-
-Sebelum menganggap pekerjaan UI selesai, Claude Code wajib memvalidasi kriteria finish gate:
-1. **Responsive Checklist**:
-   - Mobile: 360px – 480px (tidak ada horizontal scroll, touch target minimal 44px).
-   - Tablet: 768px – 1024px (grid tertata rapi, layout seimbang).
-   - Desktop: 1280px+ (spacious editorial spacing, kontras visual tajam).
-2. **Accessibility (a11y)**:
-   - Warna teks terhadap latar belakang wajib memenuhi rasio kontras WCAG AA (minimal 4.5:1).
-   - Setiap ikon interaktif wajib memiliki `aria-label` atau tag `title`.
-   - Menghormati preferensi pengguna untuk `prefers-reduced-motion`.
-3. **Typography & Brand Alignment**:
-   - Judul Display menggunakan `font-headline` (Raleway).
-   - Body menggunakan `font-sans` (Montserrat / Plus Jakarta Sans).
-   - Angka & metrik menggunakan `font-mono` (JetBrains Mono / Cascadia Code).
-
----
-
-## 3. Perintah Kerja Cepat
-
-- **Dev server**: `npm run dev`
-- **Lint**: `npm run lint --prefix apps/web`
-- **Typecheck**: `npm run typecheck --prefix apps/web`
-- **Build**: `npm run build --prefix apps/web`
-
+Jalankan `npm run typecheck --prefix apps/web` setelah perubahan frontend. Gunakan `npm run lint --prefix apps/web` dan `npm run build --prefix apps/web` bila cakupan perubahan memerlukannya. Laporkan apa yang benar-benar diuji dan keterbatasan pemeriksaan visual.

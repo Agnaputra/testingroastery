@@ -21,8 +21,9 @@ import {
 } from 'lucide-react';
 import { HeroSection } from '../components/hero/HeroSection';
 import { SensorySection } from '../components/sensory/SensorySection';
-import { PRODUCTS, formatRupiah } from '../lib/data';
+import { PRODUCTS, formatRupiah, getCustomerProductName } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
+import { openVirtualBarista } from '../lib/virtual-barista-events';
 import styles from './page.module.css';
 
 interface ProductItem {
@@ -49,51 +50,53 @@ const FEATURED_PRODUCTS: ProductItem[] = FEATURED_CONFIG.flatMap(({ slug, imageU
   const product = PRODUCTS.find((item) => item.slug === slug);
   if (!product) return [];
 
-  const variant = product.variants.find((item) => item.weightGrams === 200) ?? product.variants[0];
+  const variant = [...product.variants]
+    .filter((item) => item.inStock)
+    .sort((a, b) => a.weightGrams - b.weightGrams)[0] ?? product.variants[0];
   return [{
     id: product.id,
-    name: product.name,
+    name: getCustomerProductName(product),
     slug: product.slug,
     category: product.categoryLabel,
     weightGrams: variant.weightGrams,
     weightLabel: variant.weightLabel,
     price: variant.price,
     series: product.series,
-    notes: product.tastingNotes,
+    notes: product.tastingNotes.slice(0, 4),
     imageUrl,
   }];
 });
 
 const CATEGORIES = [
   {
-    id: 'filter',
-    title: 'Filter Roast',
-    subtitle: 'Ijen, Java Exotic, Walida, Sunda',
-    href: '/catalog?category=filter',
+    id: 'about',
+    title: 'Apa 52 Coffee Roasters',
+    subtitle: 'Filosofi sangrai dan para roaster',
+    href: '/about',
   },
   {
-    id: 'espresso',
-    title: 'Espresso Roast',
-    subtitle: 'Robusta Dampit & Arabica',
-    href: '/catalog?category=espresso',
+    id: 'catalog',
+    title: 'Catalog',
+    subtitle: 'Retail beans, slowbar, dan alat seduh',
+    href: '/catalog',
   },
   {
-    id: 'reserve',
-    title: 'Grand Reserve',
-    subtitle: 'Pilihan micro-lot',
-    href: '/catalog?category=reserve',
+    id: 'business',
+    title: 'Kemitraan Bisnis',
+    subtitle: 'Pasokan roastery, label khusus, konsultasi',
+    href: '/work-with-us',
   },
   {
-    id: 'beverages',
-    title: 'Seduhan Slowbar',
-    subtitle: 'Koleksi kopi per cangkir',
-    href: '/catalog?category=beverages',
+    id: 'lab',
+    title: 'Coffee Lab',
+    subtitle: 'Brewing Guidance dan racik blend (BYOB)',
+    href: '/guide',
   },
   {
-    id: 'byob',
-    title: 'Racik BYOB',
-    subtitle: 'Simulator profil sangrai',
-    href: '/blend-builder',
+    id: 'barista',
+    title: 'Virtual Barista',
+    subtitle: 'Konsultasi rasa dan panduan seduh AI',
+    href: '#virtual-barista',
   },
 ];
 
@@ -168,7 +171,7 @@ const FAQS = [
   {
     question: 'Kapan jam operasional Slowbar & Tasting Room di Malang?',
     answer:
-      'Slowbar & Tasting Room kami buka Senin - Jumat, pukul 11.00 - 16.00 WIB di Jl. KH Agus Salim No. 11, Klojen, Kota Malang. Anda bisa langsung datang untuk mencicipi kurasi origin terbaru kami.',
+      'Slowbar & Tasting Room kami buka Senin - Minggu, pukul 10.00 - 20.00 WIB di Jl. KH Agus Salim No. 11, Klojen, Kota Malang. Anda bisa langsung datang untuk mencicipi kurasi origin terbaru kami.',
   },
 ];
 
@@ -205,56 +208,6 @@ export default function HomePage() {
     setActiveProcess((current) => (current === nextProcess ? current : nextProcess));
   });
 
-  const handleProductPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'mouse' || event.button !== 0) return;
-
-    productDragRef.current = {
-      active: true,
-      didDrag: false,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startScrollLeft: event.currentTarget.scrollLeft,
-    };
-  };
-
-  const handleProductPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = productDragRef.current;
-    if (!drag.active || drag.pointerId !== event.pointerId) return;
-
-    const distance = event.clientX - drag.startX;
-    if (!drag.didDrag && Math.abs(distance) < 6) return;
-
-    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-    drag.didDrag = true;
-    setDraggingProducts(true);
-    event.currentTarget.scrollLeft = drag.startScrollLeft - distance;
-  };
-
-  const handleProductPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = productDragRef.current;
-    if (drag.pointerId !== event.pointerId) return;
-
-    drag.active = false;
-    setDraggingProducts(false);
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    if (drag.didDrag) {
-      window.setTimeout(() => {
-        productDragRef.current.didDrag = false;
-      }, 0);
-    }
-  };
-
-  const preventClickAfterDrag = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (!productDragRef.current.didDrag) return;
-    event.preventDefault();
-    event.stopPropagation();
-    productDragRef.current.didDrag = false;
-  };
-
   const handleQuickAdd = (product: ProductItem) => {
     addItem({
       productId: product.id,
@@ -264,14 +217,64 @@ export default function HomePage() {
       weightGrams: product.weightGrams,
       weightLabel: product.weightLabel,
       grind: 'whole',
-      grindLabel: 'Whole Beans (Biji Utuh)',
+      grindLabel: 'Biji utuh',
       unitPrice: product.price,
       quantity: 1,
       series: product.series,
       tastingNotes: product.notes,
     });
     setAddedId(product.id);
-    window.setTimeout(() => setAddedId(null), 1500);
+    setTimeout(() => setAddedId((current) => (current === product.id ? null : current)), 1500);
+  };
+
+  const handleProductPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    const rail = productRailRef.current;
+    if (!rail) return;
+
+    productDragRef.current = {
+      active: true,
+      didDrag: false,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: rail.scrollLeft,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleProductPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const { active, pointerId, startX, startScrollLeft } = productDragRef.current;
+    if (!active || event.pointerId !== pointerId) return;
+    const rail = productRailRef.current;
+    if (!rail) return;
+
+    const deltaX = event.clientX - startX;
+    if (Math.abs(deltaX) > 6) {
+      productDragRef.current.didDrag = true;
+      if (!draggingProducts) setDraggingProducts(true);
+    }
+    rail.scrollLeft = startScrollLeft - deltaX;
+  };
+
+  const handleProductPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const { pointerId } = productDragRef.current;
+    if (event.pointerId !== pointerId) return;
+
+    if (event.currentTarget.hasPointerCapture(pointerId)) {
+      event.currentTarget.releasePointerCapture(pointerId);
+    }
+    productDragRef.current.active = false;
+    window.setTimeout(() => {
+      productDragRef.current.didDrag = false;
+      setDraggingProducts(false);
+    }, 40);
+  };
+
+  const preventClickAfterDrag = (event: ReactMouseEvent) => {
+    if (productDragRef.current.didDrag) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   };
 
   return (
@@ -317,7 +320,7 @@ export default function HomePage() {
               <h2 id="featured-heading">Kopi dengan<br />suara yang berbeda.</h2>
             </div>
             <div className={styles.headerAside}>
-              <p>Empat profil untuk mengenali rentang rasa 52 Coffee—dari floral dan fruity hingga karakter yang lebih intens.</p>
+              <p>Disangrai di Malang dan semua kopi fresh roast. Empat profil untuk mengenali rentang rasa 52 Coffee—dari floral dan fruity hingga karakter yang lebih intens.</p>
               <Link href="/catalog" className={styles.textLink}>
                 Lihat seluruh koleksi <ArrowRight aria-hidden="true" size={17} />
               </Link>
@@ -399,15 +402,30 @@ export default function HomePage() {
             <h2 id="catalog-index-heading">Dari profil rasa hingga racikan kedai.</h2>
           </div>
           <nav className={styles.categoryGrid} aria-label="Kategori koleksi kopi">
-            {CATEGORIES.map((category) => (
-              <Link href={category.href} key={category.id} className={styles.categoryLink}>
-                <span className={styles.categoryText}>
-                  <strong>{category.title}</strong>
-                  <small>{category.subtitle}</small>
-                </span>
-                <ArrowUpRight aria-hidden="true" size={18} />
-              </Link>
-            ))}
+            {CATEGORIES.map((category) =>
+              category.id === 'barista' ? (
+                <button
+                  type="button"
+                  onClick={openVirtualBarista}
+                  key={category.id}
+                  className={styles.categoryLink}
+                >
+                  <span className={styles.categoryText}>
+                    <strong>{category.title}</strong>
+                    <small>{category.subtitle}</small>
+                  </span>
+                  <ArrowUpRight aria-hidden="true" size={18} />
+                </button>
+              ) : (
+                <Link href={category.href} key={category.id} className={styles.categoryLink}>
+                  <span className={styles.categoryText}>
+                    <strong>{category.title}</strong>
+                    <small>{category.subtitle}</small>
+                  </span>
+                  <ArrowUpRight aria-hidden="true" size={18} />
+                </Link>
+              )
+            )}
           </nav>
         </div>
       </section>

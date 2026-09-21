@@ -1,13 +1,8 @@
 /* eslint-disable @next/next/no-page-custom-font -- Brand fonts are loaded once by this App Router root layout. */
 import type { Metadata } from 'next';
 import './globals.css';
-import { Navbar } from '../components/navbar';
-import { Footer } from '../components/footer';
-import { CartDrawer } from '../components/cart-drawer';
-import { VirtualBaristaWidget } from '../components/virtual-barista';
 import { MotionProvider } from '../components/motion-provider';
-import { PageTransition } from '../components/page-transition';
-import { SiteIntroLoader } from '../components/site-intro-loader';
+import { AppLayoutShell } from '../components/app-layout-shell';
 
 export const metadata: Metadata = {
   title: '52 Coffee & Roastery — Artisanal Roasting, Precision Extraction (Malang)',
@@ -57,14 +52,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col selection:bg-brand-navy selection:text-white">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-5 focus:py-3 focus:text-brand-navy">Langsung ke konten</a>
         <MotionProvider>
-          <SiteIntroLoader />
-          <Navbar />
-          <main id="main-content" tabIndex={-1} className="flex-1">
-            <PageTransition>{children}</PageTransition>
-          </main>
-          <Footer />
-          <CartDrawer />
-          <VirtualBaristaWidget />
+          <AppLayoutShell>{children}</AppLayoutShell>
         </MotionProvider>
       </body>
     </html>

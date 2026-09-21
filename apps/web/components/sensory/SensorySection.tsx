@@ -13,8 +13,28 @@ export function SensorySection() {
   const sectionRef = useRef<HTMLElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedFlavor, setSelectedFlavor] = useState<(typeof SENSORY_PROFILES)[number] | null>(null);
   const reducedMotion = useReducedMotion();
+
+  const handleMouseEnter = (item: (typeof SENSORY_PROFILES)[number]) => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => {
+      setSelectedFlavor(item);
+    }, 280);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
@@ -91,6 +111,8 @@ export function SensorySection() {
                       '--segment-rotation': `${item.rotation}deg`,
                     } as CSSProperties}
                     onClick={() => setSelectedFlavor(item)}
+                    onMouseEnter={() => handleMouseEnter(item)}
+                    onMouseLeave={handleMouseLeave}
                     aria-label={`Buka penjelasan rasa ${item.name}`}
                     aria-haspopup="dialog"
                     title={item.name}
@@ -100,7 +122,7 @@ export function SensorySection() {
             </motion.div>
           </div>
           <figcaption className={styles.caption}>52 Coffee Sensory Flavor Spectrum</figcaption>
-          <p className={styles.interactionHint}>Tekan area warna untuk mengenali karakternya.</p>
+          <p className={styles.interactionHint}>Arahkan kursor atau sentuh area warna untuk membuka profil sensori.</p>
         </figure>
 
         <div className={styles.notes}>
@@ -113,7 +135,14 @@ export function SensorySection() {
                 data-flavor={item.id}
                 style={{ '--flavor-color': item.color } as CSSProperties}
               >
-                <button type="button" className={styles.flavorButton} onClick={() => setSelectedFlavor(item)} aria-haspopup="dialog">
+                <button
+                  type="button"
+                  className={styles.flavorButton}
+                  onClick={() => setSelectedFlavor(item)}
+                  onMouseEnter={() => handleMouseEnter(item)}
+                  onMouseLeave={handleMouseLeave}
+                  aria-haspopup="dialog"
+                >
                   <span className={styles.dot} aria-hidden="true" />
                   <span>
                     <strong className={styles.flavorTitle}>{item.name}</strong>
@@ -143,7 +172,7 @@ export function SensorySection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: reducedMotion ? 0 : .2 }}
+            transition={{ duration: reducedMotion ? 0 : 0.2 }}
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) setSelectedFlavor(null);
             }}
@@ -156,10 +185,10 @@ export function SensorySection() {
               aria-describedby={`flavor-${selectedFlavor.id}-description`}
               className={styles.modal}
               style={{ '--flavor-color': selectedFlavor.color } as CSSProperties}
-              initial={reducedMotion ? false : { opacity: 0, y: 24, scale: .97 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 24, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: .98 }}
-              transition={{ duration: reducedMotion ? 0 : .32, ease: [0.16, 1, 0.3, 1] }}
+              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
+              transition={{ duration: reducedMotion ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className={styles.modalTopline}>
                 <span><Coffee size={16} aria-hidden="true" /> Catatan sensorik</span>
@@ -175,6 +204,20 @@ export function SensorySection() {
                 <div className={styles.tastingCue}>
                   <span>Cara mengenalinya</span>
                   <p>{selectedFlavor.cue}</p>
+                </div>
+                <div className="mt-4 grid grid-cols-1 gap-2.5 border-t border-border-subtle pt-3 sm:grid-cols-3 text-left">
+                  <div className="rounded-lg bg-surface-container-low p-2.5">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-brand-navy block">Aroma</span>
+                    <p className="mt-1 text-[11px] text-on-surface-variant leading-relaxed">{selectedFlavor.aroma}</p>
+                  </div>
+                  <div className="rounded-lg bg-surface-container-low p-2.5">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-brand-navy block">Body</span>
+                    <p className="mt-1 text-[11px] text-on-surface-variant leading-relaxed">{selectedFlavor.body}</p>
+                  </div>
+                  <div className="rounded-lg bg-surface-container-low p-2.5">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-brand-navy block">Aftertaste</span>
+                    <p className="mt-1 text-[11px] text-on-surface-variant leading-relaxed">{selectedFlavor.aftertaste}</p>
+                  </div>
                 </div>
                 <Link href="/catalog" className={styles.modalAction} onClick={() => setSelectedFlavor(null)}>
                   Lihat kopi dengan profil ini <ArrowRight size={16} aria-hidden="true" />

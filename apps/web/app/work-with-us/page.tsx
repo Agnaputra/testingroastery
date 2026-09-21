@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   Package,
   Flame,
   TrendingUp,
+  Calculator,
   Phone,
   CheckCircle2,
 } from 'lucide-react';
@@ -16,10 +18,12 @@ export default function WorkWithUsPage() {
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
-  const [serviceType, setServiceType] = useState('Pasokan Biji Kopi Grosir');
-  const [estimatedVolume, setEstimatedVolume] = useState('10 - 30 kg / bulan');
+  const [serviceType, setServiceType] = useState('Supplier Roast Beans');
+  const [estimatedVolume, setEstimatedVolume] = useState('25 kg / bulan');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const whatsAppMessage = `Halo tim 52 Coffee & Roastery. Saya ${contactName || '[nama kontak]'} dari ${businessName || '[nama bisnis]'}${city ? ` di ${city}` : ''}. Saya tertarik dengan layanan ${serviceType}. Estimasi kebutuhan biji kopi: ${estimatedVolume}.${message ? ` Catatan tambahan: ${message}` : ''}`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +32,7 @@ export default function WorkWithUsPage() {
       return;
     }
 
-    const text = `Halo Roaster 52 Coffee! Saya ${contactName} dari ${businessName} (${city}). Tertarik dengan program kemitraan ${serviceType} (Estimasi volume: ${estimatedVolume}). Catatan: ${message}`;
-    const waUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(text)}`;
+    const waUrl = `https://wa.me/6285792524863?text=${encodeURIComponent(whatsAppMessage)}`;
 
     setSubmitted(true);
     window.open(waUrl, '_blank');
@@ -40,23 +43,19 @@ export default function WorkWithUsPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="page-shell nav-offset"
+      className="page-shell"
     >
-      {/* ========================================================================= */}
-      {/* 1. HERO SECTION (Proportionate Height & Seamless Navbar Integration)       */}
-      {/* ========================================================================= */}
+      {/* 1. HERO SECTION */}
       <PageIntro
         className="partnership-hero"
         tone="dark"
-        kicker="Kemitraan B2B 52 Coffee"
+        kicker="Kemitraan Bisnis 52 Coffee"
         icon={<Package size={14} />}
         title="Kopi konsisten untuk bisnis yang terus tumbuh."
         description="Kami mendampingi kedai kopi, restoran, dan hotel menjaga mutu sajian melalui pasokan kopi, racikan khusus, dan dukungan operasional yang terukur."
       />
 
-      {/* ========================================================================= */}
-      {/* 2. 4 KEY PARTNERSHIP SERVICES                                             */}
-      {/* ========================================================================= */}
+      {/* 2. 3 KEY PARTNERSHIP SERVICES */}
       <section className="site-container page-section">
         <SectionIntro
           className="partnership-section-intro"
@@ -78,9 +77,9 @@ export default function WorkWithUsPage() {
               <Package className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 1</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Pasokan Biji Kopi Grosir</h3>
+            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Supplier Roast Beans</h3>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Pasokan rutin kemasan bulk 1kg untuk kebutuhan kedai kopi, restoran, dan hotel dengan harga grosir kompetitif dan konsistensi batch 99.8%.
+              Pasokan roast beans terjadwal untuk kedai kopi, restoran, dan hotel dengan SOP mutu dan konsistensi ekstraksi.
             </p>
           </motion.div>
 
@@ -95,9 +94,9 @@ export default function WorkWithUsPage() {
               <Flame className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 2</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">House Blend &amp; Label Khusus</h3>
+            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Label Khusus &amp; Special Blends</h3>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Kembangkan racikan house blend eksklusif dengan merek kedai kopi Anda sendiri. Kami bantu kurasi green bean hingga profil sangrai.
+              Pembuatan signature blend eksklusif dengan profil sangrai yang dirancang khusus untuk identitas brand mitra (seperti BYOB).
             </p>
           </motion.div>
 
@@ -112,17 +111,33 @@ export default function WorkWithUsPage() {
               <TrendingUp className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 3</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Konsultasi Bisnis Kedai</h3>
+            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Consultation Business Beverages</h3>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Konsultasi alur kerja bar, pemilihan mesin espresso &amp; grinder komersial, hingga kalkulasi HPP cangkir untuk profitabilitas bisnis kopi.
+              Pendampingan menyeluruh mencakup SOP barista, supply mesin &amp; grinder, perancangan layout coffee bar, kalkulasi HPP cangkir, dan racikan signature menu.
             </p>
+            <Link href="/tools/price-calculator" className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-maroon hover:underline">Buka kalkulator HPP →</Link>
           </motion.div>
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 3. B2B INQUIRY FORM                                                       */}
-      {/* ========================================================================= */}
+      {/* Kalkulator HPP Banner */}
+      <section id="kalkulator-hpp" className="site-container pb-4" aria-labelledby="hpp-heading">
+        <div className="grid gap-6 border border-border-subtle bg-surface-container-low p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="flex gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-maroon/10 text-brand-maroon">
+              <Calculator className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-maroon">Kemitraan Bisnis</p>
+              <h2 id="hpp-heading" className="mt-1 font-editorial text-2xl font-bold text-brand-charcoal">Kalkulator HPP Bisnis</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">Hitung estimasi kebutuhan beans, biaya per sajian, harga jual, dan margin berdasarkan input bisnis Anda sebelum memulai diskusi kemitraan.</p>
+            </div>
+          </div>
+          <Link href="/tools/price-calculator" className="btn-primary shrink-0 text-sm">Buka Kalkulator HPP</Link>
+        </div>
+      </section>
+
+      {/* 3. B2B INQUIRY FORM */}
       <section className="site-container page-section">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -136,7 +151,7 @@ export default function WorkWithUsPage() {
               Mulai Diskusi Kemitraan
             </h2>
             <p className="text-sm leading-6 text-on-surface-variant">
-              Ceritakan kebutuhan bisnis Anda. Setelah formulir dikirim, percakapan akan dilanjutkan melalui WhatsApp.
+              Ceritakan kebutuhan bisnis Anda. Setelah formulir dikirim, percakapan akan dilanjutkan melalui WhatsApp resmi 52 Coffee (+62 857-9252-4863).
             </p>
           </div>
 
@@ -224,9 +239,9 @@ export default function WorkWithUsPage() {
                     onChange={(e) => setServiceType(e.target.value)}
                     className="field-control"
                   >
-                    <option value="Pasokan Biji Kopi Grosir">Pasokan Biji Kopi Grosir (1 kg)</option>
-                    <option value="House Blend dan Label Khusus">House Blend &amp; Label Khusus</option>
-                    <option value="Konsultasi Bisnis Kedai">Konsultasi Bisnis Kedai</option>
+                    <option value="Supplier Roast Beans">Supplier Roast Beans</option>
+                    <option value="Label Khusus dan Special Blends">Label Khusus &amp; Special Blends</option>
+                    <option value="Consultation Business Beverages">Consultation Business Beverages</option>
                   </select>
                 </div>
 
@@ -234,17 +249,14 @@ export default function WorkWithUsPage() {
                   <label htmlFor="estimated-volume" className="field-label">
                     Estimasi Kebutuhan Biji Kopi
                   </label>
-                  <select
+                  <input
                     id="estimated-volume"
+                    type="text"
                     value={estimatedVolume}
                     onChange={(e) => setEstimatedVolume(e.target.value)}
+                    placeholder="Contoh: 25 kg / bulan atau sesuai kebutuhan kedai"
                     className="field-control"
-                  >
-                    <option value="< 10 kg / bulan">&lt; 10 kg / bulan (Kedai Rintisan)</option>
-                    <option value="10 - 30 kg / bulan">10 - 30 kg / bulan (Kedai Reguler)</option>
-                    <option value="30 - 100 kg / bulan">30 - 100 kg / bulan (Kedai Volume Tinggi)</option>
-                    <option value="> 100 kg / bulan">&gt; 100 kg / bulan (Multi-Outlet / Distributor)</option>
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -262,9 +274,15 @@ export default function WorkWithUsPage() {
                 />
               </div>
 
+              <div className="border border-border-subtle bg-surface-container-low p-4" aria-live="polite">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-maroon">Preview pesan WhatsApp</p>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-brand-charcoal">{whatsAppMessage}</p>
+                <p className="mt-2 text-[11px] leading-5 text-on-surface-variant">Pesan ini belum dikirim. Tombol di bawah akan membuka WhatsApp dengan pesan yang sudah terisi.</p>
+              </div>
+
               <button
                 type="submit"
-                className="btn-primary w-full"
+                className="btn-primary w-full flex items-center justify-center gap-2"
               >
                 <Phone className="w-4 h-4" />
                 <span>Kirim melalui WhatsApp</span>

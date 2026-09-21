@@ -1,8 +1,9 @@
-# AI Agent Guidelines
+# Panduan Agent 52 Coffee & Roastery
 
-Lihat dokumen panduan lengkap di:
-- [AGENTS.md](./AGENTS.md) — Panduan Universal AI Agent
-- [GEMINI.md](./GEMINI.md) — Panduan Gemini / Antigravity
-- [CODEX.md](./CODEX.md) — Panduan OpenAI Codex & Cursor
-- [CLAUDE.md](./CLAUDE.md) — Panduan Anthropic Claude Code
+[AGENTS.md](./AGENTS.md) adalah panduan utama untuk semua agent yang bekerja di repositori ini. Baca juga panduan tambahan yang sesuai dengan alat yang dipakai:
 
+- [CODEX.md](./CODEX.md) untuk Codex, Cursor, dan Copilot.
+- [CLAUDE.md](./CLAUDE.md) untuk Claude Code.
+- [GEMINI.md](./GEMINI.md) untuk Gemini dan Google Antigravity.
+
+Jika rincian dokumen berbeda dari kode, periksa implementasi terkini dan perbarui dokumennya. Jangan menganggap contoh di dokumen sebagai pengganti tipe dan data pada source code.

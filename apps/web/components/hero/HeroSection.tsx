@@ -71,6 +71,16 @@ export function HeroSection() {
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
   }, []);
 
+  useEffect(() => {
+    if (reducedMotion) return;
+
+    const rotation = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % HERO_SLIDES.length);
+    }, 4200);
+
+    return () => window.clearInterval(rotation);
+  }, [reducedMotion]);
+
   const selectFromPointer = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'touch') return;
 
@@ -118,7 +128,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className={styles.hero} aria-labelledby="hero-heading" aria-describedby="hero-description">
+    <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={styles.frame}>
         <Link href="/catalog" className={styles.orderPill}>
           <span aria-hidden="true" /> Pesan Kopi <ArrowRight aria-hidden="true" size={15} />
@@ -127,9 +137,9 @@ export function HeroSection() {
         <motion.h1
           id="hero-heading"
           className={styles.wordmark}
-          initial={{ opacity: 0, scale: .94 }}
+          initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: reducedMotion ? 0 : .85, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reducedMotion ? 0 : 0.85, ease: [0.16, 1, 0.3, 1] }}
         >
           52 COFFEE
         </motion.h1>
@@ -138,7 +148,7 @@ export function HeroSection() {
           className={styles.carousel}
           role="group"
           tabIndex={0}
-          aria-label="Galeri 52 Coffee. Gerakkan pointer atau gunakan tombol panah kiri dan kanan."
+          aria-label="Galeri 52 Coffee berputar otomatis. Gerakkan pointer atau gunakan tombol panah kiri dan kanan untuk memilih visual."
           onPointerMove={selectFromPointer}
           onPointerLeave={stopPointerSelection}
           onKeyDown={handleKeyboard}
@@ -146,7 +156,7 @@ export function HeroSection() {
           {HERO_SLIDES.map((item, index) => {
             const offset = circularOffset(index, activeSlide);
             const distance = Math.abs(offset);
-            const scale = distance === 0 ? 1 : distance === 1 ? .76 : .56;
+            const scale = distance === 0 ? 1 : distance === 1 ? 0.76 : 0.56;
 
             return (
               <motion.button
@@ -158,11 +168,11 @@ export function HeroSection() {
                   y: `${distance * 7.2}vh`,
                   rotate: offset * 7,
                   scale,
-                  opacity: distance > 2 ? 0 : distance === 2 ? .58 : 1,
+                  opacity: distance > 2 ? 0 : distance === 2 ? 0.58 : 1,
                 }}
                 transition={reducedMotion
                   ? { duration: 0 }
-                  : { type: 'spring', stiffness: 155, damping: 24, mass: .92 }}
+                  : { type: 'spring', stiffness: 155, damping: 24, mass: 0.92 }}
                 onClick={() => { hoverSlideRef.current = index; setActiveSlide(index); }}
                 onFocus={() => { hoverSlideRef.current = index; setActiveSlide(index); }}
                 aria-label={`Tampilkan visual ${item.label}: ${item.note}`}
@@ -194,7 +204,7 @@ export function HeroSection() {
             data-visible={cursorVisible}
             style={{ x: smoothCursorX, y: smoothCursorY }}
           >
-            <ArrowLeft size={14} /> Gerakkan <ArrowRight size={14} />
+            <ArrowLeft size={14} /> Rotasi 360° <ArrowRight size={14} />
           </motion.div>
         </div>
 
@@ -202,9 +212,8 @@ export function HeroSection() {
           className={styles.heroCopy}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reducedMotion ? 0 : .65, delay: reducedMotion ? 0 : .16 }}
+          transition={{ duration: reducedMotion ? 0 : 0.65, delay: reducedMotion ? 0 : 0.16 }}
         >
-          <p id="hero-description">Karakter asal, presisi sangrai, dan ritual seduh dalam satu pengalaman.</p>
           <span aria-live="polite">{String(activeSlide + 1).padStart(2, '0')} / 05 — {activeItem.label}</span>
         </motion.div>
 

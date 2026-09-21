@@ -6,7 +6,6 @@ import Image from 'next/image';
 import {
   ArrowLeft,
   ShieldCheck,
-  Truck,
   CreditCard,
   QrCode,
   Building2,
@@ -19,6 +18,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useCartStore } from '../../lib/store/useCartStore';
+import { useOrderStore, type CourierType } from '../../lib/store/useOrderStore';
 import { formatRupiah } from '../../lib/data';
 
 interface ShippingOption {
@@ -29,7 +29,8 @@ interface ShippingOption {
 }
 
 export default function CheckoutPage() {
-  const { items, getSubtotal } = useCartStore();
+  const { items, getSubtotal, clearCart } = useCartStore();
+  const { addOrder } = useOrderStore();
   const [mounted, setMounted] = useState(false);
 
   // Form states
@@ -151,6 +152,7 @@ export default function CheckoutPage() {
       return;
     }
 
+
     setIsProcessing(true);
     const newOrderId = `52CR-${Date.now().toString().slice(-6)}`;
     setOrderId(newOrderId);
@@ -163,6 +165,42 @@ export default function CheckoutPage() {
   };
 
   const handleFinishPayment = () => {
+    const courierMap: Record<string, CourierType> = {
+      'jne-reg': 'JNE Reguler',
+      'sicepat-best': 'SiCepat BEST',
+      'malang-instant': 'Paxel Sameday',
+    };
+    const orderCourier: CourierType = courierMap[selectedShipping] || 'JNE Reguler';
+
+    addOrder({
+      id: orderId,
+      customerName: fullName || 'Kawan Seduh',
+      customerPhone: phone || '081234567890',
+      customerEmail: email || undefined,
+      customerAddress: address || 'Alamat Belum Diisi',
+      customerCity: city || 'Malang',
+      items: items.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        slug: item.slug,
+        weightLabel: item.weightLabel,
+        grindLabel: item.grindLabel,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        imageUrl: item.imageUrl,
+      })),
+      subtotal: subtotal,
+      shippingCost: currentShippingCost,
+      total: grandTotal,
+      paymentMethod: (selectedPayment as any) || 'qris',
+      paymentStatus: 'paid',
+      status: 'roasting',
+      courier: orderCourier,
+      roastDate: `Batch Sangrai ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`,
+      notes: notes || undefined,
+    });
+
+    clearCart();
     setShowPaymentModal(false);
     setOrderCompleted(true);
   };
@@ -186,6 +224,7 @@ export default function CheckoutPage() {
           </h1>
           <p className="text-sm text-on-surface-variant max-w-md mx-auto">
             Alur checkout demo untuk referensi <strong>#{orderId}</strong> telah selesai. Tidak ada pembayaran atau pesanan nyata yang diproses.
+            Pesanan dengan referensi <strong>#{orderId}</strong> telah masuk ke antrean roasting roastery kami.
           </p>
         </div>
 
@@ -193,6 +232,7 @@ export default function CheckoutPage() {
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Penerima:</span>
             <span className="font-bold text-on-surface">{fullName}</span>
+            <span className="font-bold text-on-surface">{fullName || 'Kawan Seduh'}</span>
           </div>
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Metode Kirim:</span>
@@ -203,6 +243,7 @@ export default function CheckoutPage() {
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Status Pembayaran:</span>
             <span className="text-brand-teal font-bold">SIMULASI — TIDAK DITAGIHKAN</span>
+            <span className="text-brand-teal font-bold">TERKONFIRMASI (SIMULASI)</span>
           </div>
           <div className="flex justify-between pt-1 text-sm font-bold">
             <span>Total Pembayaran:</span>
@@ -216,6 +257,13 @@ export default function CheckoutPage() {
           </Link>
           <Link href="/guide" className="btn-secondary text-xs bg-white">
             Buka Panduan &amp; Kalkulator Seduh
+          </Link>
+          <Link
+            href="/admin"
+            className="btn-secondary text-xs bg-white flex items-center gap-1.5 text-on-surface-variant hover:text-brand-charcoal"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-brand-maroon" />
+            <span>Lihat di Portal Admin</span>
           </Link>
         </div>
       </div>
@@ -265,7 +313,8 @@ export default function CheckoutPage() {
       </div>
 
       {/* Header */}
-      <div className="border-b border-roastery-border pb-6">
+      <div className="border-b border-brand-charcoal/20 border-t-2 border-t-brand-charcoal pb-6 pt-6">
+        <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-brand-maroon">Alur pesanan</p>
         <h1 className="section-display">
           Pembayaran dan pengiriman
         </h1>
@@ -278,7 +327,7 @@ export default function CheckoutPage() {
         {/* Left Column: Customer Details, Shipping, Payment */}
         <div className="lg:col-span-7 space-y-8">
           {/* 1. Data Pemesan */}
-          <div className="editorial-card p-6 bg-white space-y-4 shadow-sm">
+          <div className="editorial-card space-y-4 border-t-2 border-t-brand-charcoal bg-white p-6">
             <h2 className="font-editorial text-lg font-bold text-roastery-dark flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-roastery-crimson text-white font-mono text-xs flex items-center justify-center font-bold">
                 1
@@ -376,7 +425,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 2. Layanan Ekspedisi & Pengiriman */}
-          <div className="editorial-card p-6 bg-white space-y-4 shadow-sm">
+          <div className="editorial-card space-y-4 border-t-2 border-t-brand-charcoal bg-white p-6">
             <h2 className="font-editorial text-lg font-bold text-roastery-dark flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-roastery-slate text-white font-mono text-xs flex items-center justify-center font-bold">
                 2
@@ -427,7 +476,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 3. Metode Pembayaran (demo) */}
-          <div className="editorial-card p-6 bg-white space-y-4 shadow-sm">
+          <div className="editorial-card space-y-4 border-t-2 border-t-brand-charcoal bg-white p-6">
             <h2 className="font-editorial text-lg font-bold text-roastery-dark flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-roastery-teal text-white font-mono text-xs flex items-center justify-center font-bold">
                 3
@@ -478,7 +527,7 @@ export default function CheckoutPage() {
 
         {/* Right Column: Order Summary */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="editorial-card p-6 bg-white space-y-6 sticky top-28 shadow-sm">
+          <div className="editorial-card sticky top-28 space-y-6 border-t-2 border-t-brand-maroon bg-white p-6">
             <h2 className="font-editorial text-xl font-bold text-roastery-dark border-b border-roastery-border pb-4">
               Ringkasan Pesanan Seduh
             </h2>

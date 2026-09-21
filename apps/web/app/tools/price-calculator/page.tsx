@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calculator,
   Coffee,
@@ -13,6 +13,7 @@ import {
   Check,
   Phone,
   CheckCircle2,
+  X,
 } from 'lucide-react';
 import { formatRupiah } from '../../../lib/data';
 import { BrandPanel, PageIntro, SectionIntro } from '../../../components/ui/page-structure';
@@ -116,6 +117,14 @@ export default function B2BWholesaleCalculatorPage() {
 
   const [copied, setCopied] = useState<boolean>(false);
 
+  // Modal State for WhatsApp Consultation
+  const [showConsultModal, setShowConsultModal] = useState<boolean>(false);
+  const [bizName, setBizName] = useState<string>('');
+  const [contactPerson, setContactPerson] = useState<string>('');
+  const [bizPhone, setBizPhone] = useState<string>('');
+  const [bizCity, setBizCity] = useState<string>('');
+  const [bizNotes, setBizNotes] = useState<string>('');
+
   // Active bean price per kg
   const activeBeanPrice = isCustomPrice ? customBeanPrice : selectedBean.pricePerKg;
 
@@ -200,16 +209,36 @@ export default function B2BWholesaleCalculatorPage() {
     }
   };
 
+  const handleConsultSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bizName || !contactPerson || !bizPhone) {
+      alert('Mohon lengkapi nama bisnis, nama penanggung jawab, dan nomor WhatsApp.');
+      return;
+    }
+
+    const waMsg = `Halo Tim B2B 52 Coffee! Saya ${contactPerson} dari ${bizName}${bizCity ? ` (${bizCity})` : ''}.
+Saya ingin berkonsultasi mengenai pasokan biji kopi grosir berdasarkan kalkulator HPP:
+- Pilihan biji: ${isCustomPrice ? 'Harga khusus ' + formatRupiah(customBeanPrice) : selectedBean.name} (${formatRupiah(activeBeanPrice)}/kg)
+- Dosis kopi: ${doseGrams}g / cangkir
+- Menu: ${selectedDrink.name}
+- Biaya tambahan bahan: ${formatRupiah(extraCost)}
+- Total HPP / cangkir: ${formatRupiah(calc.totalHppPerCup)}
+- Rencana harga jual: ${formatRupiah(sellingPrice)} (Laba: ${formatRupiah(calc.grossProfitPerCup)}/cangkir, Margin: ${calc.marginPercent}%)
+- Target volume: ${dailyCups} cangkir/hari (~${calc.monthlyBeanKg} kg/bulan)
+${bizNotes ? `Catatan: ${bizNotes}` : ''}`;
+
+    window.open(`https://wa.me/6285792524863?text=${encodeURIComponent(waMsg)}`, '_blank');
+    setShowConsultModal(false);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="page-shell nav-offset"
+      className="page-shell"
     >
-      {/* ========================================================================= */}
-      {/* 1. HERO SECTION (B2B Wholesale & Business Calculator)                     */}
-      {/* ========================================================================= */}
+      {/* 1. HERO SECTION */}
       <PageIntro
         tone="dark"
         kicker="Kalkulator bisnis kopi"
@@ -219,13 +248,11 @@ export default function B2BWholesaleCalculatorPage() {
         visual={<BrandPanel label="Gunakan hasil simulasi sebagai dasar diskusi kebutuhan pasokan B2B." />}
       />
 
-      {/* ========================================================================= */}
-      {/* 2. INTERACTIVE SIMULATOR (2-Column Layout)                                */}
-      {/* ========================================================================= */}
+      {/* 2. INTERACTIVE SIMULATOR */}
       <section className="site-container page-section space-y-12">
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-          {/* LEFT COLUMN: Controls & Input Parameters (7 Cols) */}
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white lg:col-span-7">
+          {/* LEFT COLUMN: Controls & Input Parameters */}
+          <div className="editorial-workspace overflow-hidden lg:col-span-7">
             {/* 1. Bean Preset & Wholesale Price */}
             <div className="space-y-5 border-b border-gray-200 p-5 sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -292,7 +319,7 @@ export default function B2BWholesaleCalculatorPage() {
               </div>
             </div>
 
-            {/* 2. Dose per Cup (Gramasi) */}
+            {/* 2. Dose per Cup */}
             <div className="space-y-4 border-b border-gray-200 p-5 sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span className="flex items-center gap-2 text-sm font-bold text-brand-charcoal">
@@ -306,8 +333,8 @@ export default function B2BWholesaleCalculatorPage() {
 
               <div className="flex items-center gap-2 flex-wrap">
                 {[
-                  { label: '15g (Single/Light)', val: 15 },
-                  { label: '16g (Standar Es)', val: 16 },
+                  { label: '9g (Single Shot)', val: 9 },
+                  { label: '15g (Filter Light)', val: 15 },
                   { label: '18g (Double Shot)', val: 18 },
                   { label: '20g (Heavy Body)', val: 20 },
                 ].map((p) => (
@@ -330,13 +357,19 @@ export default function B2BWholesaleCalculatorPage() {
               <input
                 type="range"
                 aria-label="Dosis kopi per cangkir"
-                min="12"
+                min="8"
                 max="24"
-                step="0.5"
+                step="1"
                 value={doseGrams}
                 onChange={(e) => setDoseGrams(Number(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-navy"
               />
+              <div className="flex justify-between text-[10px] font-mono text-gray-400">
+                <span>8g</span>
+                <span>Single (9g)</span>
+                <span>Double (18g)</span>
+                <span>24g</span>
+              </div>
               <div className="text-xs text-gray-600">
                 Dari 1 kg biji kopi ({formatRupiah(activeBeanPrice)}), Anda menghasilkan sekitar <strong>~{calc.cupsPerKg} cangkir</strong> kopi.
               </div>
@@ -404,18 +437,18 @@ export default function B2BWholesaleCalculatorPage() {
                 <input
                   type="range"
                   aria-label="Harga jual menu"
-                  min="12000"
-                  max="45000"
+                  min="10000"
+                  max="100000"
                   step="1000"
                   value={sellingPrice}
                   onChange={(e) => setSellingPrice(Number(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-charcoal"
                 />
                 <div className="flex justify-between text-[10px] font-mono text-gray-400">
-                  <span>12rb</span>
-                  <span>22rb</span>
-                  <span>35rb</span>
-                  <span>45rb</span>
+                  <span>10rb</span>
+                  <span>25rb</span>
+                  <span>50rb</span>
+                  <span>100rb</span>
                 </div>
               </div>
 
@@ -432,25 +465,25 @@ export default function B2BWholesaleCalculatorPage() {
                 <input
                   type="range"
                   aria-label="Target penjualan cangkir per hari"
-                  min="20"
-                  max="300"
+                  min="10"
+                  max="1000"
                   step="10"
                   value={dailyCups}
                   onChange={(e) => setDailyCups(Number(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-maroon"
                 />
                 <div className="flex justify-between text-[10px] font-mono text-gray-400">
-                  <span>20</span>
-                  <span>100</span>
-                  <span>200</span>
-                  <span>300</span>
+                  <span>10</span>
+                  <span>250</span>
+                  <span>500</span>
+                  <span>1000</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Live Calculation Results (5 Cols) */}
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white lg:sticky lg:top-24 lg:col-span-5">
+          {/* RIGHT COLUMN: Live Calculation Results */}
+          <div className="editorial-workspace overflow-hidden lg:sticky lg:top-24 lg:col-span-5">
             {/* Unit Economics Highlight Cards */}
             <div className="grid grid-cols-2 divide-x divide-gray-200 border-b border-gray-200">
               {/* Total HPP per Cup */}
@@ -549,26 +582,21 @@ export default function B2BWholesaleCalculatorPage() {
                     </>
                   )}
                 </button>
-                <a
-                  href={`https://wa.me/6281234567890?text=${encodeURIComponent(
-                    `Halo Tim B2B 52 Coffee! Saya ingin berkonsultasi mengenai pasokan biji kopi grosir.\nEstimasi kebutuhan kedai saya: ~${calc.monthlyBeanKg} kg/bulan (${dailyCups} cangkir/hari).\nBiji yang diminati: ${isCustomPrice ? 'Harga khusus' : selectedBean.name}.`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => setShowConsultModal(true)}
                   className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-maroon px-4 py-3 text-center text-xs font-bold text-white transition-colors hover:bg-brand-maroon-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-maroon focus-visible:ring-offset-2"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>Konsultasi WhatsApp</span>
-                </a>
+                </button>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 3. WHOLESALE TIERS & BENEFIT TABLE                                        */}
-      {/* ========================================================================= */}
+      {/* 3. WHOLESALE TIERS & BENEFIT TABLE */}
       <section className="site-container page-section">
         <SectionIntro
           align="center"
@@ -652,9 +680,7 @@ export default function B2BWholesaleCalculatorPage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 4. BOTTOM PARTNERSHIP CTA BANNER                                          */}
-      {/* ========================================================================= */}
+      {/* 4. BOTTOM PARTNERSHIP CTA BANNER */}
       <section className="site-container pb-20">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 rounded-xl bg-brand-charcoal p-8 text-white sm:flex-row sm:p-12">
           <div className="space-y-2 text-center sm:text-left">
@@ -676,6 +702,125 @@ export default function B2BWholesaleCalculatorPage() {
           </div>
         </div>
       </section>
+
+      {/* 5. CONSULTATION POP-UP MODAL */}
+      <AnimatePresence>
+        {showConsultModal && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="consult-modal-title"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+                <div>
+                  <h3 id="consult-modal-title" className="font-editorial text-xl sm:text-2xl font-bold text-brand-navy">
+                    Konsultasi Kemitraan B2B
+                  </h3>
+                  <p className="text-xs text-on-surface-variant mt-1">
+                    Lengkapi data bisnis Anda untuk diteruskan ke WhatsApp resmi 52 Coffee.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConsultModal(false)}
+                  className="rounded-lg p-2 text-gray-400 hover:text-brand-charcoal hover:bg-gray-100 transition-colors"
+                  aria-label="Tutup modal"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleConsultSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="biz-name" className="field-label">Nama Bisnis / Kedai</label>
+                  <input
+                    id="biz-name"
+                    type="text"
+                    required
+                    value={bizName}
+                    onChange={(e) => setBizName(e.target.value)}
+                    placeholder="Contoh: Kopi Seduh Santai"
+                    className="field-control"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="biz-contact" className="field-label">Nama Penanggung Jawab</label>
+                    <input
+                      id="biz-contact"
+                      type="text"
+                      required
+                      value={contactPerson}
+                      onChange={(e) => setContactPerson(e.target.value)}
+                      placeholder="Contoh: Budi Santoso"
+                      className="field-control"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="biz-phone" className="field-label">Nomor WhatsApp</label>
+                    <input
+                      id="biz-phone"
+                      type="tel"
+                      required
+                      value={bizPhone}
+                      onChange={(e) => setBizPhone(e.target.value)}
+                      placeholder="Contoh: 08123456789"
+                      className="field-control"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="biz-city" className="field-label">Kota / Lokasi Bisnis</label>
+                  <input
+                    id="biz-city"
+                    type="text"
+                    value={bizCity}
+                    onChange={(e) => setBizCity(e.target.value)}
+                    placeholder="Contoh: Malang / Surabaya"
+                    className="field-control"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="biz-notes" className="field-label">Catatan Tambahan (Opsional)</label>
+                  <textarea
+                    id="biz-notes"
+                    rows={2}
+                    value={bizNotes}
+                    onChange={(e) => setBizNotes(e.target.value)}
+                    placeholder="Kebutuhan sampel, jadwal kunjungan roastery, atau mesin yang dipakai..."
+                    className="field-control resize-none"
+                  />
+                </div>
+
+                <div className="rounded-xl border border-border-subtle bg-surface-container-low p-3.5 text-xs font-mono space-y-1">
+                  <span className="font-bold text-brand-maroon uppercase tracking-wider block text-[10px]">Ringkasan Kalkulasi:</span>
+                  <p className="text-brand-charcoal truncate">• {isCustomPrice ? 'Harga Khusus' : selectedBean.name} — {formatRupiah(activeBeanPrice)}/kg</p>
+                  <p className="text-brand-charcoal">• Dosis {doseGrams}g, HPP {formatRupiah(calc.totalHppPerCup)}, Harga Jual {formatRupiah(sellingPrice)}</p>
+                  <p className="text-brand-charcoal">• Target ~{calc.monthlyBeanKg} kg/bulan ({dailyCups} cangkir/hari)</p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn-primary w-full flex items-center justify-center gap-2"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>Kirim &amp; Lanjutkan ke WhatsApp</span>
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

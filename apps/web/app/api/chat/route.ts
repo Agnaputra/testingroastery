@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PRODUCTS } from '../../../lib/data';
+import { getPublishedProducts } from '../../../lib/catalog-master';
 import * as fsSync from 'fs';
 import * as path from 'path';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
+
+const PUBLISHED_PRODUCTS = getPublishedProducts();
 
 function getApiKey(): string {
   if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
@@ -66,32 +68,46 @@ export async function POST(req: NextRequest) {
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
     const geminiApiKey = getApiKey();
 
-    // 1. Attempt to call Google Gemini API if a valid Gemini API key is configured
+    // 1. Prefer the guarded backend: OpenAI (when configured), then its Gemini/local fallback.
+    try {
+      const backendRes = await fetch(`${aiBackendUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history }),
+        signal: AbortSignal.timeout(3500),
+      });
+
+      if (backendRes.ok) {
+        return NextResponse.json(await backendRes.json());
+      }
+    } catch {
+      // Local route fallback remains available when the optional AI backend is offline.
+    }
+
+    // 2. Attempt Google Gemini directly only when the dedicated backend is unavailable.
     if (geminiApiKey && (geminiApiKey.startsWith('AIzaSy') || geminiApiKey.startsWith('AQ.'))) {
       try {
-        const catalogContext = PRODUCTS.map((p) =>
+        const catalogContext = PUBLISHED_PRODUCTS.map((p) =>
           `• [${p.name}] (Slug: ${p.slug}, Series: ${p.series}, Category: ${p.categoryLabel}, Process: ${p.process}, Roast: ${p.roastLevel}, Notes: ${p.tastingNotes.join(', ')}, Price: Rp ${p.basePrice}/${p.defaultWeight})`
         ).join('\n');
 
-        const systemPrompt = `Kamu adalah Virtual Barista ramah, cerdas, dan ahli dari 52 Coffee & Roastery (Instagram: @52coffeeroastery), roastery artisanal yang menyangrai biji kopi dalam batch kecil di Jl. KH. Agus Salim No. 11 Malang, Jawa Timur (Jam Buka: Senin - Jumat 11.00-16.00 WIB).
-Voucher promo: '52COFFEE' (10% OFF), Gratis Ongkir min. Rp 250.000.
+        const systemPrompt = `Kamu adalah Virtual Barista ramah, cerdas, dan ahli dari 52 Coffee & Roastery (Instagram: @52coffeeroastery), roastery artisanal di Jl. KH. Agus Salim No. 11 Malang, Jawa Timur (Jam buka: Senin-Minggu 10.00-20.00 WIB).
 
 Fitur & Tools Roastery yang Tersedia di Website:
-1. BYOB (Build Your Own Blend) di menu /blend-builder: Simulator racik blend sendiri dengan kalkulasi harga transparan per kg dan prediksi profil rasa radar. Profil sangrai dikhususkan pada 'Dark Espresso Roast' untuk mesin espresso & kopi susu.
-2. Price Calculator (Kalkulator Harga / HPP) di menu /tools/price-calculator: Simulator finansial kedai kopi untuk menghitung HPP biji sangrai, susut bobot roasting (~19.93%), biaya listrik gas (Rp 10.000/kg), kemasan pouch, serta target margin keuntungan retail.
-3. Panduan & Kalkulator Seduh di menu /guide: Kalkulator rasio, suhu, timer, dan panduan langkah seduh untuk V60, Kalita Wave, AeroPress, French Press, Japanese Iced Drip, dan espresso.
+1. BYOB (Build Your Own Blend) di /blend-builder: simulator racik dari beans Espresso Based published dengan prediksi profil rasa dan harga reaktif.
+2. Kalkulator Harga Jual Kedai di menu /tools/price-calculator: Simulator B2B untuk menghitung estimasi biaya per cangkir, harga jual, margin, dan kebutuhan pasokan berdasarkan input bisnis pengguna.
+3. Coffee Lab / Brewing Guidance di /guide: kalkulator rasio, suhu, timer, dan panduan langkah seduh.
 4. Slowbar & Retail Catalog di /catalog: Pilihan single origin Java Exotic, Kaldera Ijen, Walida, hingga Grand Reserve Micro-Lot.
 5. B2B Wholesale / Work With Us di /work-with-us: Solusi pasokan biji kopi roasted & green bean untuk kedai kopi di seluruh Indonesia.
-6. Order Tracker di /track: Lacak status pemrosesan dan resi pengiriman kurir.
 
 Katalog Biji Kopi Tersedia:
 ${catalogContext}
 
 Panduan Barista:
 - PENTING: Langsung berikan jawaban akhir yang ramah, sopan, solutif, dan informatif dalam Bahasa Indonesia. JANGAN PERNAH menyertakan proses berpikir, catatan internal, atau teks seperti '(Self-correction...)' atau 'Let\'s write the response'.
-- Jika ditanya tentang BYOB / racik blend: jelaskan fitur BYOB di /blend-builder, profil sangrai Dark Espresso Roast, dan berikan rekomendasi racikan (misal: 70% Java Ijen + 30% Dampit Robusta seharga Rp 220.000/kg atau 70% Java Ijen + 30% Arjuna Budug seharga Rp 253.000/kg).
-- Jika ditanya tentang Price Calculator / Hitung HPP: jelaskan fungsinya di /tools/price-calculator untuk menghitung biaya produksi, susut sangrai 19.93%, kemasan, dan margin profit kedai kopi.
-- Jika ditanya tentang lokasi / alamat / jam buka: jelaskan lokasinya di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (Senin-Jumat 11:00-16:00 WIB).
+- Jika ditanya tentang BYOB / racik blend: jelaskan fitur BYOB di /blend-builder yang hanya memakai beans Espresso Based published. Jangan membuat atau mengutip harga racikan di luar hasil kalkulator.
+- Jika ditanya tentang Price Calculator / Hitung HPP: jelaskan fungsinya di /tools/price-calculator untuk menghitung estimasi biaya per cangkir, harga jual, margin, dan kebutuhan pasokan berdasarkan input pengguna. Jangan menyebut biaya, margin, atau parameter produksi internal 52 Coffee.
+- Jika ditanya tentang lokasi / alamat / jam buka: jelaskan lokasinya di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (Senin-Minggu 10:00-20:00 WIB).
 - Jika ditanya tentang lambung / maag / GERD: jangan pernah menjamin kopi aman, menyembuhkan, mencegah gejala, atau menggantikan saran medis. Jelaskan bahwa acidity sebagai rasa tidak sama dengan kadar asam atau respons lambung. Boleh rekomendasikan karakter rasa dengan persepsi asam lebih ringan, sarankan porsi kecil dan tidak saat perut kosong, lalu arahkan pengguna dengan gejala berulang untuk mengikuti saran tenaga kesehatan.
 - Berikan rekomendasi yang terstruktur dan sebutkan tasting notes serta saran penyajiannya.`;
 
@@ -151,7 +167,7 @@ Panduan Barista:
           const lowerText = (generatedText + ' ' + message).toLowerCase();
 
           // 1. Direct match by product name, slug, or slowbar alias
-          const directMatches = PRODUCTS.filter((p) =>
+          const directMatches = PUBLISHED_PRODUCTS.filter((p) =>
             genLower.includes(p.name.toLowerCase()) ||
             genLower.includes(p.slug.toLowerCase()) ||
             (p.slowbarAlias && genLower.includes(p.slowbarAlias.toLowerCase()))
@@ -161,7 +177,7 @@ Panduan Barista:
 
           // 2. Contextual tasting notes match if fewer than 3
           if (geminiSlugs.length < 3) {
-            const contextualMatches = PRODUCTS.filter((p) =>
+            const contextualMatches = PUBLISHED_PRODUCTS.filter((p) =>
               !geminiSlugs.includes(p.slug) &&
               p.tastingNotes.some((n) => n.length > 5 && genLower.includes(n.toLowerCase()))
             ).map((p) => p.slug);
@@ -262,15 +278,10 @@ Panduan Barista:
       query.includes('susut') ||
       (query.includes('kalkulator') && !query.includes('seduh') && !query.includes('brew'))
     ) {
-      reply = `📊 **Fungsi Price Calculator (Kalkulator Harga & HPP Roastery)**\n\n` +
-        `Tool **Price Calculator** di 52 Coffee (/tools/price-calculator) dibuat khusus untuk membantu pemilik kedai kopi, roaster pemula, dan pelaku bisnis F&B menghitung Harga Pokok Produksi (HPP) dan menentukan harga jual biji kopi sangrai secara transparan & akurat.\n\n` +
-        `**Komponen yang Dihitung Secara Presisi:**\n` +
-        `1. **Landed Green Coffee Cost**: Biaya pembelian biji mentah per kilogram.\n` +
-        `2. **Roasting Shrink Loss (Susut Bobot ~19.93%)**: Biji kopi mentah akan menyusut kadar airnya saat disangrai. Kalkulator otomatis menghitung berapa kg green bean yang dibutuhkan untuk menghasilkan 1 kg roasted bean murni.\n` +
-        `3. **Operational & Energy Cost**: Biaya listrik infrared & gas operasional roaster (standar Rp 10.000/kg).\n` +
-        `4. **Packaging & Valve Pouch**: Biaya standing pouch food-grade dengan one-way degassing valve dan label craft (Rp 5.000 - Rp 10.000).\n` +
-        `5. **Target Margin & Profit Projection**: Menampilkan rekomendasi harga jual eceran (retail) dan harga grosir (B2B wholesale) serta estimasi laba bersih.\n\n` +
-        `Kamu bisa mencoba memasukkan parameter biaya kedai kopimu langsung di menu **[Price Calculator](/tools/price-calculator)**!`;
+      reply = `📊 **Kalkulator Harga Jual Kedai**\n\n` +
+        `Tool ini di /tools/price-calculator membantu pemilik kedai kopi, roaster pemula, dan pelaku bisnis F&B menghitung estimasi biaya per cangkir, harga jual, margin, serta kebutuhan pasokan.\n\n` +
+        `Masukkan harga biji, dosis, biaya bahan tambahan, dan target harga jual bisnis Anda sendiri. Hasilnya dapat dipakai sebagai bahan diskusi kebutuhan pasokan B2B.\n\n` +
+        `Kamu bisa mencoba simulasi di **[Kalkulator Harga Jual Kedai](/tools/price-calculator)**!`;
     }
 
     // --- PRIORITY 0C: BREW CALCULATOR & PANDUAN SEDUH ---
@@ -323,7 +334,7 @@ Panduan Barista:
         `• **Alamat Roastery & Tasting Room**:\n` +
         `  Jl. KH. Agus Salim No. 11, Kel. Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65118 (Dekat Alun-Alun & Pasar Besar Malang).\n\n` +
         `• **Jam Buka Slowbar & Tasting Room**:\n` +
-        `  Senin - Jumat: **11.00 - 16.00 WIB** (Sabtu & Minggu: Khusus Pemesanan Online & Event Cupping).\n\n` +
+        `  Senin - Minggu: **10.00 - 20.00 WIB**.\n\n` +
         `• **Kontak Resmi & Media Sosial**:\n` +
         `  • Instagram: **@52coffeeroastery**\n` +
         `  • Website: 52coffeeroastery.com\n` +
@@ -350,13 +361,9 @@ Panduan Barista:
         'kintamani-full-wash-arabica-espresso',
         'brazil-santos-espresso'
       );
-      reply = `🤝 **Kemitraan B2B & Wholesale Kedai Kopi 52 Roastery**\n\n` +
-        `Kami bermitra dengan puluhan coffee shop di Malang, Surabaya, Jabodetabek, dan kota lainnya di Indonesia.\n\n` +
-        `**Layanan B2B yang Kami Sediakan:**\n` +
-        `1. **Suplai House Blend & Single Origin (Kemasan 1 kg)**: Harga bertingkat (Tiered Wholesale Price) dengan jaminan profil sangrai yang konsisten setiap batch.\n` +
-        `2. **Custom Profiling & White Label (Maklon Sangrai)**: Kami dapat membuatkan profil sangrai unik dan kemasan khusus merek kafe Anda.\n` +
-        `3. **Sample Pack & Barista Calibration**: Dapatkan sample kit untuk uji rasa (cupping) di kedai Anda.\n\n` +
-        `Pelajari penawaran lengkap dan ajukan formulir kemitraan di menu **[Work With Us / B2B Solutions](/work-with-us)**!`;
+      reply = `🤝 **Kemitraan Bisnis 52 Coffee & Roastery**\n\n` +
+        `Kami dapat membantu kebutuhan **supplier roast beans**, **label khusus & special blends**, serta **business beverage consultation** (SOP, supply mesin, layout coffee bar, perhitungan HPP, dan signature blend).\n\n` +
+        `Ceritakan kebutuhan usaha Anda melalui **[Kemitraan Bisnis](/work-with-us)**. Formulir akan menyusun pesan WhatsApp sesuai informasi yang Anda isi.`;
     }
 
     // --- PRIORITY 0F: TRACK ORDER / LACAK RESI ---
@@ -367,9 +374,7 @@ Panduan Barista:
       query.includes('status pesanan') ||
       query.includes('sampai mana')
     ) {
-      reply = `📦 **Lacak Pesanan Biji Kopi Anda**\n\n` +
-        `Anda dapat memantau status sangrai dan nomor resi ekspedisi secara real-time melalui menu **[Track Order](/track)**.\n\n` +
-        `Cukup masukkan **Order ID (Contoh: 52C-XXXXXX)** atau Nomor WhatsApp yang Anda gunakan saat checkout!`;
+      reply = `Status pelacakan pesanan belum tersedia di website ini. Checkout saat ini masih simulasi, jadi tidak ada resi atau pesanan nyata yang diproses.`;
     }
 
     // --- PRIORITY 1: LAMBUNG / MAAG / GERD / RINGAN / LOW ACID / AMAN ---

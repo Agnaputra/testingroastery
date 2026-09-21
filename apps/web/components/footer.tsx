@@ -1,12 +1,28 @@
 import React from 'react';
 import Link from 'next/link';
 import { FiftyTwoLogo } from './logo';
-import { ArrowUpRight, Clock3, Instagram, MapPin } from 'lucide-react';
+import { ArrowUpRight, Clock3, Instagram, MapPin, MessageCircle, ShoppingBag } from 'lucide-react';
+
+import {
+  TOKOPEDIA_URL,
+  TIKTOK_URL,
+  WHATSAPP_URL,
+  WHATSAPP_NUMBER,
+  INSTAGRAM_URL,
+} from '../lib/data';
 
 export function Footer() {
   return (
     <footer className="bg-brand-charcoal text-white pt-16 pb-24 sm:pb-10 border-t border-white/10 w-full mt-auto">
       <div className="site-container space-y-12">
+        <div className="border-b border-white/25 pb-8">
+          <p aria-hidden="true" className="overflow-hidden whitespace-nowrap font-headline text-[clamp(3.2rem,11vw,10rem)] font-black leading-none tracking-[-0.085em] text-white">
+            52 COFFEE
+          </p>
+          <p className="mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-mist">
+            Roastery / Malang / Indonesia
+          </p>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-10">
           {/* Newsletter */}
           <div className="col-span-2 lg:col-span-4 space-y-4">
@@ -24,7 +40,7 @@ export function Footer() {
           {/* Quick Links */}
           <div className="lg:col-span-2 space-y-4 text-sm">
             <span className="text-[11px] font-semibold text-brand-teal block">
-              Koleksi kopi
+              Catalog
             </span>
             <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
@@ -44,7 +60,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/blend-builder" className="hover:text-white transition-colors">
-                  Peracik Blend
+                  Build Your Own Blend
                 </Link>
               </li>
             </ul>
@@ -53,22 +69,22 @@ export function Footer() {
           {/* Tools & Guides */}
           <div className="lg:col-span-2 space-y-4 text-sm">
             <span className="text-[11px] font-semibold text-brand-teal block">
-              Jelajahi
+              Coffee Lab
             </span>
             <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
                 <Link href="/guide" className="hover:text-white transition-colors">
-                  Panduan &amp; Kalkulator Seduh
+                  Brewing Guidance
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
-                  Tentang Roastery
+                <Link href="/blend-builder" className="hover:text-white transition-colors">
+                  Build Your Own Blend
                 </Link>
               </li>
               <li>
                 <Link href="/work-with-us" className="hover:text-white transition-colors">
-                  Kemitraan B2B
+                  Kemitraan Bisnis
                 </Link>
               </li>
             </ul>
@@ -83,16 +99,14 @@ export function Footer() {
               <MapPin aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-brand-teal" /> Jl. KH. Agus Salim No. 11, Klojen, Kota Malang, Jawa Timur.
             </p>
             <p className="flex items-start gap-3 text-white/75 leading-7">
-              <Clock3 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-brand-teal" /> Senin–Jumat: 11.00–16.00 WIB
+              <Clock3 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-brand-teal" /> Senin–Minggu: 10.00–20.00 WIB
             </p>
-            <a
-              className="inline-flex min-h-11 items-center gap-2 text-brand-mist hover:underline"
-              href="https://instagram.com/52coffeeroastery"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Instagram aria-hidden="true" className="h-4 w-4" /> @52coffeeroastery
-            </a>
+            <div className="flex flex-wrap gap-x-5 gap-y-1 text-brand-mist">
+              <a className="inline-flex min-h-11 items-center gap-2 hover:text-white" href={INSTAGRAM_URL} target="_blank" rel="noreferrer"><Instagram aria-hidden="true" className="h-4 w-4" /> Instagram</a>
+              <a className="inline-flex min-h-11 items-center gap-2 hover:text-white" href={WHATSAPP_URL} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" className="h-4 w-4" /> {WHATSAPP_NUMBER}</a>
+              <a className="inline-flex min-h-11 items-center gap-2 hover:text-white" href={TOKOPEDIA_URL} target="_blank" rel="noreferrer"><ShoppingBag aria-hidden="true" className="h-4 w-4" /> Tokopedia</a>
+              <a className="inline-flex min-h-11 items-center gap-2 hover:text-white" href={TIKTOK_URL} target="_blank" rel="noreferrer">TikTok <ArrowUpRight aria-hidden="true" className="h-4 w-4" /></a>
+            </div>
           </div>
         </div>
 

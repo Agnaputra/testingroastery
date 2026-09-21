@@ -2,23 +2,18 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Plus,
   ShoppingBag,
   Check,
   Share2,
-  ChevronDown,
-  ChevronUp,
-  RotateCcw,
   Sparkles,
   Flame,
-  Coffee,
-  Sliders,
-  Scale,
 } from 'lucide-react';
 import { useCartStore } from '../../lib/store/useCartStore';
-import { formatRupiah } from '../../lib/data';
+import { formatRupiah, getProductDisplayImage } from '../../lib/data';
+import { getPublishedProducts } from '../../lib/catalog-master';
 import { FlavorRadarChart, FlavorMetrics } from '../../components/flavor-radar-chart';
 import { PageIntro } from '../../components/ui/page-structure';
 
@@ -27,169 +22,87 @@ interface BlendComponent {
   name: string;
   process: string;
   region: string;
-  varietals: string;
-  notes: string;
-  pricePerKg: number; // Retail price per 1kg
-  pricePer200g: number;
+  species: 'Arabica' | 'Robusta' | 'Liberica' | 'Excelsa';
+  notes: string[];
+  pricePerKg: number;
   sensory: FlavorMetrics;
   image: string;
 }
 
-const AVAILABLE_BEANS: BlendComponent[] = [
-  {
-    id: 'java-ijen-full-wash',
-    name: 'Arabica Java Ijen Full Wash',
-    process: 'Full Wash',
-    region: 'Gunung Ijen, Bondowoso',
-    varietals: 'Kartika, USDA 762',
-    notes: 'Dark Chocolate, Brown Sugar, Clean Citrus',
-    pricePerKg: 250000,
-    pricePer200g: 60000,
-    image: '/images/bag-prau.jpg',
-    sensory: {
-      acidity: 6.5,
-      sweetness: 8.5,
-      body: 7.5,
-      floral: 5.0,
-      aftertaste: 8.2,
-      balance: 8.8,
-    },
-  },
-  {
-    id: 'arjuna-budug-asu',
-    name: 'Arjuna Budug Asu Natural Espresso',
-    process: 'Natural',
-    region: 'Gunung Arjuna, Malang',
-    varietals: 'Mixed Heirloom',
-    notes: 'Tangerine, Lychee, Caramel, Black Tea',
-    pricePerKg: 260000,
-    pricePer200g: 68000,
-    image: '/images/bag-walida.jpg',
-    sensory: {
-      acidity: 7.5,
-      sweetness: 8.8,
-      body: 7.5,
-      floral: 7.2,
-      aftertaste: 8.5,
-      balance: 8.4,
-    },
-  },
-  {
-    id: 'dampit-fine-robusta',
-    name: 'Dampit Fine Robusta Malang',
-    process: 'Natural Honey',
-    region: 'Dampit, Malang',
-    varietals: 'Fine Robusta BP 42',
-    notes: 'Dark Cocoa, Gula Aren, Heavy Crema',
-    pricePerKg: 150000,
-    pricePer200g: 35000,
-    image: '/images/bag-sumbing.jpg',
-    sensory: {
-      acidity: 2.0,
-      sweetness: 7.0,
-      body: 9.8,
-      floral: 2.5,
-      aftertaste: 8.5,
-      balance: 7.5,
-    },
-  },
-  {
-    id: 'kintamani-full-wash',
-    name: 'Kintamani Full Wash Arabica',
-    process: 'Full Wash',
-    region: 'Kintamani, Bali',
-    varietals: 'Typica, Kartika',
-    notes: 'Sweet Chocolate, Orange Citrus, Smooth Body',
-    pricePerKg: 260000,
-    pricePer200g: 70000,
-    image: '/images/bag-prau.jpg',
-    sensory: {
-      acidity: 6.8,
-      sweetness: 8.5,
-      body: 7.2,
-      floral: 6.0,
-      aftertaste: 8.0,
-      balance: 8.6,
-    },
-  },
-  {
-    id: 'gayo-full-washed',
-    name: 'Gayo Full Wash Arabica',
-    process: 'Full Wash',
-    region: 'Takengon, Aceh Tengah',
-    varietals: 'Ateng, Tim Tim',
-    notes: 'Dark Chocolate, Earthy Spices, Full Body',
-    pricePerKg: 265000,
-    pricePer200g: 75000,
-    image: '/images/bag-prau.jpg',
-    sensory: {
-      acidity: 5.5,
-      sweetness: 8.0,
-      body: 8.8,
-      floral: 4.5,
-      aftertaste: 8.8,
-      balance: 8.5,
-    },
-  },
-  {
-    id: 'brazil-santos',
-    name: 'Brazil Santos Arabica Espresso',
-    process: 'Natural',
-    region: 'Minas Gerais, Brazil',
-    varietals: 'Mundo Novo, Catuai',
-    notes: 'Roasted Peanut, Nutty Cocoa, Low Acid',
-    pricePerKg: 340000,
-    pricePer200g: 92000,
-    image: '/images/bag-grand-reserve.jpg',
-    sensory: {
-      acidity: 3.5,
-      sweetness: 8.2,
-      body: 9.0,
-      floral: 3.0,
-      aftertaste: 8.5,
-      balance: 8.8,
-    },
-  },
-  {
-    id: 'telemung-honey-robusta',
-    name: 'Telemung Honey Robusta Banyuwangi',
-    process: 'Honey Process',
-    region: 'Telemung, Banyuwangi',
-    varietals: 'Fine Robusta',
-    notes: 'Sweet Chocolate, Brown Sugar, Dense Crema',
-    pricePerKg: 150000,
-    pricePer200g: 35000,
-    image: '/images/bag-sumbing.jpg',
-    sensory: {
-      acidity: 2.2,
-      sweetness: 7.8,
-      body: 9.2,
-      floral: 3.0,
-      aftertaste: 8.2,
-      balance: 8.0,
-    },
-  },
-];
+const AVAILABLE_BEANS: BlendComponent[] = getPublishedProducts()
+  .filter((product) => product.category === 'espresso' && !product.isSoldOut)
+  .map((product) => {
+    const referenceVariant = [...product.variants]
+      .filter((variant) => variant.inStock)
+      .sort((a, b) => b.weightGrams - a.weightGrams)[0];
+    const normalizedPricePerKg = referenceVariant
+      ? Math.round((referenceVariant.price / referenceVariant.weightGrams) * 1000)
+      : Math.round((product.basePrice / Math.max(1, Number.parseInt(product.defaultWeight, 10))) * 1000);
+    const species: BlendComponent['species'] = product.name.toLowerCase().includes('robusta')
+      ? 'Robusta'
+      : 'Arabica';
+
+    return {
+      id: product.id,
+      name: product.name,
+      process: product.process,
+      region: product.region,
+      species,
+      notes: product.tastingNotes.slice(0, 4),
+      pricePerKg: normalizedPricePerKg,
+      image: getProductDisplayImage(product),
+      sensory: {
+        acidity: (product.acidity || 3) * 2,
+        sweetness: (product.sweetness || 3.5) * 2,
+        body: (product.body || 3.5) * 2,
+        floral: product.flavorCategory.includes('Floral') ? 8 : 3.5,
+        aftertaste: Math.min(10, ((product.sweetness || 3.5) + (product.body || 3.5)) * 1.05),
+        balance: Math.min(10, ((product.acidity || 3) + (product.sweetness || 3.5) + (product.body || 3.5)) / 1.5),
+      },
+    };
+  });
 
 export default function BlendBuilderPage() {
-  const [componentA, setComponentA] = useState<BlendComponent>(AVAILABLE_BEANS[0]); // Java Ijen
+  const [componentA, setComponentA] = useState<BlendComponent>(AVAILABLE_BEANS[0] || {
+    id: 'default-a',
+    name: 'Arabica Java Ijen',
+    process: 'Full Wash',
+    region: 'Bondowoso, Jawa Timur',
+    species: 'Arabica',
+    notes: ['Brown Sugar', 'Citrus', 'Sweet Cocoa'],
+    pricePerKg: 250000,
+    sensory: { acidity: 6, sweetness: 7, body: 6, floral: 5, aftertaste: 7, balance: 7 },
+    image: '/images/canva-pouch-showcase.jpg',
+  });
   const [ratioA, setRatioA] = useState<number>(70);
 
-  const [componentB, setComponentB] = useState<BlendComponent>(AVAILABLE_BEANS[1]); // Arjuna Budug Asu
+  const [componentB, setComponentB] = useState<BlendComponent>(AVAILABLE_BEANS[1] || AVAILABLE_BEANS[0] || {
+    id: 'default-b',
+    name: 'Dampit Fine Robusta',
+    process: 'Natural',
+    region: 'Malang, Jawa Timur',
+    species: 'Robusta',
+    notes: ['Dark Cocoa', 'Gula Aren', 'Dense Crema'],
+    pricePerKg: 150000,
+    sensory: { acidity: 3, sweetness: 6, body: 9, floral: 2, aftertaste: 8, balance: 6 },
+    image: '/images/canva-pouch-showcase.jpg',
+  });
   const [ratioB, setRatioB] = useState<number>(30);
 
   const [hasComponentC, setHasComponentC] = useState<boolean>(false);
-  const [componentC, setComponentC] = useState<BlendComponent>(AVAILABLE_BEANS[2]); // Dampit Robusta
+  const [componentC, setComponentC] = useState<BlendComponent>(AVAILABLE_BEANS[2] || AVAILABLE_BEANS[0]);
   const [ratioC, setRatioC] = useState<number>(15);
 
   const roastLevel = 'Dark Espresso Roast';
-  const [selectedSize, setSelectedSize] = useState<'200 g' | '500 g' | '1 kg'>('1 kg');
+  const [selectedSize, setSelectedSize] = useState<'250 g' | '500 g' | '1 kg'>('250 g');
+  const [doseGrams, setDoseGrams] = useState(18);
+  const [targetCups, setTargetCups] = useState(100);
+  const [menuPrice, setMenuPrice] = useState(22000);
   const [isAdded, setIsAdded] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const { addItem } = useCartStore();
 
-  // Handle Preset Selection
   const applyPreset = (beanAId: string, beanBId: string, rA: number = 70, rB: number = 30) => {
     const a = AVAILABLE_BEANS.find((b) => b.id === beanAId) || AVAILABLE_BEANS[0];
     const b = AVAILABLE_BEANS.find((b) => b.id === beanBId) || AVAILABLE_BEANS[1];
@@ -200,7 +113,6 @@ export default function BlendBuilderPage() {
     setHasComponentC(false);
   };
 
-  // Precise Weighted Price Calculation
   const priceCalculation = useMemo(() => {
     const totalRatio = hasComponentC ? ratioA + ratioB + ratioC : ratioA + ratioB;
     const wA = ratioA / totalRatio;
@@ -213,10 +125,9 @@ export default function BlendBuilderPage() {
 
     const blendedPricePerKg = costA + costB + costC;
 
-    // Price scaling for packaging sizes
     const price1kg = blendedPricePerKg;
     const price500g = Math.round((blendedPricePerKg * 0.52) / 1000) * 1000;
-    const price200g = Math.round((blendedPricePerKg * 0.22) / 1000) * 1000;
+    const price250g = Math.round((blendedPricePerKg * 0.27) / 1000) * 1000;
 
     return {
       wA,
@@ -228,29 +139,26 @@ export default function BlendBuilderPage() {
       blendedPricePerKg,
       price1kg,
       price500g,
-      price200g,
+      price250g,
     };
   }, [componentA, ratioA, componentB, ratioB, hasComponentC, componentC, ratioC]);
 
-  // Active Price based on selected size
   const activePrice = useMemo(() => {
-    if (selectedSize === '200 g') return priceCalculation.price200g;
+    if (selectedSize === '250 g') return priceCalculation.price250g;
     if (selectedSize === '500 g') return priceCalculation.price500g;
     return priceCalculation.price1kg;
   }, [selectedSize, priceCalculation]);
 
-  // Dynamic Blended Flavor Sensory Profile calculation
   const blendedSensory: FlavorMetrics = useMemo(() => {
     const wA = priceCalculation.wA;
     const wB = priceCalculation.wB;
     const wC = priceCalculation.wC;
 
-    // Dark Espresso Roast modifiers
     const roastModifier: Record<keyof FlavorMetrics, number> = {
-      acidity: -1.2,
+      acidity: -1.0,
       sweetness: +0.2,
       body: +1.2,
-      floral: -0.8,
+      floral: -0.6,
       aftertaste: +0.6,
       balance: +0.4,
     };
@@ -272,6 +180,34 @@ export default function BlendBuilderPage() {
       balance: Number(calculateAxis('balance').toFixed(1)),
     };
   }, [componentA, componentB, hasComponentC, componentC, priceCalculation]);
+
+  // Max 4 tasting notes
+  const predictedNotes = useMemo(() => {
+    const notes = [
+      ...componentA.notes,
+      ...componentB.notes,
+      ...(hasComponentC ? componentC.notes : []),
+    ];
+    return Array.from(new Set(notes)).slice(0, 4);
+  }, [componentA, componentB, componentC, hasComponentC]);
+
+  const roastCharacter = useMemo(() => {
+    const robustaShare =
+      (componentA.species === 'Robusta' ? priceCalculation.wA : 0) +
+      (componentB.species === 'Robusta' ? priceCalculation.wB : 0) +
+      (hasComponentC && componentC.species === 'Robusta' ? priceCalculation.wC : 0);
+    if (robustaShare >= 0.4) return 'Body tebal, crema dominan, dan finish cokelat pekat.';
+    if (blendedSensory.acidity >= 7) return 'Acidity lebih cerah dengan sweetness yang tetap terjaga.';
+    return 'Seimbang, manis karamel, dan sangat ramah untuk espresso maupun menu kopi susu.';
+  }, [blendedSensory.acidity, componentA.species, componentB.species, componentC.species, hasComponentC, priceCalculation]);
+
+  const hppSimulation = useMemo(() => {
+    const beanCostPerCup = Math.round((priceCalculation.blendedPricePerKg / 1000) * doseGrams);
+    const requiredBeansGrams = doseGrams * targetCups;
+    const totalBeanCost = beanCostPerCup * targetCups;
+    const projectedRevenue = menuPrice * targetCups;
+    return { beanCostPerCup, requiredBeansGrams, totalBeanCost, projectedRevenue };
+  }, [doseGrams, menuPrice, priceCalculation.blendedPricePerKg, targetCups]);
 
   const handleRatioAChange = (val: number) => {
     if (!hasComponentC) {
@@ -376,18 +312,14 @@ export default function BlendBuilderPage() {
       name: blendName,
       slug: 'custom-blend',
       imageUrl: '/images/canva-pouch-showcase.jpg',
-      weightGrams: selectedSize === '200 g' ? 200 : selectedSize === '500 g' ? 500 : 1000,
+      weightGrams: selectedSize === '250 g' ? 250 : selectedSize === '500 g' ? 500 : 1000,
       weightLabel: selectedSize,
       grind: 'whole',
       grindLabel: `Biji utuh (${roastLevel})`,
       unitPrice: activePrice,
       quantity: 1,
       series: 'BYOB Custom Blend',
-      tastingNotes: [
-        componentA.name.split(' ')[0],
-        componentB.name.split(' ')[0],
-        roastLevel.split(' ')[0],
-      ],
+      tastingNotes: predictedNotes,
     });
 
     setIsAdded(true);
@@ -407,9 +339,10 @@ export default function BlendBuilderPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="page-shell nav-offset"
+      className="page-shell"
     >
       <PageIntro
+        className="blend-hero"
         tone="dark"
         compact
         kicker="Peracik blend / BYOB"
@@ -419,20 +352,48 @@ export default function BlendBuilderPage() {
       />
 
       <div className="site-container page-section space-y-10">
+        {/* Packaging Size Selector on Top (Highlighted) */}
+        <section aria-labelledby="blend-size-heading" className="rounded-xl border border-border-subtle bg-white p-5 shadow-xs">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand-maroon block">
+                UKURAN KEMASAN RACIKAN
+              </span>
+              <h2 id="blend-size-heading" className="font-headline text-xl font-semibold text-brand-charcoal mt-0.5">
+                Pilih Ukuran Kemasan
+              </h2>
+              <p className="text-xs text-on-surface-variant">Harga dinamis diperbarui langsung dari proporsi biji espresso yang Anda racik.</p>
+            </div>
+            <div className="flex flex-wrap gap-2.5" role="group" aria-label="Ukuran kemasan BYOB">
+              {(['250 g', '500 g', '1 kg'] as const).map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  aria-pressed={selectedSize === size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`min-h-11 px-5 font-mono text-xs font-bold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-maroon ${
+                    selectedSize === size
+                      ? 'bg-brand-charcoal text-white shadow-xs'
+                      : 'border border-border-subtle bg-white text-brand-charcoal hover:border-brand-charcoal'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* ========================================================================= */}
-        {/* 2. 2-COLUMN MAIN BYOB SECTION                                             */}
-        {/* ========================================================================= */}
+        {/* 2-COLUMN MAIN BYOB SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* LEFT: Dynamic Bean Pouch Showcase + Live Flavor Radar Chart (5 Cols) */}
+          {/* LEFT: Dynamic Bean Pouch Showcase + Live Flavor Radar Chart */}
           <div className="lg:col-span-5 space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45 }}
-              className="bg-white rounded-xl p-5 sm:p-6 border-2 border-gray-200 shadow-md space-y-4"
+              className="editorial-workspace space-y-4 p-5 sm:p-6"
             >
-              {/* Header Badge */}
               <div className="flex items-center justify-between border-b-2 border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-brand-maroon" />
@@ -471,7 +432,7 @@ export default function BlendBuilderPage() {
                       {componentA.name.replace(/Arabica|Robusta/g, '').trim()}
                     </div>
                     <div className="text-[9px] font-mono text-on-surface-variant truncate font-semibold">
-                      {componentA.process}
+                      {componentA.species} · {componentA.process}
                     </div>
                   </div>
                 </div>
@@ -500,7 +461,7 @@ export default function BlendBuilderPage() {
                       {componentB.name.replace(/Arabica|Robusta/g, '').trim()}
                     </div>
                     <div className="text-[9px] font-mono text-on-surface-variant truncate font-semibold">
-                      {componentB.process}
+                      {componentB.species} · {componentB.process}
                     </div>
                   </div>
                 </div>
@@ -530,7 +491,7 @@ export default function BlendBuilderPage() {
                         {componentC.name.replace(/Arabica|Robusta/g, '').trim()}
                       </div>
                       <div className="text-[9px] font-mono text-on-surface-variant truncate font-semibold">
-                        {componentC.process}
+                        {componentC.species} · {componentC.process}
                       </div>
                     </div>
                   </div>
@@ -559,13 +520,13 @@ export default function BlendBuilderPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.15 }}
-              className="p-6 rounded-xl bg-white border-2 border-gray-200 shadow-md space-y-4"
+              className="editorial-workspace space-y-4 p-6"
             >
               <div className="flex items-center justify-between border-b-2 border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-brand-maroon" />
                   <h3 className="font-editorial text-base font-extrabold text-brand-charcoal">
-                    Prediksi Profil Rasa Racikan
+                    Dynamic Real Time Taste
                   </h3>
                 </div>
                 <span className="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full bg-brand-charcoal/10 text-brand-charcoal">
@@ -573,7 +534,6 @@ export default function BlendBuilderPage() {
                 </span>
               </div>
 
-              {/* Flavor Radar Component */}
               <FlavorRadarChart
                 metrics={blendedSensory}
                 size={270}
@@ -582,21 +542,26 @@ export default function BlendBuilderPage() {
                 showBars={true}
               />
 
+              <div className="border-y border-black/10 py-3">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-maroon">Beans Tasting Notes</span>
+                <p className="mt-1 text-sm font-semibold leading-6 text-brand-charcoal">{predictedNotes.join(' · ')}</p>
+              </div>
+
               <div className="p-3.5 rounded-xl bg-surface border border-gray-200 text-xs font-sans text-on-surface leading-relaxed">
                 <span className="font-extrabold text-brand-charcoal block mb-0.5">Catatan Karakter Sangrai:</span>
-                Kombinasi menonjolkan keasaman segar dari <strong className="text-brand-charcoal">{componentA.name.split(' ')[0]}</strong> berpadu manis karamel &amp; krema tebal dari <strong className="text-brand-charcoal">{componentB.name.split(' ')[0]}</strong> disangrai pada level <strong className="text-brand-maroon">{roastLevel}</strong>.
+                {roastCharacter}
               </div>
             </motion.div>
           </div>
 
-          {/* RIGHT: BYOB Form Controls & Mix Sliders (7 Cols) */}
+          {/* RIGHT: BYOB Form Controls & Mix Sliders */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}
             className="lg:col-span-7 space-y-6"
           >
-            {/* Dual/Triple Ratio Progress Bar with Balance Indicator */}
+            {/* Dual/Triple Ratio Progress Bar */}
             <div className="space-y-2.5 pt-2">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="font-extrabold text-brand-charcoal uppercase tracking-wider">
@@ -608,7 +573,6 @@ export default function BlendBuilderPage() {
               </div>
 
               <div className="w-full h-10 rounded-full overflow-hidden flex bg-gray-200 border-2 border-gray-300 relative shadow-inner">
-                {/* Segment A (Crimson) */}
                 <motion.div
                   className="bg-brand-maroon h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioA}%` }}
@@ -616,7 +580,6 @@ export default function BlendBuilderPage() {
                   A ({ratioA}%)
                 </motion.div>
 
-                {/* Segment B (Navy) */}
                 <motion.div
                   className="bg-brand-charcoal h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioB}%` }}
@@ -634,7 +597,7 @@ export default function BlendBuilderPage() {
                 )}
               </div>
 
-              {/* Quick Blend Ratio Presets for 2-Bean and 3-Bean modes */}
+              {/* Quick Blend Ratio Presets */}
               {!hasComponentC ? (
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
                   <span className="text-[10px] font-mono text-brand-navy font-bold mr-1">Preset 2-Biji:</span>
@@ -709,7 +672,7 @@ export default function BlendBuilderPage() {
                     >
                       {AVAILABLE_BEANS.map((b) => (
                         <option key={b.id} value={b.id}>
-                          {b.name} ({formatRupiah(b.pricePerKg)}/kg)
+                          {b.name} ({b.species}) — {formatRupiah(b.pricePerKg)}/kg
                         </option>
                       ))}
                     </select>
@@ -726,7 +689,6 @@ export default function BlendBuilderPage() {
                     <span className="font-mono text-xs font-extrabold text-brand-navy">%</span>
                   </div>
                 </div>
-                {/* Visual Range Slider for Component A */}
                 <div className="flex items-center gap-3 pt-1">
                   <input
                     type="range"
@@ -757,7 +719,7 @@ export default function BlendBuilderPage() {
                     >
                       {AVAILABLE_BEANS.map((b) => (
                         <option key={b.id} value={b.id}>
-                          {b.name} ({formatRupiah(b.pricePerKg)}/kg)
+                          {b.name} ({b.species}) — {formatRupiah(b.pricePerKg)}/kg
                         </option>
                       ))}
                     </select>
@@ -774,7 +736,6 @@ export default function BlendBuilderPage() {
                     <span className="font-mono text-xs font-extrabold text-brand-navy">%</span>
                   </div>
                 </div>
-                {/* Visual Range Slider for Component B */}
                 <div className="flex items-center gap-3 pt-1">
                   <input
                     type="range"
@@ -788,7 +749,7 @@ export default function BlendBuilderPage() {
                 </div>
               </div>
 
-              {/* Expandable Component C (Flexible up to 90% with auto-balancing) */}
+              {/* Component C Selector */}
               {hasComponentC && (
                 <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-navy transition-colors shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
@@ -806,7 +767,7 @@ export default function BlendBuilderPage() {
                       >
                         {AVAILABLE_BEANS.map((b) => (
                           <option key={b.id} value={b.id}>
-                            {b.name} ({formatRupiah(b.pricePerKg)}/kg)
+                            {b.name} ({b.species}) — {formatRupiah(b.pricePerKg)}/kg
                           </option>
                         ))}
                       </select>
@@ -831,7 +792,6 @@ export default function BlendBuilderPage() {
                       </button>
                     </div>
                   </div>
-                  {/* Visual Range Slider for Component C */}
                   <div className="flex items-center gap-3 pt-1">
                     <input
                       type="range"
@@ -859,53 +819,8 @@ export default function BlendBuilderPage() {
               )}
             </div>
 
-            {/* ROAST LEVEL PROFILE - LOCKED TO DARK ESPRESSO AS REQUESTED */}
-            <div className="space-y-2 pt-2">
-              <label className="block text-xs font-mono text-brand-charcoal uppercase font-extrabold tracking-wider">
-                Profil Sangrai (Roast Profile)
-              </label>
-              <div className="p-4 rounded-xl bg-brand-charcoal text-white border border-white/15 shadow-lg flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-amber-400" />
-                    <span className="font-mono text-sm font-bold text-white">Dark Espresso Roast</span>
-                    <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-brand-maroon text-white">
-                      Fixed Profile
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-200 leading-relaxed font-normal">
-                    Diformulasikan khusus untuk mesin espresso, moka pot, &amp; es kopi susu dengan ekstraksi krema tebal dan rasa cokelat manis pekat tanpa asam menusuk.
-                  </p>
-                </div>
-                <Check className="w-5 h-5 text-emerald-400 shrink-0 ml-4" />
-              </div>
-            </div>
-
-            {/* Size Selector */}
-            <div className="space-y-2">
-              <label className="block text-xs font-mono text-brand-charcoal uppercase font-extrabold tracking-wider">
-                Ukuran Kemasan
-              </label>
-              <div className="flex gap-3">
-                {(['200 g', '500 g', '1 kg'] as const).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSelectedSize(s)}
-                    className={`px-6 py-3 rounded-xl font-mono text-xs font-extrabold transition-all cursor-pointer ${
-                      selectedSize === s
-                        ? 'bg-brand-charcoal text-white shadow-md'
-                        : 'bg-white border-2 border-gray-200 text-brand-charcoal hover:border-brand-charcoal'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Price Display with Live Formula */}
-            <div className="p-5 rounded-xl bg-white border-2 border-gray-200 shadow-md space-y-3.5">
+            <div className="editorial-workspace space-y-3.5 p-5">
               <div className="flex items-baseline justify-between">
                 <div>
                   <span className="text-[10px] font-mono text-brand-maroon-dark uppercase font-black tracking-wider block">
@@ -945,13 +860,47 @@ export default function BlendBuilderPage() {
               </div>
             </div>
 
+            {/* HPP Simulation for Blend */}
+            <section aria-labelledby="hpp-heading" className="border border-border-subtle bg-white p-5 rounded-xl shadow-xs">
+              <div className="flex flex-col gap-2 border-b border-black/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 id="hpp-heading" className="font-headline text-lg font-semibold text-brand-charcoal">Kalkulator HPP Racikan Blend</h2>
+                  <p className="mt-1 text-xs leading-5 text-on-surface-variant">Hitung modal kopi per cangkir langsung dari harga racikan di atas.</p>
+                </div>
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-maroon">Simulasi modal</span>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <label className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
+                  <span>Dosis: {doseGrams}g</span>
+                  <input type="range" min="8" max="24" step="1" value={doseGrams} onChange={(event) => setDoseGrams(Number(event.target.value))} className="w-full accent-brand-maroon" />
+                  <span className="flex justify-between font-mono text-[9px] font-normal text-on-surface-variant"><span>8g</span><span>Single 9g</span><span>Double 18g</span><span>24g</span></span>
+                </label>
+                <label htmlFor="target-cups" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
+                  <span className="block">Target cup / hari</span>
+                  <input id="target-cups" type="number" min="1" max="1000" step="1" value={targetCups} onChange={(event) => setTargetCups(Math.min(1000, Math.max(1, Number(event.target.value))))} className="field-control" />
+                </label>
+                <label htmlFor="menu-price" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
+                  <span className="block">Harga jual menu</span>
+                  <input id="menu-price" type="number" min="10000" max="100000" step="1000" value={menuPrice} onChange={(event) => setMenuPrice(Math.min(100000, Math.max(10000, Number(event.target.value))))} className="field-control" />
+                </label>
+              </div>
+
+              <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="bg-surface-container-low p-3 rounded-lg"><dt className="text-[10px] text-on-surface-variant">Modal kopi / cangkir</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppSimulation.beanCostPerCup)}</dd></div>
+                <div className="bg-surface-container-low p-3 rounded-lg"><dt className="text-[10px] text-on-surface-variant">Kebutuhan kopi</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{hppSimulation.requiredBeansGrams.toLocaleString('id-ID')}g</dd></div>
+                <div className="bg-surface-container-low p-3 rounded-lg"><dt className="text-[10px] text-on-surface-variant">Biaya kopi total</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppSimulation.totalBeanCost)}</dd></div>
+                <div className="bg-surface-container-low p-3 rounded-lg"><dt className="text-[10px] text-on-surface-variant">Proyeksi omzet</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-navy">{formatRupiah(hppSimulation.projectedRevenue)}</dd></div>
+              </dl>
+            </section>
+
             {/* Action Buttons Row */}
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleAddToCart}
                 disabled={isAdded}
-                className="flex-1 bg-brand-charcoal hover:bg-brand-charcoal text-white font-mono font-extrabold text-sm py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 bg-brand-charcoal hover:bg-brand-charcoal/90 text-white font-mono font-extrabold text-sm py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isAdded ? (
                   <>
@@ -976,7 +925,12 @@ export default function BlendBuilderPage() {
               </button>
             </div>
 
-            {/* Our Picks Preset Pill */}
+            {/* Dark Espresso Roast Note Under Button */}
+            <p className="text-center font-mono text-[11px] text-on-surface-variant pt-1">
+              Semua racikan disangrai dengan profil <strong>Dark Espresso Roast</strong> untuk ekstraksi crema tebal, rasa manis seimbang, dan karakter bold.
+            </p>
+
+            {/* Our Picks Preset */}
             <div className="space-y-2.5 pt-2">
               <span className="text-xs font-mono text-brand-charcoal uppercase font-extrabold block tracking-wider">
                 Rekomendasi Racikan Roaster 52 Coffee
@@ -984,30 +938,28 @@ export default function BlendBuilderPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => applyPreset('java-ijen-full-wash', 'arjuna-budug-asu', 70, 30)}
+                  onClick={() => applyPreset(AVAILABLE_BEANS[0]?.id || '', AVAILABLE_BEANS[1]?.id || '', 70, 30)}
                   className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 Java Ijen + Arjuna Budug</div>
-                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">Fruity Tangerine, Sweet Caramel &amp; Clean Body</div>
-                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">Rp 253.000 / kg</div>
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {AVAILABLE_BEANS[0]?.name} + {AVAILABLE_BEANS[1]?.name}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{[...(AVAILABLE_BEANS[0]?.notes || []), ...(AVAILABLE_BEANS[1]?.notes || [])].slice(0, 3).join(' · ')}</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(Math.round((AVAILABLE_BEANS[0]?.pricePerKg || 200000) * 0.7 + (AVAILABLE_BEANS[1]?.pricePerKg || 200000) * 0.3))} / kg</div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => applyPreset('java-ijen-full-wash', 'dampit-fine-robusta', 70, 30)}
+                  onClick={() => applyPreset(AVAILABLE_BEANS[0]?.id || '', AVAILABLE_BEANS[2]?.id || AVAILABLE_BEANS[1]?.id || '', 70, 30)}
                   className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 Java Ijen + Dampit Robusta</div>
-                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">Racikan klasik (Krema tebal &amp; kakao pekat)</div>
-                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">Rp 220.000 / kg</div>
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {AVAILABLE_BEANS[0]?.name} + {AVAILABLE_BEANS[2]?.name || AVAILABLE_BEANS[1]?.name}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{[...(AVAILABLE_BEANS[0]?.notes || []), ...(AVAILABLE_BEANS[2]?.notes || AVAILABLE_BEANS[1]?.notes || [])].slice(0, 3).join(' · ')}</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(Math.round((AVAILABLE_BEANS[0]?.pricePerKg || 200000) * 0.7 + (AVAILABLE_BEANS[2]?.pricePerKg || AVAILABLE_BEANS[1]?.pricePerKg || 200000) * 0.3))} / kg</div>
                 </button>
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. DETAILS COMPARISON TABLE                                               */}
-        {/* ========================================================================= */}
+        {/* DETAILS COMPARISON TABLE */}
         <section className="space-y-4 pt-8 border-t-2 border-gray-200">
           <h2 className="font-editorial text-2xl font-bold text-brand-charcoal">
             Spesifikasi Komponen Racikan
@@ -1042,19 +994,19 @@ export default function BlendBuilderPage() {
             </div>
 
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-brand-navy font-mono font-bold">Varietals (A)</span>
-              <span className="font-extrabold text-brand-charcoal">{componentA.varietals}</span>
+              <span className="text-brand-navy font-mono font-bold">Species (A)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentA.species}</span>
             </div>
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
-              <span className="text-brand-navy font-mono font-bold">Varietals (B)</span>
-              <span className="font-extrabold text-brand-charcoal">{componentB.varietals}</span>
+              <span className="text-brand-navy font-mono font-bold">Species (B)</span>
+              <span className="font-extrabold text-brand-charcoal">{componentB.species}</span>
             </div>
           </div>
 
           <div className="p-5 rounded-xl bg-white border-2 border-gray-200 space-y-1.5 shadow-sm">
-            <span className="text-brand-navy font-mono text-xs block font-bold uppercase tracking-wider">Catatan Rasa Gabungan</span>
+            <span className="text-brand-navy font-mono text-xs block font-bold uppercase tracking-wider">Tasting Notes Gabungan · Prediksi</span>
             <p className="font-editorial text-base font-extrabold text-brand-charcoal">
-              {componentA.notes} • {componentB.notes}
+              {predictedNotes.join(' · ')}
             </p>
           </div>
         </section>

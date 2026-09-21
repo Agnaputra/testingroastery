@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .models import ChatRequest, ChatResponse, SearchRequest, SearchResponse
-from .rag_service import rag_service, COFFEE_KNOWLEDGE_BASE
+from .rag_service import rag_service, PUBLISHED_COFFEE_KNOWLEDGE_BASE
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -49,7 +49,7 @@ def health_check():
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_with_barista(request: ChatRequest):
     """
-    RAG-powered conversational endpoint with Gemini + NeMo Guardrails
+    Catalog-grounded conversational endpoint with OpenAI, Gemini fallback, and input guardrails.
     """
     try:
         response = rag_service.generate_barista_response(
@@ -57,8 +57,8 @@ async def chat_with_barista(request: ChatRequest):
             history=[{"role": m.role, "content": m.content} for m in request.history]
         )
         return response
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Barista service error: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Barista service tidak tersedia. Silakan coba lagi.")
 
 @app.post("/api/search", response_model=SearchResponse)
 async def search_coffee_catalog(request: SearchRequest):
@@ -81,15 +81,15 @@ async def search_coffee_catalog(request: SearchRequest):
             for item in results
         ]
         return {"results": formatted_results, "query": request.query}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Pencarian katalog tidak tersedia. Silakan coba lagi.")
 
 @app.get("/api/products")
 async def get_all_products():
     """
     Returns full authentic 52 Coffee & Roastery knowledge data
     """
-    return {"count": len(COFFEE_KNOWLEDGE_BASE), "data": COFFEE_KNOWLEDGE_BASE}
+    return {"count": len(PUBLISHED_COFFEE_KNOWLEDGE_BASE), "data": PUBLISHED_COFFEE_KNOWLEDGE_BASE}
 
 if __name__ == "__main__":
     # pyrefly: ignore [missing-import]

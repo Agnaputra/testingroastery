@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 import clsx from 'clsx';
 import { FiftyTwoLogo } from '../logo';
 
@@ -100,6 +101,13 @@ export function Surface({ children, className, as: Element = 'div', muted = fals
 export function BrandPanel({ label = 'Disangrai dengan presisi di Malang' }: { label?: string }) {
   return (
     <div className="brand-panel">
+      <Image
+        src="/images/byob-craft-collage.jpg"
+        alt=""
+        fill
+        sizes="(max-width: 1024px) 100vw, 40vw"
+        className="object-cover"
+      />
       <FiftyTwoLogo size="lg" textColor="light" />
       <p>{label}</p>
     </div>

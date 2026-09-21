@@ -4,7 +4,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, X, ArrowRight, Sparkles, ShoppingBag } from 'lucide-react';
-import { PRODUCTS, formatRupiah, getProductDisplayImage } from '../lib/data';
+import { formatRupiah, getCustomerProductName, getProductDisplayImage } from '../lib/data';
+import { getPublishedProducts } from '../lib/catalog-master';
+
+const PUBLISHED_PRODUCTS = getPublishedProducts();
 import { useCartStore } from '../lib/store/useCartStore';
 
 interface SearchModalProps {
@@ -67,7 +70,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   if (!isOpen) return null;
 
   const filtered = query.trim()
-    ? PRODUCTS.filter((p) => {
+    ? PUBLISHED_PRODUCTS.filter((p) => {
         const q = query.toLowerCase();
         return (
           p.name.toLowerCase().includes(q) ||
@@ -77,7 +80,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           p.tastingNotes.some((n) => n.toLowerCase().includes(q))
         );
       })
-    : PRODUCTS.slice(0, 4);
+    : PUBLISHED_PRODUCTS.slice(0, 4);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/65 backdrop-blur-md animate-fade-in">
@@ -92,7 +95,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Pencarian Biji Kopi"
-        className="relative w-full max-w-2xl bg-white rounded-xl shadow-lg border border-border-subtle overflow-hidden z-10 animate-slide-up"
+        className="relative z-10 w-full max-w-2xl animate-slide-up overflow-hidden rounded-md border border-border-subtle border-t-4 border-t-brand-maroon bg-white shadow-2xl"
       >
         {/* Search Input Bar */}
         <div className="p-4 sm:p-5 border-b border-border-subtle flex items-center gap-3 bg-surface-container-low/60">
@@ -110,7 +113,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 text-on-surface-variant hover:text-on-surface"
+              className="flex h-11 w-11 shrink-0 items-center justify-center text-on-surface-variant hover:text-on-surface"
               aria-label="Hapus kata kunci"
             >
               <X className="w-4 h-4" />
@@ -144,14 +147,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             filtered.map((product) => (
               <div
                 key={product.id}
-                className="p-3.5 rounded-xl border border-border-subtle bg-white hover:border-brand-navy/30 hover:bg-surface-container-low/40 transition-all flex items-center justify-between gap-3 group"
+                className="group flex items-center justify-between gap-3 rounded-md border border-border-subtle bg-white p-3.5 transition-colors hover:border-brand-navy/40 hover:bg-surface-container-low/40"
               >
                 <Link
                   href={`/catalog/${product.slug}`}
                   onClick={onClose}
                   className="flex items-center gap-3.5 min-w-0 flex-1"
                 >
-                  <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-surface-container-low">
                     <Image
                       src={getProductDisplayImage(product)}
                       alt={product.name}
@@ -170,7 +173,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       </span>
                     </div>
                     <h4 className="font-editorial text-sm font-bold text-brand-navy group-hover:text-brand-maroon truncate mt-0.5">
-                      {product.name}
+                      {getCustomerProductName(product)}
                     </h4>
                     <p className="text-[11px] text-on-surface-variant truncate">
                       Notes: {product.tastingNotes.join(', ')}
@@ -194,7 +197,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       const v = product.variants[0];
                       addItem({
                         productId: product.id,
-                        name: product.name,
+                        name: getCustomerProductName(product),
                         slug: product.slug,
                         imageUrl: getProductDisplayImage(product),
                         weightGrams: v.weightGrams,
@@ -209,7 +212,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       onClose();
                     }}
                     className="p-2.5 rounded-xl bg-brand-navy hover:bg-brand-navy-light text-white transition-colors shadow-sm cursor-pointer"
-                    aria-label={`Tambah ${product.name} ke keranjang`}
+                    aria-label={`Tambah ${getCustomerProductName(product)} ke keranjang`}
                   >
                     <ShoppingBag className="w-4 h-4" />
                   </button>
