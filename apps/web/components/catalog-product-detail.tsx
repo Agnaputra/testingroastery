@@ -168,7 +168,7 @@ function ProductDetailContent({ slug }: CatalogProductDetailProps) {
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(390px,.92fr)] lg:gap-x-16 lg:gap-y-10">
           {/* LEFT: Large product visual */}
           <div className="space-y-8">
-            <div className="group relative flex aspect-[4/5] items-center justify-center overflow-hidden border border-border-subtle bg-white p-8 sm:p-12 rounded-md shadow-xs">
+            <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden border border-border-subtle bg-surface-container-low rounded-md shadow-xs">
               <div className="w-full h-full relative flex items-center justify-center">
                 <Image
                   src={displayImg}
@@ -176,7 +176,7 @@ function ProductDetailContent({ slug }: CatalogProductDetailProps) {
                   fill
                   priority
                   sizes="(min-width: 1024px) 36vw, 80vw"
-                  className="object-contain p-[4%] mix-blend-multiply transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.035]"
+                  className="object-cover"
                 />
               </div>
             </div>
@@ -348,7 +348,7 @@ function ProductDetailContent({ slug }: CatalogProductDetailProps) {
                   </p>
                 </div>
                 <Link
-                  href={`/guide?bean=${encodeURIComponent(cleanName)}`}
+                  href={`/coffee-lab/brewing-guidance?bean=${encodeURIComponent(cleanName)}`}
                   className="inline-flex min-h-11 shrink-0 items-center gap-2 bg-brand-navy px-4 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-brand-navy-light"
                 >
                   <span>Buka panduan seduh</span>

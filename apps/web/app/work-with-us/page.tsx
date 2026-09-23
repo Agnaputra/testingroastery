@@ -12,6 +12,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
+import { WHATSAPP_URL } from '../../lib/data';
 
 export default function WorkWithUsPage() {
   const [businessName, setBusinessName] = useState('');
@@ -19,7 +20,7 @@ export default function WorkWithUsPage() {
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
   const [serviceType, setServiceType] = useState('Supplier Roast Beans');
-  const [estimatedVolume, setEstimatedVolume] = useState('25 kg / bulan');
+  const [estimatedVolume, setEstimatedVolume] = useState('');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -32,10 +33,10 @@ export default function WorkWithUsPage() {
       return;
     }
 
-    const waUrl = `https://wa.me/6285792524863?text=${encodeURIComponent(whatsAppMessage)}`;
+    const waUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(whatsAppMessage)}`;
 
     setSubmitted(true);
-    window.open(waUrl, '_blank');
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -56,7 +57,7 @@ export default function WorkWithUsPage() {
       />
 
       {/* 2. 3 KEY PARTNERSHIP SERVICES */}
-      <section className="site-container page-section">
+      <section id="wholesale-partnership" className="site-container page-section scroll-mt-28">
         <SectionIntro
           className="partnership-section-intro"
           align="center"
@@ -98,6 +99,7 @@ export default function WorkWithUsPage() {
             <p className="text-xs text-gray-600 leading-relaxed">
               Pembuatan signature blend eksklusif dengan profil sangrai yang dirancang khusus untuk identitas brand mitra (seperti BYOB).
             </p>
+            <Link href="/work-with-us/blend-builder" className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-maroon hover:underline">Buka konsultasi custom blend →</Link>
           </motion.div>
 
           <motion.div
@@ -138,7 +140,7 @@ export default function WorkWithUsPage() {
       </section>
 
       {/* 3. B2B INQUIRY FORM */}
-      <section className="site-container page-section">
+      <section id="consultation-form" className="site-container page-section scroll-mt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -151,7 +153,7 @@ export default function WorkWithUsPage() {
               Mulai Diskusi Kemitraan
             </h2>
             <p className="text-sm leading-6 text-on-surface-variant">
-              Ceritakan kebutuhan bisnis Anda. Setelah formulir dikirim, percakapan akan dilanjutkan melalui WhatsApp resmi 52 Coffee (+62 857-9252-4863).
+              Ceritakan kebutuhan bisnis Anda. Formulir ini menyiapkan pesan untuk dilanjutkan melalui WhatsApp resmi 52 Coffee (+62 857-9252-4863).
             </p>
           </div>
 
@@ -159,10 +161,10 @@ export default function WorkWithUsPage() {
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-8 text-center space-y-3">
               <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
               <h3 className="font-editorial text-xl font-bold text-brand-navy">
-                Permintaan kemitraan siap ditindaklanjuti
+                Pesan siap dikirim di WhatsApp
               </h3>
               <p className="text-sm leading-6 text-on-surface-variant max-w-md mx-auto">
-                Tim kami akan menghubungi Anda melalui WhatsApp di <strong>{phone}</strong> untuk menindaklanjuti kebutuhan pasokan dan sampel kopi.
+                Periksa percakapan yang terbuka, lalu tekan kirim di WhatsApp. Permintaan belum masuk sebelum pesan tersebut dikirim.
               </p>
             </div>
           ) : (
@@ -176,6 +178,7 @@ export default function WorkWithUsPage() {
                     id="business-name"
                     type="text"
                     required
+                    autoComplete="organization"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
                     placeholder="Contoh: Kopi Seduh Santai"
@@ -190,6 +193,7 @@ export default function WorkWithUsPage() {
                     id="contact-name"
                     type="text"
                     required
+                    autoComplete="name"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     placeholder="Contoh: Budi Santoso"
@@ -207,6 +211,8 @@ export default function WorkWithUsPage() {
                     id="business-phone"
                     type="tel"
                     required
+                    autoComplete="tel"
+                    inputMode="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="Contoh: 08123456789"
@@ -220,6 +226,7 @@ export default function WorkWithUsPage() {
                   <input
                     id="business-location"
                     type="text"
+                    autoComplete="street-address"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Contoh: Jl. Ijen No. 52, Malang / Surabaya"

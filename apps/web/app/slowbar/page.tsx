@@ -3,6 +3,9 @@ import CatalogContent from '../../components/catalog-content';
 export const metadata = {
   title: 'Slowbar | 52 Coffee & Roastery',
   description: 'Menu specialty coffee 52 Coffee & Roastery yang tersedia untuk dinikmati di lokasi.',
+  alternates: {
+    canonical: '/catalog?category=slowbar',
+  },
 };
 
 export default function SlowbarPage() {

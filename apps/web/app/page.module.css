@@ -6,7 +6,6 @@
   --maroon: #a52136;
   --maroon-dark: #5d1823;
   --paper: #f8fafc;
-  --paper: #f4f1eb;
   overflow: clip;
   background: var(--paper);
   color: var(--ink);
@@ -91,9 +90,9 @@
 }
 
 .marquee {
-  min-height: 112px;
+  min-height: clamp(124px, 10vw, 164px);
   border-top: 3px solid var(--ink);
-  border-bottom: 3px solid var(--ink);
+  border-bottom: 8px solid var(--maroon);
   background: var(--paper);
   color: var(--ink);
 }
@@ -106,8 +105,9 @@
 .marqueeTrack {
   display: flex;
   width: max-content;
-  min-height: 112px;
+  min-height: clamp(124px, 10vw, 164px);
   align-items: center;
+  animation: marquee-run 24s linear infinite;
   will-change: transform;
 }
 
@@ -124,7 +124,7 @@
   align-items: center;
   gap: clamp(28px, 4vw, 64px);
   font-family: 'Raleway', sans-serif;
-  font-size: clamp(40px, 5vw, 76px);
+  font-size: clamp(54px, 7vw, 108px);
   font-weight: 900;
   letter-spacing: -.04em;
   line-height: 1;
@@ -136,6 +136,10 @@
   font-family: 'Raleway', sans-serif;
   font-size: .42em;
   font-style: normal;
+}
+
+@keyframes marquee-run {
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
 .catalogIndex {
@@ -863,9 +867,9 @@
 @media (max-width: 767px) {
   .manifesto { min-height: 560px; padding-inline: 18px; }
   .manifesto h2 { font-size: clamp(29px, 8.2vw, 40px); letter-spacing: .025em; line-height: 1.15; }
-  .marquee { min-height: 88px; }
-  .marqueeTrack { min-height: 88px; }
-  .marqueeGroup span { font-size: 34px; }
+  .marquee { min-height: 92px; border-bottom-width: 6px; }
+  .marqueeTrack { min-height: 92px; animation-duration: 18s; }
+  .marqueeGroup span { font-size: 38px; }
   .indexIntro { grid-template-columns: 1fr; gap: 20px; }
   .indexIntro h2 { font-size: clamp(39px, 12vw, 62px); }
   .categoryGrid { grid-template-columns: 1fr; }
@@ -943,7 +947,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marqueeTrack { transform: none !important; }
+  .marqueeTrack { animation: none; transform: none !important; }
   .productImage,
   .textLink,
   .inverseLink,

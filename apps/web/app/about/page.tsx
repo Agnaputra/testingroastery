@@ -1,172 +1,65 @@
-'use client';
-
-import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Sparkles,
-  MapPin,
-  Clock,
-  Coffee,
-  Flame,
-  Award,
-  ShieldCheck,
-  ArrowRight,
-  ArrowLeft,
-  TrendingUp,
-  HeartHandshake,
-  CheckCircle2,
-} from 'lucide-react';
+import { ArrowRight, Coffee, Flame, MapPin, SearchCheck, Sparkles, Sprout } from 'lucide-react';
 import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
+
+const JOURNEY = [
+  { icon: Sprout, label: 'Sourcing / beans', title: 'Membaca karakter bahan baku', description: 'Origin, process, varietas, dan catatan rasa menjadi konteks awal untuk memahami potensi setiap kopi.', image: '/images/canva-coffee-cherries.jpg', alt: 'Buah kopi sebagai awal perjalanan biji kopi' },
+  { icon: Flame, label: 'Roasting', title: 'Mengembangkan profil sangrai', description: 'Proses sangrai diarahkan untuk membuka karakter kopi dan menyiapkannya bagi cara seduh yang dituju.', image: '/images/canva-roaster-drum.jpg', alt: 'Mesin roasting kopi di ruang produksi' },
+  { icon: SearchCheck, label: 'Quality control', title: 'Mengevaluasi hasil di dalam cangkir', description: 'Cupping dan penyeduhan ulang membantu membaca aroma, rasa, serta konsistensi sebelum kopi disajikan.', image: '/images/canva-barista-roaster.jpg', alt: 'Barista mengevaluasi kopi hasil roasting' },
+  { icon: Coffee, label: 'Brewing / serving', title: 'Menerjemahkan beans menjadi pengalaman', description: 'Parameter seduh dan dialog di slowbar membantu setiap kopi disajikan dengan konteks yang lebih mudah dipahami.', image: '/images/canva-brewista-pour.jpg', alt: 'Proses manual brew di slowbar' },
+];
 
 export default function AboutPage() {
   return (
-    <div className="page-shell">
-      <PageIntro
-        align="center"
-        compact
-        kicker="Transparansi dari kebun hingga cangkir"
-        icon={<Sparkles size={14} />}
-        title="Filosofi sangrai dan ketelusuran kopi"
-        description="Dari Malang, kami menjaga setiap proses agar karakter asal kopi tetap jernih, dapat ditelusuri, dan mudah dinikmati."
-      />
+    <main id="behind" className="page-shell scroll-mt-28">
+      <PageIntro align="center" compact kicker="Behind 52 Coffee & Roastery" icon={<Sparkles size={14} />} title="Roastery dan slowbar dalam satu percakapan rasa." description="52 Coffee & Roastery mempertemukan pemilihan beans, proses sangrai, evaluasi, dan penyeduhan agar kopi dapat dipahami dari bahan baku hingga cangkir." />
 
-      <div className="site-container page-section space-y-16">
+      <section className="site-container page-section grid gap-8 lg:grid-cols-12 lg:items-center">
+        <div className="lg:col-span-5">
+          <p className="section-kicker">Filosofi brand</p>
+          <h2 className="mt-3 font-editorial text-3xl font-bold leading-tight text-brand-charcoal sm:text-4xl">Kopi yang baik dimulai dari rasa ingin tahu.</h2>
+          <div className="mt-5 space-y-4 text-sm leading-7 text-on-surface-variant">
+            <p>Pendekatan specialty coffee membantu kami membaca setiap kopi dengan lebih teliti: apa yang ada pada beans, bagaimana panas mengubahnya, dan bagaimana air mengekstraknya.</p>
+            <p>Roastery mengembangkan karakter kopi. Slowbar menerjemahkannya melalui seduhan dan percakapan. Keduanya memberi ruang untuk belajar, mengevaluasi, dan menyempurnakan hasil.</p>
+          </div>
+          <Link href="/catalog" className="mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-maroon hover:underline">Jelajahi Retail Beans <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+        </div>
+        <div className="relative min-h-[340px] overflow-hidden rounded-md bg-brand-charcoal sm:min-h-[420px] lg:col-span-7 lg:min-h-[500px]">
+          <Image src="/images/byob-roaster-craft.jpg" alt="Aktivitas di ruang roasting 52 Coffee" fill sizes="(max-width: 1024px) 100vw, 58vw" className="object-cover opacity-90" />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-24 text-white sm:p-8"><p className="max-w-lg font-editorial text-2xl font-semibold leading-snug">Dari profil sangrai ke parameter seduh, setiap tahap saling memberi umpan balik.</p></div>
+        </div>
+      </section>
 
-      {/* Hero Showcase Image & Roastery Ethos */}
-      <div id="background" className="ui-surface editorial-workspace scroll-mt-28 p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <div className="lg:col-span-6 space-y-5">
-          <span className="badge-crimson">Dikerjakan di Malang</span>
-          <h2 id="roasters" className="scroll-mt-28 font-editorial text-2xl sm:text-3xl font-bold text-roastery-dark leading-tight">
-            Sangrai mikro dengan kontrol suhu presisi
-          </h2>
-          <p className="text-xs sm:text-sm text-roastery-charcoal leading-relaxed">
-            Di 52 Coffee & Roastery, kami menyangrai kopi dalam kelompok kecil (small-batch 1-5kg). Pendekatan ini memungkinkan kami memantau kurva suhu (Rate of Rise / RoR), aliran udara (airflow), dan waktu development phase dengan ketelitian hingga 0.1°C.
-          </p>
-          <p className="text-xs sm:text-sm text-roastery-muted leading-relaxed">
-            Hasilnya adalah rasa manis karamelisasi alami yang utuh, tanpa cacat rasa terbakar (scorching) atau rasa langu (underdeveloped).
-          </p>
+      <section id="roastery-journey" className="scroll-mt-28 border-y border-border-subtle bg-surface-container-low">
+        <div className="site-container page-section">
+          <SectionIntro kicker="Roastery Journey" title="Empat tahap, satu alur yang terhubung" description="Gambaran proses ini menjelaskan cara kami memandang perjalanan kopi tanpa menggantikan detail origin dan produk pada katalog." />
+          <ol className="grid gap-x-5 gap-y-8 md:grid-cols-2 xl:grid-cols-4">
+            {JOURNEY.map(({ icon: Icon, label, title, description, image, alt }, index) => (
+              <li key={label} className="group border-t-2 border-brand-charcoal pt-4">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-surface-container"><Image src={image} alt={alt} fill sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw" className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]" /></div>
+                <div className="pt-5">
+                  <div className="flex items-center justify-between gap-4"><span className="inline-flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-maroon"><Icon className="h-4 w-4" aria-hidden="true" /> {label}</span><span className="font-mono text-xs text-on-surface-variant">0{index + 1}</span></div>
+                  <h3 className="mt-4 font-editorial text-xl font-bold text-brand-charcoal">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-on-surface-variant">{description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
-          <div className="pt-2 grid grid-cols-2 gap-4 border-t border-roastery-border text-xs font-mono">
-            <div>
-              <span className="text-[10px] text-roastery-muted uppercase block">SCA Cupping QC</span>
-              <strong className="text-base text-roastery-dark font-bold">84+ Points</strong>
-            </div>
-            <div>
-              <span className="text-[10px] text-roastery-muted uppercase block">Batch Consistency</span>
-              <strong className="text-base text-roastery-crimson font-bold">99.8% Profile Match</strong>
-            </div>
+      <section id="slowbar-ambience" className="site-container page-section scroll-mt-28">
+        <SectionIntro kicker="Slowbar Ambience" title="Ruang untuk menyeduh lebih pelan" description="Slowbar mempertemukan atmosfer, teknik seduh, dan interaksi barista dalam pengalaman yang lebih dekat dengan karakter kopi." />
+        <div className="grid gap-5 lg:grid-cols-12 lg:grid-rows-2">
+          <div className="relative min-h-[320px] overflow-hidden rounded-md bg-brand-charcoal sm:min-h-[420px] lg:col-span-7 lg:row-span-2"><Image src="/images/tasting-room-footage.png" alt="Suasana slowbar 52 Coffee" fill sizes="(max-width: 1024px) 100vw, 58vw" className="object-cover" /></div>
+          <div className="relative min-h-[220px] overflow-hidden rounded-md bg-surface-container sm:min-h-[260px] lg:col-span-5"><Image src="/images/canva-brewista-pour.jpg" alt="Pengalaman manual brew di slowbar" fill sizes="(max-width: 1024px) 100vw, 42vw" className="object-cover" /></div>
+          <div className="flex min-h-[250px] flex-col justify-between rounded-md bg-brand-charcoal p-6 text-white sm:p-7 lg:col-span-5">
+            <div><Coffee className="h-6 w-6 text-brand-teal" aria-hidden="true" /><h3 className="mt-8 font-editorial text-2xl font-bold">Seduh, cicip, lalu bicarakan.</h3><p className="mt-3 text-sm leading-7 text-white/70">Barista membantu menjelaskan pilihan beans dan variabel seduh sesuai pengalaman yang ingin dieksplorasi.</p></div>
+            <div className="mt-8 flex items-start gap-2 text-xs leading-5 text-white/70"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal" aria-hidden="true" /><span>Jl. KH. Agus Salim No. 11, Sukoharjo, Klojen, Kota Malang, Jawa Timur 65118</span></div>
           </div>
         </div>
-
-        <div className="lg:col-span-6 relative aspect-[4/3] rounded-xl overflow-hidden bg-roastery-light border border-roastery-border shadow-md">
-          <Image
-            src="/images/canva-roaster-drum.jpg"
-            alt="52 Coffee Roasting Process"
-            fill
-            sizes="500px"
-            className="object-cover"
-          />
-        </div>
-      </div>
-
-      {/* 3 Pillars of Transparency */}
-      <div className="space-y-6">
-        <SectionIntro
-          align="center"
-          kicker="Tiga pilar utama"
-          title="Komitmen transparansi kami"
-          description="Standar yang kami pegang dari pemilihan origin hingga kopi tiba di tangan pelanggan."
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="editorial-card editorial-feature space-y-3 py-6">
-            <div className="w-12 h-12 rounded-full bg-roastery-crimson/10 text-roastery-crimson flex items-center justify-center">
-              <HeartHandshake className="w-6 h-6" />
-            </div>
-            <h3 className="font-editorial text-lg font-bold text-roastery-dark">
-              1. Direct Trade &amp; Petani Lokal
-            </h3>
-            <p className="text-xs text-roastery-muted leading-relaxed">
-              Bekerjasama langsung dengan kelompok tani di lereng Kawah Ijen, Gunung Argopuro, dan Gunung Puntang. Kami membayar harga di atas rata-rata pasar untuk mendukung kesejahteraan petani ceri matang.
-            </p>
-          </div>
-
-          <div className="editorial-card editorial-feature space-y-3 py-6">
-            <div className="w-12 h-12 rounded-full bg-roastery-slate/15 text-roastery-slate flex items-center justify-center">
-              <Flame className="w-6 h-6" />
-            </div>
-            <h3 className="font-editorial text-lg font-bold text-roastery-dark">
-              2. Scientific Roasting Profile
-            </h3>
-            <p className="text-xs text-roastery-muted leading-relaxed">
-              Setiap origin memiliki profil sangrai unik yang diuji melalui sesi *cupping* berulang hingga kami menemukan titik manis (*sweet spot*) antara keasaman buah dan kekayaan *body*.
-            </p>
-          </div>
-
-          <div className="editorial-card editorial-feature space-y-3 py-6">
-            <div className="w-12 h-12 rounded-full bg-roastery-teal/20 text-roastery-teal flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <h3 className="font-editorial text-lg font-bold text-roastery-dark">
-              3. Valve Packaging &amp; Freshness
-            </h3>
-            <p className="text-xs text-roastery-muted leading-relaxed">
-              Biji kopi dikemas dalam *foil pouch* dengan *one-way degassing valve* untuk membuang gas CO2 alami tanpa membiarkan oksigen masuk, menjaga rasa optimal selama berbulan-bulan.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tasting Room Location Malang */}
-      <div className="editorial-card p-8 sm:p-12 bg-roastery-dark text-white border border-roastery-charcoal grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        <div className="space-y-4">
-          <span className="badge-crimson bg-roastery-crimson/25 text-roastery-crimson-light border-roastery-crimson/40">Kunjungi tasting room Malang</span>
-          <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-white">
-            Mari Mampir dan Berdiskusi Kopi Bersama Kami
-          </h2>
-          <p className="text-xs sm:text-sm text-roastery-muted leading-relaxed">
-            Ingin mencicipi seduhan langsung di bar atau berkonsultasi mengenai pemilihan biji kopi untuk kedai kopi Anda? Kunjungi tasting room kami di Malang.
-          </p>
-
-          <div className="space-y-2.5 pt-2 text-xs font-mono">
-            <div className="flex items-start gap-2 text-roastery-light">
-              <MapPin className="w-4 h-4 text-roastery-teal shrink-0 mt-0.5" />
-              <span>Jl. KH. Agus Salim No. 11, Sukoharjo, Klojen, Kota Malang, Jawa Timur 65118</span>
-            </div>
-            <div className="flex items-center gap-2 text-roastery-light">
-              <Clock className="w-4 h-4 text-roastery-teal shrink-0" />
-              <span>Buka Senin - Minggu: 10.00 - 20.00 WIB</span>
-            </div>
-          </div>
-
-          <div className="pt-4 flex flex-wrap gap-3">
-            <a
-              href="https://maps.google.com/?q=52+Coffee+Roastery+Malang"
-              target="_blank"
-              rel="noreferrer"
-              className="btn-primary text-xs"
-            >
-              <span>Buka Petunjuk Google Maps</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <Link href="/catalog" className="btn-secondary text-xs bg-transparent border-white/30 text-white hover:bg-white hover:text-roastery-dark">
-              Beli Online
-            </Link>
-          </div>
-        </div>
-
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-roastery-charcoal border border-white/10 shadow-lg">
-          <Image
-            src="/images/canva-cafe-table.jpg"
-            alt="52 Coffee Tasting Room Malang"
-            fill
-            sizes="500px"
-            className="object-cover"
-          />
-        </div>
-      </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

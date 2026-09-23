@@ -21,6 +21,8 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 6rem;
+    scrollbar-color: var(--color-primary) var(--color-surface);
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -62,6 +64,21 @@
   ::selection {
     background-color: #465C70;
     color: #FFFFFF;
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid var(--color-surface);
+    border-radius: 999px;
+    background: var(--color-primary);
   }
 }
 
@@ -203,11 +220,17 @@
     width: 100%;
     max-width: 1560px;
     min-height: clamp(360px, 46vw, 560px);
-    padding: calc(76px + clamp(3rem, 7vw, 7rem)) clamp(3rem, 7vw, 7rem) clamp(3rem, 7vw, 7rem);
+    padding: calc(76px + 3rem) 1.25rem 3rem;
     overflow: hidden;
     border: 2px solid var(--color-mist);
     border-radius: 12px;
     background: #182131;
+  }
+
+  @media (min-width: 640px) {
+    .page-intro[data-tone='dark'] .page-intro__inner {
+      padding: calc(76px + clamp(3rem, 7vw, 7rem)) clamp(3rem, 7vw, 7rem) clamp(3rem, 7vw, 7rem);
+    }
   }
 
   .page-intro[data-tone='dark'][data-compact='true'] .page-intro__inner {
@@ -257,7 +280,7 @@
   }
 
   .page-display {
-    @apply max-w-[16ch] font-headline text-[clamp(2.8rem,6vw,6rem)] font-extrabold leading-[0.96] tracking-[-0.055em] text-brand-charcoal;
+    @apply max-w-[16ch] font-headline text-[clamp(2.8rem,6vw,6rem)] font-extrabold leading-[0.96] tracking-[-0.04em] text-brand-charcoal;
   }
 
   .page-intro[data-tone='dark'] .page-display {
@@ -389,7 +412,7 @@
   }
 
   .section-display {
-    @apply max-w-[22ch] font-headline text-[clamp(2.2rem,4vw,4.5rem)] font-extrabold leading-[1.02] tracking-[-0.045em] text-brand-charcoal;
+    @apply max-w-[22ch] font-headline text-[clamp(2.2rem,4vw,4.5rem)] font-extrabold leading-[1.02] tracking-[-0.04em] text-brand-charcoal;
   }
 
   .section-lead {
@@ -431,6 +454,17 @@
 
   .field-help {
     @apply text-xs leading-5 text-on-surface-variant;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 

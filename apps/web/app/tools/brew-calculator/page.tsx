@@ -1,5 +1,5 @@
 import { permanentRedirect } from 'next/navigation';
 
 export default function BrewCalculatorPage() {
-  permanentRedirect('/guide');
+  permanentRedirect('/coffee-lab/brewing-guidance');
 }

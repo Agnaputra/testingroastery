@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Coffee,
+  MapPin,
   RotateCcw,
   Search,
   X,
@@ -262,7 +263,7 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
               ['beans', 'Retail Beans'],
               ['slowbar', 'Slowbar Beverages'],
               ['glassware', 'Glassware'],
-              ['machine', 'Coffee Machine'],
+              ['machine', 'Machine & Tools'],
             ] as const).map(([value, label]) => (
               <button
                 key={value}
@@ -344,8 +345,8 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
         {mainTab === 'slowbar' && (
           <div className="my-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-brand-maroon/20 bg-brand-maroon/10 p-4 text-brand-maroon">
             <div className="flex items-center gap-2.5">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider">
-                📍 Hanya bisa dinikmati di lokasi
+              <span className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider">
+                <MapPin size={14} aria-hidden="true" /> Hanya bisa dinikmati di lokasi
               </span>
               <span className="text-xs text-brand-charcoal">
                 Menu seduhan manual dan espresso disajikan langsung oleh barista di 52 Coffee, Malang.
@@ -367,7 +368,7 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-brand-mist">Coffee Lab</p>
               <h2 id="slowbar-guide-heading" className="mt-2 font-headline text-2xl font-semibold">Brewing Guidance</h2>
               <p className="mt-3 text-sm leading-6 text-white/75">Pelajari rasio, dosis, suhu, dan urutan tuang untuk membaca karakter beans resmi 52 Coffee.</p>
-              <Link href="/guide" className="mt-5 inline-flex min-h-11 w-fit items-center border border-white/40 px-4 text-sm font-semibold hover:bg-white hover:text-brand-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-mist">Buka Brewing Guidance →</Link>
+              <Link href="/coffee-lab/brewing-guidance" className="mt-5 inline-flex min-h-11 w-fit items-center border border-white/40 px-4 text-sm font-semibold hover:bg-white hover:text-brand-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-mist">Buka Brewing Guidance →</Link>
             </div>
           </section>
         )}

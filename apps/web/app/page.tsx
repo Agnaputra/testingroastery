@@ -10,7 +10,6 @@ import {
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
-  useTransform,
 } from 'framer-motion';
 import {
   ArrowRight,
@@ -21,7 +20,8 @@ import {
 } from 'lucide-react';
 import { HeroSection } from '../components/hero/HeroSection';
 import { SensorySection } from '../components/sensory/SensorySection';
-import { PRODUCTS, formatRupiah, getCustomerProductName } from '../lib/data';
+import { formatRupiah, getCustomerProductName } from '../lib/data';
+import { getPublishedProducts } from '../lib/catalog-master';
 import { useCartStore } from '../lib/store/useCartStore';
 import { openVirtualBarista } from '../lib/virtual-barista-events';
 import styles from './page.module.css';
@@ -39,6 +39,8 @@ interface ProductItem {
   imageUrl: string;
 }
 
+const PUBLISHED_PRODUCTS = getPublishedProducts();
+
 const FEATURED_CONFIG = [
   { slug: 'sumbing-supernova-celestia', imageUrl: '/images/bag-sumbing.jpg' },
   { slug: 'prau-natural-el-davisio-surya', imageUrl: '/images/bag-prau.jpg' },
@@ -47,7 +49,7 @@ const FEATURED_CONFIG = [
 ];
 
 const FEATURED_PRODUCTS: ProductItem[] = FEATURED_CONFIG.flatMap(({ slug, imageUrl }) => {
-  const product = PRODUCTS.find((item) => item.slug === slug);
+  const product = PUBLISHED_PRODUCTS.find((item) => item.slug === slug);
   if (!product) return [];
 
   const variant = [...product.variants]
@@ -90,7 +92,7 @@ const CATEGORIES = [
     id: 'lab',
     title: 'Coffee Lab',
     subtitle: 'Brewing Guidance dan racik blend (BYOB)',
-    href: '/guide',
+    href: '/coffee-lab/brewing-guidance',
   },
   {
     id: 'barista',
@@ -142,7 +144,7 @@ const PROCESS_STEPS = [
     imageUrl: '/images/canva-hero-pour.jpg',
     imageAlt: 'Proses menuang air untuk seduhan pour-over 52 Coffee',
     imagePosition: 'center',
-    actionHref: '/guide',
+    actionHref: '/coffee-lab/brewing-guidance',
     actionLabel: 'Buka panduan seduh',
   },
 ];
@@ -161,12 +163,12 @@ const FAQS = [
   {
     question: 'Apakah 52 Coffee melayani pengiriman ke seluruh Indonesia?',
     answer:
-      'Tentu! Kami melayani pengiriman ke seluruh kota di Indonesia dengan packing kardus khusus dan bubble wrap tebal. Seluruh pesanan yang masuk sebelum pukul 15.00 WIB akan diproses kirim di hari yang sama.',
+      'Kami melayani pengiriman ke berbagai kota di Indonesia. Pilihan kurir dan estimasi pengiriman perlu dikonfirmasi saat pemesanan karena website ini belum terhubung ke status pengiriman real-time.',
   },
   {
     question: 'Apakah bisa memesan custom blend atau harga wholesale untuk kedai kopi?',
     answer:
-      'Sangat bisa! Kami bermitra dengan puluhan coffee shop di Malang, Surabaya, dan kota lainnya. Anda dapat menggunakan fitur BYOB Blend Simulator kami atau langsung menghubungi tim wholesale kami di menu Work With Us.',
+      'Bisa. Anda dapat menggunakan fitur BYOB untuk mengeksplorasi profil blend atau menghubungi tim wholesale melalui menu Kemitraan untuk membahas kebutuhan bisnis.',
   },
   {
     question: 'Kapan jam operasional Slowbar & Tasting Room di Malang?',
@@ -181,7 +183,6 @@ export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeProcess, setActiveProcess] = useState(0);
   const [draggingProducts, setDraggingProducts] = useState(false);
-  const marqueeRef = useRef<HTMLElement>(null);
   const processRef = useRef<HTMLElement>(null);
   const productRailRef = useRef<HTMLDivElement>(null);
   const productDragRef = useRef({
@@ -192,11 +193,6 @@ export default function HomePage() {
     startScrollLeft: 0,
   });
   const reducedMotion = useReducedMotion();
-  const { scrollYProgress: marqueeProgress } = useScroll({
-    target: marqueeRef,
-    offset: ['start end', 'end start'],
-  });
-  const marqueeX = useTransform(marqueeProgress, [0, 1], ['4%', '-18%']);
   const { scrollYProgress: processProgress } = useScroll({
     target: processRef,
     offset: ['start start', 'end end'],
@@ -288,13 +284,9 @@ export default function HomePage() {
         </h2>
       </section>
 
-      <section ref={marqueeRef} className={styles.marquee} aria-label="Pilihan roastery">
+      <section className={styles.marquee} aria-label="Pilihan roastery">
         <div className={styles.marqueeViewport}>
-          <motion.div
-            className={styles.marqueeTrack}
-            aria-hidden="true"
-            style={reducedMotion ? undefined : { x: marqueeX }}
-          >
+          <div className={styles.marqueeTrack} aria-hidden="true">
             {[0, 1].map((group) => (
               <div className={styles.marqueeGroup} key={group}>
                 {MARQUEE_ITEMS.map((item, itemIndex) => (
@@ -302,7 +294,7 @@ export default function HomePage() {
                 ))}
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -514,7 +506,7 @@ export default function HomePage() {
               <p>
                 Selamat datang di 52 Coffee &amp; Roastery. Dedikasi kami adalah menghadirkan specialty coffee dalam pengalaman yang mudah dijelajahi—dari memilih biji hingga menemukan cara seduhnya.
               </p>
-              <Link href="/guide" className={styles.inverseLink}>
+              <Link href="/coffee-lab/brewing-guidance" className={styles.inverseLink}>
                 Buka panduan &amp; kalkulator seduh <ArrowRight aria-hidden="true" size={17} />
               </Link>
             </motion.div>
@@ -622,7 +614,7 @@ export default function HomePage() {
             <p>Temukan kopi yang cocok dengan cara kamu menikmati hari.</p>
             <div>
               <Link href="/catalog" className={styles.darkButton}>Pesan kopi <ArrowRight aria-hidden="true" size={17} /></Link>
-              <Link href="/guide" className={styles.textLink}>Buka panduan seduh <ArrowUpRight aria-hidden="true" size={17} /></Link>
+              <Link href="/coffee-lab/brewing-guidance" className={styles.textLink}>Buka panduan seduh <ArrowUpRight aria-hidden="true" size={17} /></Link>
             </div>
           </div>
         </div>

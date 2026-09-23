@@ -16,7 +16,7 @@ export function Footer() {
     <footer className="bg-brand-charcoal text-white pt-16 pb-24 sm:pb-10 border-t border-white/10 w-full mt-auto">
       <div className="site-container space-y-12">
         <div className="border-b border-white/25 pb-8">
-          <p aria-hidden="true" className="overflow-hidden whitespace-nowrap font-headline text-[clamp(3.2rem,11vw,10rem)] font-black leading-none tracking-[-0.085em] text-white">
+          <p aria-hidden="true" className="overflow-hidden whitespace-nowrap font-headline text-[clamp(3.2rem,11vw,10rem)] font-black leading-none tracking-[-0.04em] text-white">
             52 COFFEE
           </p>
           <p className="mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-mist">
@@ -37,30 +37,25 @@ export function Footer() {
             </a>
           </div>
 
-          {/* Quick Links */}
+          {/* Primary navigation */}
           <div className="lg:col-span-2 space-y-4 text-sm">
             <span className="text-[11px] font-semibold text-brand-teal block">
-              Catalog
+              Explore
             </span>
             <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
-                <Link href="/catalog?category=filter" className="hover:text-white transition-colors">
-                  Filter Roast
+                <Link href="/about" className="hover:text-white transition-colors">
+                  About Us
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?category=espresso" className="hover:text-white transition-colors">
-                  Espresso Roast
+                <Link href="/catalog" className="hover:text-white transition-colors">
+                  Catalogue
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?series=Grand%20Reserve" className="hover:text-white transition-colors">
-                  Grand Reserve
-                </Link>
-              </li>
-              <li>
-                <Link href="/blend-builder" className="hover:text-white transition-colors">
-                  Build Your Own Blend
+                <Link href="/work-with-us" className="hover:text-white transition-colors">
+                  Partnerships
                 </Link>
               </li>
             </ul>
@@ -73,18 +68,18 @@ export function Footer() {
             </span>
             <ul className="text-white/75 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
               <li>
-                <Link href="/guide" className="hover:text-white transition-colors">
+                <Link href="/coffee-lab/brewing-guidance" className="hover:text-white transition-colors">
                   Brewing Guidance
                 </Link>
               </li>
               <li>
-                <Link href="/blend-builder" className="hover:text-white transition-colors">
+                <Link href="/coffee-lab/build-your-own-blend" className="hover:text-white transition-colors">
                   Build Your Own Blend
                 </Link>
               </li>
               <li>
-                <Link href="/work-with-us" className="hover:text-white transition-colors">
-                  Kemitraan Bisnis
+                <Link href="/coffee-lab/coffee-experiments" className="hover:text-white transition-colors">
+                  Coffee Experiments
                 </Link>
               </li>
             </ul>

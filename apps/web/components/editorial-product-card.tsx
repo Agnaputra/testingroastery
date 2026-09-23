@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Eye, Plus, Check } from 'lucide-react';
-import { CoffeeProduct, formatRupiah, getCustomerProductName } from '../lib/data';
+import { CoffeeProduct, formatRupiah, getCustomerProductName, getProductDisplayImage } from '../lib/data';
 import { QuickViewModal } from './quick-view-modal';
 import { useCartStore } from '../lib/store/useCartStore';
 
@@ -55,18 +55,18 @@ export function EditorialProductCard({
     <>
       <article className="group min-w-0 flex flex-col justify-between bg-white border border-border-subtle rounded-md p-3 transition-shadow hover:shadow-sm">
         <div>
-          {/* Clean product image container with white background */}
-          <div className="relative overflow-hidden bg-white rounded-xs">
+          {/* Product media fills the frame so no empty white gutter remains. */}
+          <div className="relative overflow-hidden bg-surface-container-low rounded-xs">
             <Link
               href={detailUrl}
               className="relative block aspect-[4/5] w-full overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-maroon"
             >
               <Image
-                src={product.imageUrl}
+                src={getProductDisplayImage(product)}
                 alt={`Kemasan ${displayName}`}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className="object-contain p-[6%] mix-blend-multiply transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.035]"
+                className="object-cover"
               />
             </Link>
 

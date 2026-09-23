@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { X, Check, ShoppingBag, Plus, Minus, ArrowRight, ExternalLink } from 'lucide-react';
-import { CoffeeProduct, ProductVariant, GrindOption, GRIND_OPTIONS, formatRupiah, getCustomerProductName } from '../lib/data';
+import { CoffeeProduct, ProductVariant, GrindOption, GRIND_OPTIONS, formatRupiah, getCustomerProductName, getProductDisplayImage } from '../lib/data';
 import { WeightSelector } from './weight-selector';
 import { GrindSelector } from './grind-selector';
 import { useCartStore } from '../lib/store/useCartStore';
@@ -70,7 +70,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
         role="dialog"
         aria-modal="true"
         aria-label={`Lihat cepat ${displayName}`}
-        className="relative z-10 flex max-h-[90vh] w-full max-w-2xl animate-slide-up flex-col overflow-hidden rounded-md border border-border-subtle border-t-4 border-t-brand-maroon bg-white shadow-2xl"
+        className="relative z-10 flex max-h-[90vh] w-full max-w-2xl animate-slide-up flex-col overflow-hidden rounded-md border border-border-subtle bg-white shadow-2xl"
       >
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-border-subtle flex items-center justify-between bg-surface-container-low/60">
@@ -94,7 +94,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
           <div className="flex flex-col sm:flex-row gap-5 items-start">
             <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-surface-container-low sm:w-44">
               <Image
-                src={product.imageUrl}
+                src={getProductDisplayImage(product)}
                 alt={displayName}
                 fill
                 sizes="180px"

@@ -6,6 +6,12 @@
       "sourceType": "well-known",
       "computedHash": "b99262b99651a5101bbb057b8d90cc095764ffa11bb3fa72266ff5262ff6684d"
     },
+    "apple-design": {
+      "source": "dickwu/apple-design-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "f43b06a7305deb944c937151023298a91986abd50bd14db2e6ad16d9c9ef35f3"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",

@@ -81,6 +81,19 @@ const config: Config = {
           light: "#F0F5F7",
           border: "#DCE6EB",
         },
+        // 52 Coffee Canva Palette Tokens (page-15.png)
+        ocha: {
+          paper: "#F8FAFC",
+          cream: "#F0F5F7",
+          mist: "#CFE8EA",
+          teal: "#8FB9BC",
+          slate: "#617281",
+          navy: "#465C70",
+          charcoal: "#2C3136",
+          crimson: "#A52136",
+          maroon: "#5D1823",
+          black: "#2C3136",
+        },
       },
       spacing: {
         gutter: "24px",
@@ -96,6 +109,8 @@ const config: Config = {
         editorial: ["Raleway", "sans-serif"],
         serif: ["Raleway", "serif"],
         mono: ["Cascadia Code", "JetBrains Mono", "monospace"],
+        anton: ["Anton", "sans-serif"],
+        script: ["Caveat", "cursive"],
       },
       fontSize: {
         "display-xl": ["72px", { lineHeight: "1.1", letterSpacing: "-0.04em", fontWeight: "800" }],

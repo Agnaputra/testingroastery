@@ -1,0 +1,6 @@
+2026/09/22-13:01:19.342 38bc Reusing MANIFEST C:\laragon\www\testingroastery\.tmp-navbar-qa\edge-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/09/22-13:01:19.342 38bc Recovering log #3
+2026/09/22-13:01:19.343 38bc Reusing old log C:\laragon\www\testingroastery\.tmp-navbar-qa\edge-profile\Default\EdgeCoupons/coupons_data.db/000003.log 
+2026/09/22-13:01:19.705 44d4 Level-0 table #5: started
+2026/09/22-13:01:19.713 44d4 Level-0 table #5: 683273 bytes OK
+2026/09/22-13:01:19.718 44d4 Delete type=0 #3
