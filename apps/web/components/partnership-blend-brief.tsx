@@ -34,16 +34,16 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
       `Penggunaan: ${data.get('useCase')}`,
       `Arah rasa: ${data.get('profile')}`,
       '',
-      'Pilihan beans & simulasi HPP:',
-      `Sumber: ${selection.sourceLabel}`,
-      `Beans: ${selection.beanLabel}`,
-      `Dasar harga: ${selection.priceBasis}`,
-      `Harga setara: ${formatRupiah(selection.beanPricePerKg)}/kg`,
+      'Pilihan bahan baku & simulasi HPP:',
+      `Sumber bahan baku: ${selection.sourceLabel}`,
+      `Produk/racikan: ${selection.beanLabel}`,
+      `Basis harga: ${selection.priceBasis}`,
+      `Harga bahan baku: ${formatRupiah(selection.beanPricePerKg)}/kg`,
       `Tasting notes: ${selection.tastingNotes.join(' · ') || '-'}`,
-      `Dosis: ${selection.doseGrams} g/cangkir`,
-      `Target: ${selection.targetCups} cangkir/hari × ${selection.operationalDays} hari`,
-      `Estimasi kebutuhan: ${selection.beanKg.toFixed(1)} kg/bulan`,
-      `Estimasi biaya langsung: ${formatRupiah(selection.directCostPerCup)}/cangkir`,
+      `Takaran kopi: ${selection.doseGrams} g/porsi`,
+      `Target penjualan: ${selection.targetCups} porsi/hari × ${selection.operationalDays} hari`,
+      `Proyeksi kebutuhan bahan baku: ${selection.beanKg.toFixed(1)} kg/bulan`,
+      `Total HPP: ${formatRupiah(selection.directCostPerCup)}/porsi`,
       '',
       `Estimasi pemakaian: ${data.get('usage') || 'Belum ditentukan'}`,
       `Peralatan: ${data.get('equipment') || 'Belum diinformasikan'}`,
@@ -59,10 +59,10 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
       <section aria-labelledby="coffee-selection-heading" className="border-b border-border-subtle pb-7">
         <h3 id="coffee-selection-heading" className="font-editorial text-xl font-bold text-brand-charcoal">Pilihan dari kalkulator</h3>
         <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-          <div><dt className="text-xs text-on-surface-variant">Sumber beans</dt><dd className="mt-1 font-semibold text-brand-charcoal">{selection.sourceLabel}</dd></div>
-          <div><dt className="text-xs text-on-surface-variant">Beans terpilih</dt><dd className="mt-1 font-semibold text-brand-charcoal">{selection.beanLabel}</dd></div>
-          <div><dt className="text-xs text-on-surface-variant">Dasar harga</dt><dd className="mt-1 font-mono font-semibold text-brand-charcoal">{selection.priceBasis}</dd></div>
-          <div><dt className="text-xs text-on-surface-variant">Biaya langsung / cangkir</dt><dd className="mt-1 font-mono font-semibold text-brand-charcoal">{formatRupiah(selection.directCostPerCup)}</dd></div>
+          <div><dt className="text-xs text-on-surface-variant">Sumber bahan baku</dt><dd className="mt-1 font-semibold text-brand-charcoal">{selection.sourceLabel}</dd></div>
+          <div><dt className="text-xs text-on-surface-variant">Produk/racikan terpilih</dt><dd className="mt-1 font-semibold text-brand-charcoal">{selection.beanLabel}</dd></div>
+          <div><dt className="text-xs text-on-surface-variant">Basis harga</dt><dd className="mt-1 font-mono font-semibold text-brand-charcoal">{selection.priceBasis}</dd></div>
+          <div><dt className="text-xs text-on-surface-variant">Total HPP / porsi</dt><dd className="mt-1 font-mono font-semibold text-brand-charcoal">{formatRupiah(selection.directCostPerCup)}</dd></div>
         </dl>
         <p className="mt-4 text-xs leading-5 text-on-surface-variant">Ringkasan ini mengikuti perubahan terakhir di BYOB dan Pricing Calculator.</p>
       </section>

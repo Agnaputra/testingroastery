@@ -16,7 +16,9 @@ import {
   ArrowUpRight,
   Check,
   ChevronDown,
+  Play,
   Plus,
+  X,
 } from 'lucide-react';
 import { HeroSection } from '../components/hero/HeroSection';
 import { SensorySection } from '../components/sensory/SensorySection';
@@ -106,23 +108,23 @@ const MARQUEE_ITEMS = ['PILIHAN ROASTERY', 'PILIHAN ROASTERY', 'PILIHAN ROASTERY
 
 const PROCESS_STEPS = [
   {
-    id: 'asal',
+    id: 'background',
     number: '01',
-    word: 'ASAL',
-    title: 'Karakter dimulai sebelum kopi tiba di roastery.',
+    word: 'BACKGROUND',
+    title: 'Rasa ingin tahu menjadi awal perjalanan kami.',
     description:
-      'Dari lereng Kaldera Ijen, Gunung Sumbing, hingga pilihan micro-lot dunia, setiap kopi dikurasi agar karakter asalnya tetap terbaca di cangkir.',
-    detail: 'Kaldera Ijen · Gunung Sumbing · Argopuro Walida',
+      '52 Coffee & Roastery mempertemukan pemilihan beans, proses sangrai, evaluasi, dan penyeduhan agar kopi dapat dipahami dari bahan baku hingga cangkir.',
+    detail: 'Cerita brand · Filosofi · Perjalanan kopi',
     imageUrl: '/images/the-roastery-behind-your-business.png',
-    imageAlt: 'Kolase origin, biji kopi, dan proses produksi 52 Coffee Roastery',
+    imageAlt: 'Perjalanan dan proses produksi 52 Coffee Roastery',
     imagePosition: 'center',
-    actionHref: '/about',
-    actionLabel: 'Kenali filosofi kami',
+    actionHref: '/background',
+    actionLabel: 'Baca background kami',
   },
   {
-    id: 'sangrai',
+    id: 'roasters',
     number: '02',
-    word: 'SANGRAI',
+    word: 'ROASTERS',
     title: 'Profil rasa dibentuk lewat sangrai yang presisi.',
     description:
       'Setiap batch disangrai menggunakan teknologi infrared untuk membentuk profil ekstraksi yang konsisten, manis, dan jernih.',
@@ -130,22 +132,22 @@ const PROCESS_STEPS = [
     imageUrl: '/images/roaster-footage.png',
     imageAlt: 'Tim 52 Coffee bekerja di depan mesin sangrai',
     imagePosition: 'center 42%',
-    actionHref: '/about',
-    actionLabel: 'Lihat proses roastery',
+    actionHref: '/roasters',
+    actionLabel: 'Lihat proses roasters',
   },
   {
-    id: 'seduh',
+    id: 'slowbar',
     number: '03',
-    word: 'SEDUH',
-    title: 'Rasa diselesaikan lewat cara seduhmu.',
+    word: 'SLOWBAR',
+    title: 'Rasa diselesaikan lewat seduhan dan percakapan.',
     description:
-      'Gunakan panduan seduh untuk menyesuaikan rasio, dosis, dan waktu agar karakter kopi yang sudah dibentuk saat roasting tetap terasa jelas.',
-    detail: 'Rasio · Dosis · Waktu',
-    imageUrl: '/images/canva-hero-pour.jpg',
-    imageAlt: 'Proses menuang air untuk seduhan pour-over 52 Coffee',
+      'Slowbar menerjemahkan karakter beans melalui pilihan menu, teknik seduh, dan dialog dengan barista agar setiap cangkir lebih mudah dipahami.',
+    detail: 'Manual brew · Tasting · Malang',
+    imageUrl: '/images/tasting-room-footage.png',
+    imageAlt: 'Suasana Slowbar dan Tasting Room 52 Coffee di Malang',
     imagePosition: 'center',
-    actionHref: '/coffee-lab/brewing-guidance',
-    actionLabel: 'Buka panduan seduh',
+    actionHref: '/slowbar',
+    actionLabel: 'Jelajahi menu Slowbar',
   },
 ];
 
@@ -183,7 +185,10 @@ export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeProcess, setActiveProcess] = useState(0);
   const [draggingProducts, setDraggingProducts] = useState(false);
+  const [storyVideoPlaying, setStoryVideoPlaying] = useState(false);
+  const [storyVideoReady, setStoryVideoReady] = useState(false);
   const processRef = useRef<HTMLElement>(null);
+  const storyPlayRef = useRef<HTMLButtonElement>(null);
   const productRailRef = useRef<HTMLDivElement>(null);
   const productDragRef = useRef({
     active: false,
@@ -463,7 +468,7 @@ export default function HomePage() {
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: -24 }}
                 transition={{ duration: reducedMotion ? 0 : .38, ease: [0.16, 1, 0.3, 1] }}
               >
-                <p className={styles.eyebrow}>Perjalanan rasa / {processStep.number}</p>
+                <p className={styles.eyebrow}>Jelajahi 52 / {processStep.number}</p>
                 <h2 id="process-heading">{processStep.title}</h2>
                 <p className={styles.leadCopy}>{processStep.description}</p>
                 <p className={styles.processDetail}>{processStep.detail}</p>
@@ -474,7 +479,7 @@ export default function HomePage() {
             </AnimatePresence>
           </div>
 
-          <div className={styles.processSteps} aria-label="Tahap perjalanan rasa">
+          <div className={styles.processSteps} aria-label="Jelajahi Background, Roasters, dan Slowbar">
             {PROCESS_STEPS.map((step, index) => (
               <button
                 type="button"
@@ -494,32 +499,88 @@ export default function HomePage() {
       <section className={styles.story} aria-labelledby="story-heading">
         <div className={styles.sectionShell}>
           <div className={styles.storyGrid}>
-            <motion.div
-              className={styles.storyCopy}
-              initial={{ opacity: 0, y: 18 }}
+            <motion.figure
+              className={styles.storyMedia}
+              data-playing={storyVideoPlaying}
+              initial={reducedMotion ? false : { opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.55 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p className={styles.eyebrow}>Filosofi 52</p>
-              <h2 id="story-heading">Dari karakter asal, menuju cangkir yang personal.</h2>
-              <p>
-                Selamat datang di 52 Coffee &amp; Roastery. Dedikasi kami adalah menghadirkan specialty coffee dalam pengalaman yang mudah dijelajahi—dari memilih biji hingga menemukan cara seduhnya.
-              </p>
-              <Link href="/coffee-lab/brewing-guidance" className={styles.inverseLink}>
-                Buka panduan &amp; kalkulator seduh <ArrowRight aria-hidden="true" size={17} />
-              </Link>
-            </motion.div>
-            <figure className={styles.storyMedia}>
-              <Image
-                src="/images/hero-52coffee-dripbox.png"
-                alt="52 Coffee drip box dalam penataan studio"
-                fill
-                sizes="(min-width: 1024px) 56vw, 100vw"
-                className={styles.coverImage}
-              />
-              <figcaption>52 Coffee / Drip Box</figcaption>
-            </figure>
+              {(!storyVideoPlaying || !storyVideoReady) && (
+                <Image
+                  src="/images/canva-hero-pour.jpg"
+                  alt="Proses menuang air untuk seduhan V60"
+                  fill
+                  sizes="(min-width: 1440px) 1344px, calc(100vw - 32px)"
+                  className={styles.storyPoster}
+                />
+              )}
+
+              {storyVideoPlaying && (
+                <iframe
+                  className={styles.storyVideo}
+                  data-ready={storyVideoReady}
+                  src="https://www.youtube-nocookie.com/embed/1oB1oDrDkHM?autoplay=1&rel=0&playsinline=1"
+                  title="A Better One Cup V60 Technique oleh James Hoffmann"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  onLoad={() => setStoryVideoReady(true)}
+                />
+              )}
+
+              {storyVideoPlaying && !storyVideoReady && (
+                <p className={styles.storyLoading} role="status">Memuat video…</p>
+              )}
+
+              {!storyVideoPlaying && (
+                <div className={styles.storyOverlay}>
+                  <button
+                    ref={storyPlayRef}
+                    type="button"
+                    className={styles.storyPlay}
+                    onClick={() => {
+                      setStoryVideoReady(false);
+                      setStoryVideoPlaying(true);
+                    }}
+                    aria-label="Putar video panduan V60"
+                  >
+                    <Play aria-hidden="true" fill="currentColor" size={19} />
+                    <span>Putar video</span>
+                  </button>
+                  <div className={styles.storyCopy}>
+                    <div className={styles.storyCopyText}>
+                      <h2 id="story-heading">Seduh lebih presisi.</h2>
+                      <p>
+                        Brewing Guidance 52 membantu menyesuaikan rasio, dosis, grind size, suhu, dan waktu seduh dengan kopi pilihanmu.
+                      </p>
+                    </div>
+                    <Link href="/coffee-lab/brewing-guidance" className={styles.storyGuideLink}>
+                      Buka panduan <ArrowRight aria-hidden="true" size={17} />
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {storyVideoPlaying && (
+                <button
+                  type="button"
+                  className={styles.storyClose}
+                  onClick={() => {
+                    setStoryVideoPlaying(false);
+                    setStoryVideoReady(false);
+                    window.requestAnimationFrame(() => storyPlayRef.current?.focus({ preventScroll: true }));
+                  }}
+                  aria-label="Tutup video dan kembali ke tampilan awal"
+                  ref={(button) => button?.focus({ preventScroll: true })}
+                >
+                  <X aria-hidden="true" size={18} />
+                  <span>Tutup video</span>
+                </button>
+              )}
+              <figcaption>James Hoffmann / One Cup V60 Technique</figcaption>
+            </motion.figure>
           </div>
         </div>
       </section>

@@ -926,16 +926,16 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
             {isPartnership && hppSimulation && (
               <section id="pricing-calculator" aria-labelledby="hpp-heading" className="scroll-mt-28 rounded-xl border border-border-subtle bg-white p-5 sm:p-6"><span id="hpp-racikan" className="sr-only" />
                 <div className="border-b border-black/10 pb-4">
-                  <h2 id="hpp-heading" className="font-headline text-lg font-semibold text-brand-charcoal">Pricing Calculator</h2>
-                  <p className="mt-1 text-xs leading-5 text-on-surface-variant">Gunakan racikan BYOB di atas atau pilih produk Retail Beans sebagai dasar simulasi HPP.</p>
+                  <h2 id="hpp-heading" className="font-headline text-lg font-semibold text-brand-charcoal">Kalkulator HPP &amp; Margin</h2>
+                  <p className="mt-1 text-xs leading-5 text-on-surface-variant">Gunakan racikan BYOB atau produk retail sebagai basis perhitungan HPP, kebutuhan bahan baku, dan margin kontribusi.</p>
                 </div>
 
                 <fieldset className="mt-5">
-                  <legend className="text-xs font-semibold text-brand-charcoal">Sumber beans untuk HPP</legend>
+                  <legend className="text-xs font-semibold text-brand-charcoal">Basis perhitungan HPP</legend>
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {([
                       ['byob', 'Racikan BYOB', `${formatRupiah(activePrice)} / ${selectedSize}`],
-                      ['retail', 'Retail Beans', 'Pilih produk dan ukuran tersedia'],
+                      ['retail', 'Produk Retail', 'Pilih produk dan ukuran tersedia'],
                     ] as const).map(([value, label, description]) => (
                       <label key={value} className={`cursor-pointer rounded-xl border p-4 transition-colors ${hppSource === value ? 'border-brand-navy bg-brand-mist/30' : 'border-border-subtle bg-white hover:border-brand-navy/50'}`}>
                         <span className="flex items-start gap-3">
@@ -950,7 +950,7 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
                 {hppSource === 'retail' && selectedRetailBean && (
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     <label htmlFor="retail-bean" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
-                      <span className="block">Retail Beans</span>
+                      <span className="block">Produk retail</span>
                       <select id="retail-bean" value={selectedRetailBean.id} onChange={(event) => {
                         const nextBean = RETAIL_BEANS.find((product) => product.id === event.target.value);
                         setRetailBeanId(event.target.value);
@@ -970,19 +970,19 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
 
                 <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                   <label className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
-                    <span>Dosis: {doseGrams} g/cangkir</span>
+                    <span>Takaran kopi: {doseGrams} g/porsi</span>
                     <input type="range" min="8" max="24" step="1" value={doseGrams} onChange={(event) => setDoseGrams(Number(event.target.value))} className="w-full accent-brand-maroon" />
                   </label>
                   <label htmlFor="other-cost" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
-                    <span className="block">Biaya bahan lain / cangkir</span>
+                    <span className="block">Biaya variabel lain / porsi</span>
                     <input id="other-cost" type="number" min="0" step="500" value={otherCost} onChange={(event) => setOtherCost(Math.max(0, Number(event.target.value) || 0))} className="field-control" />
                   </label>
                   <label htmlFor="menu-price" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
-                    <span className="block">Harga jual menu</span>
+                    <span className="block">Harga jual / porsi</span>
                     <input id="menu-price" type="number" min="0" step="1000" value={menuPrice} onChange={(event) => setMenuPrice(Math.max(0, Number(event.target.value) || 0))} className="field-control" />
                   </label>
                   <label htmlFor="target-cups" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
-                    <span className="block">Cangkir / hari</span>
+                    <span className="block">Target penjualan / hari</span>
                     <input id="target-cups" type="number" min="0" max="1000" step="1" value={targetCups} onChange={(event) => setTargetCups(Math.min(1000, Math.max(0, Number(event.target.value) || 0)))} className="field-control" />
                   </label>
                   <label htmlFor="operational-days" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
@@ -992,14 +992,14 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
                 </div>
 
                 <dl className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-border-subtle pt-5 sm:grid-cols-3">
-                  <div><dt className="text-[10px] text-on-surface-variant">Harga beans setara / kg</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppBeanPricePerKg)}</dd></div>
-                  <div><dt className="text-[10px] text-on-surface-variant">Biaya kopi / cangkir</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppSimulation.coffeePerCup)}</dd></div>
-                  <div><dt className="text-[10px] text-on-surface-variant">Biaya langsung / cangkir</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppSimulation.directCostPerCup)}</dd></div>
-                  <div><dt className="text-[10px] text-on-surface-variant">Kontribusi kotor / cangkir</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{hppSimulation.contributionPerCup === null ? '—' : formatRupiah(hppSimulation.contributionPerCup)}</dd></div>
-                  <div><dt className="text-[10px] text-on-surface-variant">Kebutuhan beans / bulan</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{hppSimulation.beanKg.toFixed(1)} kg</dd></div>
-                  <div><dt className="text-[10px] text-on-surface-variant">Kontribusi kotor / bulan</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-navy">{hppSimulation.monthlyContribution === null ? '—' : formatRupiah(hppSimulation.monthlyContribution)}</dd></div>
+                  <div><dt className="text-[10px] text-on-surface-variant">Harga bahan baku / kg</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppBeanPricePerKg)}</dd></div>
+                  <div><dt className="text-[10px] text-on-surface-variant">HPP kopi / porsi</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppSimulation.coffeePerCup)}</dd></div>
+                  <div><dt className="text-[10px] text-on-surface-variant">Total HPP / porsi</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{formatRupiah(hppSimulation.directCostPerCup)}</dd></div>
+                  <div><dt className="text-[10px] text-on-surface-variant">Margin kontribusi / porsi</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{hppSimulation.contributionPerCup === null ? '—' : formatRupiah(hppSimulation.contributionPerCup)}</dd></div>
+                  <div><dt className="text-[10px] text-on-surface-variant">Kebutuhan bahan baku / bulan</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-charcoal">{hppSimulation.beanKg.toFixed(1)} kg</dd></div>
+                  <div><dt className="text-[10px] text-on-surface-variant">Proyeksi margin kontribusi / bulan</dt><dd className="mt-1 font-mono text-sm font-bold text-brand-navy">{hppSimulation.monthlyContribution === null ? '—' : formatRupiah(hppSimulation.monthlyContribution)}</dd></div>
                 </dl>
-                <p className="mt-5 text-xs leading-5 text-on-surface-variant">Simulasi berdasarkan input Anda; bukan quotation dan belum mencakup seluruh biaya operasional atau syarat partnership.</p>
+                <p className="mt-5 text-xs leading-5 text-on-surface-variant">Estimasi berdasarkan input Anda. Nilai ini bukan penawaran harga resmi dan belum mencakup biaya tetap, pajak, komisi platform, atau ketentuan partnership.</p>
               </section>
             )}
 

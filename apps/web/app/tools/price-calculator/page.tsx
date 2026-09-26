@@ -26,12 +26,12 @@ export default function PriceCalculatorPage() {
     if (!result) return;
     const lines = [
       'Simulasi kebutuhan kemitraan 52 Coffee',
-      `Harga beans (input): ${formatRupiah(number(beanPrice))}/kg`,
-      `Dosis: ${number(dose)} g/cangkir`,
-      `Biaya kopi/cangkir: ${formatRupiah(result.coffeePerCup)}`,
-      `Biaya langsung/cangkir: ${formatRupiah(result.directCostPerCup)}`,
-      result.beanKg ? `Estimasi kebutuhan: ${result.beanKg.toFixed(1)} kg/bulan` : '',
-      'Catatan: simulasi bukan quotation dan belum memasukkan seluruh biaya operasional.',
+      `Harga bahan baku: ${formatRupiah(number(beanPrice))}/kg`,
+      `Takaran kopi: ${number(dose)} g/porsi`,
+      `HPP kopi/porsi: ${formatRupiah(result.coffeePerCup)}`,
+      `Total HPP/porsi: ${formatRupiah(result.directCostPerCup)}`,
+      result.beanKg ? `Proyeksi kebutuhan bahan baku: ${result.beanKg.toFixed(1)} kg/bulan` : '',
+      'Catatan: estimasi bukan penawaran harga resmi dan belum memasukkan seluruh biaya operasional.',
     ].filter(Boolean).join('\n');
     await navigator.clipboard.writeText(lines);
     setCopied(true);
@@ -47,11 +47,11 @@ export default function PriceCalculatorPage() {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.78fr)] lg:items-start">
           <div className="ui-surface grid gap-5 p-6 sm:grid-cols-2 sm:p-8">
-            <MoneyField id="bean-price" label="Harga beans per kg" value={beanPrice} onChange={setBeanPrice} placeholder="Contoh: 180000" />
-            <NumberField id="dose" label="Dosis per cangkir (gram)" value={dose} onChange={setDose} placeholder="Contoh: 18" />
-            <MoneyField id="other-cost" label="Biaya bahan lain per cangkir" value={otherCost} onChange={setOtherCost} placeholder="Susu, cup, filter, dan lain-lain" required={false} />
-            <MoneyField id="selling-price" label="Harga jual per cangkir" value={sellingPrice} onChange={setSellingPrice} placeholder="Opsional" required={false} />
-            <NumberField id="daily-cups" label="Cangkir per hari" value={dailyCups} onChange={setDailyCups} placeholder="Opsional" required={false} />
+            <MoneyField id="bean-price" label="Harga bahan baku per kg" value={beanPrice} onChange={setBeanPrice} placeholder="Contoh: 180000" />
+            <NumberField id="dose" label="Takaran kopi per porsi (gram)" value={dose} onChange={setDose} placeholder="Contoh: 18" />
+            <MoneyField id="other-cost" label="Biaya variabel lain per porsi" value={otherCost} onChange={setOtherCost} placeholder="Susu, kemasan, filter, dan biaya variabel lain" required={false} />
+            <MoneyField id="selling-price" label="Harga jual per porsi" value={sellingPrice} onChange={setSellingPrice} placeholder="Opsional" required={false} />
+            <NumberField id="daily-cups" label="Target penjualan per hari" value={dailyCups} onChange={setDailyCups} placeholder="Opsional" required={false} />
             <NumberField id="days" label="Hari operasional per bulan" value={days} onChange={setDays} placeholder="Opsional" required={false} />
           </div>
 
@@ -62,12 +62,12 @@ export default function PriceCalculatorPage() {
             ) : (
               <>
                 <dl className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                  <Result label="Cangkir per kg" value={`± ${result.cupsPerKg.toFixed(1)}`} />
-                  <Result label="Biaya kopi / cangkir" value={formatRupiah(result.coffeePerCup)} />
-                  <Result label="Biaya langsung / cangkir" value={formatRupiah(result.directCostPerCup)} />
-                  <Result label="Kontribusi kotor / cangkir" value={result.contributionPerCup === null ? '—' : formatRupiah(result.contributionPerCup)} />
-                  <Result label="Kebutuhan beans / bulan" value={result.monthlyCups ? `${result.beanKg.toFixed(1)} kg` : '—'} />
-                  <Result label="Kontribusi kotor / bulan" value={result.monthlyContribution === null || !result.monthlyCups ? '—' : formatRupiah(result.monthlyContribution)} />
+                  <Result label="Estimasi porsi per kg" value={`± ${result.cupsPerKg.toFixed(1)}`} />
+                  <Result label="HPP kopi / porsi" value={formatRupiah(result.coffeePerCup)} />
+                  <Result label="Total HPP / porsi" value={formatRupiah(result.directCostPerCup)} />
+                  <Result label="Margin kontribusi / porsi" value={result.contributionPerCup === null ? '—' : formatRupiah(result.contributionPerCup)} />
+                  <Result label="Kebutuhan bahan baku / bulan" value={result.monthlyCups ? `${result.beanKg.toFixed(1)} kg` : '—'} />
+                  <Result label="Proyeksi margin kontribusi / bulan" value={result.monthlyContribution === null || !result.monthlyCups ? '—' : formatRupiah(result.monthlyContribution)} />
                 </dl>
                 <button type="button" onClick={copySummary} className="mt-8 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/25 px-4 text-sm font-semibold transition-colors hover:bg-white hover:text-brand-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"><Copy className="h-4 w-4" aria-hidden="true" />{copied ? 'Ringkasan tersalin' : 'Salin ringkasan'}</button>
               </>
