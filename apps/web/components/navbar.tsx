@@ -47,11 +47,6 @@ export const NAV_ITEMS: NavItem[] = [
         id: 'partnerships-consultations',
         href: '/work-with-us/consultations',
         label: 'Consultations',
-        children: [
-          { id: 'consultation-form', href: '/work-with-us/consultations#consultation-form', label: 'Formulir Consultation' },
-          { id: 'byob-consultation', href: '/work-with-us/consultations#byob', label: 'Build Your Own Blend' },
-          { id: 'pricing-calculator', href: '/work-with-us/consultations#pricing-calculator', label: 'Pricing Calculator' },
-        ],
       },
       {
         id: 'wholesale',
@@ -69,33 +64,16 @@ export const NAV_ITEMS: NavItem[] = [
         id: 'brewing-guidance',
         href: '/coffee-lab/brewing-guidance',
         label: 'Brewing Guidance',
-        children: [
-          { id: 'brewing-methods', href: '/coffee-lab/brewing-guidance#brewing-methods', label: 'Brewing Methods' },
-          { id: 'recipes', href: '/coffee-lab/brewing-guidance#recipes', label: 'Recipes' },
-          { id: 'grind-size', href: '/coffee-lab/brewing-guidance#grind-size', label: 'Grind Size' },
-          { id: 'ratio-extraction', href: '/coffee-lab/brewing-guidance#ratio-extraction', label: 'Ratio & Extraction' },
-        ],
       },
       {
         id: 'lab-blend',
         href: '/coffee-lab/build-your-own-blend',
         label: 'Build Your Own Blend',
-        children: [
-          { id: 'choose-beans', href: '/coffee-lab/build-your-own-blend#choose-your-beans', label: 'Choose Your Beans' },
-          { id: 'define-profile', href: '/coffee-lab/build-your-own-blend#define-your-profile', label: 'Define Your Profile' },
-          { id: 'blend-development', href: '/coffee-lab/build-your-own-blend#blend-development', label: 'Blend Development' },
-          { id: 'tasting-adjustment', href: '/coffee-lab/build-your-own-blend#tasting-adjustment', label: 'Tasting & Adjustment' },
-        ],
       },
       {
         id: 'coffee-experiments',
         href: '/coffee-lab/coffee-experiments',
         label: 'Coffee Experiments',
-        children: [
-          { id: 'cupping-events', href: '/coffee-lab/coffee-experiments#cupping-events', label: 'Cupping Events' },
-          { id: 'roasting-experiments', href: '/coffee-lab/coffee-experiments#roasting-experiments', label: 'Roasting Experiments' },
-          { id: 'brewing-experiments', href: '/coffee-lab/coffee-experiments#brewing-experiments', label: 'Brewing Experiments' },
-        ],
       },
     ],
   },

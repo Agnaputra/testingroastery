@@ -1,7 +1,7 @@
 'use client';
 
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -187,6 +187,7 @@ export default function HomePage() {
   const [draggingProducts, setDraggingProducts] = useState(false);
   const [storyVideoPlaying, setStoryVideoPlaying] = useState(false);
   const [storyVideoReady, setStoryVideoReady] = useState(false);
+  const [storyPreviewMounted, setStoryPreviewMounted] = useState(false);
   const processRef = useRef<HTMLElement>(null);
   const storyPlayRef = useRef<HTMLButtonElement>(null);
   const productRailRef = useRef<HTMLDivElement>(null);
@@ -203,6 +204,8 @@ export default function HomePage() {
     offset: ['start start', 'end end'],
   });
   const processStep = PROCESS_STEPS[activeProcess];
+
+  useEffect(() => setStoryPreviewMounted(true), []);
 
   useMotionValueEvent(processProgress, 'change', (progress) => {
     const nextProcess = Math.min(PROCESS_STEPS.length - 1, Math.floor(progress * PROCESS_STEPS.length));
@@ -497,23 +500,33 @@ export default function HomePage() {
       </section>
 
       <section className={styles.story} aria-labelledby="story-heading">
-        <div className={styles.sectionShell}>
-          <div className={styles.storyGrid}>
-            <motion.figure
-              className={styles.storyMedia}
-              data-playing={storyVideoPlaying}
-              initial={reducedMotion ? false : { opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {(!storyVideoPlaying || !storyVideoReady) && (
-                <Image
-                  src="/images/canva-hero-pour.jpg"
-                  alt="Proses menuang air untuk seduhan V60"
-                  fill
-                  sizes="(min-width: 1440px) 1344px, calc(100vw - 32px)"
-                  className={styles.storyPoster}
+        <motion.figure
+          className={styles.storyMedia}
+          data-playing={storyVideoPlaying}
+          initial={reducedMotion ? false : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
+              <Image
+                src="/images/story-v60-hd.jpg"
+                alt="Proses menuang air untuk seduhan V60"
+                fill
+                sizes="100vw"
+                className={styles.storyPoster}
+              />
+
+              {!storyVideoPlaying && storyPreviewMounted && reducedMotion === false && (
+                <iframe
+                  className={`${styles.storyVideo} ${styles.storyPreviewVideo}`}
+                  data-ready={storyVideoReady}
+                  src="https://www.youtube-nocookie.com/embed/1oB1oDrDkHM?autoplay=1&mute=1&controls=0&loop=1&playlist=1oB1oDrDkHM&rel=0&playsinline=1&disablekb=1&fs=0&cc_load_policy=0&iv_load_policy=3"
+                  title="Pratinjau otomatis panduan V60"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="autoplay; encrypted-media"
+                  onLoad={() => setStoryVideoReady(true)}
                 />
               )}
 
@@ -536,6 +549,14 @@ export default function HomePage() {
 
               {!storyVideoPlaying && (
                 <div className={styles.storyOverlay}>
+                  <div className={styles.storyHeader}>
+                    <div className={styles.storyEyebrow}>
+                      <span>Cerita dari Coffee Lab</span>
+                      <span>52 / 01</span>
+                    </div>
+                    <h2 id="story-heading"><span>Seduh lebih</span><span>presisi.</span></h2>
+                  </div>
+
                   <button
                     ref={storyPlayRef}
                     type="button"
@@ -546,14 +567,19 @@ export default function HomePage() {
                     }}
                     aria-label="Putar video panduan V60"
                   >
-                    <Play aria-hidden="true" fill="currentColor" size={19} />
-                    <span>Putar video</span>
+                    <span>Putar film</span>
+                    <Play aria-hidden="true" fill="currentColor" size={17} />
                   </button>
+
                   <div className={styles.storyCopy}>
                     <div className={styles.storyCopyText}>
-                      <h2 id="story-heading">Seduh lebih presisi.</h2>
+                      <div className={styles.storyMeta}>
+                        <span className={styles.storyDuration}>02:30</span>
+                        <span>Panduan seduh V60</span>
+                      </div>
+                      <h3>Satu cangkir, lebih terarah.</h3>
                       <p>
-                        Brewing Guidance 52 membantu menyesuaikan rasio, dosis, grind size, suhu, dan waktu seduh dengan kopi pilihanmu.
+                        Sesuaikan rasio, dosis, grind size, suhu, dan waktu seduh dengan kopi pilihanmu.
                       </p>
                     </div>
                     <Link href="/coffee-lab/brewing-guidance" className={styles.storyGuideLink}>
@@ -579,10 +605,7 @@ export default function HomePage() {
                   <span>Tutup video</span>
                 </button>
               )}
-              <figcaption>James Hoffmann / One Cup V60 Technique</figcaption>
-            </motion.figure>
-          </div>
-        </div>
+        </motion.figure>
       </section>
 
       <section className={styles.b2b} aria-labelledby="b2b-heading">
