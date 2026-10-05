@@ -49,3 +49,4 @@ Thumbs.db
 .turbo/
 .tmp-ui-review/
 apps/web/.tmp-visual-reference/
+apps/ai-backend/evaluation/results/

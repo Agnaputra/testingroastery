@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .models import ChatRequest, ChatResponse, SearchRequest, SearchResponse
+from .guardrail_service import guardrail_service
 from .rag_service import rag_service, PUBLISHED_COFFEE_KNOWLEDGE_BASE
 
 app = FastAPI(
@@ -38,18 +39,21 @@ def root():
 
 @app.get("/health")
 def health_check():
+    guardrails = guardrail_service.status()
+    retrieval = rag_service.retrieval_status()
     return {
-        "status": "healthy",
+        "status": "healthy" if guardrails["runtime_ready"] and retrieval["runtime"] == "pgvector" else "degraded",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "environment": settings.ENVIRONMENT,
-        "guardrails_enabled": settings.ENABLE_GUARDRAILS,
+        "guardrails": guardrails,
+        "retrieval": retrieval,
     }
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_with_barista(request: ChatRequest):
     """
-    Catalog-grounded conversational endpoint with OpenAI, Gemini fallback, and input guardrails.
+    Catalog-grounded conversational endpoint with OpenAI, local fallback, and input guardrails.
     """
     try:
         response = rag_service.generate_barista_response(
@@ -66,7 +70,7 @@ async def search_coffee_catalog(request: SearchRequest):
     Semantic vector search for coffee products by tasting notes or queries
     """
     try:
-        results = rag_service.search_similar_products(request.query, limit=request.limit or 4)
+        results = rag_service.search_similar_products(request.query, top_k=request.limit or 4)
         formatted_results = [
             {
                 "slug": item[0]["slug"],

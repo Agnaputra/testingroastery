@@ -13,7 +13,7 @@ Baca [AGENTS.md](./AGENTS.md) sebagai panduan utama. Instruksi ini berlaku untuk
 - Pertahankan strict typing. Gunakan tipe dari `apps/web/lib/data.ts` dan tipe fitur setempat; hindari `any` baru tanpa alasan.
 - Cart store ada di `@/lib/store/useCartStore`. `addItem()` menerima `CartItemInput = Omit<CartItem, 'id'>`; kontrak saat ini mencakup `productId`, `name`, `slug`, `imageUrl`, `weightGrams`, `weightLabel`, `grind`, `grindLabel`, `unitPrice`, `quantity`, `series`, dan `tastingNotes`. Periksa tipe sumber sebelum mengubah pemanggilan.
 - Ambil harga produk dari data yang ada, dan format tampilan nominal dengan `formatRupiah()`. Pertahankan quick view, pencarian, detail produk, dan cart.
-- Jangan menyatakan checkout atau pelacakan sebagai transaksi nyata. Jelaskan apakah respons Virtual Barista berasal dari Gemini, FastAPI, atau fallback lokal bila hal itu relevan.
+- Jangan menyatakan checkout atau pelacakan sebagai transaksi nyata. Jelaskan apakah respons Virtual Barista berasal dari OpenAI melalui FastAPI atau fallback lokal bila hal itu relevan.
 
 ## Penyelesaian
 

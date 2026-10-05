@@ -744,6 +744,17 @@
   background:
     linear-gradient(90deg, rgb(10 14 17 / 82%) 0%, rgb(10 14 17 / 38%) 46%, rgb(10 14 17 / 8%) 72%),
     linear-gradient(180deg, rgb(10 14 17 / 32%) 0%, transparent 42%, rgb(10 14 17 / 90%) 100%);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 450ms cubic-bezier(.22, 1, .36, 1), transform 450ms cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .story:hover .storyOverlay:not(:focus-within) {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
 }
 
 .storyHeader {
@@ -1170,6 +1181,7 @@
   .lightButton,
   .quickAdd,
   .processSteps button,
+  .storyOverlay,
   .storyCopy,
   .storyPlay,
   .storyClose,

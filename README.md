@@ -59,13 +59,13 @@ testingroastery/
 │   │   ├── tailwind.config.ts        # Token warna & font 52 Coffee
 │   │   └── package.json
 │   │
-│   └── ai-backend/                   # Backend AI Microservice (FastAPI + pgvector + Gemini + NeMo)
+│   └── ai-backend/                   # Backend AI Microservice (FastAPI + pgvector + OpenAI + NeMo)
 │       ├── app/
 │       │   ├── main.py               # FastAPI entrypoint (/health, /api/chat, /api/search, /api/products)
-│       │   ├── config.py             # App configuration & Gemini settings
+│       │   ├── config.py             # App configuration & OpenAI settings
 │       │   ├── database.py           # PostgreSQL SQLAlchemy connection
 │       │   ├── models.py             # Pydantic schemas & response models
-│       │   ├── rag_service.py        # Vector similarity search & Gemini RAG reasoning
+│       │   ├── rag_service.py        # Vector similarity search & OpenAI RAG reasoning
 │       │   ├── guardrails/           # NVIDIA NeMo Guardrails configuration
 │       │   │   ├── config.yml        # Rails configuration
 │       │   │   ├── prompts.yml       # Moderation & hallucination grounding prompts

@@ -12,11 +12,9 @@ class Settings(BaseSettings):
     # OpenAI runs server-side only. Never expose this key through frontend env vars.
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
-
-    # Google Gemini remains a temporary provider fallback during migration.
-    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "models/text-embedding-004")
+    OPENAI_EMBEDDING_MODEL: str = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+    EMBEDDING_DIMENSIONS: int = int(os.getenv("EMBEDDING_DIMENSIONS", "1536"))
+    RAG_TOP_K: int = int(os.getenv("RAG_TOP_K", "3"))
     
     # PostgreSQL + pgvector Database
     DATABASE_URL: str = os.getenv(
@@ -26,6 +24,7 @@ class Settings(BaseSettings):
     
     # Guardrails
     ENABLE_GUARDRAILS: bool = os.getenv("ENABLE_GUARDRAILS", "true").lower() == "true"
+    RAGAS_EVALUATOR_MODEL: str = os.getenv("RAGAS_EVALUATOR_MODEL", "gpt-4.1-mini")
     
     # CORS Origins
     CORS_ORIGINS: list[str] = [

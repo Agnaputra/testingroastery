@@ -60,14 +60,14 @@ CREATE TABLE IF NOT EXISTS product_variants (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Coffee Knowledge Base for Vector RAG (Embedding 768-dim)
+-- 5. Coffee Knowledge Base for Vector RAG. text-embedding-3-small emits 1536 dimensions.
 CREATE TABLE IF NOT EXISTS coffee_knowledge (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID REFERENCES products(id) ON DELETE CASCADE,
     title VARCHAR(200) NOT NULL,
     document_chunk TEXT NOT NULL,
     metadata JSONB,
-    embedding vector(768),
+    embedding vector(1536),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

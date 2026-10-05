@@ -1,24 +1,16 @@
-# Colang Domain Rules for 52 Coffee & Roastery
+# NVIDIA NeMo rail flows invoked by LLMRails.check() at input and output time.
 
-define user ask coffee recommendations
-  "rekomendasi kopi fruity"
-  "kopi rasa buah berry"
-  "kopi yang harum melati"
-  "kopi untuk v60"
-  "kopi espresso untuk susu"
-  "biji kopi paling manis"
+define flow self check input
+  $allowed = execute self_check_input
+  if not $allowed
+    bot refuse to respond
+    stop
 
-define flow coffee recommendation
-  user ask coffee recommendations
-  $bot_reply = execute search_and_generate_barista_reply
-  bot $bot_reply
+define flow self check output
+  $allowed = execute self_check_output
+  if not $allowed
+    bot refuse to respond
+    stop
 
-define user ask off topic
-  "siapa presiden indonesia"
-  "buatkan kode python"
-  "bagaimana cara meretas wifi"
-  "jelaskan teori relativitas"
-
-define flow handle off topic
-  user ask off topic
-  bot "Mohon maaf kawan seduh, saya adalah Virtual Barista khusus 52 Coffee & Roastery. Saya siap membantu seputar rekomendasi biji kopi, profil rasa, dan panduan seduh presisi di roastery kami."
+define bot refuse to respond
+  "Mohon maaf kawan seduh, saya hanya dapat membantu seputar katalog 52 Coffee, profil rasa, dan panduan seduh."

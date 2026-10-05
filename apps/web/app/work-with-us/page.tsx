@@ -1,303 +1,142 @@
 'use client';
 
-import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import {
-  Package,
-  Flame,
-  TrendingUp,
-  Calculator,
-  Phone,
-  CheckCircle2,
-} from 'lucide-react';
-import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
-import { WHATSAPP_URL } from '../../lib/data';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { WholesaleSection } from './wholesale-section';
+import styles from './page.module.css';
+
+const consultationFeatures = [
+  ['Formulir Consultation', 'Ceritakan kebutuhan dan kondisi bisnismu.'],
+  ['Build Your Own Blend', 'Kembangkan profil rasa dan racikan yang merepresentasikan bisnismu.'],
+  ['Pricing Calculator', 'Perkirakan kebutuhan dan biaya sebelum memulai.'],
+] as const;
+
+const processSteps = [
+  ['Ceritakan kebutuhan', 'Kenalkan bisnis, konsep, dan kebutuhan kopimu.'],
+  ['Temukan arah', 'Kami membantu menentukan kopi atau solusi yang sesuai.'],
+  ['Tasting & penyesuaian', 'Evaluasi profil rasa dan lakukan penyesuaian bila diperlukan.'],
+  ['Mulai kemitraan', 'Solusi yang telah disepakati siap diterapkan pada bisnismu.'],
+] as const;
 
 export default function WorkWithUsPage() {
-  const [businessName, setBusinessName] = useState('');
-  const [contactName, setContactName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [city, setCity] = useState('');
-  const [serviceType, setServiceType] = useState('Supplier Roast Beans');
-  const [estimatedVolume, setEstimatedVolume] = useState('');
-  const [message, setMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const whatsAppMessage = `Halo tim 52 Coffee & Roastery. Saya ${contactName || '[nama kontak]'} dari ${businessName || '[nama bisnis]'}${city ? ` di ${city}` : ''}. Saya tertarik dengan layanan ${serviceType}. Estimasi kebutuhan biji kopi: ${estimatedVolume}.${message ? ` Catatan tambahan: ${message}` : ''}`;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!businessName || !contactName || !phone) {
-      alert('Mohon lengkapi nama bisnis, nama kontak, dan nomor WhatsApp.');
-      return;
-    }
-
-    const waUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(whatsAppMessage)}`;
-
-    setSubmitted(true);
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  const reducedMotion = useReducedMotion();
+  const reveal = {
+    initial: reducedMotion ? false : { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.16 },
+    transition: { duration: reducedMotion ? 0 : 0.65, ease: [0.22, 1, 0.36, 1] as const },
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-      className="page-shell"
-    >
-      {/* 1. HERO SECTION */}
-      <PageIntro
-        className="partnership-hero"
-        tone="dark"
-        kicker="Kemitraan Bisnis 52 Coffee"
-        icon={<Package size={14} />}
-        title="Kopi konsisten untuk bisnis yang terus tumbuh."
-        description="Kami mendampingi kedai kopi, restoran, dan hotel menjaga mutu sajian melalui pasokan kopi, racikan khusus, dan dukungan operasional yang terukur."
-      />
-
-      {/* 2. 3 KEY PARTNERSHIP SERVICES */}
-      <section id="wholesale-partnership" className="site-container page-section scroll-mt-28">
-        <SectionIntro
-          className="partnership-section-intro"
-          align="center"
-          kicker="Solusi kemitraan"
-          title="Layanan roastery untuk bisnis Anda"
-          description="Pilih dukungan yang paling sesuai dengan tahap dan kebutuhan operasional bisnis Anda."
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.05 }}
-            className="ui-surface p-6 space-y-3 group"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#49697a]/25 bg-[#49697a]/10 text-[#49697a] transition-transform group-hover:scale-105">
-              <Package className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 1</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Supplier Roast Beans</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Pasokan roast beans terjadwal untuk kedai kopi, restoran, dan hotel dengan SOP mutu dan konsistensi ekstraksi.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="ui-surface p-6 space-y-3 group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-brand-navy/10 border border-brand-navy/20 flex items-center justify-center text-brand-navy group-hover:scale-105 transition-transform">
-              <Flame className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 2</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Label Khusus &amp; Special Blends</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Pembuatan signature blend eksklusif dengan profil sangrai yang dirancang khusus untuk identitas brand mitra (seperti BYOB).
-            </p>
-            <Link href="/work-with-us/blend-builder" className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-maroon hover:underline">Buka konsultasi custom blend →</Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-            className="ui-surface p-6 space-y-3 group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-brand-charcoal/10 border border-brand-charcoal/20 flex items-center justify-center text-brand-charcoal group-hover:scale-105 transition-transform">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 3</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Consultation Business Beverages</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Pendampingan menyeluruh mencakup SOP barista, supply mesin &amp; grinder, perancangan layout coffee bar, kalkulasi HPP cangkir, dan racikan signature menu.
-            </p>
-            <Link href="/tools/price-calculator" className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-maroon hover:underline">Buka kalkulator HPP →</Link>
-          </motion.div>
+    <div className={`${styles.page} page-shell`}>
+      <section className={styles.hero} aria-labelledby="partnership-hero-heading">
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>KEMITRAAN / B2B</p>
+          <h1 id="partnership-hero-heading">
+            <span>Partner untuk</span>
+            <span>kebutuhan kopi</span>
+            <span>bisnismu.</span>
+          </h1>
+          <p className={styles.heroDescription}>
+            Bangun kebutuhan kopi bisnismu bersama 52 Coffee &amp; Roastery melalui
+            konsultasi yang terarah atau kemitraan wholesale untuk kebutuhan
+            jangka panjang.
+          </p>
+          <a href="#partnerships" className={styles.heroLink}>
+            Jelajahi Kemitraan <ArrowDownRight size={18} aria-hidden="true" />
+          </a>
+        </div>
+        <div className={styles.heroMedia}>
+          <Image
+            src="/images/roaster-footage.png"
+            alt="Tim 52 Coffee bekerja di depan mesin roasting"
+            fill
+            priority
+            sizes="(max-width: 767px) 100vw, 48vw"
+            className={styles.image}
+          />
         </div>
       </section>
 
-      {/* Kalkulator HPP Banner */}
-      <section id="kalkulator-hpp" className="site-container pb-4" aria-labelledby="hpp-heading">
-        <div className="grid gap-6 border border-border-subtle bg-surface-container-low p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="flex gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-maroon/10 text-brand-maroon">
-              <Calculator className="h-6 w-6" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-maroon">Kemitraan Bisnis</p>
-              <h2 id="hpp-heading" className="mt-1 font-editorial text-2xl font-bold text-brand-charcoal">Kalkulator HPP Bisnis</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">Hitung estimasi kebutuhan beans, biaya per sajian, harga jual, dan margin berdasarkan input bisnis Anda sebelum memulai diskusi kemitraan.</p>
-            </div>
-          </div>
-          <Link href="/tools/price-calculator" className="btn-primary shrink-0 text-sm">Buka Kalkulator HPP</Link>
+      <motion.section id="partnerships" className={`${styles.intro} site-container`} aria-labelledby="partnership-intro-heading" {...reveal}>
+        <p className={styles.eyebrow}>Bentuk Kemitraan / 02</p>
+        <div className={styles.introCopy}>
+          <h2 id="partnership-intro-heading">Dua cara untuk<br />memulai bersama.</h2>
+          <p>
+            Setiap bisnis memiliki kebutuhan yang berbeda. Mulai dari merancang arah kopi
+            hingga membangun pasokan yang konsisten, pilih bentuk kemitraan yang paling
+            sesuai dengan kebutuhanmu.
+          </p>
         </div>
-      </section>
+      </motion.section>
 
-      {/* 3. B2B INQUIRY FORM */}
-      <section id="consultation-form" className="site-container page-section scroll-mt-28">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45 }}
-          className="ui-surface mx-auto max-w-4xl p-6 sm:p-10 space-y-8"
-        >
-          <div className="border-b border-border-subtle pb-5 space-y-2">
-            <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-brand-navy">
-              Mulai Diskusi Kemitraan
-            </h2>
-            <p className="text-sm leading-6 text-on-surface-variant">
-              Ceritakan kebutuhan bisnis Anda. Formulir ini menyiapkan pesan untuk dilanjutkan melalui WhatsApp resmi 52 Coffee (+62 857-9252-4863).
-            </p>
+      <motion.section id="consultations" className={styles.consultations} aria-labelledby="consultations-heading" {...reveal}>
+        <div className={`${styles.serviceGrid} site-container`}>
+          <div className={styles.serviceMedia}>
+            <Image
+              src="/images/byob-roaster-craft.jpg"
+              alt="Roaster 52 Coffee mengevaluasi biji kopi untuk profil racikan bisnis"
+              fill
+              sizes="(max-width: 767px) 100vw, 42vw"
+              className={styles.image}
+            />
           </div>
+          <div className={styles.serviceContent}>
+            <motion.div className={styles.rule} aria-hidden="true" initial={reducedMotion ? false : { scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: reducedMotion ? 0 : 0.8 }} />
+            <div className={styles.serviceLabel}><span>01</span><span>Consultations</span></div>
+            <h2 id="consultations-heading">Mulai dari sebuah<br />percakapan.</h2>
+            <p className={styles.serviceDescription}>
+              Ceritakan kebutuhan, konsep, dan arah kopimu. Kami membantu menerjemahkannya
+              menjadi pilihan yang lebih terarah untuk bisnismu.
+            </p>
+            <ol className={styles.featureList}>
+              {consultationFeatures.map(([title, description], index) => (
+                <li key={title}>
+                  <span className={styles.featureNumber}>0{index + 1}</span>
+                  <div><h3>{title}</h3><p>{description}</p></div>
+                </li>
+              ))}
+            </ol>
+            <Link href="/work-with-us/consultations" className={styles.serviceLink}>
+              Explore Consultations <ArrowUpRight size={19} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </motion.section>
 
-          {submitted ? (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-8 text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-              <h3 className="font-editorial text-xl font-bold text-brand-navy">
-                Pesan siap dikirim di WhatsApp
-              </h3>
-              <p className="text-sm leading-6 text-on-surface-variant max-w-md mx-auto">
-                Periksa percakapan yang terbuka, lalu tekan kirim di WhatsApp. Permintaan belum masuk sebelum pesan tersebut dikirim.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="business-name" className="field-label">
-                    Nama Bisnis / Kedai Kopi
-                  </label>
-                  <input
-                    id="business-name"
-                    type="text"
-                    required
-                    autoComplete="organization"
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="Contoh: Kopi Seduh Santai"
-                    className="field-control"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="contact-name" className="field-label">
-                    Nama Penanggung Jawab
-                  </label>
-                  <input
-                    id="contact-name"
-                    type="text"
-                    required
-                    autoComplete="name"
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
-                    placeholder="Contoh: Budi Santoso"
-                    className="field-control"
-                  />
-                </div>
-              </div>
+      <WholesaleSection />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="business-phone" className="field-label">
-                    Nomor WhatsApp Aktif
-                  </label>
-                  <input
-                    id="business-phone"
-                    type="tel"
-                    required
-                    autoComplete="tel"
-                    inputMode="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Contoh: 08123456789"
-                    className="field-control"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="business-location" className="field-label">
-                    Alamat / Lokasi Bisnis
-                  </label>
-                  <input
-                    id="business-location"
-                    type="text"
-                    autoComplete="street-address"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Contoh: Jl. Ijen No. 52, Malang / Surabaya"
-                    className="field-control"
-                  />
-                </div>
-              </div>
+      <motion.section className={`${styles.process} site-container`} aria-labelledby="process-heading" {...reveal}>
+        <p className={styles.eyebrow}>Proses Kemitraan / 04</p>
+        <h2 id="process-heading">Dari percakapan<br />menjadi sajian.</h2>
+        <ol className={styles.processList}>
+          {processSteps.map(([title, description], index) => (
+            <li key={title}>
+              <span className={styles.processNumber}>0{index + 1}</span>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </li>
+          ))}
+        </ol>
+      </motion.section>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="service-type" className="field-label">
-                    Jenis Layanan Kemitraan
-                  </label>
-                  <select
-                    id="service-type"
-                    value={serviceType}
-                    onChange={(e) => setServiceType(e.target.value)}
-                    className="field-control"
-                  >
-                    <option value="Supplier Roast Beans">Supplier Roast Beans</option>
-                    <option value="Label Khusus dan Special Blends">Label Khusus &amp; Special Blends</option>
-                    <option value="Consultation Business Beverages">Consultation Business Beverages</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="estimated-volume" className="field-label">
-                    Estimasi Kebutuhan Biji Kopi
-                  </label>
-                  <input
-                    id="estimated-volume"
-                    type="text"
-                    value={estimatedVolume}
-                    onChange={(e) => setEstimatedVolume(e.target.value)}
-                    placeholder="Contoh: 25 kg / bulan atau sesuai kebutuhan kedai"
-                    className="field-control"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="partnership-notes" className="field-label">
-                  Catatan Tambahan / Profil Rasa yang Dicari
-                </label>
-                <textarea
-                  id="partnership-notes"
-                  rows={3}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ceritakan profil rasa yang diinginkan atau preferensi mesin yang digunakan..."
-                  className="field-control min-h-28 resize-y"
-                />
-              </div>
-
-              <div className="border border-border-subtle bg-surface-container-low p-4" aria-live="polite">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-maroon">Preview pesan WhatsApp</p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-brand-charcoal">{whatsAppMessage}</p>
-                <p className="mt-2 text-[11px] leading-5 text-on-surface-variant">Pesan ini belum dikirim. Tombol di bawah akan membuka WhatsApp dengan pesan yang sudah terisi.</p>
-              </div>
-
-              <button
-                type="submit"
-                className="btn-primary w-full flex items-center justify-center gap-2"
-              >
-                <Phone className="w-4 h-4" />
-                <span>Kirim melalui WhatsApp</span>
-              </button>
-            </form>
-          )}
-        </motion.div>
-      </section>
-    </motion.div>
+      <motion.section className={styles.final} aria-labelledby="final-heading" {...reveal}>
+        <div className={`${styles.finalInner} site-container`}>
+          <p className={styles.eyebrow}>Mulai Bersama / 52 Coffee</p>
+          <h2 id="final-heading">Mari bangun sesuatu<br />bersama.</h2>
+          <p>Ceritakan kebutuhan kopimu dan temukan bentuk kemitraan yang sesuai dengan bisnismu.</p>
+          <div className={styles.finalActions}>
+            <Link href="/work-with-us/consultations" className={styles.finalPrimary}>
+              Mulai Konsultasi <ArrowUpRight size={19} aria-hidden="true" />
+            </Link>
+            <Link href="/work-with-us#wholesale-partnership" className={styles.finalSecondary}>
+              Wholesale &amp; Partnership <ArrowUpRight size={19} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </motion.section>
+    </div>
   );
 }

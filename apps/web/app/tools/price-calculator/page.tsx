@@ -77,7 +77,7 @@ export default function PriceCalculatorPage() {
 
         <div className="mt-10 grid gap-5 border border-border-subtle bg-surface-container-low p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex gap-3"><Info className="mt-0.5 h-5 w-5 shrink-0 text-brand-maroon" aria-hidden="true" /><div><h2 className="font-editorial text-xl font-bold text-brand-charcoal">Batas simulasi</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-on-surface-variant">Belum mencakup tenaga kerja, sewa, utilitas, pajak, penyusutan alat, delivery, waste, diskon, atau syarat partnership. Harga dan skema pasokan perlu dikonfirmasi melalui konsultasi.</p></div></div>
-          <Link href="/work-with-us#consultation-form" className="btn-primary inline-flex min-h-11 items-center justify-center gap-2 text-sm">Minta konsultasi <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+          <Link href="/work-with-us/consultations#consultation-form" className="btn-primary inline-flex min-h-11 items-center justify-center gap-2 text-sm">Minta konsultasi <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
         </div>
       </section>
     </main>

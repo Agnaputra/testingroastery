@@ -1,11 +1,11 @@
 # 52 Coffee & Roastery — Panduan Agent
 
-Dokumen ini adalah panduan utama untuk agent yang bekerja di monorepo 52 Coffee & Roastery. Baca kode dan perubahan lokal sebelum mengedit. Instruksi khusus alat ada di [CODEX.md](./CODEX.md), [CLAUDE.md](./CLAUDE.md), dan [GEMINI.md](./GEMINI.md).
+Dokumen ini adalah panduan utama untuk agent yang bekerja di monorepo 52 Coffee & Roastery. Baca kode dan perubahan lokal sebelum mengedit. Instruksi khusus alat ada di [CODEX.md](./CODEX.md) dan [CLAUDE.md](./CLAUDE.md).
 
 ## Arsitektur dan perintah
 
 - `apps/web`: Next.js 14 App Router, React, TypeScript strict, Tailwind CSS, Zustand, Framer Motion, Three.js, dan `lucide-react`.
-- `apps/ai-backend`: FastAPI, Gemini, PostgreSQL/pgvector, dan konfigurasi guardrail. Periksa implementasi sebelum menyebut NeMo Guardrails aktif: saat ini pemeriksaan input di `app/rag_service.py` menggunakan daftar frasa, sedangkan `nemoguardrails` belum ada di `requirements.txt`.
+- `apps/ai-backend`: FastAPI, OpenAI Responses API, PostgreSQL/pgvector, dan konfigurasi guardrail. Periksa implementasi sebelum menyebut NeMo Guardrails aktif: saat ini pemeriksaan input di `app/rag_service.py` menggunakan daftar frasa, sedangkan `nemoguardrails` belum ada di `requirements.txt`.
 - Root: `npm run dev`, `npm run build`, dan `npm run ai:start`.
 - Frontend: `npm run lint --prefix apps/web` dan `npm run typecheck --prefix apps/web`.
 
@@ -14,7 +14,7 @@ Dokumen ini adalah panduan utama untuk agent yang bekerja di monorepo 52 Coffee 
 - Katalog frontend, tipe `CoffeeProduct`/`ProductVariant`/`GrindOption`, varian, stok, dan harga produk ada di [apps/web/lib/data.ts](./apps/web/lib/data.ts). Jangan menyalin daftar harga ke panduan atau komponen baru. Gunakan `formatRupiah()` untuk menampilkan nominal.
 - Backend AI memiliki knowledge base sendiri di `apps/ai-backend/app/rag_service.py`. Jangan menganggap datanya otomatis tersinkron dengan katalog frontend.
 - Cart menggunakan Zustand persist di [apps/web/lib/store/useCartStore.ts](./apps/web/lib/store/useCartStore.ts). Ikuti tipe `CartItemInput` terkini saat memanggil `addItem()`; pertahankan alur cart, quick view, pencarian, detail produk, dan Virtual Barista.
-- `/api/chat` mencoba Gemini, lalu FastAPI, lalu jawaban lokal. Jelaskan jalur yang benar saat mengubah atau menguji perilaku AI; jangan menyebut fallback lokal sebagai hasil RAG.
+- `/api/chat` mencoba FastAPI yang memakai OpenAI, lalu jawaban lokal. Jelaskan jalur yang benar saat mengubah atau menguji perilaku AI; jangan menyebut fallback lokal sebagai hasil RAG.
 - Checkout, QRIS, dan status pesanan saat ini adalah simulasi. Jangan menampilkan klaim bahwa pembayaran, pesanan, atau pengiriman nyata telah diproses tanpa integrasi yang terverifikasi.
 
 ## Desain dan pengalaman pengguna

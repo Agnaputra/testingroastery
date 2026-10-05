@@ -1,12 +1,11 @@
-import os
-import json
-import math
-from typing import List, Dict, Any, Tuple
-# pyrefly: ignore [missing-import]
-import google.generativeai as genai
+from typing import List, Dict, Any, Tuple, Optional
 import httpx
+import psycopg2
+from pgvector import Vector
+from pgvector.psycopg2 import register_vector
 
 from .config import settings
+from .guardrail_service import guardrail_service
 from .models import ProductSearchResult
 
 # Master knowledge base of 52 Coffee & Roastery from official Slowbar PDF Menu
@@ -552,19 +551,56 @@ class RAGService:
     def __init__(self):
         self.openai_api_key = settings.OPENAI_API_KEY
         self.openai_model = settings.OPENAI_MODEL
-        self.gemini_api_key = settings.GEMINI_API_KEY
-        if self.gemini_api_key:
-            genai.configure(api_key=self.gemini_api_key)
-            self.gemini_model = genai.GenerativeModel(settings.GEMINI_MODEL)
-            self.embedding_model = "models/text-embedding-004"
-        else:
-            self.gemini_model = None
-            self.embedding_model = None
 
-    def search_similar_products(self, query: str, top_k: int = 3) -> List[Tuple[Dict[str, Any], float]]:
-        """
-        Calculates semantic similarity using keyword overlap and token embeddings
-        """
+    def _create_embedding(self, text: str) -> Optional[List[float]]:
+        """Create an OpenAI embedding used only by the server-side retriever."""
+        if not self.openai_api_key:
+            return None
+        try:
+            response = httpx.post(
+                "https://api.openai.com/v1/embeddings",
+                headers={
+                    "Authorization": f"Bearer {self.openai_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={"model": settings.OPENAI_EMBEDDING_MODEL, "input": text},
+                timeout=15.0,
+            )
+            response.raise_for_status()
+            embedding = response.json()["data"][0]["embedding"]
+            if len(embedding) != settings.EMBEDDING_DIMENSIONS:
+                return None
+            return embedding
+        except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError):
+            return None
+
+    def _search_pgvector(self, query: str, top_k: int) -> List[Tuple[Dict[str, Any], float]]:
+        """Retrieve public catalog chunks from PostgreSQL with pgvector cosine distance."""
+        embedding = self._create_embedding(query)
+        if embedding is None:
+            return []
+        try:
+            with psycopg2.connect(settings.DATABASE_URL, connect_timeout=3) as connection:
+                register_vector(connection)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT metadata, 1 - (embedding <=> %s) AS similarity
+                        FROM coffee_knowledge
+                        WHERE embedding IS NOT NULL
+                          AND COALESCE(metadata->>'publication_status', 'published') = 'published'
+                        ORDER BY embedding <=> %s
+                        LIMIT %s
+                        """,
+                        (Vector(embedding), Vector(embedding), top_k),
+                    )
+                    rows = cursor.fetchall()
+            return [(metadata, float(similarity)) for metadata, similarity in rows if isinstance(metadata, dict)]
+        except (psycopg2.Error, ValueError, TypeError):
+            return []
+
+    def _search_in_memory(self, query: str, top_k: int) -> List[Tuple[Dict[str, Any], float]]:
+        """Deterministic availability fallback; this is not presented as vector RAG."""
         query_lower = query.lower()
         results = []
 
@@ -613,32 +649,44 @@ class RAGService:
 
         return results[:top_k]
 
-    def check_guardrails_input(self, user_input: str) -> Tuple[bool, str]:
-        """
-        NeMo Guardrails Input Validation
-        """
-        blocked_phrases = [
-            "ignore previous instructions", "system prompt", "hack", "bypass",
-            "judi", "politik", "presiden", "meretas", "ddos", "script injection",
-            "drop table", "select * from users"
-        ]
-        user_input_lower = user_input.lower()
-        for phrase in blocked_phrases:
-            if phrase in user_input_lower:
-                return False, "Mohon maaf kawan seduh, saya adalah Virtual Barista khusus 52 Coffee & Roastery. Saya hanya dapat melayani pertanyaan seputar biji kopi, profil rasa, dan panduan seduh."
+    def search_similar_products(self, query: str, top_k: Optional[int] = None) -> List[Tuple[Dict[str, Any], float]]:
+        """Use pgvector at runtime, falling back only when the vector service is unavailable."""
+        limit = max(1, min(top_k or settings.RAG_TOP_K, 10))
+        vector_results = self._search_pgvector(query, limit)
+        return vector_results or self._search_in_memory(query, limit)
 
-        return True, ""
+    def retrieval_status(self) -> Dict[str, Any]:
+        """Report actual runtime readiness without issuing an embedding request."""
+        try:
+            with psycopg2.connect(settings.DATABASE_URL, connect_timeout=3) as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT COUNT(*) FROM coffee_knowledge WHERE embedding IS NOT NULL")
+                    embedded_chunks = int(cursor.fetchone()[0])
+            return {
+                "runtime": "pgvector" if embedded_chunks else "fallback_in_memory",
+                "database_reachable": True,
+                "embedded_chunks": embedded_chunks,
+                "embedding_model": settings.OPENAI_EMBEDDING_MODEL,
+            }
+        except psycopg2.Error:
+            return {
+                "runtime": "fallback_in_memory",
+                "database_reachable": False,
+                "embedded_chunks": 0,
+                "embedding_model": settings.OPENAI_EMBEDDING_MODEL,
+            }
 
     def generate_barista_response(self, user_query: str, history: List[Dict[str, str]] = []) -> Dict[str, Any]:
-        """Synthesizes a catalog-grounded response using OpenAI, Gemini, then local fallback."""
-        # 1. Guardrail Input Check
-        passed, rail_message = self.check_guardrails_input(user_query)
-        if not passed:
+        """Synthesizes a catalog-grounded response using OpenAI, then local fallback."""
+        # 1. Guardrail input check (NeMo when configured, deterministic policy as defence in depth).
+        input_decision = guardrail_service.check_input(user_query)
+        if not input_decision.allowed:
             return {
-                "reply": rail_message,
+                "reply": input_decision.message,
                 "recommendedSlugs": [],
                 "recommendedProducts": [],
-                "guardrailStatus": "blocked_input_rail"
+                "groundedInCatalog": True,
+                "guardrailStatus": input_decision.status,
             }
 
         # 2. Retrieve Relevant Coffee Products
@@ -660,7 +708,7 @@ class RAGService:
             for p in retrieved_products
         ])
 
-        # 3. Formulate Prompt with Gemini
+        # 3. Formulate the grounded prompt
         system_instruction = (
             "Anda adalah 'Virtual Barista 52 Coffee & Roastery' yang bertugas di slowbar tasting room kami di Jl. KH. Agus Salim No. 11, Malang.\n"
             "Persona Anda ramah, hangat, berpengetahuan mendalam tentang specialty coffee, dan menyapa pelanggan dengan panggilan 'kawan seduh'.\n\n"
@@ -711,19 +759,18 @@ class RAGService:
             except (httpx.HTTPError, ValueError, KeyError):
                 reply_text = ""
 
-        if not reply_text and self.gemini_model and self.gemini_api_key:
-            try:
-                chat = self.gemini_model.start_chat(history=[])
-                response = chat.send_message(
-                    f"{system_instruction}\n\n{user_content}",
-                    generation_config={"temperature": 0.3}
-                )
-                reply_text = response.text
-            except Exception:
-                reply_text = ""
-
         if not reply_text:
             reply_text = self._fallback_reply(user_query, retrieved_products)
+
+        output_decision = guardrail_service.check_output(reply_text)
+        if not output_decision.allowed:
+            return {
+                "reply": output_decision.message,
+                "recommendedSlugs": [],
+                "recommendedProducts": [],
+                "groundedInCatalog": True,
+                "guardrailStatus": output_decision.status,
+            }
 
         product_results = [
             ProductSearchResult(
@@ -734,17 +781,17 @@ class RAGService:
                 process=p["process"],
                 tasting_notes=p["notes"],
                 base_price=float(p.get("price_100g", p.get("price_200g", p.get("price_16g", 0)))),
-                similarity_score=0.95
+                similarity_score=round(score, 3)
             )
-            for p in retrieved_products
+            for p, score in similar_items
         ]
 
         return {
             "reply": reply_text,
             "recommendedSlugs": recommended_slugs,
-            "recommendedProducts": [p.dict() for p in product_results],
+            "recommendedProducts": [p.model_dump() for p in product_results],
             "groundedInCatalog": True,
-            "guardrailStatus": "passed"
+            "guardrailStatus": output_decision.status if output_decision.status != "passed_nemo" else input_decision.status,
         }
 
     def _fallback_reply(self, query: str, products: List[Dict[str, Any]]) -> str:

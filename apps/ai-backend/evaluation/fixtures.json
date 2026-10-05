@@ -1,0 +1,26 @@
+[
+  {
+    "id": "fruit-filter",
+    "question": "Saya ingin kopi filter yang fruity dan wangi melati untuk V60.",
+    "expected_slugs": ["ijen-carbonic-maceration-asmara", "ijen-kenyan-wening"],
+    "reference": "Rekomendasikan kopi katalog dengan karakter fruity atau jasmine dan metode seduh V60."
+  },
+  {
+    "id": "milk-espresso",
+    "question": "Biji apa yang cocok untuk espresso susu dengan cokelat dan body tebal?",
+    "expected_slugs": ["dampit-natural-espresso", "brazil-santos-espresso"],
+    "reference": "Rekomendasikan espresso katalog dengan notes chocolate atau dark chocolate dan full body untuk minuman susu."
+  },
+  {
+    "id": "reserve-geisha",
+    "question": "Saya mencari Geisha untuk seduhan filter yang floral dan peach.",
+    "expected_slugs": ["el-triunfo-geisha-tolima-aurora"],
+    "reference": "Rekomendasikan El Triunfo Geisha Tolima karena memiliki notes jasmine, bergamot, peach, dan tea-like."
+  },
+  {
+    "id": "berry-natural",
+    "question": "Ada kopi natural dengan rasa strawberry atau berry?",
+    "expected_slugs": ["buntu-lenta-natural-duharman", "sindoro-strawberry-selai"],
+    "reference": "Rekomendasikan kopi katalog dengan notes blueberry, strawberry, atau sweet jammy strawberry."
+  }
+]

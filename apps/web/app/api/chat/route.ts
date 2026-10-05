@@ -1,31 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublishedProducts } from '../../../lib/catalog-master';
-import * as fsSync from 'fs';
-import * as path from 'path';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 const PUBLISHED_PRODUCTS = getPublishedProducts();
-
-function getApiKey(): string {
-  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
-  if (process.env.GOOGLE_AI_API_KEY) return process.env.GOOGLE_AI_API_KEY;
-  try {
-    const envPaths = [
-      path.join(process.cwd(), '.env.local'),
-      path.join(process.cwd(), '..', '..', '.env.local')
-    ];
-    for (const p of envPaths) {
-      if (fsSync.existsSync(p)) {
-        const text = fsSync.readFileSync(p, 'utf8');
-        const match = text.match(/GEMINI_API_KEY\s*=\s*([^\r\n]+)/);
-        if (match) return match[1].trim();
-      }
-    }
-  } catch (e) {}
-  return '';
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -66,15 +45,14 @@ export async function POST(req: NextRequest) {
     }
 
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
-    const geminiApiKey = getApiKey();
 
-    // 1. Prefer the guarded backend: OpenAI (when configured), then its Gemini/local fallback.
+    // Prefer the guarded backend: OpenAI when configured, then its local fallback.
     try {
       const backendRes = await fetch(`${aiBackendUrl}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, history }),
-        signal: AbortSignal.timeout(3500),
+        signal: AbortSignal.timeout(25000),
       });
 
       if (backendRes.ok) {
@@ -84,147 +62,7 @@ export async function POST(req: NextRequest) {
       // Local route fallback remains available when the optional AI backend is offline.
     }
 
-    // 2. Attempt Google Gemini directly only when the dedicated backend is unavailable.
-    if (geminiApiKey && (geminiApiKey.startsWith('AIzaSy') || geminiApiKey.startsWith('AQ.'))) {
-      try {
-        const catalogContext = PUBLISHED_PRODUCTS.map((p) =>
-          `• [${p.name}] (Slug: ${p.slug}, Series: ${p.series}, Category: ${p.categoryLabel}, Process: ${p.process}, Roast: ${p.roastLevel}, Notes: ${p.tastingNotes.join(', ')}, Price: Rp ${p.basePrice}/${p.defaultWeight})`
-        ).join('\n');
-
-        const systemPrompt = `Kamu adalah Virtual Barista ramah, cerdas, dan ahli dari 52 Coffee & Roastery (Instagram: @52coffeeroastery), roastery artisanal di Jl. KH. Agus Salim No. 11 Malang, Jawa Timur (Jam buka: Senin-Minggu 10.00-20.00 WIB).
-
-Fitur & Tools Roastery yang Tersedia di Website:
-1. BYOB (Build Your Own Blend) di /blend-builder: simulator racik dari beans Espresso Based published dengan prediksi profil rasa dan harga reaktif.
-2. Kalkulator Harga Jual Kedai di menu /tools/price-calculator: Simulator B2B untuk menghitung estimasi biaya per cangkir, harga jual, margin, dan kebutuhan pasokan berdasarkan input bisnis pengguna.
-3. Coffee Lab / Brewing Guidance di /guide: kalkulator rasio, suhu, timer, dan panduan langkah seduh.
-4. Slowbar & Retail Catalog di /catalog: Pilihan single origin Java Exotic, Kaldera Ijen, Walida, hingga Grand Reserve Micro-Lot.
-5. B2B Wholesale / Work With Us di /work-with-us: Solusi pasokan biji kopi roasted & green bean untuk kedai kopi di seluruh Indonesia.
-
-Katalog Biji Kopi Tersedia:
-${catalogContext}
-
-Panduan Barista:
-- PENTING: Langsung berikan jawaban akhir yang ramah, sopan, solutif, dan informatif dalam Bahasa Indonesia. JANGAN PERNAH menyertakan proses berpikir, catatan internal, atau teks seperti '(Self-correction...)' atau 'Let\'s write the response'.
-- Jika ditanya tentang BYOB / racik blend: jelaskan fitur BYOB di /blend-builder yang hanya memakai beans Espresso Based published. Jangan membuat atau mengutip harga racikan di luar hasil kalkulator.
-- Jika ditanya tentang Price Calculator / Hitung HPP: jelaskan fungsinya di /tools/price-calculator untuk menghitung estimasi biaya per cangkir, harga jual, margin, dan kebutuhan pasokan berdasarkan input pengguna. Jangan menyebut biaya, margin, atau parameter produksi internal 52 Coffee.
-- Jika ditanya tentang lokasi / alamat / jam buka: jelaskan lokasinya di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang (Senin-Minggu 10:00-20:00 WIB).
-- Jika ditanya tentang lambung / maag / GERD: jangan pernah menjamin kopi aman, menyembuhkan, mencegah gejala, atau menggantikan saran medis. Jelaskan bahwa acidity sebagai rasa tidak sama dengan kadar asam atau respons lambung. Boleh rekomendasikan karakter rasa dengan persepsi asam lebih ringan, sarankan porsi kecil dan tidak saat perut kosong, lalu arahkan pengguna dengan gejala berulang untuk mengikuti saran tenaga kesehatan.
-- Berikan rekomendasi yang terstruktur dan sebutkan tasting notes serta saran penyajiannya.`;
-
-        const geminiHistory = (history || []).slice(-6).map((h: any) => ({
-          role: h.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: h.content }],
-        }));
-
-        const targetModels = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'];
-        let generatedText = '';
-
-        for (const modelName of targetModels) {
-          try {
-            const geminiRes = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [
-                    { role: 'user', parts: [{ text: systemPrompt }] },
-                    { role: 'model', parts: [{ text: 'Siap! Saya adalah Virtual Barista 52 Coffee & Roastery Malang.' }] },
-                    ...geminiHistory,
-                    { role: 'user', parts: [{ text: message }] },
-                  ],
-                  generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 2500,
-                  },
-                }),
-                signal: AbortSignal.timeout(12000),
-              }
-            );
-
-            if (geminiRes.ok) {
-              const geminiData = await geminiRes.json();
-              const parts = geminiData.candidates?.[0]?.content?.parts;
-              let rawText = Array.isArray(parts)
-                ? parts.map((p: any) => p.text).filter(Boolean).join('\n')
-                : geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-              if (rawText) {
-                generatedText = rawText
-                  .replace(/^\s*\([\s\S]*?(?:self-correction|thinking|internal note)[\s\S]*?\)\s*/gi, '')
-                  .replace(/^[\s\S]*?(?:let's write the response|here is the response)[.:]\s*/gi, '')
-                  .trim();
-                break;
-              }
-            }
-          } catch (modelErr) {
-            // Try next model
-          }
-        }
-
-        if (generatedText) {
-          const genLower = generatedText.toLowerCase();
-          const lowerText = (generatedText + ' ' + message).toLowerCase();
-
-          // 1. Direct match by product name, slug, or slowbar alias
-          const directMatches = PUBLISHED_PRODUCTS.filter((p) =>
-            genLower.includes(p.name.toLowerCase()) ||
-            genLower.includes(p.slug.toLowerCase()) ||
-            (p.slowbarAlias && genLower.includes(p.slowbarAlias.toLowerCase()))
-          ).map((p) => p.slug);
-
-          let geminiSlugs = Array.from(new Set(directMatches)).slice(0, 3);
-
-          // 2. Contextual tasting notes match if fewer than 3
-          if (geminiSlugs.length < 3) {
-            const contextualMatches = PUBLISHED_PRODUCTS.filter((p) =>
-              !geminiSlugs.includes(p.slug) &&
-              p.tastingNotes.some((n) => n.length > 5 && genLower.includes(n.toLowerCase()))
-            ).map((p) => p.slug);
-
-            geminiSlugs = Array.from(new Set([...geminiSlugs, ...contextualMatches])).slice(0, 3);
-          }
-
-          // 3. Fallback defaults based on intent if none matched
-          if (geminiSlugs.length === 0) {
-            if (lowerText.includes('strong') || lowerText.includes('susu') || lowerText.includes('espresso')) {
-              geminiSlugs = ['brazil-santos-espresso', 'dampit-natural-espresso'];
-            } else if (lowerText.includes('lambung') || lowerText.includes('maag') || lowerText.includes('mild')) {
-              geminiSlugs = ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana'];
-            } else {
-              geminiSlugs = ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'];
-            }
-          }
-
-          return NextResponse.json({
-            reply: generatedText,
-            recommendedSlugs: geminiSlugs,
-            groundedInCatalog: true,
-          });
-        }
-      } catch (geminiErr: any) {
-        console.error('Gemini API Error in route:', geminiErr?.message || geminiErr);
-      }
-    }
-
-    // 2. Attempt to contact Python FastAPI backend if running
-    try {
-      const backendRes = await fetch(`${aiBackendUrl}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, history }),
-        signal: AbortSignal.timeout(1500),
-      });
-
-      if (backendRes.ok) {
-        const backendData = await backendRes.json();
-        return NextResponse.json(backendData);
-      }
-    } catch (e) {
-      // Backend not running, proceed to expert built-in barista knowledge engine
-    }
-
-    // 3. Comprehensive Context-Aware Built-in Barista Intelligence
+    // Comprehensive Context-Aware Built-in Barista Intelligence
     const query = message.toLowerCase().trim();
     const cleanQuery = query.replace(/[^\w\s]/gi, '').trim();
     let reply = '';
@@ -363,7 +201,7 @@ Panduan Barista:
       );
       reply = `🤝 **Kemitraan Bisnis 52 Coffee & Roastery**\n\n` +
         `Kami dapat membantu kebutuhan **supplier roast beans**, **label khusus & special blends**, serta **business beverage consultation** (SOP, supply mesin, layout coffee bar, perhitungan HPP, dan signature blend).\n\n` +
-        `Ceritakan kebutuhan usaha Anda melalui **[Kemitraan Bisnis](/work-with-us)**. Formulir akan menyusun pesan WhatsApp sesuai informasi yang Anda isi.`;
+        `Ceritakan kebutuhan usaha Anda melalui **[Kemitraan Bisnis](/work-with-us)**. Pilih jalur Consultations atau Wholesale & Partnership untuk menyiapkan pesan WhatsApp.`;
     }
 
     // --- PRIORITY 0F: TRACK ORDER / LACAK RESI ---
