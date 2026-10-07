@@ -118,7 +118,7 @@ class NemoGuardrailService:
             "configured": settings.ENABLE_GUARDRAILS,
             "runtime_ready": ready,
             "runtime": "nemo" if ready else "degraded",
-            "reason": None if ready else self._error,
+            "reason": self._error,
         }
 
 

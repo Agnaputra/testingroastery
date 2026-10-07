@@ -1,0 +1,192 @@
+{
+   "checksum": "0c1baf23fa69b7d1f75eec148f8f8162",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13237454721653559",
+            "date_last_used": "0",
+            "guid": "d7b0902d-33be-45e7-855a-6e4c2aeb350b",
+            "id": "7",
+            "name": "Drive Saya - Google Drive",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://drive.google.com/drive/my-drive",
+            "visit_count": 0
+         }, {
+            "children": [ {
+               "date_added": "13318679005704806",
+               "date_last_used": "0",
+               "guid": "15cb75d1-92d8-4c73-9477-e2118621e372",
+               "id": "9",
+               "name": "Acer",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "http://www.acer.com/",
+               "visit_count": 0
+            } ],
+            "date_added": "13318679571975482",
+            "date_last_used": "0",
+            "date_modified": "13318679571975482",
+            "guid": "819ea9f6-262f-4baf-97ae-8822b5e0bdb6",
+            "id": "8",
+            "name": "Acer",
+            "source": "unknown",
+            "type": "folder"
+         }, {
+            "date_added": "13264570463993546",
+            "date_last_used": "0",
+            "guid": "3e5e8943-ead7-401a-92c2-428692957df8",
+            "id": "10",
+            "name": "Bunga Mawar - Ciri-Ciri, Karakteristik Dan Klasifikasi",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://rumus.co.id/bunga-mawar/",
+            "visit_count": 0
+         }, {
+            "date_added": "12938767234756418",
+            "date_last_used": "0",
+            "guid": "6e5ff3ba-7f11-464b-bc1c-918b29f3afb0",
+            "id": "11",
+            "name": "Download IObit Freeware",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "http://www.iobit.com/",
+            "visit_count": 0
+         }, {
+            "date_added": "13208849197549939",
+            "date_last_used": "0",
+            "guid": "68515c86-fcd1-4a25-90e3-a0061ed5d1b8",
+            "id": "12",
+            "name": "Tab Baru",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "chrome://newtab/",
+            "visit_count": 0
+         }, {
+            "date_added": "13208849220276890",
+            "date_last_used": "0",
+            "guid": "761b6236-1f07-403e-8e35-8e934c54f6cc",
+            "id": "13",
+            "name": "www.google.com",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.google.com/search?q=web+bppkad&oq=web+bppkad&aqs=chrome..69i57.8667j0j7&sourceid=chrome&ie=UTF-8",
+            "visit_count": 0
+         }, {
+            "children": [ {
+               "date_added": "13230269124346757",
+               "date_last_used": "0",
+               "guid": "c9752681-06b4-4257-8130-a2addd77730d",
+               "id": "15",
+               "name": "ASUS Homepage",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "http://www.asus.com/",
+               "visit_count": 0
+            }, {
+               "date_added": "13230269124346757",
+               "date_last_used": "0",
+               "guid": "d35ca0f0-70d6-4b6c-a2cd-8a31188de859",
+               "id": "16",
+               "name": "ASUS Member",
+               "show_icon": false,
+               "source": "sync",
+               "type": "url",
+               "url": "https://account.asus.com/",
+               "visit_count": 0
+            } ],
+            "date_added": "13309727507169252",
+            "date_last_used": "0",
+            "date_modified": "13309727507169252",
+            "guid": "37ae81e8-4abb-4829-86db-f4b075f16403",
+            "id": "14",
+            "name": "ASUS E-Service",
+            "source": "unknown",
+            "type": "folder"
+         }, {
+            "date_added": "13294566429466007",
+            "date_last_used": "0",
+            "guid": "36ef88de-ee7a-4068-be43-0b97355906b5",
+            "id": "17",
+            "name": "neonime - Penelusuran Google",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.google.com/search?q=neonime&oq=neonime&aqs=chrome..69i57j0i10j46i10j0i512j69i60.9719j0j7&sourceid=chrome&ie=UTF-8",
+            "visit_count": 0
+         }, {
+            "date_added": "13310467454151946",
+            "date_last_used": "0",
+            "guid": "7d513d38-fa15-434a-8e71-0b1951bd6e17",
+            "id": "18",
+            "name": "PEMILIHAN CALON KETUA OSIS DAN CALON KETUA UMUM MPK 2022/2023",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://docs.google.com/forms/d/e/1FAIpQLSf4P_v_txceZWSmdcFqhLwRkZ0W4IBz-ozMc2TLmsNuLKPtSA/viewform",
+            "visit_count": 0
+         } ],
+         "date_added": "13435834814278127",
+         "date_last_used": "0",
+         "date_modified": "13310467454151946",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13435834814278127",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [ {
+            "date_added": "13167639198906256",
+            "date_last_used": "0",
+            "guid": "2cdb0595-59b8-4607-a7db-6964779e24ac",
+            "id": "19",
+            "name": "http://google.com/signins",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "http://google.com/signins",
+            "visit_count": 0
+         } ],
+         "date_added": "13435834814278127",
+         "date_last_used": "0",
+         "date_modified": "13167639198906256",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "workspaces_v2": {
+         "children": [  ],
+         "date_added": "13435834814278127",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "75aa6670-344f-549d-b742-660f029506ab",
+         "id": "5",
+         "name": "Workspaces",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "CkEKHgiIgQISCNKfbhWhAQAAKg4QABgBIAAoBTAAOABAABIAKhhFQlE4MmN0MkxEMGJKcnN6cnl0eUNBPT1IA6AGDBKMAQgDEocBChxuamdEdTg4ZUNydlhwODZwRDdmSEdjcUZwODg9EiRiMTc3NzI5Ny1hYzgxLTUxNTgtYjVkNS01Njk5Mjk2ZTFkODQYACAAKAAw+qTi3rUuOOD95MOBMEDg/eTDgTBKHHl6TkIwMWNuNTRBN2NSVTB1VCsvUGdtVHRVbz1lAAAAAMI+AmAAEq0BCBESqAEKHGVOSlE2UUtXeVNySW1PdHN4TW12RDNYTXhzTT0SJDM2ZWY4OGRlLWVlN2EtNDA2OC1iZTQzLTBiOTczNTU5MDZiNRgAIAAoADDF3r7hmzM48d7Zt+0yQPHe2bftMkoccTNEajJZdFlvSlRvMkY3dTc3a3dia1NTbFNNPVofIh39ZDVxQ09VM0MyWVhiTTBIUDhWei94clR2TGdNPWXaad5dwj4CYAUSrQEIDRKoAQocZmQzQ1NMM1NMZDZOQmc3bFpxY1RSaFZER3NzPRIkNzYxYjYyMzYtMWYwNy00MDNlLThlMzUtOGU5MzRjNTRmNmNjGAAgACgAMILOx/iYMzi63dm37TJAut3Zt+0yShwybFcweklTU3Q5OTB4cnEzVXB0YW14WnExMXc9Wh8iHfdUSkt3QkNHWVlQcDdoTVlHelRSdXFYWFkwdjg9Zdpp3l3CPgJgBRKsAQgPEqcBChxNVzFrSlUxWHl4Q2UzNE9rc2Y3ZjYrL0ZQNlk9EiRjOTc1MjY4MS0wNmI0LTQyNTctODEzMC1hMmFkZGQ3NzczMGQYACAAKAAwyNXct+0yOLre2bftMkC63tm37TJKHDVSQlpoWDVvTWhnT0VQTXRseXlqL1ZxbHIzbz1aHiIcME9acGtSVC9ldW1HRFlWalpDUzh4S20yNFFVPWUAAAAAwj4CYAUSrAEICRKnAQocZWhyc1dSeC9rcU9Uc2JiZHoxUVA0eUI0N0wwPRIkMTVjYjc1ZDEtOTJkOC00YzczLTk0NzctZTIxMTg2MjFlMzcyGAAgACgAMLWVz/PcMDjLls/z3DBAy5bP89wwShw3YjFROFlGbjBLbUFIZmtaai9HUUoraXVkMk09Wh4iHGd1WGdMZkxiZGJyRTBlYUJGUktmUU03Nyt2Zz1lAAAAAMI+AmAFEq0BCAwSqAEKHGVBc0ZrbHRhYWZrRFVJcjFDZXIzTzdkY1I4bz0SJDY4NTE1Yzg2LWZjZDEtNGEyNS05MGUzLWEwMDYxZWQ1ZDFiOBgAIAAoADDG1dy37TI4g97Zt+0yQIPe2bftMkocTnQyVVJSTndWOTMrZ3IwTXlvUXp4ODFEaDQ0PVofIh3vK2hpSVY3dlVDY3N0NjNCeTVSaWxkZGkzT3ZZPWUAAAAAwj4CYAUSrAEIEBKnAQocZFg5RmNabXcwZW9PS2JiOC9TbU9OUGtLcGQ4PRIkZDM1Y2EwZjAtNzBkNi00YjZjLWEyY2QtOGEzMTE4OGRlODU5GAAgACgAMMnV3LftMjjW3tm37TJA1t7Zt+0yShxwSkg2UVM3ZmpHNHp5KzFuWHNVblpJZFhkaWs9Wh4iHEwrbWJWR0VyS2ZWTm9MUVhuckRIelMxVk9GMD1lAAAAAMI+AmAFEq0BCAoSqAEKHEFBU2RxY1lKTkZNVlNGMXpyVlZ3MUFnL3UrZz0SJDNlNWU4OTQzLWVhZDctNDAxYS05MmMyLTQyODY5Mjk1N2RmOBgAIAAoADDF1dy37TI45N3Zt+0yQOTd2bftMkocbVc3dlBmb3pCcThjODFNSDgxUGdwWFZYTjNrPVofIh28ZVdscldoWWVUVFpPcWw3S3h4L3lmU1BYNHI0PWWMpw4qwj4CYAUSrAEIExKnAQocUXQ3SnZOWTZEQkhkZGdzTnpnUDNxMzRwWmVzPRIkMmNkYjA1OTUtNTliOC00NjA3LWE3ZGItNjk2NDc3OWUyNGFjGAAgACgAMMHV3LftMjjh3Nm37TJA4dzZt+0yShx6WEFqWm83bHk1dnpnVmR2RE8rbytUWkozNGs9Wh4iHDZscjh2NUZHU2owYUs2VXhPMHg4N3AvemJsYz1lAAAAAMI+AmAFEqwBCAgSpwEKHE9ad3BNVUhEUlhwL1MzYU9Hdi9RRGhwOUJTST0SJDgxOWVhOWY2LTI2MmYtNGJhZi05N2FlLTg4MjJiNWUwYmRiNhgAIAAoADC0lc/z3DA4jZbP89wwQI2Wz/PcMEocQ3hidElaM1J1Y2ZzT1hTdEtIU3FCeEZkS0dvPVoeIhx5c0hxc0owWEJvOFNlMUN4QkpBV2ZyV2ZJdEk9ZQAAAADCPgJgABKsAQgHEqcBChxzZW83d3cxWGtPRjVNYnk2OHc1bGN2YllYMkE9EiRkN2IwOTAyZC0zM2JlLTQ1ZTctODU1YS02ZTRjMmFlYjM1MGIYACAAKAAwxJPZzoUvOM7+5MOBMEDO/uTDgTBKHHJxdWVCZEtTNFpQRTE4eXJXWENkUFZ2SG40VT1aHiIcblAvNlpzUEQrTDh2eWZXNWpxR3ZwbVBzVWdvPWUAAAAAwj4CYAUSrQEIDhKoAQocbkZpWUFOWnlqdnNoUzZqcFN3VEFvOVpXdmg4PRIkMzdhZTgxZTgtNGFiYi00ODI5LTg2ZGItZjRiMDc1ZjE2NDAzGAAgACgAMMfV3LftMjif3tm37TJAn97Zt+0yShxlMElvSzBNdHlSanhIN0Y5QThHTlBqWE5aNnM9Wh8iHftLS3lrTmFiS2lLVnhTa1A2VWZ1ejVnaWZnRWs9ZQAAAADCPgJgABKtAQgSEqgBChxuRkp3bmk3RjZrZXRGVDRHcVFrTTNwQlA2ZmM9EiQ3ZDUxM2QzOC1mYTE1LTQzNGEtOGU3MS0wYjE5NTFiZDZlMTcYACAAKAAww9Xct+0yOJrd2bftMkCa3dm37TJKHGZhWjNZVHNyQldNTFZlakZaWGs1RWRjdUs5WT1aHyId/lhRbjhoYTBoTzhIbTk5YWtsY2dSR201ckxOcz1lo60cX8I+AmAFEowBCAEShwEKHHl4Si82ZnZrZWNyN2twNUVRekI0dFdMcGRiRT0SJGY5ZDNkY2IzLTQ0NWItNTUzZS1hYmZhLWUxNzM3OGNhNTE2MhgAIAAoADD1pOLetS44pfzkw4EwQKX85MOBMEocYVJDV0xnaEY5YjVJbnFLSUR2dUovanZRa0ZjPWUAAAAAwj4CYAASrQEICxKoAQocWDlsRTczaFJqRTRJK3F6REZZNExTT2x0MDhrPRIkNmU1ZmYzYmEtN2YxMS00NjRiLWJjMWMtOTE4YjI5ZjNhZmIwGAAgACgAMMLV3LftMjj/3Nm37TJA/9zZt+0yShxJMjN5WVpzVStrVnFJaENIQm9UN3FZc0FCYXc9Wh8iHd53Vkh3LzY5U0hhczYyV0FPdE1WU010MjQ0STg9ZQAAAADCPgJgBRKMAQgCEocBChxZY1NUb252RVNQd3FDczRMMmNyVmh2NjhMOTg9EiQ3Y2IyN2U5MS1hYjZhLTU3N2MtYTEyZC1kMmI4ODhmYmZhNTgYACAAKAAw9qTi3rUuONT85MOBMEDU/OTDgTBKHG9QVmtod0JSYlY2NUtDV1IyK0lPTkhXb091OD1lAAAAAMI+AmAAEowBCAUShwEKHHdSQnJaTCs2UEE5YXZLZ2pOUDdKWERMY2Z2cz0SJDk1MTQ1NzA2LTM1MDktNTJjZi04Njk2LTNkZjA4NTY3ZWRjMRgAIAAoADDq8s/onjM4u/XP6J4zQLv1z+ieM0ocbm14NjVzUUR2eEk4VGdFZXYrQStudHRvU240PWUAAAAAwj4CYAAwADgA",
+   "version": 1
+}

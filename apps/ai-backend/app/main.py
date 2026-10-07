@@ -1,4 +1,6 @@
 # pyrefly: ignore [missing-import]
+import asyncio
+
 from fastapi import FastAPI, HTTPException, Depends
 # pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,9 +58,10 @@ async def chat_with_barista(request: ChatRequest):
     Catalog-grounded conversational endpoint with OpenAI, local fallback, and input guardrails.
     """
     try:
-        response = rag_service.generate_barista_response(
+        response = await asyncio.to_thread(
+            rag_service.generate_barista_response,
             user_query=request.message,
-            history=[{"role": m.role, "content": m.content} for m in request.history]
+            history=[{"role": m.role, "content": m.content} for m in request.history],
         )
         return response
     except Exception:

@@ -1,0 +1,5 @@
+2026/10/07-15:20:18.611 43cc Creating DB C:\laragon\www\testingroastery\.tmp-barista-qa\edge-profile\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/10/07-15:20:18.621 43cc Reusing MANIFEST C:\laragon\www\testingroastery\.tmp-barista-qa\edge-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/10/07-15:20:20.331 7064 Level-0 table #5: started
+2026/10/07-15:20:20.336 7064 Level-0 table #5: 683273 bytes OK
+2026/10/07-15:20:20.342 7064 Delete type=0 #3

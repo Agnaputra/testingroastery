@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
-  Sparkles,
   Send,
   X,
   RotateCcw,
@@ -33,15 +32,15 @@ interface ChatMessage {
 }
 
 const QUICK_PROMPTS = [
-  'Rekomendasi racikan BYOB (Build Your Own Blend)',
-  'Price Calculator roastery itu buat apa?',
-  'Kopi dengan rasa asam lebih ringan untuk lambung sensitif?',
-  'Biji kopi fruity & floral terbaik untuk V60',
-  'Dimana lokasi & jam buka roastery di Malang?',
+  { label: 'Pilih kopi', prompt: 'Bantu saya memilih kopi sesuai selera' },
+  { label: 'Panduan seduh', prompt: 'Bantu saya membuat panduan seduh' },
+  { label: 'Coffee Lab', prompt: 'Jelaskan fitur Coffee Lab yang tersedia' },
+  { label: 'Kemitraan', prompt: 'Jelaskan layanan konsultasi dan kemitraan 52 Coffee' },
 ];
 
 export function VirtualBaristaWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const open = () => setIsOpen(true);
@@ -64,16 +63,11 @@ export function VirtualBaristaWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCartStore();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
     if (isOpen) {
-
-      scrollToBottom();
+      messagesEndRef.current?.scrollIntoView({ behavior: shouldReduceMotion ? 'auto' : 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, shouldReduceMotion]);
 
   // Progressive Typewriter streaming response effect
   const streamBaristaResponse = async (
@@ -268,15 +262,15 @@ export function VirtualBaristaWidget() {
         {/* Virtual Barista launcher */}
         {!isOpen && (
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-3 bg-brand-navy text-white p-3 sm:px-4 rounded-full shadow-lg border border-white/20 transition-colors hover:bg-brand-charcoal cursor-pointer"
+            className="group relative flex min-h-11 items-center gap-3 rounded-full border border-white/20 bg-brand-navy p-2.5 text-white shadow-lg transition-colors hover:bg-brand-charcoal sm:px-4"
             aria-label="Buka Virtual Barista"
           >
             {/* Roastery avatar */}
             <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-teal to-brand-teal-light p-[2px] shadow-sm">
+              <div className="h-9 w-9 rounded-full border border-brand-teal-light/60 p-[2px]">
                 <div className="w-full h-full rounded-full bg-brand-navy flex items-center justify-center">
                   <FiftyTwoBeanMark className="w-4 h-4 text-brand-teal-light" />
                 </div>
@@ -294,7 +288,6 @@ export function VirtualBaristaWidget() {
               </div>
             </div>
 
-            <Sparkles aria-hidden="true" className="hidden sm:block w-4 h-4 text-brand-teal-light" />
           </motion.button>
         )}
       </div>
@@ -303,32 +296,31 @@ export function VirtualBaristaWidget() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 25, scale: 0.94 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 25, scale: 0.94 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed bottom-4 right-4 z-50 flex h-[600px] max-h-[85vh] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-md border border-border-subtle border-t-4 border-t-brand-maroon bg-white shadow-2xl sm:bottom-6 sm:right-6 sm:w-[430px]"
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.98 }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2, ease: 'easeOut' }}
+            className="fixed inset-x-0 bottom-0 z-50 flex h-[min(680px,calc(100dvh-0.75rem))] flex-col overflow-hidden rounded-t-[24px] border border-border-subtle bg-white shadow-2xl sm:inset-x-auto sm:bottom-6 sm:right-6 sm:h-[min(680px,calc(100dvh-3rem))] sm:w-[420px] sm:rounded-[22px]"
+            role="dialog"
+            aria-label="Percakapan dengan Virtual Barista"
           >
             {/* Header with Roastery Identity */}
-            <div className="flex items-center justify-between border-b border-white/10 bg-brand-charcoal p-4 text-white">
+            <div className="flex min-h-[72px] items-center justify-between border-b border-border-subtle bg-white px-4 py-3 text-on-surface">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-teal to-brand-teal-light p-[2px]">
+                  <div className="h-10 w-10 rounded-full bg-brand-navy p-[2px]">
                     <div className="w-full h-full rounded-full bg-brand-navy flex items-center justify-center">
                       <FiftyTwoBeanMark className="w-5 h-5 text-brand-teal-light" />
                     </div>
                   </div>
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-brand-navy rounded-full" />
+                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                 </div>
-                <div>
-                  <h3 className="font-editorial text-sm font-bold text-white flex items-center gap-1.5">
-                    Virtual Barista 52
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 bg-brand-teal/30 text-brand-teal-light border border-brand-teal/40 rounded-md font-bold">
-                      Katalog published
-                    </span>
+                <div className="min-w-0">
+                  <h3 className="truncate font-editorial text-[15px] font-bold text-on-surface">
+                    Virtual Barista
                   </h3>
-                  <p className="text-[11px] text-gray-300 font-mono">
-                    @52coffeeroastery • Malang Tasting Room
+                  <p className="text-[11px] text-on-surface-variant">
+                    Katalog 52 Coffee aktif
                   </p>
                 </div>
               </div>
@@ -345,15 +337,15 @@ export function VirtualBaristaWidget() {
                       },
                     ])
                   }
-                  className="flex h-11 w-11 items-center justify-center rounded-md text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-                  title="Reset Chat"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
+                  title="Mulai ulang"
                   aria-label="Mulai ulang percakapan"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="flex h-11 w-11 items-center justify-center rounded-md text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
                   aria-label="Tutup percakapan"
                 >
                   <X className="w-5 h-5" />
@@ -362,26 +354,26 @@ export function VirtualBaristaWidget() {
             </div>
 
             {/* Chat Body Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-container-low/40">
+            <div className="flex-1 space-y-5 overflow-y-auto bg-surface-container-low/50 px-4 py-5">
               {messages.map((msg) => {
                 const isBarista = msg.sender === 'barista';
                 return (
                   <div
                     key={msg.id}
-                    className={`flex gap-2.5 ${isBarista ? 'items-start' : 'items-end flex-row-reverse'}`}
+                    className={`flex gap-2.5 ${isBarista ? 'items-start' : 'flex-row-reverse items-end'}`}
                   >
                     {isBarista && (
-                      <div className="w-7 h-7 rounded-full bg-brand-navy text-brand-teal-light flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-navy text-brand-teal-light">
                         <FiftyTwoBeanMark className="w-3.5 h-3.5" />
                       </div>
                     )}
 
-                    <div className={`space-y-2 max-w-[85%]`}>
+                    <div className="max-w-[88%] space-y-2">
                       <div
-                        className={`p-3.5 rounded-xl text-xs sm:text-[13px] leading-relaxed font-sans shadow-xs whitespace-pre-line ${
+                        className={`whitespace-pre-line rounded-2xl px-4 py-3 font-sans text-sm leading-6 ${
                           isBarista
-                            ? 'bg-white border border-border-subtle text-on-surface'
-                            : 'bg-brand-navy text-white rounded-br-none'
+                            ? 'border border-border-subtle bg-white text-on-surface'
+                            : 'rounded-br-md bg-brand-navy text-white'
                         }`}
                       >
                         {msg.text || (
@@ -398,7 +390,7 @@ export function VirtualBaristaWidget() {
                           {msg.recommendedProducts.map((prod) => (
                             <div
                               key={prod.id}
-                              className="p-3 rounded-xl bg-white border border-border-subtle shadow-xs flex items-center justify-between gap-3 hover:border-brand-navy/30 transition-all"
+                              className="flex items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-white p-3 transition-colors hover:border-brand-navy/30"
                             >
                               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-surface-container-low shrink-0 border border-border-subtle">
@@ -444,7 +436,7 @@ export function VirtualBaristaWidget() {
                                   setAddedProductId(prod.id);
                                   setTimeout(() => setAddedProductId(null), 1500);
                                 }}
-                                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors shadow-xs ${
+                                className={`flex h-11 shrink-0 items-center gap-1 rounded-full px-3 text-[11px] font-bold transition-colors ${
                                   addedProductId === prod.id
                                     ? 'bg-brand-navy text-white'
                                     : 'bg-brand-navy hover:bg-brand-navy-light text-white'
@@ -453,12 +445,12 @@ export function VirtualBaristaWidget() {
                                 {addedProductId === prod.id ? (
                                   <>
                                     <Check className="w-3.5 h-3.5 text-emerald-300" />
-                                    <span>Added</span>
+                                    <span>Ditambahkan</span>
                                   </>
                                 ) : (
                                   <>
                                     <ShoppingBag className="w-3.5 h-3.5" />
-                                    <span>+ Cart</span>
+                                    <span>Tambah</span>
                                   </>
                                 )}
                               </button>
@@ -468,7 +460,7 @@ export function VirtualBaristaWidget() {
                       )}
 
                       <div
-                        className={`text-[9px] font-mono text-on-surface-variant ${
+                        className={`text-[11px] text-on-surface-variant ${
                           isBarista ? 'text-left' : 'text-right'
                         }`}
                       >
@@ -480,12 +472,12 @@ export function VirtualBaristaWidget() {
               })}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-on-surface-variant text-xs p-2.5 bg-white rounded-xl border border-border-subtle max-w-[240px] shadow-xs">
+                <div className="flex max-w-[280px] items-center gap-2 rounded-2xl border border-border-subtle bg-white px-4 py-3 text-xs text-on-surface-variant" role="status">
                   <div className="w-2 h-2 rounded-full bg-brand-navy animate-pulse" />
                   <div className="w-2 h-2 rounded-full bg-brand-navy animate-pulse [animation-delay:0.2s]" />
                   <div className="w-2 h-2 rounded-full bg-brand-navy animate-pulse [animation-delay:0.4s]" />
-                  <span className="font-mono text-[11px] text-brand-navy font-semibold">
-                    Barista virtual sedang menyiapkan jawaban...
+                  <span className="text-[11px] font-medium text-brand-navy">
+                    Mencari jawaban dari katalog...
                   </span>
                 </div>
               )}
@@ -493,14 +485,14 @@ export function VirtualBaristaWidget() {
             </div>
 
             {/* Quick Prompts Carousel */}
-            <div className="px-3 py-2 bg-white border-t border-border-subtle overflow-x-auto flex gap-1.5 no-scrollbar">
-              {QUICK_PROMPTS.map((prompt, idx) => (
+            <div className="no-scrollbar flex gap-2 overflow-x-auto border-t border-border-subtle bg-white px-3 py-2.5">
+              {QUICK_PROMPTS.map(({ label, prompt }) => (
                 <button
-                  key={idx}
+                  key={label}
                   onClick={() => handleSendMessage(prompt)}
-                  className="whitespace-nowrap px-3 py-1 rounded-full bg-surface-container-low hover:bg-brand-navy hover:text-white border border-border-subtle text-[11px] text-brand-navy transition-colors font-medium shrink-0 shadow-2xs cursor-pointer"
+                  className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-border-subtle bg-surface-container-low px-4 text-xs font-medium text-brand-navy transition-colors hover:border-brand-navy/30 hover:bg-brand-mist/50"
                 >
-                  {prompt}
+                  {label}
                 </button>
               ))}
             </div>
@@ -511,7 +503,7 @@ export function VirtualBaristaWidget() {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="p-3 bg-white border-t border-border-subtle flex items-center gap-2"
+              className="flex items-center gap-2 border-t border-border-subtle bg-white px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3"
             >
               <input
                 type="text"
@@ -519,13 +511,14 @@ export function VirtualBaristaWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Tanya rasa, origin, atau rekomendasi..."
                 maxLength={500}
-                className="flex-1 px-4 py-2.5 text-xs sm:text-sm bg-surface-container-low rounded-full border border-border-subtle focus:outline-none focus:border-brand-navy text-on-surface placeholder:text-on-surface-variant"
+                aria-label="Pesan untuk Virtual Barista"
+                className="h-11 min-w-0 flex-1 rounded-full border border-border-subtle bg-surface-container-low px-4 text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-brand-navy focus:ring-2 focus:ring-brand-mist"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="p-2.5 rounded-full bg-brand-navy hover:bg-brand-navy-light text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0 shadow-md cursor-pointer hover:scale-105"
-                aria-label="Send message"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-navy text-white transition-colors hover:bg-brand-navy-light disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Kirim pesan"
               >
                 <Send className="w-4 h-4" />
               </button>
