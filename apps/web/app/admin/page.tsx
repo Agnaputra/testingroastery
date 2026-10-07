@@ -49,6 +49,19 @@ type AdminTab =
   | 'slowbar'
   | 'financials';
 
+const DEFAULT_PUBLISHED_ROWS = new Set(ACTIVE_CATALOG_MAPPING.map((mapping) => mapping.masterRow));
+
+function publicationRowsFromOverrides(overrides: Record<string, boolean>): Set<number> {
+  const rows = new Set<number>();
+  DEFAULT_PUBLISHED_ROWS.forEach((row) => {
+    const mappings = ACTIVE_CATALOG_MAPPING.filter((mapping) => mapping.masterRow === row);
+    if (mappings.every((mapping) =>
+      overrides[mapping.slug] !== false && (!mapping.knowledgeSlug || overrides[mapping.knowledgeSlug] !== false)
+    )) rows.add(row);
+  });
+  return rows;
+}
+
 export default function AdminDashboardPage() {
   return (
     <Suspense fallback={<div className="p-20 text-center font-mono text-xs text-on-surface-variant">Memuat Portal Roastery Admin...</div>}>
@@ -65,39 +78,45 @@ function AdminDashboardContent() {
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [catalogSyncError, setCatalogSyncError] = useState('');
+  const [updatingRow, setUpdatingRow] = useState<number | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
-    const saved = typeof window !== 'undefined' ? sessionStorage.getItem('52coffee:admin-auth') : null;
-    if (saved === 'true') {
-      setIsAuthenticated(true);
-    }
+    Promise.all([
+      fetch('/api/admin/session', { cache: 'no-store' }),
+      fetch('/api/catalog/publication', { cache: 'no-store' }),
+    ]).then(async ([sessionResponse, publicationResponse]) => {
+      if (sessionResponse.ok) {
+        const session = (await sessionResponse.json()) as { authenticated?: boolean };
+        setIsAuthenticated(session.authenticated === true);
+      }
+      if (publicationResponse.ok) {
+        const publication = (await publicationResponse.json()) as { overrides?: Record<string, boolean> };
+        setPublishedRows(publicationRowsFromOverrides(publication.overrides ?? {}));
+      } else {
+        setCatalogSyncError('Status katalog belum dapat dimuat.');
+      }
+    }).catch(() => setCatalogSyncError('Status katalog belum dapat dimuat.'));
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput.trim() === '5252' || pinInput.toLowerCase().trim() === 'admin52') {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('52coffee:admin-auth', 'true');
-      }
+    const response = await fetch('/api/admin/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: pinInput.trim() }),
+    });
+    if (response.ok) {
       setIsAuthenticated(true);
       setPinError('');
     } else {
-      setPinError('PIN roastery tidak sesuai. Silakan gunakan PIN demo: 5252');
+      setPinError('PIN roastery tidak sesuai.');
     }
   };
 
-  const handleDemoLogin = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('52coffee:admin-auth', 'true');
-    }
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('52coffee:admin-auth');
-    }
+  const handleLogout = async () => {
+    await fetch('/api/admin/session', { method: 'DELETE' });
     setIsAuthenticated(false);
     setPinInput('');
   };
@@ -107,11 +126,7 @@ function AdminDashboardContent() {
 
   // Local state for Master Products (initialized with all 55 items from catalog-master)
   const [masterItems, setMasterItems] = useState<OwnerCatalogProduct[]>(OWNER_CATALOG_PRODUCTS);
-  const [publishedRows, setPublishedRows] = useState<Set<number>>(() => {
-    const set = new Set<number>();
-    ACTIVE_CATALOG_MAPPING.forEach((m) => set.add(m.masterRow));
-    return set;
-  });
+  const [publishedRows, setPublishedRows] = useState<Set<number>>(() => new Set(DEFAULT_PUBLISHED_ROWS));
 
   // Slowbar availability state (barista toggle: bean is out of stock on bar today)
   const [slowbarOutOfStock, setSlowbarOutOfStock] = useState<Set<string>>(new Set(['Arkana', 'Gayo']));
@@ -179,16 +194,38 @@ function AdminDashboardContent() {
   }, [masterItems, publishedRows]);
 
   // Handle Publish / Unpublish Toggle
-  const handleTogglePublish = (row: number) => {
-    setPublishedRows((prev) => {
-      const next = new Set(prev);
-      if (next.has(row)) {
-        next.delete(row);
-      } else {
-        next.add(row);
-      }
+  const handleTogglePublish = async (row: number) => {
+    const slugs = ACTIVE_CATALOG_MAPPING
+      .filter((mapping) => mapping.masterRow === row)
+      .flatMap((mapping) => [mapping.slug, mapping.knowledgeSlug].filter((slug): slug is string => Boolean(slug)));
+    if (slugs.length === 0 || updatingRow !== null) return;
+    const nextPublished = !publishedRows.has(row);
+    setCatalogSyncError('');
+    setUpdatingRow(row);
+    setPublishedRows((previous) => {
+      const next = new Set(previous);
+      if (nextPublished) next.add(row);
+      else next.delete(row);
       return next;
     });
+    try {
+      const response = await fetch('/api/catalog/publication', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slugs, isPublished: nextPublished }),
+      });
+      if (!response.ok) throw new Error('Publication update failed');
+    } catch {
+      setPublishedRows((previous) => {
+        const reverted = new Set(previous);
+        if (nextPublished) reverted.delete(row);
+        else reverted.add(row);
+        return reverted;
+      });
+      setCatalogSyncError('Perubahan gagal disimpan. Silakan masuk ulang dan coba lagi.');
+    } finally {
+      setUpdatingRow(null);
+    }
   };
 
   // Open Price Editor
@@ -220,10 +257,6 @@ function AdminDashboardContent() {
         return item;
       })
     );
-    // Auto mark as published if price provided and was in review
-    if (price100g || price200g) {
-      setPublishedRows((prev) => new Set(prev).add(editingProduct.sourceRow));
-    }
     setEditingProduct(null);
   };
 
@@ -309,7 +342,7 @@ function AdminDashboardContent() {
                 <p className="text-xs text-red-600 font-mono text-center font-medium">{pinError}</p>
               ) : (
                 <p className="text-[10px] text-on-surface-variant font-mono text-center">
-                  Demo PIN Staff Roastery: <strong className="text-brand-navy">5252</strong>
+                  Gunakan PIN staff yang dikonfigurasi untuk portal ini.
                 </p>
               )}
             </div>
@@ -321,13 +354,6 @@ function AdminDashboardContent() {
               Buka Portal Roastery
             </button>
 
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              className="w-full rounded-xs border border-black/15 bg-[#F8FAFC] py-2.5 font-mono text-xs font-semibold text-brand-charcoal hover:bg-black/5 transition-colors"
-            >
-              Masuk Langsung (Akses Demo 5252)
-            </button>
           </form>
 
           <div className="border-t border-black/10 pt-4 text-center">
@@ -632,6 +658,11 @@ function AdminDashboardContent() {
                 ))}
               </div>
             </div>
+            {catalogSyncError && (
+              <p role="alert" className="rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
+                {catalogSyncError}
+              </p>
+            )}
 
             {/* Master Catalog Table */}
             <div className="overflow-x-auto rounded-sm border border-border-subtle bg-white shadow-2xs">
@@ -650,6 +681,7 @@ function AdminDashboardContent() {
                 <tbody className="divide-y divide-black/10">
                   {filteredCatalog.map((item) => {
                     const isPublished = publishedRows.has(item.sourceRow);
+                    const hasWebMapping = ACTIVE_CATALOG_MAPPING.some((mapping) => mapping.masterRow === item.sourceRow);
                     const isReview =
                       item.prices.filter100g === '-' &&
                       item.prices.filter200g === '-' &&
@@ -713,14 +745,18 @@ function AdminDashboardContent() {
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleTogglePublish(item.sourceRow)}
+                              onClick={() => void handleTogglePublish(item.sourceRow)}
+                              disabled={!hasWebMapping || updatingRow !== null}
+                              title={hasWebMapping ? undefined : 'Produk ini belum memiliki mapping ke katalog website.'}
                               className={`rounded-xs px-3 py-1 text-[10px] font-bold uppercase transition-colors ${
-                                isPublished
+                                !hasWebMapping
+                                  ? 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400'
+                                  : isPublished
                                   ? 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
                                   : 'border border-emerald-300 bg-emerald-600 text-white hover:bg-emerald-700'
                               }`}
                             >
-                              {isPublished ? 'Tarik Draft' : 'Aktifkan'}
+                              {!hasWebMapping ? 'Belum Dipetakan' : updatingRow === item.sourceRow ? 'Menyimpan...' : isPublished ? 'Tarik Draft' : 'Aktifkan'}
                             </button>
                           </div>
                         </td>

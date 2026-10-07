@@ -1,13 +1,21 @@
 # pyrefly: ignore [missing-import]
 import asyncio
+import re
+import secrets
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Header, HTTPException
 # pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .models import ChatRequest, ChatResponse, SearchRequest, SearchResponse
+from .models import ChatRequest, ChatResponse, PublicationUpdateRequest, SearchRequest, SearchResponse
 from .guardrail_service import guardrail_service
 from .rag_service import rag_service, PUBLISHED_COFFEE_KNOWLEDGE_BASE
+from .publication_service import (
+    apply_publication_overrides,
+    ensure_publication_schema,
+    get_publication_overrides,
+    set_publication,
+)
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -23,6 +31,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def initialise_publication_store():
+    ensure_publication_schema()
 
 @app.get("/")
 def root():
@@ -96,7 +109,33 @@ async def get_all_products():
     """
     Returns full authentic 52 Coffee & Roastery knowledge data
     """
-    return {"count": len(PUBLISHED_COFFEE_KNOWLEDGE_BASE), "data": PUBLISHED_COFFEE_KNOWLEDGE_BASE}
+    products = apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, get_publication_overrides())
+    return {"count": len(products), "data": products}
+
+
+@app.get("/api/catalog/publication")
+async def get_catalog_publication():
+    try:
+        return {"overrides": get_publication_overrides()}
+    except Exception:
+        raise HTTPException(status_code=503, detail="Status katalog tidak tersedia.")
+
+
+@app.patch("/api/catalog/publication")
+async def update_catalog_publication(
+    request: PublicationUpdateRequest,
+    x_admin_key: str = Header(default=""),
+):
+    if not settings.ADMIN_API_KEY or not secrets.compare_digest(x_admin_key, settings.ADMIN_API_KEY):
+        raise HTTPException(status_code=401, detail="Akses admin tidak valid.")
+    slugs = list(dict.fromkeys(slug.strip() for slug in request.slugs))
+    if any(not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug) for slug in slugs):
+        raise HTTPException(status_code=422, detail="Slug produk tidak valid.")
+    try:
+        set_publication(slugs, request.isPublished)
+        return {"updated": slugs, "isPublished": request.isPublished}
+    except Exception:
+        raise HTTPException(status_code=503, detail="Status katalog gagal disimpan.")
 
 if __name__ == "__main__":
     # pyrefly: ignore [missing-import]

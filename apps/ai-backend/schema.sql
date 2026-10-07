@@ -78,3 +78,10 @@ ON coffee_knowledge USING hnsw (embedding vector_cosine_ops);
 -- Index on product slugs
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 CREATE INDEX IF NOT EXISTS idx_series_slug ON series(slug);
+
+-- Runtime publication overrides controlled by the admin portal.
+CREATE TABLE IF NOT EXISTS catalog_publication_overrides (
+    slug VARCHAR(150) PRIMARY KEY,
+    is_published BOOLEAN NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

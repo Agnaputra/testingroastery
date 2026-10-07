@@ -1,6 +1,7 @@
 import unittest
 
-from .rag_service import is_contextual_followup, is_supported_question, is_website_feature_question
+from .publication_service import apply_publication_overrides
+from .rag_service import RAGService, is_contextual_followup, is_supported_question, is_website_feature_question
 
 
 class ScopeTest(unittest.TestCase):
@@ -9,11 +10,14 @@ class ScopeTest(unittest.TestCase):
         self.assertTrue(is_supported_question("Bagaimana memakai fitur Brewing Guidance?"))
         self.assertTrue(is_website_feature_question("Bagaimana memakai fitur Brewing Guidance?"))
         self.assertFalse(is_website_feature_question("Produk floral untuk V60 apa yang tersedia?"))
+        self.assertTrue(is_supported_question("Prau Natural El Davisio Double Mosto"))
+        self.assertTrue(is_supported_question("buntu lenta"))
+        self.assertTrue(is_supported_question("apa saja produk yang ada disini?"))
 
-    def test_medical_and_general_queries_are_rejected(self) -> None:
-        self.assertFalse(is_supported_question("Apa itu maag?"))
-        self.assertFalse(is_supported_question("Apa itu leukemia?"))
-        self.assertFalse(is_supported_question("Siapa presiden Indonesia?"))
+    def test_medical_and_general_queries_are_allowed(self) -> None:
+        self.assertTrue(is_supported_question("Apa itu maag?"))
+        self.assertTrue(is_supported_question("Apa itu leukemia?"))
+        self.assertTrue(is_supported_question("Siapa presiden Indonesia?"))
         self.assertFalse(is_website_feature_question("Kopi floral untuk V60 apa yang tersedia?"))
 
     def test_conversation_and_followups_are_allowed_without_opening_general_scope(self) -> None:
@@ -23,7 +27,25 @@ class ScopeTest(unittest.TestCase):
         self.assertTrue(is_supported_question("makasih"))
         self.assertTrue(is_contextual_followup("yang kedua lebih murah?", history))
         self.assertTrue(is_supported_question("yang kedua lebih murah?", history))
-        self.assertFalse(is_supported_question("siapa penemu telepon?", history))
+        self.assertTrue(is_supported_question("apa?", history))
+        self.assertTrue(is_supported_question("kok bgini jawabannya", history))
+        self.assertTrue(is_supported_question("siapa penemu telepon?", history))
+
+    def test_web_citations_are_extracted_and_internal_markers_removed(self) -> None:
+        reply, sources = RAGService._extract_response({"output": [{"content": [{
+            "type": "output_text",
+            "text": "Jawaban. \ue200cite\ue202turn0search0\ue201",
+            "annotations": [{"type": "url_citation", "url": "https://example.com", "title": "Example"}],
+        }]}]})
+        self.assertEqual(reply, "Jawaban.")
+        self.assertEqual(sources, [{"title": "Example", "url": "https://example.com"}])
+
+    def test_publication_overrides_only_hide_explicitly_disabled_products(self) -> None:
+        products = [{"slug": "prau-natural"}, {"slug": "buntu-lenta"}]
+        self.assertEqual(
+            apply_publication_overrides(products, {"prau-natural": False}),
+            [{"slug": "buntu-lenta"}],
+        )
 
 
 if __name__ == "__main__":

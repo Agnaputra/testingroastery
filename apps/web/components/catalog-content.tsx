@@ -18,7 +18,7 @@ import {
 import { getPublishedProducts } from '../lib/catalog-master';
 import { EditorialProductCard } from './editorial-product-card';
 
-const PUBLISHED_PRODUCTS = getPublishedProducts();
+const DEFAULT_PUBLISHED_PRODUCTS = getPublishedProducts();
 
 // Ordered according to official 52 Coffee Menu Blueprint
 const ORDERED_SERIES = [
@@ -44,7 +44,13 @@ const FLAVOR_PROFILES = [
   { id: 'Nutty', label: 'Nutty' },
 ] as const;
 
-export default function CatalogContent({ initialCategory: defaultCategory }: { initialCategory?: string }) {
+export default function CatalogContent({
+  initialCategory: defaultCategory,
+  publishedSlugs,
+}: {
+  initialCategory?: string;
+  publishedSlugs?: string[];
+}) {
   return (
     <Suspense
       fallback={
@@ -53,16 +59,21 @@ export default function CatalogContent({ initialCategory: defaultCategory }: { i
         </div>
       }
     >
-      <CatalogClientContent defaultCategory={defaultCategory} />
+      <CatalogClientContent defaultCategory={defaultCategory} publishedSlugs={publishedSlugs} />
     </Suspense>
   );
 }
 
-function CatalogClientContent({ defaultCategory }: { defaultCategory?: string }) {
+function CatalogClientContent({ defaultCategory, publishedSlugs }: { defaultCategory?: string; publishedSlugs?: string[] }) {
   const reducedMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') ?? defaultCategory ?? null;
   const initialSeries = searchParams.get('series');
+  const publishedProducts = useMemo(() => {
+    if (!publishedSlugs) return DEFAULT_PUBLISHED_PRODUCTS;
+    const activeSlugs = new Set(publishedSlugs);
+    return DEFAULT_PUBLISHED_PRODUCTS.filter((product) => activeSlugs.has(product.slug));
+  }, [publishedSlugs]);
 
   const [mainTab, setMainTab] = useState<'beans' | 'slowbar' | 'glassware' | 'machine'>(() => {
     if (initialCategory) {
@@ -112,7 +123,7 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
   // Extract and sort all unique series by official Blueprint menu order
   const allSeriesList = useMemo(() => {
     const set = new Set<string>();
-    PUBLISHED_PRODUCTS.forEach((p) => set.add(p.series));
+    publishedProducts.forEach((p) => set.add(p.series));
     const list = Array.from(set);
     return list.sort((a, b) => {
       const idxA = ORDERED_SERIES.indexOf(a);
@@ -122,11 +133,11 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
       if (idxB !== -1) return 1;
       return a.localeCompare(b);
     });
-  }, []);
+  }, [publishedProducts]);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    return PUBLISHED_PRODUCTS.filter((p) => {
+    return publishedProducts.filter((p) => {
       // 1. Category Filter
       if (mainTab === 'slowbar') {
         if (!p.cupPrice) return false;
@@ -189,7 +200,7 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
       }
       return a.name.localeCompare(b.name);
     });
-  }, [mainTab, beansSubTab, slowbarGroup, slowbarBrewBase, selectedSeries, selectedFlavor, searchQuery, sortBy]);
+  }, [publishedProducts, mainTab, beansSubTab, slowbarGroup, slowbarBrewBase, selectedSeries, selectedFlavor, searchQuery, sortBy]);
 
   // Assign image URLs
   const enrichedProducts = useMemo(() => {
@@ -204,16 +215,16 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
   const displayedProducts = enrichedProducts.slice(0, visibleCount);
 
   const filterCount = useMemo(
-    () => PUBLISHED_PRODUCTS.filter((p) => p.category === 'filter' || p.category === 'reserve').length,
-    []
+    () => publishedProducts.filter((p) => p.category === 'filter' || p.category === 'reserve').length,
+    [publishedProducts]
   );
   const espressoCount = useMemo(
-    () => PUBLISHED_PRODUCTS.filter((p) => p.category === 'espresso').length,
-    []
+    () => publishedProducts.filter((p) => p.category === 'espresso').length,
+    [publishedProducts]
   );
   const slowbarCount = useMemo(
-    () => PUBLISHED_PRODUCTS.filter((p) => !!p.cupPrice).length,
-    []
+    () => publishedProducts.filter((p) => !!p.cupPrice).length,
+    [publishedProducts]
   );
 
   const hasActiveFilters =
@@ -253,7 +264,7 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
               <span>
                 {mainTab === 'slowbar'
                   ? `${slowbarCount} menu Slowbar`
-                  : `${PUBLISHED_PRODUCTS.length} pilihan kopi (${filterCount} filter · ${espressoCount} espresso)`}
+                  : `${publishedProducts.length} pilihan kopi (${filterCount} filter · ${espressoCount} espresso)`}
               </span>
               <span>Di sangrai di Malang · Semua kopi fresh roast</span>
             </div>

@@ -8,8 +8,8 @@ class ChatMessage(BaseModel):
     content: str = Field(..., description="Text content of the message")
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., description="User query / question to the barista")
-    history: Optional[List[ChatMessage]] = Field(default=[], description="Recent conversation history")
+    message: str = Field(..., min_length=1, max_length=500, description="User query / question to the barista")
+    history: Optional[List[ChatMessage]] = Field(default_factory=list, description="Recent conversation history")
     temperature: Optional[float] = Field(default=0.4, description="Sampling temperature")
 
 class ProductSearchResult(BaseModel):
@@ -22,10 +22,15 @@ class ProductSearchResult(BaseModel):
     base_price: float
     similarity_score: Optional[float] = None
 
+class SourceLink(BaseModel):
+    title: str
+    url: str
+
 class ChatResponse(BaseModel):
     reply: str
-    recommendedSlugs: List[str] = []
-    recommendedProducts: List[ProductSearchResult] = []
+    recommendedSlugs: List[str] = Field(default_factory=list)
+    recommendedProducts: List[ProductSearchResult] = Field(default_factory=list)
+    sources: List[SourceLink] = Field(default_factory=list)
     groundedInCatalog: bool = True
     guardrailStatus: str = "passed"
 
@@ -36,3 +41,7 @@ class SearchRequest(BaseModel):
 class SearchResponse(BaseModel):
     results: List[ProductSearchResult]
     query: str
+
+class PublicationUpdateRequest(BaseModel):
+    slugs: List[str] = Field(..., min_length=1, max_length=10)
+    isPublished: bool

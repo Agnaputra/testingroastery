@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Guardrails
     ENABLE_GUARDRAILS: bool = os.getenv("ENABLE_GUARDRAILS", "true").lower() == "true"
     RAGAS_EVALUATOR_MODEL: str = os.getenv("RAGAS_EVALUATOR_MODEL", "gpt-4.1-mini")
+    ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "")
     
     # CORS Origins
     CORS_ORIGINS: list[str] = [

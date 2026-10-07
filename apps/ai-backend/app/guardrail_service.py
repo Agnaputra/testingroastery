@@ -14,8 +14,8 @@ from .config import settings
 
 
 REFUSAL_MESSAGE = (
-    "Mohon maaf kawan seduh, saya hanya dapat membantu seputar katalog 52 Coffee, "
-    "profil rasa, dan panduan seduh."
+    "Maaf, saya tidak dapat membantu permintaan yang berbahaya, melanggar privasi, "
+    "atau mencoba membocorkan instruksi dan data internal."
 )
 
 

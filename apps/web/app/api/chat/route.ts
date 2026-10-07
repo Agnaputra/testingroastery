@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPublishedProducts } from '../../../lib/catalog-master';
+import { getPublishedProducts, toWebCatalogSlug } from '../../../lib/catalog-master';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -24,42 +24,66 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Blocked phrases — prompt injection, SQL, jailbreak, off-topic abuse
+    // 2. Block only prompt injection and clearly harmful requests; ordinary topics stay open.
     const BLOCKED_PHRASES = [
       'ignore previous instructions', 'ignore all instructions',
       'system prompt', 'jailbreak', 'bypass filter', 'bypass guardrail',
       'act as dan', 'you are dan', 'pretend you are', 'roleplay as',
       'drop table', 'select * from', 'insert into', 'delete from', '--',
-      'hack', 'meretas', 'ddos', 'script injection', 'xss',
-      'judi', 'togel', 'politik', 'presiden', 'narkoba', 'drugs',
-      'cara membuat bom', 'weapons', 'senjata',
+      'hack akun', 'cara meretas', 'ddos', 'script injection', 'xss payload',
+      'cara membuat bom', 'cara membuat senjata',
     ];
     const msgLower = message.toLowerCase();
     const isBlocked = BLOCKED_PHRASES.some((phrase) => msgLower.includes(phrase));
     if (isBlocked) {
       return NextResponse.json({
-        reply: 'Mohon maaf kawan seduh 🙏 Saya adalah Virtual Barista khusus 52 Coffee & Roastery. Saya hanya dapat membantu seputar rekomendasi biji kopi, profil rasa, dan panduan seduh presisi. Ada yang ingin kamu ketahui tentang kopi kami?',
-        recommendedSlugs: ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai'],
-        groundedInCatalog: true,
+        reply: 'Maaf, saya tidak dapat membantu permintaan yang mencoba membocorkan sistem, merusak layanan, atau membahayakan orang lain. Saya tetap bisa membantu dengan pertanyaan umum yang aman.',
+        recommendedSlugs: [],
+        groundedInCatalog: false,
       });
     }
 
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
 
-    // Prefer the guarded backend: OpenAI when configured, then its local fallback.
-    try {
-      const backendRes = await fetch(`${aiBackendUrl}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, history }),
-        signal: AbortSignal.timeout(25000),
-      });
+    // A development reload can briefly make FastAPI unavailable, so retry once before fallback.
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const backendRes = await fetch(`${aiBackendUrl}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, history }),
+          signal: AbortSignal.timeout(25000),
+        });
 
-      if (backendRes.ok) {
-        return NextResponse.json(await backendRes.json());
+        if (backendRes.ok) {
+          const payload = await backendRes.json();
+          if (Array.isArray(payload.recommendedSlugs)) {
+            payload.recommendedSlugs = payload.recommendedSlugs.map(toWebCatalogSlug);
+          }
+          return NextResponse.json(payload);
+        }
+      } catch {
+        // Retry once, then let the explicit local fallback handle a real outage.
       }
-    } catch {
-      // Local route fallback remains available when the optional AI backend is offline.
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+    }
+
+    const localScopeTerms = [
+      '52 coffee', 'kopi', 'coffee', 'beans', 'biji', 'espresso', 'v60', 'seduh', 'roast',
+      'katalog', 'produk', 'tasting', 'rasa', 'byob', 'blend', 'coffee lab', 'wholesale',
+      'partnership', 'kemitraan', 'checkout', 'keranjang', 'harga', 'halo', 'hello', 'hai',
+    ];
+    const localQuery = message.toLowerCase();
+    if (!localScopeTerms.some((term) => localQuery.includes(term))) {
+      return NextResponse.json({
+        reply: 'Maaf, layanan AI dan pencarian web sedang tidak tersedia. Silakan coba lagi sebentar lagi.',
+        recommendedSlugs: [],
+        sources: [],
+        groundedInCatalog: false,
+        guardrailStatus: 'backend_unavailable',
+      });
     }
 
     // Comprehensive Context-Aware Built-in Barista Intelligence

@@ -81,6 +81,7 @@ export interface MasterBean {
 export interface ProductMappingEntry {
   webId: string;
   slug: string;
+  knowledgeSlug?: string;
   masterRow: number;
   canonicalName: string;
   alias?: string;
@@ -96,7 +97,7 @@ export interface ProductMappingEntry {
 export const ACTIVE_CATALOG_MAPPING: ProductMappingEntry[] = [
   // 1. Java Exotic Series
   { webId: 'sumbing-supernova-celestia', slug: 'sumbing-supernova-celestia', masterRow: 1, canonicalName: 'Sumbing Supernova Wash', alias: 'Celestia', profileType: 'filter', publicationStatus: 'published' },
-  { webId: 'prau-natural-surya', slug: 'prau-natural-surya', masterRow: 2, canonicalName: 'Prau Natural El Davisio Double Mosto', alias: 'Surya', profileType: 'filter', publicationStatus: 'published' },
+  { webId: 'prau-natural-surya', slug: 'prau-natural-surya', knowledgeSlug: 'prau-natural-el-davisio-surya', masterRow: 2, canonicalName: 'Prau Natural El Davisio Double Mosto', alias: 'Surya', profileType: 'filter', publicationStatus: 'published' },
   { webId: 'prau-not-chiroso-unchiro', slug: 'prau-not-chiroso-unchiro', masterRow: 3, canonicalName: 'Prau Not-Chiroso Style', alias: 'Unchiro', profileType: 'filter', publicationStatus: 'published' },
   { webId: 'sindoro-strawberry-selai', slug: 'sindoro-strawberry-selai', masterRow: 5, canonicalName: 'Sindoro Strawberry Triple Yeast', alias: 'Selai', profileType: 'filter', publicationStatus: 'published' },
   { webId: 'sindoro-lavender-candy', slug: 'sindoro-lavender-candy', masterRow: 8, canonicalName: 'Sindoro Lavender Candy Wash', alias: 'Lavender', profileType: 'filter', publicationStatus: 'published' },
@@ -125,20 +126,24 @@ export const ACTIVE_CATALOG_MAPPING: ProductMappingEntry[] = [
   { webId: 'damarkandang-cm-kismis', slug: 'damarkandang-cm-kismis', masterRow: 41, canonicalName: 'Argopuro Damarkandang CM Kismis', alias: 'Damarkandang Kismis', profileType: 'filter', publicationStatus: 'published' },
 
   // 6. Grand Reserve
-  { webId: 'grand-reserve-magnum-sidra', slug: 'grand-reserve-magnum-sidra', masterRow: 29, canonicalName: 'Magnum Sidra El Vergel Cauca Colombia', alias: 'Soberano', profileType: 'reserve', publicationStatus: 'published' },
-  { webId: 'grand-reserve-el-triunfo-geisha', slug: 'grand-reserve-el-triunfo-geisha', masterRow: 30, canonicalName: 'El Triunfo Geisha Tolima Colombia', alias: 'Aurora', profileType: 'reserve', publicationStatus: 'published' },
-  { webId: 'grand-reserve-sudan-rume-carmin', slug: 'grand-reserve-sudan-rume-carmin', masterRow: 31, canonicalName: 'Sudan Rume Huila Colombia', alias: 'Carmin', profileType: 'reserve', publicationStatus: 'published' },
+  { webId: 'grand-reserve-magnum-sidra', slug: 'grand-reserve-magnum-sidra', knowledgeSlug: 'magnum-sidra-el-vergel-soberano', masterRow: 29, canonicalName: 'Magnum Sidra El Vergel Cauca Colombia', alias: 'Soberano', profileType: 'reserve', publicationStatus: 'published' },
+  { webId: 'grand-reserve-el-triunfo-geisha', slug: 'grand-reserve-el-triunfo-geisha', knowledgeSlug: 'el-triunfo-geisha-tolima-aurora', masterRow: 30, canonicalName: 'El Triunfo Geisha Tolima Colombia', alias: 'Aurora', profileType: 'reserve', publicationStatus: 'published' },
+  { webId: 'grand-reserve-sudan-rume-carmin', slug: 'grand-reserve-sudan-rume-carmin', knowledgeSlug: 'sudan-rume-huila-carmin', masterRow: 31, canonicalName: 'Sudan Rume Huila Colombia', alias: 'Carmin', profileType: 'reserve', publicationStatus: 'published' },
   { webId: 'grand-reserve-pink-bourbon-marfil', slug: 'grand-reserve-pink-bourbon-marfil', masterRow: 32, canonicalName: 'Inmaculada Pink Bourbon Huila Colombia', alias: 'Marfil', profileType: 'reserve', publicationStatus: 'published' },
-  { webId: 'grand-reserve-yemen-sahara', slug: 'grand-reserve-yemen-sahara', masterRow: 33, canonicalName: 'Yemen Haraz Golden Harvest', alias: 'Sahara', profileType: 'reserve', publicationStatus: 'published' },
+  { webId: 'grand-reserve-yemen-sahara', slug: 'grand-reserve-yemen-sahara', knowledgeSlug: 'yemen-haraz-golden-harvest-sahara', masterRow: 33, canonicalName: 'Yemen Haraz Golden Harvest', alias: 'Sahara', profileType: 'reserve', publicationStatus: 'published' },
 
   // 7. Espresso Lineup (Robusta & Arabica)
-  { webId: 'espresso-dampit-natural', slug: 'dampit-natural-robusta-espresso', masterRow: 24, canonicalName: 'Dampit Natural', profileType: 'espresso', publicationStatus: 'published' },
+  { webId: 'espresso-dampit-natural', slug: 'dampit-natural-robusta-espresso', knowledgeSlug: 'dampit-natural-espresso', masterRow: 24, canonicalName: 'Dampit Natural', profileType: 'espresso', publicationStatus: 'published' },
   { webId: 'espresso-telemung-honey', slug: 'telemung-honey-robusta-espresso', masterRow: 25, canonicalName: 'Telemung Honey', profileType: 'espresso', publicationStatus: 'published' },
   { webId: 'espresso-arabica-kintamani', slug: 'kintamani-full-wash-arabica-espresso', masterRow: 18, canonicalName: 'Kintamani Full Wash', alias: 'Arkana', profileType: 'espresso', dualRoastProfileBean: 'kintamani-full-wash', publicationStatus: 'published' },
   { webId: 'espresso-arabica-gayo-full-wash', slug: 'gayo-full-wash-arabica-espresso', masterRow: 27, canonicalName: 'Gayo Full Wash', alias: 'Gayo', profileType: 'espresso', dualRoastProfileBean: 'gayo-full-wash', publicationStatus: 'published' },
   { webId: 'espresso-arabica-ijen-full-wash', slug: 'arabica-ijen-full-wash-espresso', masterRow: 15, canonicalName: 'Ijen Full Wash', alias: 'Washey', profileType: 'espresso', dualRoastProfileBean: 'ijen-full-wash', publicationStatus: 'published' },
   { webId: 'espresso-brazil-santos', slug: 'brazil-santos-espresso', masterRow: 28, canonicalName: 'Brazil Santos', profileType: 'espresso', publicationStatus: 'published' },
 ];
+
+export function toWebCatalogSlug(slug: string): string {
+  return ACTIVE_CATALOG_MAPPING.find((mapping) => mapping.knowledgeSlug === slug)?.slug ?? slug;
+}
 
 /**
  * Rows in master snapshot that have missing prices, provisional "Harga belum ada" notes,
