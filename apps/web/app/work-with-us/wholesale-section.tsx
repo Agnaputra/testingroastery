@@ -12,6 +12,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { SectionIntro } from '../../components/ui/page-structure';
+import { ReserveLayout } from '../../components/ui/reserve-layout';
 import { WHATSAPP_URL } from '../../lib/data';
 
 export function WholesaleSection() {
@@ -42,7 +43,7 @@ export function WholesaleSection() {
   return (
     <>
       {/* 2. 3 KEY PARTNERSHIP SERVICES */}
-      <section id="wholesale-partnership" className="site-container page-section scroll-mt-28">
+      <section id="wholesale-services" className="site-container page-section scroll-mt-28">
         <SectionIntro
           className="partnership-section-intro"
           align="center"
@@ -125,13 +126,24 @@ export function WholesaleSection() {
       </section>
 
       {/* 3. B2B INQUIRY FORM */}
-      <section id="consultation-form" className="site-container page-section scroll-mt-28">
+      <ReserveLayout
+        id="wholesale-partnership"
+        tone="maroon"
+        kicker="Wholesale partnership"
+        title="Bangun pasokan yang konsisten."
+        description="Ceritakan kebutuhan operasional bisnis Anda. Tim roastery membantu menentukan layanan, volume, dan arah kopi yang paling masuk akal."
+        details={[
+          { icon: <Package className="h-4 w-4" aria-hidden="true" />, title: 'Supplier roast beans', description: 'Pasokan terjadwal dengan standar mutu dan ekstraksi.' },
+          { icon: <Flame className="h-4 w-4" aria-hidden="true" />, title: 'Special blends', description: 'Profil sangrai dan racikan yang mewakili identitas bisnis.' },
+          { icon: <TrendingUp className="h-4 w-4" aria-hidden="true" />, title: 'Business consultation', description: 'SOP, peralatan, layout bar, HPP, dan menu signature.' },
+        ]}
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.45 }}
-          className="ui-surface mx-auto max-w-4xl p-6 sm:p-10 space-y-8"
+          className="space-y-8"
         >
           <div className="border-b border-border-subtle pb-5 space-y-2">
             <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-brand-navy">
@@ -282,7 +294,7 @@ export function WholesaleSection() {
             </form>
           )}
         </motion.div>
-      </section>
+      </ReserveLayout>
     </>
   );
 }

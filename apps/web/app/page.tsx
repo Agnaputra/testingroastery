@@ -153,29 +153,29 @@ const PROCESS_STEPS = [
 
 const FAQS = [
   {
-    question: 'Apakah biji kopi di 52 Coffee selalu fresh roasted?',
+    question: 'Apa itu Virtual Barista 52 Coffee?',
     answer:
-      'Ya, seluruh biji kopi disangrai dalam batch kecil (small-batch) setiap minggunya di roastery kami di Malang. Tanggal sangrai (Roast Date) selalu tertera jelas pada kemasan agar Anda menikmati masa resting optimal (7-30 hari setelah sangrai).',
+      'Virtual Barista adalah asisten berbasis AI yang membantu Anda mengenal katalog dan menggunakan fitur website 52 Coffee. Jawabannya diarahkan pada produk yang dipublikasikan, karakter rasa, panduan seduh, Coffee Lab, serta layanan kemitraan kami.',
   },
   {
-    question: 'Bagaimana cara memilih ukuran gilingan (grind size) yang tepat?',
+    question: 'Bagaimana cara menggunakan Virtual Barista?',
     answer:
-      'Saat memesan di website, Anda bisa memilih varian Whole Bean (biji utuh untuk menjaga kesegaran maksimal), Giling Kasar (Cold Brew, French Press), Giling Medium (V60, Aeropress, Kalita Wave), atau Giling Halus (Espresso, Mokapot, Tubruk).',
+      'Klik tombol Virtual Barista di kanan bawah, lalu ceritakan kebutuhan Anda. Contohnya: “Saya suka kopi fruity untuk V60”, “Bagaimana memakai Brewing Guidance?”, atau “Di mana saya bisa mengajukan konsultasi wholesale?”',
   },
   {
-    question: 'Apakah 52 Coffee melayani pengiriman ke seluruh Indonesia?',
+    question: 'Apa saja yang bisa dibantu oleh AI ini?',
     answer:
-      'Kami melayani pengiriman ke berbagai kota di Indonesia. Pilihan kurir dan estimasi pengiriman perlu dikonfirmasi saat pemesanan karena website ini belum terhubung ke status pengiriman real-time.',
+      'AI dapat membantu memilih beans berdasarkan preferensi rasa dan metode seduh, menjelaskan tasting notes serta profil produk, memberi panduan seduh, dan menunjukkan fitur Catalogue, keranjang, Coffee Lab, BYOB, Consultations, serta Wholesale & Partnership.',
   },
   {
-    question: 'Apakah bisa memesan custom blend atau harga wholesale untuk kedai kopi?',
+    question: 'Dari mana Virtual Barista mendapatkan jawabannya?',
     answer:
-      'Bisa. Anda dapat menggunakan fitur BYOB untuk mengeksplorasi profil blend atau menghubungi tim wholesale melalui menu Kemitraan untuk membahas kebutuhan bisnis.',
+      'Jawaban disusun dari katalog produk 52 Coffee yang telah dipublikasikan dan informasi fitur yang tersedia di website. Dengan begitu, rekomendasi tetap terhubung dengan produk dan layanan 52 Coffee, bukan dibuat sebagai pengetahuan umum tanpa konteks.',
   },
   {
-    question: 'Kapan jam operasional Slowbar & Tasting Room di Malang?',
+    question: 'Apakah Virtual Barista dapat menjawab semua pertanyaan?',
     answer:
-      'Slowbar & Tasting Room kami buka Senin - Minggu, pukul 10.00 - 20.00 WIB di Jl. KH Agus Salim No. 11, Klojen, Kota Malang. Anda bisa langsung datang untuk mencicipi kurasi origin terbaru kami.',
+      'Tidak. Virtual Barista difokuskan pada katalog dan fitur 52 Coffee, sehingga pertanyaan umum, medis, politik, atau topik di luar layanan akan ditolak dan diarahkan kembali ke konteks kopi. Informasi checkout, pembayaran, pesanan, dan pelacakan juga dijelaskan sebagai simulasi, bukan transaksi nyata.',
   },
 ];
 
@@ -611,12 +611,14 @@ export default function HomePage() {
       <section className={styles.b2b} aria-labelledby="b2b-heading">
         <div className={styles.b2bCopy}>
           <p className={styles.eyebrow}>Kemitraan / B2B</p>
-          <h2 id="b2b-heading">Kopi untuk ruang yang kamu bangun.</h2>
+          <h2 id="b2b-heading">Kemitraan kopi untuk bisnismu.</h2>
           <p>
-            Jelajahi kebutuhan wholesale, racikan BYOB, dan dukungan untuk membentuk profil kopi yang sesuai dengan arah kedaimu.
+            Dapatkan pasokan roast beans untuk kedai, restoran, hotel, atau kantor;
+            kembangkan custom blend dan private label; serta konsultasikan konsep menu,
+            SOP, peralatan, layout bar, hingga perhitungan HPP bersama tim kami.
           </p>
           <Link href="/work-with-us" className={styles.lightButton}>
-            Mulai percakapan <ArrowUpRight aria-hidden="true" size={17} />
+            Lihat program kemitraan <ArrowUpRight aria-hidden="true" size={17} />
           </Link>
         </div>
         <figure className={styles.b2bMedia}>
@@ -635,9 +637,9 @@ export default function HomePage() {
         <div className={styles.sectionShell}>
           <div className={styles.faqGrid}>
             <div className={styles.faqIntro}>
-              <p className={styles.eyebrow}>Informasi / FAQ</p>
-              <h2 id="faq-heading">Yang sering ditanyakan sebelum menyeduh.</h2>
-              <p>Pertanyaan umum seputar sangrai, pengiriman, pilihan gilingan, dan layanan 52 Coffee.</p>
+              <p className={styles.eyebrow}>Virtual Barista / AI</p>
+              <h2 id="faq-heading">Kenali asisten kopi digital kami.</h2>
+              <p>Pelajari cara menggunakan Virtual Barista untuk menjelajahi kopi dan fitur 52 Coffee dengan percakapan yang lebih personal.</p>
               <div className={styles.faqImage}>
                 <Image
                   src="/images/canva-cafe-moodboard.jpg"

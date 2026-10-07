@@ -159,7 +159,7 @@ export function Navbar() {
 
   const totalItems = mounted ? getTotalItems() : 0;
   const isHome = pathname === '/';
-  const hasDarkNavbarCanvas = isHome || pathname.startsWith('/guide') || pathname.startsWith('/coffee-lab') || pathname.startsWith('/blend-builder') || pathname.startsWith('/work-with-us') || pathname.startsWith('/tools/price-calculator');
+  const hasDarkNavbarCanvas = isHome || pathname.startsWith('/about') || pathname.startsWith('/guide') || pathname.startsWith('/coffee-lab') || pathname.startsWith('/blend-builder') || pathname.startsWith('/work-with-us') || pathname.startsWith('/tools/price-calculator');
   const active = (href: string) => {
     if (href.includes('#') || href.includes('?')) return false;
     return href === '/' ? pathname === '/' : pathname === href;
@@ -169,7 +169,7 @@ export function Navbar() {
   }`;
   const iconColor = 'border border-white/30 bg-[#182131]/90 text-white hover:bg-[#182131]';
   const headerSurface = scrolled
-    ? 'border-white/10 bg-brand-charcoal/95 shadow-[0_10px_30px_rgba(20,24,28,.18)] backdrop-blur-xl'
+    ? 'border-white/15 bg-[rgba(44,49,54,.82)] shadow-[0_10px_30px_rgba(20,24,28,.16)] backdrop-blur-md'
     : 'border-transparent bg-transparent';
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, BriefcaseBusiness, Calculator, Coffee, MessageSquare, SlidersHorizontal, Sparkles, TestTube2 } from 'lucide-react';
-import { PageIntro, SectionIntro } from '../../../components/ui/page-structure';
+import { ArrowRight, Calculator, Coffee, MessageSquare, SlidersHorizontal, TestTube2 } from 'lucide-react';
+import { SectionIntro } from '../../../components/ui/page-structure';
+import { ReserveLayout } from '../../../components/ui/reserve-layout';
 import { BlendBuilderExperience } from '../../../components/blend-builder-experience';
 import { ConsultationFormSection } from './consultation-form-section';
 
@@ -38,21 +39,12 @@ const CONSULTATION_STEPS = [
 
 export default function ConsultationsPage() {
   return (
-    <main className="page-shell">
-      {/* 1. HERO / PAGE INTRO */}
-      <PageIntro
-        compact
-        tone="dark"
-        kicker="Partnerships / Consultations"
-        icon={<BriefcaseBusiness size={14} />}
-        title="Konsultasi Bisnis Kopi & Custom Blend."
-        description="Solusi terpadu untuk café, restoran, hotel, dan mitra wholesale. Rancang profil racikan unik, simulasikan HPP per cangkir, dan kirimkan brief konsultasi dalam satu halaman."
-      />
-
+    <main className="page-shell nav-offset relative">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[76px] bg-brand-maroon" aria-hidden="true" />
       {/* 2. STICKY IN-PAGE NAVIGATION */}
       <nav
         aria-label="Navigasi Halaman Konsultasi"
-        className="sticky top-16 z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
+        className="sticky top-[76px] z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
       >
         <div className="site-container flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -91,17 +83,30 @@ export default function ConsultationsPage() {
         </div>
       </nav>
 
-      <section className="site-container page-section space-y-20">
+      <ReserveLayout
+        id="consultation-form"
+        tone="maroon"
+        kicker="Mulai diskusi"
+        title="Ceritakan kebutuhan bisnismu."
+        description="Isi brief singkat agar tim 52 Coffee memahami skala usaha, kebutuhan pasokan, dan arah rasa yang ingin dibangun."
+        details={[
+          { icon: <MessageSquare className="h-4 w-4" aria-hidden="true" />, title: 'Brief terarah', description: 'Profil usaha, kota, volume, dan kebutuhan layanan.' },
+          { icon: <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />, title: 'Solusi relevan', description: 'Pasokan beans, custom blend, atau konsultasi bisnis.' },
+          { icon: <ArrowRight className="h-4 w-4" aria-hidden="true" />, title: 'Lanjut via WhatsApp', description: 'Pesan disiapkan otomatis dan baru terkirim setelah Anda mengonfirmasi.' },
+        ]}
+      >
         {/* SECTION 1: FORMULIR CONSULTATION */}
-        <section id="consultation-form" className="scroll-mt-32 space-y-6">
+        <div className="space-y-6">
           <SectionIntro
             kicker="Langkah 1 • Mulai Diskusi"
             title="Formulir Consultation"
             description="Kirimkan profil usaha, estimasi kebutuhan pasokan, atau rencana racikan menu Anda. Pesan otomatis disusun dan dilanjutkan melalui WhatsApp resmi 52 Coffee (+62 857-9252-4863)."
           />
           <ConsultationFormSection />
-        </section>
+        </div>
+      </ReserveLayout>
 
+      <section className="site-container page-section space-y-20">
         {/* SECTION 2: BUILD YOUR OWN BLEND (BYOB) */}
         <section id="byob" className="scroll-mt-32 space-y-8 border-t border-border-subtle pt-16">
           <SectionIntro

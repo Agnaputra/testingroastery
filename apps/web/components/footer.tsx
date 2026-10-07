@@ -13,8 +13,9 @@ import {
 
 export function Footer() {
   return (
-    <footer className="bg-brand-charcoal text-white pt-16 pb-24 sm:pb-10 border-t border-white/10 w-full mt-auto">
-      <div className="site-container space-y-12">
+    <footer className="relative isolate mt-auto w-full overflow-hidden border-t border-white/20 bg-[rgba(44,49,54,.92)] pb-24 pt-16 text-white shadow-[0_-18px_60px_rgba(24,33,49,.14)] backdrop-blur-md sm:pb-10">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-brand-teal/10 to-transparent" />
+      <div className="site-container relative z-10 space-y-12">
         <div className="border-b border-white/25 pb-8">
           <p aria-hidden="true" className="overflow-hidden whitespace-nowrap font-headline text-[clamp(3.2rem,11vw,10rem)] font-black leading-none tracking-[-0.04em] text-white">
             52 COFFEE

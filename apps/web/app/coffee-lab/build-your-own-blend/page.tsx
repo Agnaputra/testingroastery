@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Coffee, FlaskConical, Layers, SlidersHorizontal, Sparkles, TestTube2 } from 'lucide-react';
-import { PageIntro, SectionIntro } from '../../../components/ui/page-structure';
+import { ArrowRight, Coffee, Layers, SlidersHorizontal, TestTube2 } from 'lucide-react';
+import { SectionIntro } from '../../../components/ui/page-structure';
+import { ReserveLayout } from '../../../components/ui/reserve-layout';
 import { BlendBuilderExperience } from '../../../components/blend-builder-experience';
 
 export const metadata: Metadata = {
@@ -62,33 +62,12 @@ const BLEND_STAGES = [
 
 export default function BuildYourOwnBlendLabPage() {
   return (
-    <main className="page-shell">
-      {/* 1. HERO / PAGE INTRO */}
-      <PageIntro
-        compact
-        tone="dark"
-        kicker="Coffee Lab / Build Your Own Blend"
-        icon={<FlaskConical size={14} />}
-        title="Bangun profil rasa dalam satu alur eksperimen."
-        description="Pilih beans, tentukan arah profil rasa, kembangkan racikan dengan simulator interaktif, lalu lakukan tasting & adjustment tanpa berpindah halaman."
-        visual={
-          <div className="relative aspect-[4/3] min-h-[240px] overflow-hidden rounded-md bg-brand-charcoal">
-            <Image
-              src="/images/byob-craft-collage.jpg"
-              alt="Eksperimen meracik kopi di lab 52 Coffee"
-              fill
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              className="object-cover opacity-90"
-              priority
-            />
-          </div>
-        }
-      />
-
+    <main className="page-shell nav-offset relative">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[76px] bg-brand-navy" aria-hidden="true" />
       {/* 2. STICKY IN-PAGE NAVIGATION */}
       <nav
         aria-label="Navigasi Build Your Own Blend"
-        className="sticky top-16 z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
+        className="sticky top-[76px] z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
       >
         <div className="site-container flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -131,49 +110,21 @@ export default function BuildYourOwnBlendLabPage() {
         </div>
       </nav>
 
-      <section className="site-container page-section space-y-20">
-        {/* 4 STAGES OVERVIEW CARDS */}
-        <section id="choose-your-beans" className="scroll-mt-32 space-y-8">
-          <SectionIntro
-            kicker="Framework Racikan"
-            title="Empat tahap dalam satu alur eksperimen"
-            description="Pelajari prinsip dasar sebelum menggunakan simulator racikan di bawah ini."
-          />
-
-          <div className="grid gap-x-6 gap-y-8 md:grid-cols-2 xl:grid-cols-4">
-            {BLEND_STAGES.map((stage, idx) => {
-              const Icon = stage.icon;
-              return (
-                <article
-                  key={stage.id}
-                  id={stage.id}
-                  className="scroll-mt-32 border-t-2 border-brand-charcoal pt-5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Icon className="h-6 w-6 text-brand-maroon" aria-hidden="true" />
-                      <span className="font-mono text-xs font-semibold text-on-surface-variant">0{idx + 1}</span>
-                    </div>
-                    <h3 className="mt-5 font-editorial text-xl font-bold text-brand-charcoal">{stage.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-on-surface-variant">{stage.description}</p>
-                  </div>
-
-                  <ul className="mt-5 space-y-2 border-t border-border-subtle pt-4 text-xs text-on-surface-variant">
-                    {stage.points.map((pt) => (
-                      <li key={pt} className="flex gap-2">
-                        <span className="text-brand-maroon font-bold" aria-hidden="true">—</span>
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* INTERACTIVE BLEND BUILDER SIMULATOR (BLEND DEVELOPMENT) */}
-        <section id="blend-development" className="scroll-mt-32 space-y-6 border-t border-border-subtle pt-16">
+      {/* INTERACTIVE BLEND BUILDER SIMULATOR (BLEND DEVELOPMENT) */}
+      <ReserveLayout
+        id="blend-development"
+        kicker="Lab workspace"
+        title="Bangun blend langkah demi langkah."
+        description="Pilih origin, atur rasio, lalu baca perubahan profil sensorik dan harga racikan secara langsung."
+        workspaceClassName="p-4 sm:p-6"
+        details={BLEND_STAGES.map(({ icon: Icon, title, description }) => ({
+          icon: <Icon key={title} className="h-4 w-4" aria-hidden="true" />,
+          title,
+          description,
+        }))}
+      >
+        <div className="space-y-6">
+          <span id="choose-your-beans" className="sr-only" />
           <div id="define-your-profile" className="scroll-mt-32">
             <SectionIntro
               kicker="Simulator Interaktif • Lab Workspace"
@@ -183,10 +134,12 @@ export default function BuildYourOwnBlendLabPage() {
           </div>
 
           <div className="pt-4">
-            <BlendBuilderExperience mode="lab" />
+            <BlendBuilderExperience mode="lab" embedded />
           </div>
-        </section>
+        </div>
+      </ReserveLayout>
 
+      <section className="site-container page-section">
         {/* CTA TO COMMERCIAL CONSULTATIONS */}
         <div className="rounded-2xl border border-border-subtle bg-surface-container-low p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>

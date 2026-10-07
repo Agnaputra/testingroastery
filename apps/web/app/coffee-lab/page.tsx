@@ -33,22 +33,24 @@ const EXPERIMENTS = [
 export default function CoffeeLabPage() {
   return (
     <main className="page-shell">
-      <PageIntro
-        tone="dark"
-        kicker="Coffee Lab / Learn by tasting"
-        icon={<FlaskConical size={14} />}
-        title="Pelajari kopi melalui seduh, racik, dan eksperimen."
-        description="Ruang belajar 52 Coffee untuk memahami variabel seduh, membangun profil rasa, dan mengikuti eksplorasi yang lahir dari meja cupping serta roaster kami."
-      />
+      <div className="editorial-enter">
+        <PageIntro
+          tone="dark"
+          kicker="Coffee Lab / Learn by tasting"
+          icon={<FlaskConical size={14} />}
+          title="Pelajari kopi melalui seduh, racik, dan eksperimen."
+          description="Ruang belajar 52 Coffee untuk memahami variabel seduh, membangun profil rasa, dan mengikuti eksplorasi yang lahir dari meja cupping serta roaster kami."
+        />
+      </div>
 
-      <section className="site-container page-section">
+      <section className="editorial-reveal site-container page-section">
         <SectionIntro
           kicker="Mulai bereksperimen"
           title="Dua cara memahami karakter kopi"
           description="Gunakan panduan seduh untuk presisi harian, atau bangun racikan sendiri untuk melihat bagaimana origin dan proporsi mengubah rasa."
         />
 
-        <div className="grid gap-5 lg:grid-cols-12">
+        <div className="editorial-reveal-list grid gap-5 lg:grid-cols-12">
           <article className="ui-surface overflow-hidden lg:col-span-7">
             <div className="relative aspect-[16/8] min-h-[240px] overflow-hidden bg-surface-container">
               <Image src="/images/canva-v60-kettle-pour.jpg" alt="Proses manual brew dengan V60" fill sizes="(max-width: 1024px) 100vw, 58vw" className="object-cover" />
@@ -75,7 +77,7 @@ export default function CoffeeLabPage() {
         </div>
       </section>
 
-      <section id="coffee-experiments" className="scroll-mt-28 border-y border-border-subtle bg-surface-container-low">
+      <section id="coffee-experiments" className="editorial-reveal scroll-mt-28 border-y border-border-subtle bg-surface-container-low">
         <div className="site-container page-section">
           <SectionIntro
             kicker="Coffee Experiments"
@@ -83,7 +85,7 @@ export default function CoffeeLabPage() {
             description="Program eksperimen akan diumumkan ketika jadwal dan materinya siap. Bagian ini menjadi rumah bagi cupping, roasting, dan brewing experiments 52 Coffee."
           />
 
-          <div className="grid gap-x-6 gap-y-8 md:grid-cols-3">
+          <div className="editorial-reveal-list grid gap-x-6 gap-y-8 md:grid-cols-3">
             {EXPERIMENTS.map(({ href, icon: Icon, title, description }) => (
               <Link key={href} href={href} className="group border-t-2 border-brand-charcoal pt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-maroon">
                 <Icon className="h-6 w-6 text-brand-maroon" aria-hidden="true" />

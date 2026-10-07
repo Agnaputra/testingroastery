@@ -39,6 +39,7 @@ import {
   CURATED_RECIPES,
   BREW_TOPICS,
 } from '../lib/brewlogic-database';
+import { ReserveLayout } from './ui/reserve-layout';
 
 // Pre-configured 52 Coffee Quick Beans
 const FIFTY_TWO_BEANS = [
@@ -312,7 +313,7 @@ export function BrewingGuidanceExperience() {
   };
 
   return (
-    <div className="space-y-16 pb-24">
+    <div className="pb-24 [&>section+section]:mt-16">
       {/* 1. IN-PAGE STICKY ANCHOR NAVIGATION */}
       <nav
         aria-label="Navigasi Brewing Guidance"
@@ -377,12 +378,20 @@ export function BrewingGuidanceExperience() {
       </nav>
 
       {/* 2. PRECISION BREWING CONSOLE (ALA BREWLOGIC) */}
-      <section
+      <ReserveLayout
         id="precision-console"
-        className="site-container scroll-mt-28 space-y-6"
+        kicker="Brew with precision"
+        title="Rancang resep seduhmu."
+        description="Masukkan karakter beans, alat, grinder, dan air. BrewLogic menerjemahkannya menjadi parameter yang bisa langsung dipraktikkan."
+        workspaceClassName="space-y-6"
+        details={[
+          { icon: <Compass className="h-4 w-4" aria-hidden="true" />, title: 'Parameter terarah', description: 'Beans, roast, process, dan target rasa.' },
+          { icon: <Sliders className="h-4 w-4" aria-hidden="true" />, title: 'Kalibrasi alat', description: 'Brewer, grinder, serta mineral air.' },
+          { icon: <Timer className="h-4 w-4" aria-hidden="true" />, title: 'Pendamping seduh', description: 'Resep bertahap dan live timer dalam satu alur.' },
+        ]}
       >
         {/* Step Progression Tabs Header */}
-        <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+        <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
             <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-brand-charcoal">
@@ -390,7 +399,7 @@ export function BrewingGuidanceExperience() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 font-mono text-xs font-bold">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 font-mono text-xs font-bold">
             <button
               type="button"
               onClick={() => setConsoleStep(1)}
@@ -433,30 +442,30 @@ export function BrewingGuidanceExperience() {
         {consoleStep === 1 && (
           <div className="rounded-2xl border border-border-subtle bg-white p-6 sm:p-10 shadow-sm space-y-8 animate-fade-in">
             {/* Hot vs Iced Segmented Switch */}
-            <div className="max-w-md mx-auto p-1.5 rounded-2xl bg-surface-container-low border border-border-subtle flex relative">
+            <div className="mx-auto grid max-w-md grid-cols-2 rounded-2xl border border-border-subtle bg-surface-container-low p-1.5">
               <button
                 type="button"
                 onClick={() => setTemperatureStyle('hot')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-mono text-xs font-bold transition-all ${
+                className={`flex min-w-0 items-center justify-center gap-2 rounded-xl py-3 font-mono text-[10px] font-bold transition-all sm:text-xs ${
                   temperatureStyle === 'hot'
                     ? 'bg-brand-maroon text-white shadow-md'
                     : 'text-on-surface-variant hover:text-brand-charcoal'
                 }`}
               >
-                <Flame className="w-4 h-4" />
+                <Flame className="h-4 w-4 shrink-0" />
                 <span>HOT BREW</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTemperatureStyle('iced')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-mono text-xs font-bold transition-all ${
+                className={`flex min-w-0 items-center justify-center gap-1.5 rounded-xl py-3 font-mono text-[10px] font-bold transition-all sm:gap-2 sm:text-xs ${
                   temperatureStyle === 'iced'
                     ? 'bg-brand-teal text-brand-charcoal shadow-md'
                     : 'text-on-surface-variant hover:text-brand-charcoal'
                 }`}
               >
-                <Droplets className="w-4 h-4" />
-                <span>ICED BREW (FLASH CHILL)</span>
+                <Droplets className="h-4 w-4 shrink-0" />
+                <span className="text-center">ICED / FLASH CHILL</span>
               </button>
             </div>
 
@@ -1185,10 +1194,10 @@ export function BrewingGuidanceExperience() {
             </div>
           </div>
         )}
-      </section>
+      </ReserveLayout>
 
       {/* 3. SECTION: BREWING METHODS OVERVIEW (#brewing-methods) */}
-      <section id="brewing-methods" className="site-container scroll-mt-28 space-y-8">
+      <section id="brewing-methods" className="site-container scroll-mt-36 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-5">
           <div>
             <div className="flex items-center gap-2 text-brand-maroon font-mono text-xs font-bold uppercase tracking-wider">
@@ -1318,7 +1327,7 @@ export function BrewingGuidanceExperience() {
       </section>
 
       {/* 4. SECTION: RECIPES BARISTA 52 COFFEE (#recipes) */}
-      <section id="recipes" className="site-container scroll-mt-28 space-y-8">
+      <section id="recipes" className="site-container scroll-mt-36 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-5">
           <div>
             <div className="flex items-center gap-2 text-brand-maroon font-mono text-xs font-bold uppercase tracking-wider">
@@ -1418,7 +1427,7 @@ export function BrewingGuidanceExperience() {
       </section>
 
       {/* 5. SECTION: GRIND SIZE GUIDANCE (#grind-size) */}
-      <section id="grind-size" className="site-container scroll-mt-28 space-y-8">
+      <section id="grind-size" className="site-container scroll-mt-36 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-5">
           <div>
             <div className="flex items-center gap-2 text-brand-maroon font-mono text-xs font-bold uppercase tracking-wider">
@@ -1487,7 +1496,7 @@ export function BrewingGuidanceExperience() {
       </section>
 
       {/* 6. SECTION: RATIO & EXTRACTION DYNAMICS (#ratio-extraction) */}
-      <section id="ratio-extraction" className="site-container scroll-mt-28 space-y-8">
+      <section id="ratio-extraction" className="site-container scroll-mt-36 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-5">
           <div>
             <div className="flex items-center gap-2 text-brand-maroon font-mono text-xs font-bold uppercase tracking-wider">

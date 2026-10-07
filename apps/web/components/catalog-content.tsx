@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Coffee,
   MapPin,
@@ -59,6 +59,7 @@ export default function CatalogContent({ initialCategory: defaultCategory }: { i
 }
 
 function CatalogClientContent({ defaultCategory }: { defaultCategory?: string }) {
+  const reducedMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') ?? defaultCategory ?? null;
   const initialSeries = searchParams.get('series');
@@ -228,9 +229,14 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
   return (
     <div className="min-h-screen bg-[#f7f7f4] pb-24 pt-[76px] text-brand-charcoal [&_button]:min-h-11">
       {/* Editorial Hero Header */}
-      <section className="border-b border-black/10">
+      <motion.section
+        className="border-b border-black/10"
+        initial={reducedMotion ? false : { opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reducedMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+      >
         <div className="site-container grid gap-8 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.3fr)_minmax(280px,.7fr)] lg:items-end lg:py-16">
-          <div>
+          <motion.div initial={reducedMotion ? false : { opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.7, delay: reducedMotion ? 0 : 0.08 }}>
             <p className="mb-4 flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-maroon">
               <Coffee size={14} aria-hidden="true" />
               Koleksi Sangrai 52 Coffee & Roastery
@@ -238,8 +244,8 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
             <h1 className="max-w-[13ch] font-headline text-[clamp(2.5rem,5.5vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-brand-charcoal">
               Temukan kopi yang terasa personal.
             </h1>
-          </div>
-          <div className="max-w-md lg:justify-self-end">
+          </motion.div>
+          <motion.div className="max-w-md lg:justify-self-end" initial={reducedMotion ? false : { opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.7, delay: reducedMotion ? 0 : 0.18 }}>
             <p className="text-sm leading-relaxed text-on-surface-variant">
               Jelajahi origin nusantara, proses fermentasi presisi, dan profil rasa unik yang disangrai segar di Malang untuk ritual seduh Anda.
             </p>
@@ -251,11 +257,16 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
               </span>
               <span>Di sangrai di Malang · Semua kopi fresh roast</span>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <div className="site-container pt-8">
+      <motion.div
+        className="site-container pt-8"
+        initial={reducedMotion ? false : { opacity: 0, y: 26 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reducedMotion ? 0 : 0.7, delay: reducedMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+      >
         {/* Primary Tabs (Beans vs Slowbar) & Sub-tabs (Filter vs Espresso) */}
         <div className="flex flex-col gap-4 border-b border-black/10 pb-5 lg:flex-row lg:items-center lg:justify-between">
           <div role="tablist" aria-label="Jenis penyajian kopi" className="flex items-center gap-7">
@@ -539,12 +550,19 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             >
-              {displayedProducts.map((product) => (
-                <EditorialProductCard
+              {displayedProducts.map((product, index) => (
+                <motion.div
                   key={product.id}
-                  product={product}
-                  isBeverageMode={mainTab === 'slowbar'}
-                />
+                  initial={reducedMotion ? false : { opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.12 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.6, delay: reducedMotion ? 0 : Math.min(index * 0.07, 0.28), ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <EditorialProductCard
+                    product={product}
+                    isBeverageMode={mainTab === 'slowbar'}
+                  />
+                </motion.div>
               ))}
             </motion.div>
           ) : (
@@ -590,7 +608,7 @@ function CatalogClientContent({ defaultCategory }: { defaultCategory?: string })
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

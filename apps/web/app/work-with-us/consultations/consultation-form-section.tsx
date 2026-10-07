@@ -35,7 +35,7 @@ Nomor WA: ${phone || '-'}.${notes ? `\nCatatan kebutuhan: ${notes}` : ''}`;
   };
 
   return (
-    <div className="ui-surface rounded-2xl border-2 border-[#2C3136] bg-white p-6 sm:p-10 shadow-[4px_4px_0px_#2C3136]">
+    <div>
       {submitted ? (
         <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 p-8 text-center space-y-3">
           <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />

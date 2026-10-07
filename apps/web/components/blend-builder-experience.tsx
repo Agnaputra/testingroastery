@@ -79,7 +79,7 @@ const SIZE_OPTIONS: Array<{ label: '250 g' | '500 g' | '1 kg'; grams: BlendWeigh
   { label: '1 kg', grams: 1000 },
 ];
 
-export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partnership' }) {
+export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mode?: 'lab' | 'partnership'; embedded?: boolean }) {
   const [componentA, setComponentA] = useState<BlendComponent>(AVAILABLE_BEANS[0] || {
     id: 'default-a',
     name: 'Arabica Java Ijen',
@@ -125,6 +125,7 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
 
   const { addItem } = useCartStore();
   const isPartnership = mode === 'partnership';
+  const isEmbedded = embedded || isPartnership;
   const selectedWeight = SIZE_OPTIONS.find((option) => option.label === selectedSize)?.grams ?? 250;
 
   const applyPreset = (beanAId: string, beanBId: string, rA: number = 70, rB: number = 30) => {
@@ -395,9 +396,9 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className={isPartnership ? undefined : 'page-shell'}
+      className={isEmbedded ? undefined : 'page-shell'}
     >
-      {!isPartnership && (
+      {!isEmbedded && (
         <PageIntro
           className="blend-hero"
           tone="dark"
@@ -409,7 +410,7 @@ export function BlendBuilderExperience({ mode = 'lab' }: { mode?: 'lab' | 'partn
         />
       )}
 
-      <div className={isPartnership ? 'space-y-10' : 'site-container page-section space-y-10'}>
+      <div className={isEmbedded ? 'space-y-10' : 'site-container page-section space-y-10'}>
         {/* Packaging Size Selector on Top (Highlighted) */}
         <section aria-labelledby="blend-size-heading" className="rounded-xl bg-brand-charcoal p-5 text-white sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

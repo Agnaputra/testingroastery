@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -10,14 +9,14 @@ import {
   Coffee,
   Droplets,
   Flame,
-  FlaskConical,
   Gauge,
   Info,
   MapPin,
   Sparkles,
   Thermometer,
 } from 'lucide-react';
-import { PageIntro, SectionIntro } from '../../../components/ui/page-structure';
+import { SectionIntro } from '../../../components/ui/page-structure';
+import { ReserveLayout } from '../../../components/ui/reserve-layout';
 
 export const metadata: Metadata = {
   title: 'Coffee Experiments | Coffee Lab 52 Coffee',
@@ -29,33 +28,12 @@ export const metadata: Metadata = {
 
 export default function CoffeeExperimentsPage() {
   return (
-    <main className="page-shell">
-      {/* 1. HERO / PAGE INTRO */}
-      <PageIntro
-        compact
-        tone="dark"
-        kicker="Coffee Lab / Coffee Experiments"
-        icon={<FlaskConical size={14} />}
-        title="Agenda eksperimen dalam satu halaman."
-        description="Ruang riset terbuka 52 Coffee & Roastery. Kami mendokumentasikan sesi cupping berkala, eksplorasi profil sangrai inframerah, dan pengujian variabel ekstraksi seduh untuk memahami karakter rasa secara empiris."
-        visual={
-          <div className="relative aspect-[4/3] min-h-[240px] overflow-hidden rounded-md bg-brand-charcoal">
-            <Image
-              src="/images/roaster-footage.png"
-              alt="Eksperimen roasting dan cupping di lab 52 Coffee"
-              fill
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              className="object-cover opacity-90"
-              priority
-            />
-          </div>
-        }
-      />
-
+    <main className="page-shell nav-offset relative">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[76px] bg-brand-navy" aria-hidden="true" />
       {/* 2. STICKY IN-PAGE NAVIGATION */}
       <nav
         aria-label="Navigasi Coffee Experiments"
-        className="sticky top-16 z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
+        className="sticky top-[76px] z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
       >
         <div className="site-container flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -95,18 +73,28 @@ export default function CoffeeExperimentsPage() {
         </div>
       </nav>
 
-      <section className="site-container page-section space-y-20">
-        {/* ========================================================= */}
-        {/* SECTION 1: CUPPING EVENTS */}
-        {/* ========================================================= */}
-        <section id="cupping-events" className="scroll-mt-32 space-y-8">
+      {/* ========================================================= */}
+      {/* SECTION 1: CUPPING EVENTS */}
+      {/* ========================================================= */}
+      <ReserveLayout
+        id="cupping-events"
+        kicker="Sensorik dan evaluasi"
+        title="Cicipi kopi dengan parameter yang sama."
+        description="Cupping menyamakan rasio, suhu, waktu, dan cara evaluasi agar perbedaan karakter setiap origin dapat dibaca dengan jernih."
+        details={[
+          { icon: <Coffee className="h-4 w-4" aria-hidden="true" />, title: 'Rasio konsisten', description: '8,25 gram kopi untuk setiap 150 ml air.' },
+          { icon: <Thermometer className="h-4 w-4" aria-hidden="true" />, title: 'Suhu terkontrol', description: 'Air 93°C dengan mineral 120–150 PPM.' },
+          { icon: <Clock className="h-4 w-4" aria-hidden="true" />, title: 'Evaluasi bertahap', description: 'Aroma, rasa, body, dan aftertaste dibaca saat cangkir mendingin.' },
+        ]}
+      >
+        <div className="space-y-8">
           <SectionIntro
             kicker="Pilar 1 • Sensorik & Evaluasi"
             title="Cupping Events"
             description="Sesi evaluasi sensorik terstandarisasi untuk membandingkan aroma, keasaman, rasa manis, dan kejernihan antar origin dalam protokol penyeduhan yang seragam."
           />
 
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             {/* Cupping Protocols Guide */}
             <div className="space-y-6">
               <div className="ui-surface rounded-2xl border-2 border-[#2C3136] bg-white p-6 sm:p-8 shadow-[4px_4px_0px_#2C3136]">
@@ -199,8 +187,10 @@ export default function CoffeeExperimentsPage() {
               </a>
             </aside>
           </div>
-        </section>
+        </div>
+      </ReserveLayout>
 
+      <section className="site-container page-section space-y-20">
         {/* ========================================================= */}
         {/* SECTION 2: ROASTING EXPERIMENTS */}
         {/* ========================================================= */}

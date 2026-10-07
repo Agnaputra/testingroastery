@@ -32,7 +32,12 @@ export default function WorkWithUsPage() {
   return (
     <div className={`${styles.page} page-shell`}>
       <section className={styles.hero} aria-labelledby="partnership-hero-heading">
-        <div className={styles.heroCopy}>
+        <motion.div
+          className={styles.heroCopy}
+          initial={reducedMotion ? false : { opacity: 0, x: -28 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.75, ease: [0.22, 1, 0.36, 1] }}
+        >
           <p className={styles.eyebrow}>KEMITRAAN / B2B</p>
           <h1 id="partnership-hero-heading">
             <span>Partner untuk</span>
@@ -47,8 +52,13 @@ export default function WorkWithUsPage() {
           <a href="#partnerships" className={styles.heroLink}>
             Jelajahi Kemitraan <ArrowDownRight size={18} aria-hidden="true" />
           </a>
-        </div>
-        <div className={styles.heroMedia}>
+        </motion.div>
+        <motion.div
+          className={styles.heroMedia}
+          initial={reducedMotion ? false : { opacity: 0, scale: 1.025 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: reducedMotion ? 0 : 0.9, delay: reducedMotion ? 0 : 0.12, ease: [0.22, 1, 0.36, 1] }}
+        >
           <Image
             src="/images/roaster-footage.png"
             alt="Tim 52 Coffee bekerja di depan mesin roasting"
@@ -57,7 +67,7 @@ export default function WorkWithUsPage() {
             sizes="(max-width: 767px) 100vw, 48vw"
             className={styles.image}
           />
-        </div>
+        </motion.div>
       </section>
 
       <motion.section id="partnerships" className={`${styles.intro} site-container`} aria-labelledby="partnership-intro-heading" {...reveal}>
@@ -93,10 +103,16 @@ export default function WorkWithUsPage() {
             </p>
             <ol className={styles.featureList}>
               {consultationFeatures.map(([title, description], index) => (
-                <li key={title}>
+                <motion.li
+                  key={title}
+                  initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.55 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.5, delay: reducedMotion ? 0 : index * 0.08 }}
+                >
                   <span className={styles.featureNumber}>0{index + 1}</span>
                   <div><h3>{title}</h3><p>{description}</p></div>
-                </li>
+                </motion.li>
               ))}
             </ol>
             <Link href="/work-with-us/consultations" className={styles.serviceLink}>
@@ -113,11 +129,17 @@ export default function WorkWithUsPage() {
         <h2 id="process-heading">Dari percakapan<br />menjadi sajian.</h2>
         <ol className={styles.processList}>
           {processSteps.map(([title, description], index) => (
-            <li key={title}>
+            <motion.li
+              key={title}
+              initial={reducedMotion ? false : { opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.45 }}
+              transition={{ duration: reducedMotion ? 0 : 0.55, delay: reducedMotion ? 0 : index * 0.08 }}
+            >
               <span className={styles.processNumber}>0{index + 1}</span>
               <h3>{title}</h3>
               <p>{description}</p>
-            </li>
+            </motion.li>
           ))}
         </ol>
       </motion.section>
