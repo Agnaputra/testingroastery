@@ -53,12 +53,18 @@ GENERIC_PRODUCT_REFERENCES = (
     "yang itu",
     "produk tadi",
     "produk itu",
+    "produk ini",
+    "produk tersebut",
     "produk sebelumnya",
     "kopi yang kamu rekomendasikan",
     "detailnya",
     "produknya",
     "kopi tadi",
     "kopi itu",
+    "kopi ini",
+    "kopi tersebut",
+    "kopi yang ini",
+    "kopi yang itu",
     "yang satunya",
     "prosesnya",
     "rasanya",
@@ -358,7 +364,7 @@ def _is_website_message(message: str) -> bool:
 
 def _ordinal_index(message: str) -> int | None:
     query = _normalise(message)
-    match = re.search(r"\b(?:yang|nomor|produk)\s+(pertama|kesatu|kedua|ketiga|[123])\b", query)
+    match = re.search(r"\b(?:yang|nomor|produk|kopi|pilihan|rekomendasi)\s+(pertama|kesatu|kedua|ketiga|[123])\b", query)
     return ORDINALS.get(match.group(1)) if match else None
 
 
@@ -445,6 +451,14 @@ def derive_conversation_state(
                 or not state.last_recommended_product_slugs
             ):
                 state.last_recommended_product_slugs = safe_slugs
+            # Product actions retain catalog grounding and a validated product slug.
+            # They are not a navigation away from the coffee conversation.
+            if message.intent == "website_action" and message.grounding == "catalog" and safe_slugs:
+                state.referenced_product_slugs = [safe_slugs[-1]]
+                state.focus_product_slug = safe_slugs[-1]
+                state.active_topic = "coffee"
+                state.active_intent = "catalog_query"
+                continue
             if message.intent in {"website_feature", "website_action", "off_topic"}:
                 if state.active_topic in {"coffee", "coffee_knowledge"}:
                     previous_coffee = _coffee_snapshot(state)
@@ -512,6 +526,7 @@ def derive_conversation_state(
             if ordinal < len(state.last_recommended_product_slugs):
                 state.referenced_product_slugs = [state.last_recommended_product_slugs[ordinal]]
                 state.focus_product_slug = state.referenced_product_slugs[0]
+                state.active_topic = "coffee"
                 state.needs_clarification = False
                 state.clarification_candidates.clear()
                 state.used_history = True
@@ -551,10 +566,12 @@ def derive_conversation_state(
                 state.referenced_product_slugs = state.comparison_product_slugs.copy()
                 state.used_history = True
             elif len(state.referenced_product_slugs) == 1:
+                state.active_topic = "coffee"
                 state.used_history = True
             elif len(state.last_recommended_product_slugs) == 1:
                 state.referenced_product_slugs = state.last_recommended_product_slugs.copy()
                 state.focus_product_slug = state.referenced_product_slugs[0]
+                state.active_topic = "coffee"
                 state.used_history = True
             elif state.active_intent == "coffee_knowledge":
                 state.used_history = True

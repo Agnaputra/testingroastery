@@ -16,7 +16,7 @@ from .chat_router import (
 )
 from .guardrail_service import guardrail_service
 from .action_service import resolve_contextual_action
-from .conversation_state import derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
+from .conversation_state import ConversationState, derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
 from .models import ProductSearchResult
 from .publication_service import apply_publication_overrides, get_publication_overrides
 from .recommendation_service import (
@@ -630,11 +630,35 @@ def _matched_catalog_products(user_query: str) -> List[Dict[str, Any]]:
     return matches
 
 
-def _active_catalog_products() -> List[Dict[str, Any]]:
+def _active_catalog_products() -> Tuple[List[Dict[str, Any]], bool]:
+    """Load publication-approved products without treating an outage as approval."""
     try:
-        return apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, get_publication_overrides())
+        overrides = get_publication_overrides()
+        return apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, overrides), True
     except psycopg2.Error:
-        return PUBLISHED_COFFEE_KNOWLEDGE_BASE
+        return [], False
+
+
+def _requires_catalog_authority(
+    user_query: str,
+    intent: ChatIntent,
+    catalog_candidates: List[str],
+    conversation_state: ConversationState,
+) -> bool:
+    """Keep coffee knowledge and website help available while product authority is offline."""
+    query = user_query.lower()
+    commerce_request = any(term in query for term in ("tambahkan", "masukkan", "add", "ke keranjang"))
+    if commerce_request:
+        return True
+    if intent in {"catalog_query", "product_recommendation", "product_comparison"}:
+        return True
+    if intent == "coffee_knowledge":
+        return False
+    return bool(
+        catalog_candidates
+        or conversation_state.referenced_product_slugs
+        or conversation_state.last_recommended_product_slugs
+    )
 
 
 def is_catalog_list_question(user_query: str) -> bool:
@@ -744,7 +768,7 @@ class RAGService:
         query_lower = query.lower()
         results = []
 
-        active_products = _active_catalog_products()
+        active_products, _ = _active_catalog_products()
         for product in active_products:
             score = 0.0
             
@@ -853,14 +877,15 @@ class RAGService:
     ) -> Dict[str, Any]:
         """Route domain chat to catalog RAG, website context, or coffee-only web search."""
         history = history or []
-        active_products = _active_catalog_products()
+        active_products, publication_authority_available = _active_catalog_products()
+        context_products = active_products if publication_authority_available else PUBLISHED_COFFEE_KNOWLEDGE_BASE
         active_slugs = {product["slug"] for product in active_products}
         current_catalog_candidates = find_product_candidates(user_query, PUBLISHED_COFFEE_KNOWLEDGE_BASE)
         has_current_active_product = any(slug in active_slugs for slug in current_catalog_candidates)
         references_inactive_product = bool(current_catalog_candidates) and not any(
             slug in active_slugs for slug in current_catalog_candidates
         )
-        conversation_state = derive_conversation_state(history, user_query, active_products)
+        conversation_state = derive_conversation_state(history, user_query, context_products)
         products_by_slug = {product["slug"]: product for product in active_products}
         referenced_products = [
             products_by_slug[slug]
@@ -905,13 +930,26 @@ class RAGService:
 
         # 2. Guardrail input check (NeMo when configured, deterministic policy as defence in depth).
         input_decision = guardrail_service.check_input(user_query)
-        nemo_false_positive = input_decision.status == "blocked_input_nemo" and _is_domain_question(user_query)
-        if not input_decision.allowed and not nemo_false_positive:
+        if not input_decision.allowed:
             return self._response(
                 input_decision.message,
                 intent,
                 "none",
                 guardrail_status=input_decision.status,
+            )
+
+        if not publication_authority_available and _requires_catalog_authority(
+            user_query,
+            intent,
+            current_catalog_candidates,
+            conversation_state,
+        ):
+            return self._response(
+                "Status katalog 52 Coffee sedang tidak tersedia. Saya belum dapat memberikan rekomendasi produk atau memproses keranjang sampai status produk dapat diverifikasi.",
+                intent,
+                "none",
+                follow_ups=["Jelaskan proses natural", "Buka Brewing Guidance"],
+                guardrail_status="catalog_authority_unavailable",
             )
 
         if conversation_state.needs_clarification:

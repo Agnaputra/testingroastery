@@ -6,6 +6,8 @@
     "dev": "npm run dev --prefix apps/web",
     "build": "npm run build --prefix apps/web",
     "start": "npm run start --prefix apps/web",
-    "ai:start": "cd apps/ai-backend && uvicorn app.main:app --reload --port 8000"
+    "test": "npm run test:virtual-barista",
+    "test:virtual-barista": "node scripts/run-virtual-barista-tests.cjs",
+    "ai:start": "cd apps/ai-backend && .\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
   }
 }

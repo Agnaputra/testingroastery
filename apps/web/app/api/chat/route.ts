@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublishedProducts, toKnowledgeCatalogSlug, toWebCatalogSlug } from '../../../lib/catalog-master';
 import { isVirtualBaristaAction, type VirtualBaristaAction } from '../../../lib/virtual-barista-actions';
+import { resolveCatalogSelectedVariant } from '../../../lib/virtual-barista-recommendations';
+import { isVirtualBaristaChatResponse } from '../../../lib/virtual-barista-response';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-const publishedSlugs = new Set(getPublishedProducts().map((product) => product.slug));
+const publishedProducts = getPublishedProducts();
+const publishedProductsBySlug = new Map(publishedProducts.map((product) => [product.slug, product]));
+const publishedSlugs = new Set(publishedProductsBySlug.keys());
 const BLOCKED_PHRASES = [
   'ignore previous instructions', 'ignore all instructions', 'system prompt', 'jailbreak',
   'bypass filter', 'bypass guardrail', 'act as dan', 'you are dan', 'pretend you are',
@@ -98,7 +102,8 @@ export async function POST(req: NextRequest) {
         });
 
         if (backendRes.ok) {
-          const payload = await backendRes.json();
+          const payload: unknown = await backendRes.json();
+          if (!isVirtualBaristaChatResponse(payload)) return unavailableResponse();
           const sourceSlugs = Array.isArray(payload.recommendedProductSlugs)
             ? payload.recommendedProductSlugs
             : Array.isArray(payload.recommendedSlugs)
@@ -108,16 +113,26 @@ export async function POST(req: NextRequest) {
             .filter((slug: unknown): slug is string => typeof slug === 'string')
             .map(toWebCatalogSlug)
             .filter((slug: string) => publishedSlugs.has(slug));
-          const recommendedProducts = Array.isArray(payload.recommendedProducts)
-            ? payload.recommendedProducts.map((product: unknown) => {
-                if (!product || typeof product !== 'object') return product;
-                const record = product as Record<string, unknown>;
-                return {
-                  ...record,
-                  slug: typeof record.slug === 'string' ? toWebCatalogSlug(record.slug) : record.slug,
-                };
-              })
-            : payload.recommendedProducts;
+          const recommendationBySlug = new Map<string, Record<string, unknown>>();
+          if (Array.isArray(payload.recommendedProducts)) {
+            for (const product of payload.recommendedProducts) {
+              if (!product || typeof product !== 'object') continue;
+              const record = product as Record<string, unknown>;
+              if (typeof record.slug !== 'string') continue;
+              const slug = toWebCatalogSlug(record.slug);
+              const catalogProduct = publishedProductsBySlug.get(slug);
+              if (!catalogProduct) continue;
+              recommendationBySlug.set(slug, {
+                ...record,
+                slug,
+                selectedVariant: resolveCatalogSelectedVariant(catalogProduct, record.selectedVariant),
+              });
+            }
+          }
+          const recommendedProducts = validatedSlugs.flatMap((slug: string) => {
+            const recommendation = recommendationBySlug.get(slug);
+            return recommendation ? [recommendation] : [];
+          });
           const actions: VirtualBaristaAction[] = Array.isArray(payload.actions)
             ? payload.actions.map((action: unknown): unknown => {
                 if (!action || typeof action !== 'object') return action;

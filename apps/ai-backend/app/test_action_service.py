@@ -157,7 +157,7 @@ class ContextualActionServiceTest(unittest.TestCase):
         passed = GuardrailDecision(True, "passed_nemo")
         with (
             patch("app.rag_service.PUBLISHED_COFFEE_KNOWLEDGE_BASE", PRODUCTS),
-            patch("app.rag_service._active_catalog_products", return_value=PRODUCTS),
+            patch("app.rag_service._active_catalog_products", return_value=(PRODUCTS, True)),
             patch.object(guardrail_service, "check_input", return_value=passed),
             patch.object(guardrail_service, "check_output", return_value=passed),
         ):
@@ -167,3 +167,20 @@ class ContextualActionServiceTest(unittest.TestCase):
         validated = ChatResponse.model_validate(response)
         self.assertEqual(validated.actions[0].type, "add_to_cart")
         self.assertEqual(validated.actions[0].variant_weight, 100)
+
+    def test_26_product_action_history_keeps_selected_variant(self):
+        history = [
+            *self.history,
+            {"role": "user", "content": "Masukkan yang kedua ke keranjang"},
+            {
+                "role": "assistant",
+                "content": "Saya menyiapkan produk untuk keranjang.",
+                "intent": "website_action",
+                "grounding": "catalog",
+                "recommendedProductSlugs": ["buntu-natural"],
+                "recommendedVariants": [{"productSlug": "buntu-natural", "weightGrams": 100}],
+            },
+        ]
+        result = resolve("Tambahkan yang itu", history)
+        self.assertEqual(result.action["product_slug"], "buntu-natural")
+        self.assertEqual(result.action["variant_weight"], 100)

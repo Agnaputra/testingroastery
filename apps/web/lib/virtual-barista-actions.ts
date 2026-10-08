@@ -14,6 +14,17 @@ export type VirtualBaristaAction =
   | { action_id: string; type: 'view_product'; product_slug: string }
   | { action_id: string; type: 'open_feature'; path: string };
 
+export function claimVirtualBaristaActions(
+  actions: VirtualBaristaAction[],
+  claimedActionIds: Set<string>,
+): VirtualBaristaAction[] {
+  return actions.filter((action) => {
+    if (claimedActionIds.has(action.action_id)) return false;
+    claimedActionIds.add(action.action_id);
+    return true;
+  });
+}
+
 const hasSafeId = (value: unknown): value is string => typeof value === 'string' && /^vb-[a-f0-9]{20}$/.test(value);
 
 export function isVirtualBaristaAction(value: unknown): value is VirtualBaristaAction {
