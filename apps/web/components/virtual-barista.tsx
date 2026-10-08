@@ -17,6 +17,7 @@ import { getPublishedProducts } from '../lib/catalog-master';
 import { useCartStore } from '../lib/store/useCartStore';
 import { FiftyTwoBeanMark } from './logo';
 import { OPEN_VIRTUAL_BARISTA } from '../lib/virtual-barista-events';
+import { ACTION_MAX_QUANTITY, isVirtualBaristaAction, type VirtualBaristaAction } from '../lib/virtual-barista-actions';
 
 const PUBLISHED_PRODUCTS = getPublishedProducts();
 
@@ -42,9 +43,10 @@ interface ChatMessage {
   intent?: string;
   grounding?: 'catalog' | 'website' | 'coffee_web' | 'conversation' | 'none';
   recommendedProductSlugs?: string[];
+  recommendedVariants?: Array<{ productSlug: string; weightGrams: number }>;
 }
 
-type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs'>;
+type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs' | 'recommendedVariants'>;
 
 function isRecommendedVariant(value: unknown): value is RecommendedVariant {
   if (!value || typeof value !== 'object') return false;
@@ -98,6 +100,7 @@ export function VirtualBaristaWidget() {
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const executedActionIds = useRef(new Set<string>());
   const { addItem } = useCartStore();
 
   useEffect(() => {
@@ -147,6 +150,7 @@ export function VirtualBaristaWidget() {
                 intent: i === words.length - 1 ? metadata?.intent : undefined,
                 grounding: i === words.length - 1 ? metadata?.grounding : undefined,
                 recommendedProductSlugs: i === words.length - 1 ? metadata?.recommendedProductSlugs : undefined,
+                recommendedVariants: i === words.length - 1 ? metadata?.recommendedVariants : undefined,
               }
             : msg
         )
@@ -155,6 +159,65 @@ export function VirtualBaristaWidget() {
       // Natural reading speed delay
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
+  };
+
+  const executeAction = async (action: VirtualBaristaAction): Promise<string> => {
+    if (executedActionIds.current.has(action.action_id)) return '';
+    if (action.type === 'open_feature') {
+      executedActionIds.current.add(action.action_id);
+      window.location.assign(action.path);
+      return '';
+    }
+    if (action.type === 'view_product') {
+      const product = PUBLISHED_PRODUCTS.find((item) => item.slug === action.product_slug);
+      if (!product) return 'Detail produk tidak dapat dibuka karena produk sudah tidak aktif.';
+      try {
+        const publication = await fetch('/api/catalog/publication', { cache: 'no-store' });
+        if (!publication.ok) return 'Status katalog terbaru tidak dapat diverifikasi; detail produk belum dibuka.';
+        const data = (await publication.json()) as { overrides?: Record<string, boolean> };
+        if (data.overrides?.[product.slug] === false) return 'Produk tersebut sudah tidak aktif; detail produk belum dibuka.';
+      } catch {
+        return 'Status katalog terbaru tidak dapat diverifikasi; detail produk belum dibuka.';
+      }
+      executedActionIds.current.add(action.action_id);
+      window.location.assign(`/catalog/${product.slug}?mode=beans`);
+      return '';
+    }
+
+    const product = PUBLISHED_PRODUCTS.find((item) => item.slug === action.product_slug);
+    if (!product || action.quantity < 1 || action.quantity > ACTION_MAX_QUANTITY) {
+      return 'Produk atau jumlah untuk keranjang tidak valid.';
+    }
+    try {
+      const publication = await fetch('/api/catalog/publication', { cache: 'no-store' });
+      if (!publication.ok) return 'Status katalog terbaru tidak dapat diverifikasi; item belum ditambahkan.';
+      const data = (await publication.json()) as { overrides?: Record<string, boolean> };
+      if (data.overrides?.[product.slug] === false) return 'Produk tersebut sudah tidak aktif; item belum ditambahkan.';
+    } catch {
+      return 'Status katalog terbaru tidak dapat diverifikasi; item belum ditambahkan.';
+    }
+    const variant = product.variants.find((item) => item.weightGrams === action.variant_weight && item.inStock);
+    if (!variant) return 'Varian yang diminta tidak dapat ditambahkan saat ini.';
+    const itemId = `${product.id}-${variant.weightGrams}-whole`;
+    const previousQuantity = useCartStore.getState().items.find((item) => item.id === itemId)?.quantity ?? 0;
+    addItem({
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      imageUrl: getProductDisplayImage(product),
+      weightGrams: variant.weightGrams,
+      weightLabel: variant.weightLabel,
+      grind: 'whole',
+      grindLabel: 'Whole Beans',
+      unitPrice: variant.price,
+      quantity: action.quantity,
+      series: product.series,
+      tastingNotes: product.tastingNotes,
+    });
+    const actualQuantity = useCartStore.getState().items.find((item) => item.id === itemId)?.quantity ?? 0;
+    if (actualQuantity !== previousQuantity + action.quantity) return 'Keranjang belum dapat diperbarui; item tidak ditambahkan.';
+    executedActionIds.current.add(action.action_id);
+    return `Berhasil menambahkan ${product.name} ${variant.weightLabel} sebanyak ${action.quantity} bungkus ke keranjang.`;
   };
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -171,6 +234,9 @@ export function VirtualBaristaWidget() {
     setMessages((prev) => [...prev, userMessage]);
     if (!textToSend) setInput('');
     setIsLoading(true);
+    const requestId = typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     try {
       // Send request to /api/chat route
@@ -179,12 +245,14 @@ export function VirtualBaristaWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: query.trim(),
+          requestId,
           history: messages.slice(-8).map((m) => ({
             role: m.sender === 'user' ? 'user' : 'assistant',
             content: m.text.replace(/\*/g, ''),
             intent: m.intent,
             grounding: m.grounding,
             recommendedProductSlugs: m.recommendedProductSlugs,
+            recommendedVariants: m.recommendedVariants,
           })),
         }),
       });
@@ -196,11 +264,11 @@ export function VirtualBaristaWidget() {
       const data = await response.json();
 
       let matchedProducts: BaristaRecommendedProduct[] = [];
+      const variantsBySlug = new Map<string, RecommendedVariant>();
       const recommendedSlugs = Array.isArray(data.recommendedProductSlugs)
         ? data.recommendedProductSlugs
         : data.recommendedSlugs;
       if (Array.isArray(recommendedSlugs)) {
-        const variantsBySlug = new Map<string, RecommendedVariant>();
         if (Array.isArray(data.recommendedProducts)) {
           for (const recommendation of data.recommendedProducts) {
             if (
@@ -232,9 +300,21 @@ export function VirtualBaristaWidget() {
       const followUpSuggestions = Array.isArray(data.followUpSuggestions)
         ? data.followUpSuggestions.filter((suggestion: unknown): suggestion is string => typeof suggestion === 'string')
         : undefined;
+      const actions: VirtualBaristaAction[] = Array.isArray(data.actions)
+        ? data.actions.filter((action: unknown): action is VirtualBaristaAction => isVirtualBaristaAction(action))
+        : [];
+      if (actions.length > 0) matchedProducts = [];
+      const outcomes = await Promise.all(actions.map((action) => executeAction(action)));
+      const actionOutcome = outcomes.filter(Boolean).join('\n');
+      const selectedVariantReferences = new Map(
+        Array.from(variantsBySlug, ([productSlug, variant]) => [productSlug, variant.weightGrams])
+      );
+      for (const action of actions) {
+        if (action.type === 'add_to_cart') selectedVariantReferences.set(action.product_slug, action.variant_weight);
+      }
 
       await streamBaristaResponse(
-        rawReply,
+        [rawReply, actionOutcome].filter(Boolean).join('\n\n'),
         matchedProducts.length > 0 ? matchedProducts : undefined,
         sources,
         followUpSuggestions,
@@ -246,6 +326,10 @@ export function VirtualBaristaWidget() {
           recommendedProductSlugs: Array.isArray(recommendedSlugs)
             ? recommendedSlugs.filter((slug: unknown): slug is string => typeof slug === 'string')
             : undefined,
+          recommendedVariants: Array.from(selectedVariantReferences, ([productSlug, weightGrams]) => ({
+            productSlug,
+            weightGrams,
+          })),
         }
       );
       setIsLoading(false);

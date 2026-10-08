@@ -49,9 +49,14 @@ ORDINALS = {
 }
 GENERIC_PRODUCT_REFERENCES = (
     "yang tadi",
+    "yang ini",
     "yang itu",
     "produk tadi",
     "produk itu",
+    "produk sebelumnya",
+    "kopi yang kamu rekomendasikan",
+    "detailnya",
+    "produknya",
     "kopi tadi",
     "kopi itu",
     "yang satunya",
@@ -345,6 +350,9 @@ def _comparison_candidates(
 
 def _is_website_message(message: str) -> bool:
     query = message.lower()
+    # Cart commands are product follow-ups, not a website-topic switch.
+    if "keranjang" in query and any(term in query for term in ("tambahkan", "masukkan", "add")):
+        return False
     return any(term in query for term in WEBSITE_FEATURE_TERMS)
 
 

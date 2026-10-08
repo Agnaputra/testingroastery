@@ -15,6 +15,7 @@ from .chat_router import (
     route_chat_intent,
 )
 from .guardrail_service import guardrail_service
+from .action_service import resolve_contextual_action
 from .conversation_state import derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
 from .models import ProductSearchResult
 from .publication_service import apply_publication_overrides, get_publication_overrides
@@ -25,6 +26,7 @@ from .recommendation_service import (
     format_recommendation_reply,
     recommend_products,
 )
+from .website_features import WEBSITE_FEATURE_CONTEXT, WEBSITE_FEATURES
 
 # Master knowledge base of 52 Coffee & Roastery from official Slowbar PDF Menu
 COFFEE_KNOWLEDGE_BASE = [
@@ -565,48 +567,6 @@ PUBLISHED_COFFEE_KNOWLEDGE_BASE = [
     if product.get("publication_status", "published") == "published"
 ]
 
-WEBSITE_FEATURES = (
-    {
-        "name": "Catalogue",
-        "path": "/catalog",
-        "description": "Retail Beans, Slowbar Beverages, Glassware, serta Machine & Tools dengan pencarian, filter, dan detail produk.",
-    },
-    {
-        "name": "Brewing Guidance",
-        "path": "/coffee-lab/brewing-guidance",
-        "description": "Panduan, kalkulator rasio, dan timer seduh.",
-    },
-    {
-        "name": "Build Your Own Blend",
-        "path": "/blend-builder",
-        "description": "Simulator edukasional untuk merancang komposisi blend.",
-    },
-    {
-        "name": "Coffee Experiments",
-        "path": "/coffee-lab/coffee-experiments",
-        "description": "Eksperimen dan pembelajaran sensorik kopi.",
-    },
-    {
-        "name": "Consultation",
-        "path": "/work-with-us/consultations",
-        "description": "Konsultasi kebutuhan kopi dan bisnis.",
-    },
-    {
-        "name": "Wholesale & Partnership",
-        "path": "/work-with-us#wholesale-partnership",
-        "description": "Kebutuhan pasokan, kemitraan, dan custom blend bisnis.",
-    },
-    {
-        "name": "Cart & Checkout",
-        "path": "/checkout",
-        "description": "Keranjang tampil sebagai drawer dan checkout masih berupa simulasi; tidak memproses pembayaran atau pengiriman nyata.",
-    },
-)
-WEBSITE_FEATURE_CONTEXT = "Fitur website 52 Coffee:\n" + "\n".join(
-    f"- {feature['name']} ({feature['path']}): {feature['description']}"
-    for feature in WEBSITE_FEATURES
-)
-
 COFFEE_SCOPE_TERMS = (
     "52 coffee", "roastery", "kopi", "coffee", "beans", "biji", "espresso", "filter", "slowbar",
     "v60", "kalita", "aeropress", "moka", "grind", "giling", "tasting", "floral", "fruity",
@@ -866,6 +826,7 @@ class RAGService:
         slugs: Optional[List[str]] = None,
         products: Optional[List[Dict[str, Any]]] = None,
         sources: Optional[List[Dict[str, str]]] = None,
+        actions: Optional[List[Dict[str, Any]]] = None,
         follow_ups: Optional[List[str]] = None,
         guardrail_status: str = "passed",
     ) -> Dict[str, Any]:
@@ -875,7 +836,7 @@ class RAGService:
             "intent": intent,
             "grounding": grounding,
             "recommendedProductSlugs": selected_slugs,
-            "actions": [],
+            "actions": actions or [],
             "sources": sources or [],
             "followUpSuggestions": follow_ups or [],
             "recommendedSlugs": selected_slugs,
@@ -887,7 +848,8 @@ class RAGService:
     def generate_barista_response(
         self,
         user_query: str,
-        history: Optional[List[Dict[str, str]]] = None,
+        history: Optional[List[Dict[str, Any]]] = None,
+        request_id: str | None = None,
     ) -> Dict[str, Any]:
         """Route domain chat to catalog RAG, website context, or coffee-only web search."""
         history = history or []
@@ -986,6 +948,31 @@ class RAGService:
                 intent,
                 "catalog",
                 guardrail_status="catalog_product_unpublished",
+            )
+
+        action_resolution = resolve_contextual_action(
+            user_query,
+            state=conversation_state,
+            products=active_products,
+            history=history,
+            request_id=request_id,
+        )
+        if action_resolution.handled:
+            output_decision = guardrail_service.check_output(action_resolution.reply)
+            if not output_decision.allowed:
+                return self._response(
+                    output_decision.message,
+                    "website_action",
+                    "none",
+                    guardrail_status=output_decision.status,
+                )
+            return self._response(
+                action_resolution.reply,
+                "website_action",
+                action_resolution.grounding,
+                slugs=[action_resolution.product_slug] if action_resolution.product_slug else [],
+                actions=[action_resolution.action] if action_resolution.action else [],
+                guardrail_status=input_decision.status,
             )
 
         conversational_reply = self._conversation_reply(user_query, contextual_followup)
