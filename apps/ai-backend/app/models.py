@@ -9,11 +9,23 @@ class ChatMessage(BaseModel):
     intent: Optional[str] = None
     grounding: Optional[Literal["catalog", "website", "coffee_web", "conversation", "none"]] = None
     recommendedProductSlugs: List[str] = Field(default_factory=list, max_length=10)
+    recommendedVariants: List["RecommendedVariantReference"] = Field(default_factory=list, max_length=10)
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=500, description="User query / question to the barista")
     history: Optional[List[ChatMessage]] = Field(default_factory=list, description="Recent conversation history")
     temperature: Optional[float] = Field(default=0.4, description="Sampling temperature")
+    requestId: Optional[str] = Field(default=None, max_length=100)
+
+class RecommendedVariantReference(BaseModel):
+    productSlug: str
+    weightGrams: int
+
+class RecommendedVariant(BaseModel):
+    weightGrams: int
+    weightLabel: str
+    price: int
+    pricePerGram: float
 
 class ProductSearchResult(BaseModel):
     slug: str
@@ -24,14 +36,18 @@ class ProductSearchResult(BaseModel):
     tasting_notes: List[str]
     base_price: float
     similarity_score: Optional[float] = None
+    selectedVariant: Optional[RecommendedVariant] = None
 
 class SourceLink(BaseModel):
     title: str
     url: str
 
 class ChatAction(BaseModel):
+    action_id: str
     type: Literal["view_product", "add_to_cart", "open_feature"]
     product_slug: Optional[str] = None
+    variant_weight: Optional[int] = None
+    quantity: Optional[int] = None
     path: Optional[str] = None
 
 class ChatResponse(BaseModel):

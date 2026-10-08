@@ -15,9 +15,18 @@ from .chat_router import (
     route_chat_intent,
 )
 from .guardrail_service import guardrail_service
-from .conversation_state import derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
+from .action_service import resolve_contextual_action
+from .conversation_state import ConversationState, derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
 from .models import ProductSearchResult
 from .publication_service import apply_publication_overrides, get_publication_overrides
+from .recommendation_service import (
+    RecommendationResult,
+    catalog_variants,
+    format_product_comparison,
+    format_recommendation_reply,
+    recommend_products,
+)
+from .website_features import WEBSITE_FEATURE_CONTEXT, WEBSITE_FEATURES
 
 # Master knowledge base of 52 Coffee & Roastery from official Slowbar PDF Menu
 COFFEE_KNOWLEDGE_BASE = [
@@ -558,48 +567,6 @@ PUBLISHED_COFFEE_KNOWLEDGE_BASE = [
     if product.get("publication_status", "published") == "published"
 ]
 
-WEBSITE_FEATURES = (
-    {
-        "name": "Catalogue",
-        "path": "/catalog",
-        "description": "Retail Beans, Slowbar Beverages, Glassware, serta Machine & Tools dengan pencarian, filter, dan detail produk.",
-    },
-    {
-        "name": "Brewing Guidance",
-        "path": "/coffee-lab/brewing-guidance",
-        "description": "Panduan, kalkulator rasio, dan timer seduh.",
-    },
-    {
-        "name": "Build Your Own Blend",
-        "path": "/blend-builder",
-        "description": "Simulator edukasional untuk merancang komposisi blend.",
-    },
-    {
-        "name": "Coffee Experiments",
-        "path": "/coffee-lab/coffee-experiments",
-        "description": "Eksperimen dan pembelajaran sensorik kopi.",
-    },
-    {
-        "name": "Consultation",
-        "path": "/work-with-us/consultations",
-        "description": "Konsultasi kebutuhan kopi dan bisnis.",
-    },
-    {
-        "name": "Wholesale & Partnership",
-        "path": "/work-with-us#wholesale-partnership",
-        "description": "Kebutuhan pasokan, kemitraan, dan custom blend bisnis.",
-    },
-    {
-        "name": "Cart & Checkout",
-        "path": "/checkout",
-        "description": "Keranjang tampil sebagai drawer dan checkout masih berupa simulasi; tidak memproses pembayaran atau pengiriman nyata.",
-    },
-)
-WEBSITE_FEATURE_CONTEXT = "Fitur website 52 Coffee:\n" + "\n".join(
-    f"- {feature['name']} ({feature['path']}): {feature['description']}"
-    for feature in WEBSITE_FEATURES
-)
-
 COFFEE_SCOPE_TERMS = (
     "52 coffee", "roastery", "kopi", "coffee", "beans", "biji", "espresso", "filter", "slowbar",
     "v60", "kalita", "aeropress", "moka", "grind", "giling", "tasting", "floral", "fruity",
@@ -663,11 +630,35 @@ def _matched_catalog_products(user_query: str) -> List[Dict[str, Any]]:
     return matches
 
 
-def _active_catalog_products() -> List[Dict[str, Any]]:
+def _active_catalog_products() -> Tuple[List[Dict[str, Any]], bool]:
+    """Load publication-approved products without treating an outage as approval."""
     try:
-        return apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, get_publication_overrides())
+        overrides = get_publication_overrides()
+        return apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, overrides), True
     except psycopg2.Error:
-        return PUBLISHED_COFFEE_KNOWLEDGE_BASE
+        return [], False
+
+
+def _requires_catalog_authority(
+    user_query: str,
+    intent: ChatIntent,
+    catalog_candidates: List[str],
+    conversation_state: ConversationState,
+) -> bool:
+    """Keep coffee knowledge and website help available while product authority is offline."""
+    query = user_query.lower()
+    commerce_request = any(term in query for term in ("tambahkan", "masukkan", "add", "ke keranjang"))
+    if commerce_request:
+        return True
+    if intent in {"catalog_query", "product_recommendation", "product_comparison"}:
+        return True
+    if intent == "coffee_knowledge":
+        return False
+    return bool(
+        catalog_candidates
+        or conversation_state.referenced_product_slugs
+        or conversation_state.last_recommended_product_slugs
+    )
 
 
 def is_catalog_list_question(user_query: str) -> bool:
@@ -700,21 +691,6 @@ def is_website_feature_question(user_query: str) -> bool:
     return any(term in user_query.lower() for term in WEBSITE_FEATURE_TERMS)
 
 
-def _catalog_price_label(product: Dict[str, Any]) -> str:
-    for field, weight in (
-        ("price_16g", "16g"),
-        ("price_50g", "50g"),
-        ("price_100g", "100g"),
-        ("price_200g", "200g"),
-        ("price_500g", "500g"),
-        ("price_1000g", "1kg"),
-    ):
-        if product.get(field):
-            price = f"{int(product[field]):,}".replace(",", ".")
-            return f"Rp {price} / {weight}"
-    return "Harga tidak tersedia"
-
-
 def _catalog_base_price(product: Dict[str, Any]) -> int | None:
     for field in ("price_16g", "price_50g", "price_100g", "price_200g", "price_500g", "price_1000g"):
         if product.get(field):
@@ -722,12 +698,14 @@ def _catalog_base_price(product: Dict[str, Any]) -> int | None:
     return None
 
 
-def _supports_brew_method(product: Dict[str, Any], brew_method: str) -> bool:
-    method = brew_method.lower()
-    recipe = str(product.get("recipe", "")).lower()
-    if method == "espresso":
-        return product.get("category") == "espresso" or "espresso" in recipe
-    return method in recipe
+def _catalog_variant_labels(product: Dict[str, Any]) -> str:
+    variants = catalog_variants(product)
+    if not variants:
+        return "Variant tidak tersedia"
+    return ", ".join(
+        f"{variant.weight_label} - Rp {variant.price:,}".replace(",", ".")
+        for variant in variants
+    )
 
 
 class RAGService:
@@ -790,7 +768,7 @@ class RAGService:
         query_lower = query.lower()
         results = []
 
-        active_products = _active_catalog_products()
+        active_products, _ = _active_catalog_products()
         for product in active_products:
             score = 0.0
             
@@ -872,6 +850,7 @@ class RAGService:
         slugs: Optional[List[str]] = None,
         products: Optional[List[Dict[str, Any]]] = None,
         sources: Optional[List[Dict[str, str]]] = None,
+        actions: Optional[List[Dict[str, Any]]] = None,
         follow_ups: Optional[List[str]] = None,
         guardrail_status: str = "passed",
     ) -> Dict[str, Any]:
@@ -881,7 +860,7 @@ class RAGService:
             "intent": intent,
             "grounding": grounding,
             "recommendedProductSlugs": selected_slugs,
-            "actions": [],
+            "actions": actions or [],
             "sources": sources or [],
             "followUpSuggestions": follow_ups or [],
             "recommendedSlugs": selected_slugs,
@@ -893,18 +872,20 @@ class RAGService:
     def generate_barista_response(
         self,
         user_query: str,
-        history: Optional[List[Dict[str, str]]] = None,
+        history: Optional[List[Dict[str, Any]]] = None,
+        request_id: str | None = None,
     ) -> Dict[str, Any]:
         """Route domain chat to catalog RAG, website context, or coffee-only web search."""
         history = history or []
-        active_products = _active_catalog_products()
+        active_products, publication_authority_available = _active_catalog_products()
+        context_products = active_products if publication_authority_available else PUBLISHED_COFFEE_KNOWLEDGE_BASE
         active_slugs = {product["slug"] for product in active_products}
         current_catalog_candidates = find_product_candidates(user_query, PUBLISHED_COFFEE_KNOWLEDGE_BASE)
         has_current_active_product = any(slug in active_slugs for slug in current_catalog_candidates)
         references_inactive_product = bool(current_catalog_candidates) and not any(
             slug in active_slugs for slug in current_catalog_candidates
         )
-        conversation_state = derive_conversation_state(history, user_query, active_products)
+        conversation_state = derive_conversation_state(history, user_query, context_products)
         products_by_slug = {product["slug"]: product for product in active_products}
         referenced_products = [
             products_by_slug[slug]
@@ -949,13 +930,26 @@ class RAGService:
 
         # 2. Guardrail input check (NeMo when configured, deterministic policy as defence in depth).
         input_decision = guardrail_service.check_input(user_query)
-        nemo_false_positive = input_decision.status == "blocked_input_nemo" and _is_domain_question(user_query)
-        if not input_decision.allowed and not nemo_false_positive:
+        if not input_decision.allowed:
             return self._response(
                 input_decision.message,
                 intent,
                 "none",
                 guardrail_status=input_decision.status,
+            )
+
+        if not publication_authority_available and _requires_catalog_authority(
+            user_query,
+            intent,
+            current_catalog_candidates,
+            conversation_state,
+        ):
+            return self._response(
+                "Status katalog 52 Coffee sedang tidak tersedia. Saya belum dapat memberikan rekomendasi produk atau memproses keranjang sampai status produk dapat diverifikasi.",
+                intent,
+                "none",
+                follow_ups=["Jelaskan proses natural", "Buka Brewing Guidance"],
+                guardrail_status="catalog_authority_unavailable",
             )
 
         if conversation_state.needs_clarification:
@@ -973,12 +967,50 @@ class RAGService:
                 guardrail_status=input_decision.status,
             )
 
+        strict_budget_mentioned = any(term in user_query.lower() for term in ("budget", "harga", "rp", "ribu")) and any(
+            phrase in user_query.lower()
+            for phrase in ("maksimal", "di bawah", "kurang dari", "tidak lebih dari")
+        )
+        if intent == "product_recommendation" and strict_budget_mentioned and conversation_state.budget_max is None:
+            return self._response(
+                "Berapa batas budget maksimal yang kamu inginkan?",
+                intent,
+                "conversation",
+                follow_ups=["Maksimal Rp100.000", "Maksimal Rp150.000"],
+                guardrail_status=input_decision.status,
+            )
+
         if references_inactive_product:
             return self._response(
                 "Produk tersebut sedang tidak aktif di katalog 52 Coffee. Saya bisa membantu memilih produk lain yang masih tersedia.",
                 intent,
                 "catalog",
                 guardrail_status="catalog_product_unpublished",
+            )
+
+        action_resolution = resolve_contextual_action(
+            user_query,
+            state=conversation_state,
+            products=active_products,
+            history=history,
+            request_id=request_id,
+        )
+        if action_resolution.handled:
+            output_decision = guardrail_service.check_output(action_resolution.reply)
+            if not output_decision.allowed:
+                return self._response(
+                    output_decision.message,
+                    "website_action",
+                    "none",
+                    guardrail_status=output_decision.status,
+                )
+            return self._response(
+                action_resolution.reply,
+                "website_action",
+                action_resolution.grounding,
+                slugs=[action_resolution.product_slug] if action_resolution.product_slug else [],
+                actions=[action_resolution.action] if action_resolution.action else [],
+                guardrail_status=input_decision.status,
             )
 
         conversational_reply = self._conversation_reply(user_query, contextual_followup)
@@ -1042,7 +1074,7 @@ class RAGService:
                 similar_items = referenced_items + [
                     item for item in similar_items if item[0]["slug"] not in referenced_slugs
                 ]
-        if not similar_items and not feature_question:
+        if not similar_items and not feature_question and intent != "product_recommendation":
             return self._response(
                 "Saya belum menemukan produk katalog yang cocok. Coba sebutkan rasa, metode seduh, atau kisaran budgetmu.",
                 intent,
@@ -1051,46 +1083,17 @@ class RAGService:
                 guardrail_status="catalog_context_unavailable",
             )
 
+        recommendation_result: RecommendationResult | None = None
         recommendation_pool = similar_items
-        if conversation_state.budget_max is not None or conversation_state.relative_price_direction:
-            # ponytail: preserve retrieval order, then use catalog order only as a
-            # price-eligibility fallback; Phase 2B owns ranking these candidates.
-            retrieved_slugs = {item[0]["slug"] for item in recommendation_pool}
+        if intent == "product_recommendation":
+            recommendation_result = recommend_products(active_products, conversation_state, similar_items)
             recommendation_pool = [
-                *recommendation_pool,
-                *((product, 0.0) for product in active_products if product["slug"] not in retrieved_slugs),
+                (recommendation.product, recommendation.score)
+                for recommendation in recommendation_result.recommendations
             ]
-        if conversation_state.brew_method:
-            recommendation_pool = [
-                item for item in recommendation_pool
-                if _supports_brew_method(item[0], conversation_state.brew_method)
-            ]
-        if conversation_state.budget_max is not None:
-            recommendation_pool = [
-                item for item in recommendation_pool
-                if (price := _catalog_base_price(item[0])) is not None and price <= conversation_state.budget_max
-            ]
-        if conversation_state.relative_price_direction and referenced_products:
-            reference_price = _catalog_base_price(referenced_products[-1])
-            if reference_price is not None:
-                comparison = (
-                    (lambda price: price < reference_price)
-                    if conversation_state.relative_price_direction == "cheaper"
-                    else (lambda price: price > reference_price)
-                )
-                reference_slugs = {product["slug"] for product in referenced_products}
-                recommendation_pool = [
-                    item for item in recommendation_pool
-                    if item[0]["slug"] not in reference_slugs
-                    and (price := _catalog_base_price(item[0])) is not None
-                    and comparison(price)
-                ]
-
-        if intent == "product_recommendation" and (
-            conversation_state.budget_max is not None or conversation_state.relative_price_direction
-        ) and not recommendation_pool:
+        if intent == "product_recommendation" and not recommendation_pool:
             return self._response(
-                "Saya belum menemukan produk aktif yang memenuhi batas harga itu. Mau ubah budget atau preferensi rasanya?",
+                format_recommendation_reply(recommendation_result or RecommendationResult([])),
                 intent,
                 "catalog",
                 follow_ups=["Naikkan budget", "Ubah preferensi rasa"],
@@ -1129,8 +1132,10 @@ class RAGService:
             f"Origin: {p['origin']}\n"
             f"Process: {p['process']}\n"
             f"Tasting Notes: {', '.join(p['notes'])}\n"
-            f"Harga katalog: {_catalog_price_label(p)}\n"
+            f"Semua variant katalog: {_catalog_variant_labels(p)}\n"
             f"Harga Cup Slowbar: Rp {p.get('cup_price', 0):,}\n"
+            f"Roast: {p.get('roast', 'Tidak tercatat')}\n"
+            f"Varietal: {p.get('varietal', 'Tidak tercatat')}\n"
             f"Resep Seduh: {p['recipe']}\n"
             f"Deskripsi: {p['description']}"
             for p in retrieved_products
@@ -1163,8 +1168,10 @@ class RAGService:
             "Berikan jawaban yang hanya didukung konteks di atas."
         )
 
-        reply_text = ""
-        if self.openai_api_key and self.openai_model:
+        reply_text = format_recommendation_reply(recommendation_result) if recommendation_result else ""
+        if intent == "product_comparison" and referenced_products:
+            reply_text = format_product_comparison(referenced_products)
+        if not reply_text and self.openai_api_key and self.openai_model:
             try:
                 conversation_history = [
                     {
@@ -1223,6 +1230,11 @@ class RAGService:
                 guardrail_status=output_decision.status,
             )
 
+        recommendation_by_slug = {
+            recommendation.product["slug"]: recommendation
+            for recommendation in (recommendation_result.recommendations if recommendation_result else [])
+        }
+        semantic_score_by_slug = {product["slug"]: score for product, score in similar_items}
         product_results = [
             ProductSearchResult(
                 slug=p["slug"],
@@ -1231,8 +1243,26 @@ class RAGService:
                 origin=p["origin"],
                 process=p["process"],
                 tasting_notes=p["notes"],
-                base_price=float(p.get("price_100g", p.get("price_200g", p.get("price_16g", 0)))),
-                similarity_score=round(score, 3)
+                base_price=float(
+                    recommendation_by_slug[p["slug"]].variant.price
+                    if p["slug"] in recommendation_by_slug
+                    else (_catalog_base_price(p) or 0)
+                ),
+                similarity_score=(
+                    round(max(0.0, min(semantic_score_by_slug[p["slug"]], 1.0)), 3)
+                    if recommendation_result and p["slug"] in semantic_score_by_slug
+                    else None if recommendation_result else round(score, 3)
+                ),
+                selectedVariant=(
+                    {
+                        "weightGrams": recommendation_by_slug[p["slug"]].variant.weight_grams,
+                        "weightLabel": recommendation_by_slug[p["slug"]].variant.weight_label,
+                        "price": recommendation_by_slug[p["slug"]].variant.price,
+                        "pricePerGram": round(recommendation_by_slug[p["slug"]].variant.price_per_gram, 2),
+                    }
+                    if p["slug"] in recommendation_by_slug
+                    else None
+                ),
             )
             for p, score in recommended_items
         ]

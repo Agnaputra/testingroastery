@@ -146,6 +146,14 @@ export function toWebCatalogSlug(slug: string): string {
   return mapping ? PRODUCTS.find((product) => product.id === mapping.webId)?.slug ?? mapping.slug : slug;
 }
 
+export function toKnowledgeCatalogSlug(slug: string): string {
+  const mapping = ACTIVE_CATALOG_MAPPING.find((entry) => {
+    const webSlug = PRODUCTS.find((product) => product.id === entry.webId)?.slug ?? entry.slug;
+    return webSlug === slug;
+  });
+  return mapping?.knowledgeSlug ?? slug;
+}
+
 /**
  * Rows in master snapshot that have missing prices, provisional "Harga belum ada" notes,
  * or naming ambiguity that require owner review before public release.

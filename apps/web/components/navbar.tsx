@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, ChevronDown, ChevronRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
 import { useCartStore } from '../lib/store/useCartStore';
+import { getHydratedCartItemCount } from '../lib/store/cart-hydration';
+import { useCartHydration } from '../lib/store/useCartHydration';
 import { SearchModal } from './search-modal';
 import { FiftyTwoLogo } from './logo';
 
@@ -92,15 +94,14 @@ export function Navbar() {
   const [mobileSectionOpen, setMobileSectionOpen] = useState<string | null>(null);
   const [mobileSubsectionOpen, setMobileSubsectionOpen] = useState<string | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const desktopNavRef = useRef<HTMLElement>(null);
   const lastDesktopTriggerRef = useRef<HTMLButtonElement | null>(null);
   const lastDesktopSubmenuTriggerRef = useRef<HTMLButtonElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const { toggleDrawer, getTotalItems } = useCartStore();
+  const hasCartHydrated = useCartHydration();
 
-  useEffect(() => setMounted(true), []);
   useEffect(() => {
     setMobileMenuOpen(false);
     setDesktopMenuOpen(null);
@@ -157,7 +158,8 @@ export function Navbar() {
     };
   }, [desktopMenuOpen, mobileMenuOpen]);
 
-  const totalItems = mounted ? getTotalItems() : 0;
+  const totalItems = getTotalItems();
+  const cartItemCount = getHydratedCartItemCount(hasCartHydrated, totalItems);
   const isHome = pathname === '/';
   const hasDarkNavbarCanvas = isHome || pathname.startsWith('/about') || pathname.startsWith('/guide') || pathname.startsWith('/coffee-lab') || pathname.startsWith('/blend-builder') || pathname.startsWith('/work-with-us') || pathname.startsWith('/tools/price-calculator');
   const active = (href: string) => {
@@ -337,9 +339,9 @@ export function Navbar() {
 
           <div className="flex items-center gap-0.5 sm:gap-2">
             <button type="button" aria-label="Cari kopi" title="Cari kopi (Ctrl/⌘ K)" onClick={() => { setSearchModalOpen(true); closeMobileMenu(); }} className={`icon-button rounded-lg ${iconColor}`}><Search aria-hidden="true" className="h-5 w-5" /></button>
-            <button type="button" onClick={toggleDrawer} aria-label={`Keranjang belanja, ${totalItems} item`} className={`icon-button relative rounded-lg ${iconColor}`}>
+            <button type="button" onClick={toggleDrawer} aria-label={cartItemCount === null ? 'Keranjang belanja' : `Keranjang belanja, ${cartItemCount} item`} className={`icon-button relative rounded-lg ${iconColor}`}>
               <ShoppingBag aria-hidden="true" className="h-5 w-5" />
-              {totalItems > 0 && <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-maroon px-1 font-mono text-[10px] font-bold text-white">{totalItems > 99 ? '99+' : totalItems}</span>}
+              {cartItemCount !== null && cartItemCount > 0 && <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-maroon px-1 font-mono text-[10px] font-bold text-white">{cartItemCount > 99 ? '99+' : cartItemCount}</span>}
             </button>
             <button ref={menuButtonRef} type="button" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setMobileMenuOpen((open) => !open)} className={`icon-button rounded-lg xl:hidden ${iconColor}`}>
               {mobileMenuOpen ? <X aria-hidden="true" className="h-5 w-5" /> : <Menu aria-hidden="true" className="h-5 w-5" />}

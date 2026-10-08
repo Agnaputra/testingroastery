@@ -8,32 +8,51 @@ import {
   Send,
   X,
   RotateCcw,
-  ShoppingBag,
-  Check,
   ChevronRight,
 } from 'lucide-react';
-import { CoffeeProduct, formatRupiah, getProductDisplayImage } from '../lib/data';
+import { formatRupiah, getProductDisplayImage } from '../lib/data';
 import { getPublishedProducts } from '../lib/catalog-master';
 import { useCartStore } from '../lib/store/useCartStore';
 import { FiftyTwoBeanMark } from './logo';
 import { OPEN_VIRTUAL_BARISTA } from '../lib/virtual-barista-events';
+import {
+  ACTION_MAX_QUANTITY,
+  claimVirtualBaristaActions,
+  isVirtualBaristaAction,
+  type VirtualBaristaAction,
+} from '../lib/virtual-barista-actions';
+import {
+  mapRecommendationsToCatalog,
+  type CatalogRecommendedProduct,
+} from '../lib/virtual-barista-recommendations';
+import { loadCatalogPublicationAuthority } from '../lib/catalog-publication';
 
 const PUBLISHED_PRODUCTS = getPublishedProducts();
+
+type BaristaRecommendedProduct = CatalogRecommendedProduct;
 
 interface ChatMessage {
   id: string;
   sender: 'user' | 'barista';
   text: string;
   timestamp: string;
-  recommendedProducts?: CoffeeProduct[];
+  recommendedProducts?: BaristaRecommendedProduct[];
   sources?: Array<{ title: string; url: string }>;
   followUpSuggestions?: string[];
   intent?: string;
   grounding?: 'catalog' | 'website' | 'coffee_web' | 'conversation' | 'none';
   recommendedProductSlugs?: string[];
+  recommendedVariants?: Array<{ productSlug: string; weightGrams: number }>;
 }
 
-type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs'>;
+type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs' | 'recommendedVariants'>;
+
+function getCatalogPublicationAuthority() {
+  return loadCatalogPublicationAuthority(
+    PUBLISHED_PRODUCTS,
+    () => fetch('/api/catalog/publication', { cache: 'no-store' }),
+  );
+}
 
 const QUICK_PROMPTS = [
   { label: 'Pilih kopi', prompt: 'Bantu saya memilih kopi sesuai selera' },
@@ -45,7 +64,6 @@ const QUICK_PROMPTS = [
 export function VirtualBaristaWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
-  const [availableProducts, setAvailableProducts] = useState(PUBLISHED_PRODUCTS);
 
   useEffect(() => {
     const open = () => setIsOpen(true);
@@ -53,19 +71,8 @@ export function VirtualBaristaWidget() {
     return () => window.removeEventListener(OPEN_VIRTUAL_BARISTA, open);
   }, []);
 
-  useEffect(() => {
-    fetch('/api/catalog/publication', { cache: 'no-store' })
-      .then(async (response) => {
-        if (!response.ok) return;
-        const data = (await response.json()) as { overrides?: Record<string, boolean> };
-        setAvailableProducts(PUBLISHED_PRODUCTS.filter((product) => data.overrides?.[product.slug] !== false));
-      })
-      .catch(() => undefined);
-  }, []);
-
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [addedProductId, setAddedProductId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
@@ -76,6 +83,7 @@ export function VirtualBaristaWidget() {
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const claimedActionIds = useRef(new Set<string>());
   const { addItem } = useCartStore();
 
   useEffect(() => {
@@ -87,7 +95,7 @@ export function VirtualBaristaWidget() {
   // Progressive Typewriter streaming response effect
   const streamBaristaResponse = async (
     fullText: string,
-    products?: CoffeeProduct[],
+    products?: BaristaRecommendedProduct[],
     sources?: Array<{ title: string; url: string }>,
     followUpSuggestions?: string[],
     metadata?: ConversationMetadata
@@ -125,6 +133,7 @@ export function VirtualBaristaWidget() {
                 intent: i === words.length - 1 ? metadata?.intent : undefined,
                 grounding: i === words.length - 1 ? metadata?.grounding : undefined,
                 recommendedProductSlugs: i === words.length - 1 ? metadata?.recommendedProductSlugs : undefined,
+                recommendedVariants: i === words.length - 1 ? metadata?.recommendedVariants : undefined,
               }
             : msg
         )
@@ -133,6 +142,50 @@ export function VirtualBaristaWidget() {
       // Natural reading speed delay
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
+  };
+
+  const executeAction = async (action: VirtualBaristaAction): Promise<string> => {
+    if (action.type === 'open_feature') {
+      window.location.assign(action.path);
+      return '';
+    }
+    if (action.type === 'view_product') {
+      const authority = await getCatalogPublicationAuthority();
+      if (authority.status === 'unavailable') return 'Status katalog terbaru tidak dapat diverifikasi; detail produk belum dibuka.';
+      const product = authority.products.find((item) => item.slug === action.product_slug);
+      if (!product) return 'Produk tersebut sudah tidak aktif; detail produk belum dibuka.';
+      window.location.assign(`/catalog/${product.slug}?mode=beans`);
+      return '';
+    }
+
+    if (action.quantity < 1 || action.quantity > ACTION_MAX_QUANTITY) {
+      return 'Produk atau jumlah untuk keranjang tidak valid.';
+    }
+    const authority = await getCatalogPublicationAuthority();
+    if (authority.status === 'unavailable') return 'Status katalog terbaru tidak dapat diverifikasi; item belum ditambahkan.';
+    const product = authority.products.find((item) => item.slug === action.product_slug);
+    if (!product) return 'Produk tersebut sudah tidak aktif; item belum ditambahkan.';
+    const variant = product.variants.find((item) => item.weightGrams === action.variant_weight && item.inStock);
+    if (!variant) return 'Varian yang diminta tidak dapat ditambahkan saat ini.';
+    const itemId = `${product.id}-${variant.weightGrams}-whole`;
+    const previousQuantity = useCartStore.getState().items.find((item) => item.id === itemId)?.quantity ?? 0;
+    addItem({
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      imageUrl: getProductDisplayImage(product),
+      weightGrams: variant.weightGrams,
+      weightLabel: variant.weightLabel,
+      grind: 'whole',
+      grindLabel: 'Whole Beans',
+      unitPrice: variant.price,
+      quantity: action.quantity,
+      series: product.series,
+      tastingNotes: product.tastingNotes,
+    });
+    const actualQuantity = useCartStore.getState().items.find((item) => item.id === itemId)?.quantity ?? 0;
+    if (actualQuantity !== previousQuantity + action.quantity) return 'Keranjang belum dapat diperbarui; item tidak ditambahkan.';
+    return `Berhasil menambahkan ${product.name} ${variant.weightLabel} sebanyak ${action.quantity} bungkus ke keranjang.`;
   };
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -149,20 +202,26 @@ export function VirtualBaristaWidget() {
     setMessages((prev) => [...prev, userMessage]);
     if (!textToSend) setInput('');
     setIsLoading(true);
+    const requestId = typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     try {
+      const publicationAuthorityPromise = getCatalogPublicationAuthority();
       // Send request to /api/chat route
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: query.trim(),
+          requestId,
           history: messages.slice(-8).map((m) => ({
             role: m.sender === 'user' ? 'user' : 'assistant',
             content: m.text.replace(/\*/g, ''),
             intent: m.intent,
             grounding: m.grounding,
             recommendedProductSlugs: m.recommendedProductSlugs,
+            recommendedVariants: m.recommendedVariants,
           })),
         }),
       });
@@ -172,14 +231,18 @@ export function VirtualBaristaWidget() {
       }
 
       const data = await response.json();
+      const publicationAuthority = await publicationAuthorityPromise;
+      const currentProducts = publicationAuthority.products;
 
-      let matchedProducts: CoffeeProduct[] = [];
+      let matchedProducts: BaristaRecommendedProduct[] = [];
       const recommendedSlugs = Array.isArray(data.recommendedProductSlugs)
         ? data.recommendedProductSlugs
         : data.recommendedSlugs;
-      if (Array.isArray(recommendedSlugs)) {
-        matchedProducts = availableProducts.filter((product) => recommendedSlugs.includes(product.slug));
-      }
+      matchedProducts = mapRecommendationsToCatalog(
+        currentProducts,
+        recommendedSlugs,
+        data.recommendedProducts,
+      );
 
       const rawReply = (data.reply || 'Berikut rekomendasi kurasi biji kopi segar dari roastery kami di Malang yang sangat pas dengan selera kamu:').replace(/\*/g, '');
       const sources = Array.isArray(data.sources)
@@ -195,9 +258,24 @@ export function VirtualBaristaWidget() {
       const followUpSuggestions = Array.isArray(data.followUpSuggestions)
         ? data.followUpSuggestions.filter((suggestion: unknown): suggestion is string => typeof suggestion === 'string')
         : undefined;
+      const actions: VirtualBaristaAction[] = publicationAuthority.status === 'verified' && Array.isArray(data.actions)
+        ? data.actions.filter((action: unknown): action is VirtualBaristaAction => isVirtualBaristaAction(action))
+        : [];
+      if (actions.length > 0) matchedProducts = [];
+      const claimedActions = claimVirtualBaristaActions(actions, claimedActionIds.current);
+      const outcomes = await Promise.all(claimedActions.map((action) => executeAction(action)));
+      const actionOutcome = outcomes.filter(Boolean).join('\n');
+      const selectedVariantReferences = new Map(
+        matchedProducts.flatMap((product) => product.selectedVariant
+          ? [[product.slug, product.selectedVariant.weightGrams] as const]
+          : [])
+      );
+      for (const action of actions) {
+        if (action.type === 'add_to_cart') selectedVariantReferences.set(action.product_slug, action.variant_weight);
+      }
 
       await streamBaristaResponse(
-        rawReply,
+        [rawReply, actionOutcome].filter(Boolean).join('\n\n'),
         matchedProducts.length > 0 ? matchedProducts : undefined,
         sources,
         followUpSuggestions,
@@ -209,6 +287,10 @@ export function VirtualBaristaWidget() {
           recommendedProductSlugs: Array.isArray(recommendedSlugs)
             ? recommendedSlugs.filter((slug: unknown): slug is string => typeof slug === 'string')
             : undefined,
+          recommendedVariants: Array.from(selectedVariantReferences, ([productSlug, weightGrams]) => ({
+            productSlug,
+            weightGrams,
+          })),
         }
       );
       setIsLoading(false);
@@ -378,49 +460,30 @@ export function VirtualBaristaWidget() {
                                     {prod.name}
                                   </Link>
                                   <div className="text-[10px] font-mono text-brand-maroon font-bold">
-                                    {formatRupiah(prod.basePrice)} / {prod.defaultWeight}
+                                    {prod.selectedVariant
+                                      ? `${formatRupiah(prod.selectedVariant.price)} / ${prod.selectedVariant.weightLabel}`
+                                      : 'Varian pilihan belum tersedia'}
                                   </div>
                                 </div>
                               </div>
 
-                              <button
-                                onClick={() => {
-                                  const variant = prod.variants[0];
-                                  addItem({
-                                    productId: prod.id,
-                                    name: prod.name,
-                                    slug: prod.slug,
-                                    imageUrl: getProductDisplayImage(prod),
-                                    weightGrams: variant.weightGrams,
-                                    weightLabel: variant.weightLabel,
-                                    grind: 'whole',
-                                    grindLabel: 'Whole Beans',
-                                    unitPrice: variant.price,
-                                    quantity: 1,
-                                    series: prod.series,
-                                    tastingNotes: prod.tastingNotes,
-                                  });
-                                  setAddedProductId(prod.id);
-                                  setTimeout(() => setAddedProductId(null), 1500);
-                                }}
-                                className={`flex h-11 shrink-0 items-center gap-1 rounded-full px-3 text-[11px] font-bold transition-colors ${
-                                  addedProductId === prod.id
-                                    ? 'bg-brand-navy text-white'
-                                    : 'bg-brand-navy hover:bg-brand-navy-light text-white'
-                                }`}
-                              >
-                                {addedProductId === prod.id ? (
-                                  <>
-                                    <Check className="w-3.5 h-3.5 text-emerald-300" />
-                                    <span>Ditambahkan</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <ShoppingBag className="w-3.5 h-3.5" />
-                                    <span>Tambah</span>
-                                  </>
-                                )}
-                              </button>
+                              {prod.selectedVariant ? (
+                                <Link
+                                  href={`/catalog/${prod.slug}?mode=beans`}
+                                  onClick={() => setIsOpen(false)}
+                                  className="flex h-11 shrink-0 items-center gap-1 rounded-full bg-brand-navy px-3 text-[11px] font-bold text-white transition-colors hover:bg-brand-navy-light"
+                                >
+                                  <span>Lihat detail</span>
+                                </Link>
+                              ) : (
+                                <Link
+                                  href={`/catalog/${prod.slug}?mode=beans`}
+                                  onClick={() => setIsOpen(false)}
+                                  className="flex h-11 shrink-0 items-center gap-1 rounded-full bg-brand-navy px-3 text-[11px] font-bold text-white transition-colors hover:bg-brand-navy-light"
+                                >
+                                  <span>Pilih varian</span>
+                                </Link>
+                              )}
                             </div>
                           ))}
                         </div>

@@ -118,6 +118,38 @@ class ConversationStateTest(unittest.TestCase):
         self.assertIsNone(state.brew_method)
         self.assertEqual(state.referenced_product_slugs, [])
 
+    def test_product_action_keeps_second_recommendation_focused_for_followups(self) -> None:
+        slugs = [product["slug"] for product in PRODUCTS]
+        history = [
+            {"role": "user", "content": "Rekomendasikan kopi fruity untuk V60"},
+            assistant("product_recommendation", slugs),
+            {"role": "user", "content": "Masukkan yang kedua ke keranjang"},
+            {
+                "role": "assistant",
+                "content": "Saya menyiapkan produk untuk keranjang.",
+                "intent": "website_action",
+                "grounding": "catalog",
+                "recommendedProductSlugs": [slugs[1]],
+                "recommendedVariants": [{"productSlug": slugs[1], "weightGrams": 100}],
+            },
+        ]
+        for followup in ("Yang itu cocok untuk espresso juga?", "kopi tadi gimana?", "produk kedua"):
+            state = derive_conversation_state(history, followup, PRODUCTS)
+            self.assertFalse(state.needs_clarification)
+            self.assertEqual(state.referenced_product_slugs, [slugs[1]])
+        self.assertEqual(derive_conversation_state(history, "Yang itu cocok untuk espresso juga?", PRODUCTS).brew_method, "Espresso")
+
+    def test_unrelated_feature_action_still_clears_product_focus(self) -> None:
+        history = [
+            {"role": "user", "content": "Rekomendasikan kopi fruity"},
+            assistant("product_recommendation", [PRODUCTS[0]["slug"]]),
+            {"role": "user", "content": "Buka Brewing Guidance"},
+            {"role": "assistant", "content": "Membuka panduan.", "intent": "website_action", "grounding": "website"},
+        ]
+        state = derive_conversation_state(history, "yang itu gimana?", PRODUCTS)
+        self.assertTrue(state.needs_clarification)
+        self.assertEqual(state.referenced_product_slugs, [])
+
     def test_return_to_recent_coffee_restores_only_when_unambiguous(self) -> None:
         history = [
             {"role": "user", "content": "Ceritakan Prau"},

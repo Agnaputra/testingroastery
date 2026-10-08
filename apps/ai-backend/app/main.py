@@ -75,6 +75,7 @@ async def chat_with_barista(request: ChatRequest):
             rag_service.generate_barista_response,
             user_query=request.message,
             history=[message.model_dump(exclude_none=True) for message in request.history],
+            request_id=request.requestId,
         )
         return response
     except Exception:

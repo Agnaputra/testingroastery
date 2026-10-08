@@ -4,6 +4,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _cors_origins() -> list[str]:
+    """Return an explicit allow-list for browser access to the AI service.
+
+    The Next.js API routes call this service server-to-server, so Vercel Preview
+    deployments do not need direct browser access. Deployments can opt into
+    additional trusted origins through the comma-separated CORS_ORIGINS setting.
+    """
+    configured_origins = os.getenv("CORS_ORIGINS", "")
+    if configured_origins:
+        return [origin.strip().rstrip("/") for origin in configured_origins.split(",") if origin.strip()]
+
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://52coffee-roastery.vercel.app",
+        "https://52coffee.id",
+    ]
+
 class Settings(BaseSettings):
     APP_NAME: str = "52 Coffee & Roastery - AI Barista Microservice"
     APP_VERSION: str = "1.0.0"
@@ -28,11 +47,6 @@ class Settings(BaseSettings):
     ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "")
     
     # CORS Origins
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://52coffee.id",
-        "*",
-    ]
+    CORS_ORIGINS: list[str] = _cors_origins()
 
 settings = Settings()
