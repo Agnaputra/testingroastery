@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 from .config import settings
@@ -33,26 +34,31 @@ class NemoGuardrailService:
         self._rails: Any | None = None
         self._error: str | None = None
         self._initialised = False
+        self._initialise_lock = Lock()
 
     def _ensure_rails(self) -> bool:
         if self._initialised:
             return self._rails is not None
-        self._initialised = True
-        if not settings.ENABLE_GUARDRAILS:
-            self._error = "disabled_by_configuration"
-            return False
-        if not settings.OPENAI_API_KEY:
-            self._error = "missing_openai_api_key"
-            return False
-        try:
-            from nemoguardrails import LLMRails, RailsConfig
+        with self._initialise_lock:
+            if self._initialised:
+                return self._rails is not None
+            try:
+                if not settings.ENABLE_GUARDRAILS:
+                    self._error = "disabled_by_configuration"
+                    return False
+                if not settings.OPENAI_API_KEY:
+                    self._error = "missing_openai_api_key"
+                    return False
+                from nemoguardrails import LLMRails, RailsConfig
 
-            config_path = Path(__file__).with_name("guardrails")
-            self._rails = LLMRails(RailsConfig.from_path(str(config_path)))
-            return True
-        except Exception as error:  # Service remains available with explicit degraded status.
-            self._error = type(error).__name__
-            return False
+                config_path = Path(__file__).with_name("guardrails")
+                self._rails = LLMRails(RailsConfig.from_path(str(config_path)))
+                return True
+            except Exception as error:  # Service remains available with explicit degraded status.
+                self._error = type(error).__name__
+                return False
+            finally:
+                self._initialised = True
 
     @staticmethod
     def _deterministic_input_blocked(value: str) -> bool:
@@ -80,6 +86,7 @@ class NemoGuardrailService:
             # check() is NeMo's no-generation validation API; it executes the
             # configured input/output rails without replacing our Responses API.
             result = self._rails.check(messages=[message])
+            self._error = None
             if hasattr(result, "passed"):
                 return bool(result.passed)
             if isinstance(result, dict):

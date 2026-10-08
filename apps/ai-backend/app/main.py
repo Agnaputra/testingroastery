@@ -74,7 +74,7 @@ async def chat_with_barista(request: ChatRequest):
         response = await asyncio.to_thread(
             rag_service.generate_barista_response,
             user_query=request.message,
-            history=[{"role": m.role, "content": m.content} for m in request.history],
+            history=[message.model_dump(exclude_none=True) for message in request.history],
         )
         return response
     except Exception:

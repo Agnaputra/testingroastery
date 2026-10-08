@@ -142,7 +142,8 @@ export const ACTIVE_CATALOG_MAPPING: ProductMappingEntry[] = [
 ];
 
 export function toWebCatalogSlug(slug: string): string {
-  return ACTIVE_CATALOG_MAPPING.find((mapping) => mapping.knowledgeSlug === slug)?.slug ?? slug;
+  const mapping = ACTIVE_CATALOG_MAPPING.find((entry) => entry.knowledgeSlug === slug);
+  return mapping ? PRODUCTS.find((product) => product.id === mapping.webId)?.slug ?? mapping.slug : slug;
 }
 
 /**

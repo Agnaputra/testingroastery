@@ -11,9 +11,6 @@ import {
   ShoppingBag,
   Check,
   ChevronRight,
-  Coffee,
-  Flame,
-  Scale,
 } from 'lucide-react';
 import { CoffeeProduct, formatRupiah, getProductDisplayImage } from '../lib/data';
 import { getPublishedProducts } from '../lib/catalog-master';
@@ -30,12 +27,18 @@ interface ChatMessage {
   timestamp: string;
   recommendedProducts?: CoffeeProduct[];
   sources?: Array<{ title: string; url: string }>;
+  followUpSuggestions?: string[];
+  intent?: string;
+  grounding?: 'catalog' | 'website' | 'coffee_web' | 'conversation' | 'none';
+  recommendedProductSlugs?: string[];
 }
+
+type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs'>;
 
 const QUICK_PROMPTS = [
   { label: 'Pilih kopi', prompt: 'Bantu saya memilih kopi sesuai selera' },
   { label: 'Panduan seduh', prompt: 'Bantu saya membuat panduan seduh' },
-  { label: 'Cari di web', prompt: 'Apa berita teknologi terbaru hari ini?' },
+  { label: 'Pengetahuan kopi', prompt: 'Apa itu varietal Pink Bourbon?' },
   { label: 'Kemitraan', prompt: 'Jelaskan layanan konsultasi dan kemitraan 52 Coffee' },
 ];
 
@@ -67,7 +70,7 @@ export function VirtualBaristaWidget() {
     {
       id: 'welcome',
       sender: 'barista',
-      text: 'Halo, kawan seduh! Saya bisa membantu soal katalog dan fitur 52 Coffee, sekaligus menjawab pertanyaan umum serta mencari informasi terbaru dari web bila diperlukan.',
+      text: 'Halo! Saya bisa membantu memilih produk 52 Coffee, membahas specialty coffee, atau memandu kamu memakai fitur website. Mau mulai dari mana?',
       timestamp: 'Baru saja',
     },
   ]);
@@ -85,7 +88,9 @@ export function VirtualBaristaWidget() {
   const streamBaristaResponse = async (
     fullText: string,
     products?: CoffeeProduct[],
-    sources?: Array<{ title: string; url: string }>
+    sources?: Array<{ title: string; url: string }>,
+    followUpSuggestions?: string[],
+    metadata?: ConversationMetadata
   ) => {
     const messageId = Date.now().toString();
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -116,6 +121,10 @@ export function VirtualBaristaWidget() {
                 text: snapshot,
                 recommendedProducts: i === words.length - 1 ? products : undefined,
                 sources: i === words.length - 1 ? sources : undefined,
+                followUpSuggestions: i === words.length - 1 ? followUpSuggestions : undefined,
+                intent: i === words.length - 1 ? metadata?.intent : undefined,
+                grounding: i === words.length - 1 ? metadata?.grounding : undefined,
+                recommendedProductSlugs: i === words.length - 1 ? metadata?.recommendedProductSlugs : undefined,
               }
             : msg
         )
@@ -148,9 +157,12 @@ export function VirtualBaristaWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: query.trim(),
-          history: messages.slice(-6).map((m) => ({
+          history: messages.slice(-8).map((m) => ({
             role: m.sender === 'user' ? 'user' : 'assistant',
             content: m.text.replace(/\*/g, ''),
+            intent: m.intent,
+            grounding: m.grounding,
+            recommendedProductSlugs: m.recommendedProductSlugs,
           })),
         }),
       });
@@ -162,8 +174,11 @@ export function VirtualBaristaWidget() {
       const data = await response.json();
 
       let matchedProducts: CoffeeProduct[] = [];
-      if (data.recommendedSlugs && Array.isArray(data.recommendedSlugs)) {
-        matchedProducts = availableProducts.filter((p) => data.recommendedSlugs.includes(p.slug));
+      const recommendedSlugs = Array.isArray(data.recommendedProductSlugs)
+        ? data.recommendedProductSlugs
+        : data.recommendedSlugs;
+      if (Array.isArray(recommendedSlugs)) {
+        matchedProducts = availableProducts.filter((product) => recommendedSlugs.includes(product.slug));
       }
 
       const rawReply = (data.reply || 'Berikut rekomendasi kurasi biji kopi segar dari roastery kami di Malang yang sangat pas dengan selera kamu:').replace(/\*/g, '');
@@ -177,108 +192,32 @@ export function VirtualBaristaWidget() {
               (source as { url: string }).url.startsWith('https://')
           )
         : undefined;
+      const followUpSuggestions = Array.isArray(data.followUpSuggestions)
+        ? data.followUpSuggestions.filter((suggestion: unknown): suggestion is string => typeof suggestion === 'string')
+        : undefined;
 
-      setIsLoading(false);
       await streamBaristaResponse(
         rawReply,
         matchedProducts.length > 0 ? matchedProducts : undefined,
-        sources
+        sources,
+        followUpSuggestions,
+        {
+          intent: typeof data.intent === 'string' ? data.intent : undefined,
+          grounding: ['catalog', 'website', 'coffee_web', 'conversation', 'none'].includes(data.grounding)
+            ? data.grounding
+            : undefined,
+          recommendedProductSlugs: Array.isArray(recommendedSlugs)
+            ? recommendedSlugs.filter((slug: unknown): slug is string => typeof slug === 'string')
+            : undefined,
+        }
       );
-    } catch (err) {
-      console.warn('Fallback to local barista AI logic:', err);
-
-      // Local fallback logic
-      const lower = query.toLowerCase();
-      let reply = '';
-      let matched: CoffeeProduct[] = [];
-
-      const clean = lower.replace(/[^\w\s]/gi, '').trim();
-
-      if (lower.includes('byob') || lower.includes('by ob') || lower.includes('custom blend') || lower.includes('racik')) {
-        matched = availableProducts.filter((p) =>
-          ['dampit-natural-espresso', 'kintamani-full-wash-arabica-espresso', 'brazil-santos-espresso'].includes(p.slug)
-        );
-        reply = 'BYOB (Build Your Own Blend) di /blend-builder membantu kamu meracik dari beans Espresso Based yang published. Pilih komposisi, ukuran 250g/500g/1kg, lalu lihat prediksi rasa dan harga yang diperbarui dari data katalog.';
-      } else if (lower.includes('price calculator') || lower.includes('kalkulator harga') || lower.includes('hpp') || lower.includes('cogs')) {
-        reply = 'Kalkulator Harga Jual Kedai (/tools/price-calculator) membantu Anda menghitung estimasi biaya per cangkir, harga jual, margin, dan kebutuhan pasokan. Masukkan harga biji serta biaya operasional kedai Anda sendiri untuk menyusun proyeksi yang sesuai.';
-      } else if (lower.includes('lokasi') || lower.includes('alamat') || lower.includes('dimana') || lower.includes('malang')) {
-        reply = 'Roastery & Tasting Room 52 Coffee berlokasi di Jl. KH. Agus Salim No. 11, Klojen, Kota Malang. Jam operasional: Senin - Minggu, 10:00 - 20:00 WIB. Instagram: @52coffeeroastery.';
-      } else if (
-        lower.includes('lambung') ||
-        lower.includes('maag') ||
-        lower.includes('gerd') ||
-        lower.includes('asam lambung') ||
-        lower.includes('perut') ||
-        lower.includes('ringan') ||
-        lower.includes('low acid') ||
-        lower.includes('tidak asam') ||
-        lower.includes('lembut') ||
-        lower.includes('smooth') ||
-        lower.includes('mild')
-      ) {
-        matched = availableProducts.filter((p) =>
-          ['kintamani-full-wash-arabica-espresso', 'ijen-yellow-bourbon-kencana', 'sumbing-supernova-celestia'].includes(p.slug)
-        );
-        reply = 'Tidak ada kopi yang dapat dijamin aman untuk maag atau GERD karena respons setiap orang berbeda. Jika kamu mencari karakter rasa dengan persepsi asam lebih ringan, coba:\n1. Kintamani Full Wash (sweet chocolate, citrus lembut)\n2. Ijen Yellow Bourbon Honey (madu dan kacang almond)\n3. Java Exotic Sumbing Deep Washed (brown sugar dan black tea)\n\nMulai dari porsi kecil dan hindari minum saat perut kosong. Jika kamu memiliki GERD atau gejala berulang, ikuti saran tenaga kesehatan.';
-      } else if (
-        clean === 'manual' ||
-        clean === 'manual brew' ||
-        clean === 'filter' ||
-        clean === '1' ||
-        clean === 'opsi 1' ||
-        lower.includes('manual brew') ||
-        (lower.includes('manual') && !lower.includes('buku')) ||
-        (lower.includes('filter') && !lower.includes('roast'))
-      ) {
-        matched = availableProducts.filter((p) =>
-          ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai', 'ijen-carbonic-maceration-asmara'].includes(p.slug)
-        );
-        reply = 'Untuk seduhan Filter Manual Brew (V60, Aeropress, Kalita), kurasi terbaik kami:\n1. Argopuro Walida Natural Anaerobic (Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Manis Selai Stroberi & Vanilla)\n3. Ijen Carbonic Maceration (Peach & Jasmine Floral)';
-      } else if (
-        clean === 'kopi susu' ||
-        clean === 'espresso' ||
-        clean === '2' ||
-        clean === 'opsi 2' ||
-        lower.includes('kopi susu') ||
-        lower.includes('espresso') ||
-        lower.includes('dampit') ||
-        lower.includes('crema') ||
-        lower.includes('robusta')
-      ) {
-        matched = availableProducts.filter((p) =>
-          ['dampit-natural-espresso', 'kintamani-full-wash-arabica-espresso', 'brazil-santos-espresso'].includes(p.slug)
-        );
-        reply = 'Untuk seduhan Espresso & Kopi Susu Aren, primadona kami:\n1. Dampit Natural Robusta Malang (Dark Chocolate & Crema Tebal)\n2. Kintamani Full Wash Arabica (Sweet Chocolate & Smooth)\n3. Brazil Santos (Roasted Peanut & Nutty)';
-      } else if (
-        lower.includes('best seller') ||
-        lower.includes('bestseller') ||
-        lower.includes('terlaris') ||
-        lower.includes('paling laku') ||
-        lower.includes('favorit') ||
-        lower.includes('populer') ||
-        lower.includes('paling enak') ||
-        lower.includes('rekomendasi') ||
-        lower.includes('rekomen')
-      ) {
-        matched = availableProducts.filter((p) =>
-          ['argopuro-walida-anaerob-arcapada', 'sindoro-strawberry-selai', 'dampit-natural-espresso'].includes(p.slug)
-        );
-        reply = 'Rekomendasi Best Seller & Terfavorit di 52 Coffee & Roastery:\n1. Argopuro Walida Natural Anaerobic (Filter V60 — Plum & Dark Cherry)\n2. Sindoro Strawberry Triple Yeast (Filter V60 — Selai Stroberi & Vanilla)\n3. Dampit Fine Robusta Malang (Espresso / Es Kopi Susu Aren)\n4. B.Y.O.B Custom House Blend (Dark Espresso)';
-      } else if (lower.includes('fruity') || lower.includes('buah') || lower.includes('strawberry') || lower.includes('berry')) {
-        matched = availableProducts.filter((p) => p.flavorCategory.includes('Fruity')).slice(0, 3);
-        reply = 'Untuk profil Fruity & Exotic, saya sangat merekomendasikan Sindoro Strawberry Triple Yeast dengan aroma selai stroberi kental, atau Argopuro Walida dengan karakter plum dan cherry yang sangat juicy!';
-      } else if (lower.includes('floral') || lower.includes('jasmine') || lower.includes('geisha') || lower.includes('bunga')) {
-        matched = availableProducts.filter((p) => p.flavorCategory.includes('Floral')).slice(0, 2);
-        reply = 'Bagi pencinta aroma Floral Elegan, pilihan mahkota kami adalah El Triunfo Geisha Tolima Colombia (Jasmine & Bergamot) serta Ijen Carbonic Maceration dengan harum melati dan peach manis!';
-      } else if (lower.includes('rasio') || lower.includes('v60') || lower.includes('seduh') || lower.includes('resep')) {
-        reply = 'Untuk memulai V60, gunakan Brewing Guidance di /guide untuk menyesuaikan dosis, rasio, suhu, timer, dan tahap tuang dengan beans yang dipilih.';
-      } else {
-        matched = availableProducts.filter((p) => p.isFeatured).slice(0, 2);
-        reply = `Halo! Kami memiliki beragam kurasi biji kopi segar yang disangrai di Malang. Kamu bisa memilih:\n1. Filter Manual Brew (Fruity, Floral, atau Sweet Strawberry)\n2. Espresso & Kopi Susu (Chocolate, Nutty, Crema Tebal)\n3. B.Y.O.B Custom Blend Simulator (/blend-builder)\n4. Grand Reserve Micro-Lot (Geisha & Sidra Langka)\n\nProfil rasa atau topik mana yang ingin kamu eksplorasi?`;
-      }
-
       setIsLoading(false);
-      await streamBaristaResponse(reply, matched.length > 0 ? matched : undefined);
+    } catch (error) {
+      console.warn('Virtual Barista backend unavailable:', error);
+      await streamBaristaResponse(
+        'Virtual Barista sedang tidak tersedia. Kamu masih bisa membuka Catalogue atau Brewing Guidance.'
+      );
+      setIsLoading(false);
     }
   };
 
@@ -312,7 +251,7 @@ export function VirtualBaristaWidget() {
                 <span>Virtual Barista</span>
               </div>
               <div className="text-[10px] font-mono text-gray-300">
-                Kopi &amp; tanya apa saja
+                52 Coffee &amp; Coffee Assistant
               </div>
             </div>
 
@@ -348,7 +287,7 @@ export function VirtualBaristaWidget() {
                     Virtual Barista
                   </h3>
                   <p className="text-[11px] text-on-surface-variant">
-                    Katalog + pencarian web
+                    Katalog &amp; pengetahuan kopi
                   </p>
                 </div>
               </div>
@@ -360,7 +299,7 @@ export function VirtualBaristaWidget() {
                       {
                         id: 'welcome',
                         sender: 'barista',
-                        text: 'Halo, kawan seduh! Kamu bisa bertanya tentang 52 Coffee maupun topik umum. Untuk informasi terbaru, saya dapat mencari sumber dari web.',
+                        text: 'Halo! Saya bisa membantu memilih produk 52 Coffee, membahas specialty coffee, atau memandu kamu memakai fitur website. Mau mulai dari mana?',
                         timestamp: 'Baru saja',
                       },
                     ])
@@ -504,6 +443,22 @@ export function VirtualBaristaWidget() {
                         </div>
                       )}
 
+                      {msg.followUpSuggestions && msg.followUpSuggestions.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1" aria-label="Saran pertanyaan lanjutan">
+                          {msg.followUpSuggestions.map((suggestion) => (
+                            <button
+                              key={suggestion}
+                              type="button"
+                              onClick={() => handleSendMessage(suggestion)}
+                              disabled={isLoading}
+                              className="min-h-9 rounded-full border border-border-subtle bg-white px-3 text-left text-[11px] font-medium text-brand-navy transition-colors hover:border-brand-navy/30 disabled:opacity-50"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
                       <div
                         className={`text-[11px] text-on-surface-variant ${
                           isBarista ? 'text-left' : 'text-right'
@@ -554,7 +509,7 @@ export function VirtualBaristaWidget() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Tanya tentang kopi atau topik apa saja..."
+                placeholder="Tanya tentang kopi atau 52 Coffee..."
                 maxLength={500}
                 aria-label="Pesan untuk Virtual Barista"
                 className="h-11 min-w-0 flex-1 rounded-full border border-border-subtle bg-surface-container-low px-4 text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-brand-navy focus:ring-2 focus:ring-brand-mist"
