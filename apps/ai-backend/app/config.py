@@ -1,4 +1,5 @@
 import os
+from pydantic import Field
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -47,6 +48,12 @@ class Settings(BaseSettings):
     ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "")
     
     # CORS Origins
-    CORS_ORIGINS: list[str] = _cors_origins()
+    # Read the comma-separated environment variable in _cors_origins(). The
+    # validation alias prevents pydantic-settings from trying to JSON-decode it
+    # before that parser runs.
+    CORS_ORIGINS: list[str] = Field(
+        default_factory=_cors_origins,
+        validation_alias="_PARSED_CORS_ORIGINS",
+    )
 
 settings = Settings()

@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from .config import _cors_origins
+from .config import Settings, _cors_origins
 
 
 class CorsConfigurationTest(unittest.TestCase):
@@ -18,6 +18,13 @@ class CorsConfigurationTest(unittest.TestCase):
         with patch.dict(os.environ, {"CORS_ORIGINS": "https://52coffee.id/, https://example.test "}):
             self.assertEqual(
                 _cors_origins(),
+                ["https://52coffee.id", "https://example.test"],
+            )
+
+    def test_settings_accepts_comma_separated_cors_environment_value(self) -> None:
+        with patch.dict(os.environ, {"CORS_ORIGINS": "https://52coffee.id,https://example.test"}):
+            self.assertEqual(
+                Settings().CORS_ORIGINS,
                 ["https://52coffee.id", "https://example.test"],
             )
 
