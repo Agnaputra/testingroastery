@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPublishedProducts, toWebCatalogSlug } from '../../../lib/catalog-master';
+import { getPublishedProducts, toKnowledgeCatalogSlug, toWebCatalogSlug } from '../../../lib/catalog-master';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -57,7 +57,18 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const safeHistory = Array.isArray(history) ? history.slice(-8) : [];
+    const safeHistory = Array.isArray(history)
+      ? history.slice(-8).map((entry: unknown) => {
+          if (!entry || typeof entry !== 'object') return entry;
+          const message = entry as Record<string, unknown>;
+          const slugs = Array.isArray(message.recommendedProductSlugs)
+            ? message.recommendedProductSlugs
+                .filter((slug: unknown): slug is string => typeof slug === 'string')
+                .map(toKnowledgeCatalogSlug)
+            : message.recommendedProductSlugs;
+          return { ...message, recommendedProductSlugs: slugs };
+        })
+      : [];
     const aiBackendUrl = process.env.AI_BACKEND_URL || 'http://127.0.0.1:8000';
     const startedAt = Date.now();
 
@@ -83,11 +94,22 @@ export async function POST(req: NextRequest) {
             .filter((slug: unknown): slug is string => typeof slug === 'string')
             .map(toWebCatalogSlug)
             .filter((slug: string) => publishedSlugs.has(slug));
+          const recommendedProducts = Array.isArray(payload.recommendedProducts)
+            ? payload.recommendedProducts.map((product: unknown) => {
+                if (!product || typeof product !== 'object') return product;
+                const record = product as Record<string, unknown>;
+                return {
+                  ...record,
+                  slug: typeof record.slug === 'string' ? toWebCatalogSlug(record.slug) : record.slug,
+                };
+              })
+            : payload.recommendedProducts;
 
           return NextResponse.json({
             ...payload,
             recommendedProductSlugs: validatedSlugs,
             recommendedSlugs: validatedSlugs,
+            recommendedProducts,
             actions: [], // Phase 2 will add validated website actions.
           });
         }

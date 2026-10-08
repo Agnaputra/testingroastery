@@ -15,6 +15,12 @@ class ChatRequest(BaseModel):
     history: Optional[List[ChatMessage]] = Field(default_factory=list, description="Recent conversation history")
     temperature: Optional[float] = Field(default=0.4, description="Sampling temperature")
 
+class RecommendedVariant(BaseModel):
+    weightGrams: int
+    weightLabel: str
+    price: int
+    pricePerGram: float
+
 class ProductSearchResult(BaseModel):
     slug: str
     name: str
@@ -24,6 +30,7 @@ class ProductSearchResult(BaseModel):
     tasting_notes: List[str]
     base_price: float
     similarity_score: Optional[float] = None
+    selectedVariant: Optional[RecommendedVariant] = None
 
 class SourceLink(BaseModel):
     title: str

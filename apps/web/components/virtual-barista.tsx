@@ -20,12 +20,23 @@ import { OPEN_VIRTUAL_BARISTA } from '../lib/virtual-barista-events';
 
 const PUBLISHED_PRODUCTS = getPublishedProducts();
 
+type RecommendedVariant = {
+  weightGrams: number;
+  weightLabel: string;
+  price: number;
+  pricePerGram: number;
+};
+
+type BaristaRecommendedProduct = CoffeeProduct & {
+  selectedVariant?: RecommendedVariant;
+};
+
 interface ChatMessage {
   id: string;
   sender: 'user' | 'barista';
   text: string;
   timestamp: string;
-  recommendedProducts?: CoffeeProduct[];
+  recommendedProducts?: BaristaRecommendedProduct[];
   sources?: Array<{ title: string; url: string }>;
   followUpSuggestions?: string[];
   intent?: string;
@@ -34,6 +45,17 @@ interface ChatMessage {
 }
 
 type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs'>;
+
+function isRecommendedVariant(value: unknown): value is RecommendedVariant {
+  if (!value || typeof value !== 'object') return false;
+  const variant = value as Record<string, unknown>;
+  return (
+    typeof variant.weightGrams === 'number' &&
+    typeof variant.weightLabel === 'string' &&
+    typeof variant.price === 'number' &&
+    typeof variant.pricePerGram === 'number'
+  );
+}
 
 const QUICK_PROMPTS = [
   { label: 'Pilih kopi', prompt: 'Bantu saya memilih kopi sesuai selera' },
@@ -87,7 +109,7 @@ export function VirtualBaristaWidget() {
   // Progressive Typewriter streaming response effect
   const streamBaristaResponse = async (
     fullText: string,
-    products?: CoffeeProduct[],
+    products?: BaristaRecommendedProduct[],
     sources?: Array<{ title: string; url: string }>,
     followUpSuggestions?: string[],
     metadata?: ConversationMetadata
@@ -173,12 +195,27 @@ export function VirtualBaristaWidget() {
 
       const data = await response.json();
 
-      let matchedProducts: CoffeeProduct[] = [];
+      let matchedProducts: BaristaRecommendedProduct[] = [];
       const recommendedSlugs = Array.isArray(data.recommendedProductSlugs)
         ? data.recommendedProductSlugs
         : data.recommendedSlugs;
       if (Array.isArray(recommendedSlugs)) {
-        matchedProducts = availableProducts.filter((product) => recommendedSlugs.includes(product.slug));
+        const variantsBySlug = new Map<string, RecommendedVariant>();
+        if (Array.isArray(data.recommendedProducts)) {
+          for (const recommendation of data.recommendedProducts) {
+            if (
+              recommendation &&
+              typeof recommendation === 'object' &&
+              typeof recommendation.slug === 'string' &&
+              isRecommendedVariant(recommendation.selectedVariant)
+            ) {
+              variantsBySlug.set(recommendation.slug, recommendation.selectedVariant);
+            }
+          }
+        }
+        matchedProducts = availableProducts
+          .filter((product) => recommendedSlugs.includes(product.slug))
+          .map((product) => ({ ...product, selectedVariant: variantsBySlug.get(product.slug) }));
       }
 
       const rawReply = (data.reply || 'Berikut rekomendasi kurasi biji kopi segar dari roastery kami di Malang yang sangat pas dengan selera kamu:').replace(/\*/g, '');
@@ -378,11 +415,20 @@ export function VirtualBaristaWidget() {
                                     {prod.name}
                                   </Link>
                                   <div className="text-[10px] font-mono text-brand-maroon font-bold">
-                                    {formatRupiah(prod.basePrice)} / {prod.defaultWeight}
+                                    {formatRupiah(prod.selectedVariant?.price ?? prod.basePrice)} / {prod.selectedVariant?.weightLabel ?? prod.defaultWeight}
                                   </div>
                                 </div>
                               </div>
 
+                              {prod.selectedVariant ? (
+                                <Link
+                                  href={`/catalog/${prod.slug}?mode=beans`}
+                                  onClick={() => setIsOpen(false)}
+                                  className="flex h-11 shrink-0 items-center gap-1 rounded-full bg-brand-navy px-3 text-[11px] font-bold text-white transition-colors hover:bg-brand-navy-light"
+                                >
+                                  <span>Lihat detail</span>
+                                </Link>
+                              ) : (
                               <button
                                 onClick={() => {
                                   const variant = prod.variants[0];
@@ -421,6 +467,7 @@ export function VirtualBaristaWidget() {
                                   </>
                                 )}
                               </button>
+                              )}
                             </div>
                           ))}
                         </div>

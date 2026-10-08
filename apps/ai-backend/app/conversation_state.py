@@ -19,6 +19,8 @@ TASTE_TERMS = {
     "nutty": ("nutty", "kacang"),
     "citrus": ("citrus", "jeruk"),
     "bold": ("bold", "tebal"),
+    "funky": ("funky", "fermentasi intens", "boozy", "winey"),
+    "bright": ("bright", "cerah"),
 }
 BREW_METHODS = {
     "V60": ("v60", "v-60"),
@@ -63,6 +65,22 @@ GENERIC_PRODUCT_REFERENCES = (
     "lebih mahal",
 )
 RETURN_TO_COFFEE_TERMS = ("balik ke kopi", "kembali ke kopi")
+PROCESS_TERMS = {
+    "wash": ("washed", "wash process", "full wash", "proses wash"),
+    "natural": ("natural process", "proses natural"),
+    "honey": ("honey process", "proses honey"),
+    "anaerobic": ("anaerobic", "anaerob"),
+    "wine": ("wine process", "wine processed", "proses wine", "winey"),
+    "carbonic": ("carbonic maceration",),
+    "lactic": ("lactic process", "proses lactic"),
+}
+ROAST_TERMS = {
+    "Light": ("light roast", "roast ringan", "sangrai ringan"),
+    "Light-Medium": ("light medium", "light-medium"),
+    "Medium-Light": ("medium light", "medium-light"),
+    "Medium": ("medium roast", "roast medium", "sangrai medium"),
+    "Medium-Dark": ("medium dark", "medium-dark", "roast gelap"),
+}
 
 
 @dataclass(frozen=True)
@@ -101,6 +119,17 @@ class ConversationState:
     taste_preferences: list[str] = field(default_factory=list)
     brew_method: str | None = None
     budget_max: int | None = None
+    budget_target: int | None = None
+    requested_weight_grams: int | None = None
+    taste_exclusions: list[str] = field(default_factory=list)
+    required_tastes: list[str] = field(default_factory=list)
+    process_preferences: list[str] = field(default_factory=list)
+    process_exclusions: list[str] = field(default_factory=list)
+    required_processes: list[str] = field(default_factory=list)
+    roast_preferences: list[str] = field(default_factory=list)
+    required_roasts: list[str] = field(default_factory=list)
+    origin_preferences: list[str] = field(default_factory=list)
+    varietal_preferences: list[str] = field(default_factory=list)
     requested_attributes: list[str] = field(default_factory=list)
     comparison_product_slugs: list[str] = field(default_factory=list)
     relative_price_direction: Literal["cheaper", "more_expensive"] | None = None
@@ -117,6 +146,20 @@ class ConversationState:
             parts.append(f"metode seduh: {self.brew_method}")
         if self.budget_max is not None:
             parts.append(f"budget maksimal: Rp {self.budget_max:,}".replace(",", "."))
+        elif self.budget_target is not None:
+            parts.append(f"target budget: Rp {self.budget_target:,}".replace(",", "."))
+        if self.requested_weight_grams is not None:
+            parts.append(f"gramasi wajib: {self.requested_weight_grams}g")
+        if self.process_preferences:
+            parts.append(f"preferensi proses: {', '.join(self.process_preferences)}")
+        if self.process_exclusions:
+            parts.append(f"proses dikecualikan: {', '.join(self.process_exclusions)}")
+        if self.roast_preferences:
+            parts.append(f"preferensi roast: {', '.join(self.roast_preferences)}")
+        if self.origin_preferences:
+            parts.append(f"preferensi origin: {', '.join(self.origin_preferences)}")
+        if self.varietal_preferences:
+            parts.append(f"preferensi varietal: {', '.join(self.varietal_preferences)}")
         if self.relative_price_direction == "cheaper":
             parts.append("mencari alternatif yang lebih murah dari produk yang sedang dibahas")
         if self.requested_attributes:
@@ -135,7 +178,7 @@ def _append_unique(values: list[str], value: str) -> None:
 
 def _extract_budget(message: str) -> int | None:
     match = re.search(
-        r"(?:budget(?:\s+maksimal)?|max(?:imal)?|di bawah|kurang dari)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
+        r"(?:budget\s+maksimal|maksimal|maximal|max|di bawah|kurang dari|tidak lebih dari)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
         message.lower(),
     )
     if not match:
@@ -150,12 +193,54 @@ def _extract_budget(message: str) -> int | None:
     return int(value * multiplier)
 
 
-def _extract_constraints(message: str, state: ConversationState, *, current: bool) -> None:
+def _extract_budget_target(message: str) -> int | None:
+    match = re.search(
+        r"(?:budget|sekitar)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
+        message.lower(),
+    )
+    if not match:
+        return None
+    raw_number, suffix = match.groups()
+    value = float(raw_number.replace(",", ".")) if suffix else int(re.sub(r"[.,]", "", raw_number))
+    return int(value * (1_000_000 if suffix in {"juta", "jt"} else 1_000 if suffix else 1))
+
+
+def _extract_weight(message: str) -> int | None:
+    query = message.lower()
+    match = re.search(r"\b(\d+(?:[.,]\d+)?)\s*(kg|g|gram)\b", query)
+    if not match:
+        return None
+    value = float(match.group(1).replace(",", "."))
+    grams = int(value * 1000) if match.group(2) == "kg" else int(value)
+    package_cue = any(term in query for term in ("kemasan", "paket", "berat", "gramasi", "ukuran", "variant", "varian"))
+    return grams if grams >= 50 or package_cue else None
+
+
+def _extract_constraints(
+    message: str,
+    state: ConversationState,
+    products: Sequence[Mapping[str, Any]],
+    *,
+    current: bool,
+) -> None:
     query = message.lower()
     mentioned = False
+
+    def has_nearby_intent(terms: Sequence[str], markers: Sequence[str]) -> bool:
+        return any(
+            marker in query[max(0, query.find(term) - 24):query.find(term)]
+            for term in terms if term in query
+            for marker in markers
+        )
+
     for taste, terms in TASTE_TERMS.items():
         if any(term in query for term in terms):
-            _append_unique(state.taste_preferences, taste)
+            exclusion_intent = has_nearby_intent(terms, ("jangan", "tanpa", "hindari", "bukan yang"))
+            required_intent = has_nearby_intent(terms, ("harus",))
+            target = state.taste_exclusions if exclusion_intent else state.taste_preferences
+            _append_unique(target, taste)
+            if required_intent and not exclusion_intent:
+                _append_unique(state.required_tastes, taste)
             mentioned = True
     for method, terms in BREW_METHODS.items():
         if any(term in query for term in terms):
@@ -165,7 +250,40 @@ def _extract_constraints(message: str, state: ConversationState, *, current: boo
     budget = _extract_budget(query)
     if budget is not None:
         state.budget_max = budget
+        state.budget_target = None
         mentioned = True
+    elif (budget_target := _extract_budget_target(query)) is not None:
+        state.budget_target = budget_target
+        mentioned = True
+    if (weight := _extract_weight(query)) is not None:
+        state.requested_weight_grams = weight
+        mentioned = True
+    for process, terms in PROCESS_TERMS.items():
+        if any(term in query for term in terms):
+            exclusion_intent = has_nearby_intent(terms, ("jangan", "tanpa", "hindari", "bukan yang"))
+            required_intent = has_nearby_intent(terms, ("harus",))
+            target = state.process_exclusions if exclusion_intent else state.process_preferences
+            _append_unique(target, process)
+            if required_intent and not exclusion_intent:
+                _append_unique(state.required_processes, process)
+            mentioned = True
+    for roast, terms in ROAST_TERMS.items():
+        if any(term in query for term in terms):
+            _append_unique(state.roast_preferences, roast)
+            if has_nearby_intent(terms, ("harus",)):
+                _append_unique(state.required_roasts, roast)
+            mentioned = True
+    for product in products:
+        identity = _normalise(str(product.get("origin", "")))
+        varietal = _normalise(str(product.get("varietal", "")))
+        for token in set(identity.split()):
+            if len(token) >= 4 and re.search(rf"\b{re.escape(token)}\b", _normalise(query)):
+                _append_unique(state.origin_preferences, token)
+                mentioned = True
+        for token in set(varietal.split()):
+            if len(token) >= 4 and re.search(rf"\b{re.escape(token)}\b", _normalise(query)):
+                _append_unique(state.varietal_preferences, token)
+                mentioned = True
     for attribute, terms in ATTRIBUTE_TERMS.items():
         if any(term in query for term in terms):
             _append_unique(state.requested_attributes, attribute)
@@ -200,6 +318,31 @@ def find_product_candidates(message: str, products: Sequence[Mapping[str, Any]])
     return [slug for slug, score in scored if score == best]
 
 
+def _comparison_candidates(
+    message: str,
+    products: Sequence[Mapping[str, Any]],
+) -> tuple[list[str], list[str]]:
+    query = _normalise(message)
+    groups: dict[str, list[tuple[str, int]]] = {}
+    for product in products:
+        matches = [len(phrase.split()) for phrase in _identity_phrases(product) if re.search(rf"\b{re.escape(phrase)}\b", query)]
+        if not matches:
+            continue
+        base_name = _normalise(re.sub(r"\s*\([^)]*\)\s*$", "", str(product.get("name", ""))))
+        group = " ".join(base_name.split()[:2])
+        groups.setdefault(group, []).append((str(product["slug"]), max(matches)))
+    selected: list[str] = []
+    ambiguous: list[str] = []
+    for matches in groups.values():
+        best = max(score for _, score in matches)
+        winners = [slug for slug, score in matches if score == best]
+        if len(winners) == 1:
+            selected.extend(winners)
+        else:
+            ambiguous.extend(winners)
+    return selected, ambiguous
+
+
 def _is_website_message(message: str) -> bool:
     query = message.lower()
     return any(term in query for term in WEBSITE_FEATURE_TERMS)
@@ -228,6 +371,17 @@ def _reset_active_coffee_context(state: ConversationState) -> None:
     state.taste_preferences.clear()
     state.brew_method = None
     state.budget_max = None
+    state.budget_target = None
+    state.requested_weight_grams = None
+    state.taste_exclusions.clear()
+    state.required_tastes.clear()
+    state.process_preferences.clear()
+    state.process_exclusions.clear()
+    state.required_processes.clear()
+    state.roast_preferences.clear()
+    state.required_roasts.clear()
+    state.origin_preferences.clear()
+    state.varietal_preferences.clear()
     state.requested_attributes.clear()
     state.comparison_product_slugs.clear()
     state.relative_price_direction = None
@@ -243,6 +397,17 @@ def _coffee_snapshot(state: ConversationState) -> ConversationState:
         taste_preferences=state.taste_preferences.copy(),
         brew_method=state.brew_method,
         budget_max=state.budget_max,
+        budget_target=state.budget_target,
+        requested_weight_grams=state.requested_weight_grams,
+        taste_exclusions=state.taste_exclusions.copy(),
+        required_tastes=state.required_tastes.copy(),
+        process_preferences=state.process_preferences.copy(),
+        process_exclusions=state.process_exclusions.copy(),
+        required_processes=state.required_processes.copy(),
+        roast_preferences=state.roast_preferences.copy(),
+        required_roasts=state.required_roasts.copy(),
+        origin_preferences=state.origin_preferences.copy(),
+        varietal_preferences=state.varietal_preferences.copy(),
         requested_attributes=state.requested_attributes.copy(),
         comparison_product_slugs=state.comparison_product_slugs.copy(),
     )
@@ -316,15 +481,26 @@ def derive_conversation_state(
             or state.taste_preferences
             or state.active_intent in {"catalog_query", "product_recommendation", "product_comparison", "coffee_knowledge"}
         )
-        _extract_constraints(message.content, state, current=is_current)
+        _extract_constraints(message.content, state, products, current=is_current)
         if is_current and state.current_constraints_changed and had_coffee_context:
             state.used_history = True
         candidates = find_product_candidates(message.content, products)
         previous_refs = state.referenced_product_slugs.copy()
         ordinal = _ordinal_index(message.content)
         generic_reference = _has_generic_product_reference(message.content)
+        direct_comparison, ambiguous_comparison = (
+            _comparison_candidates(message.content, products) if _is_comparison(message.content) else ([], [])
+        )
 
-        if ordinal is not None:
+        if ambiguous_comparison:
+            state.needs_clarification = True
+            state.clarification_candidates = ambiguous_comparison
+        elif len(direct_comparison) >= 2:
+            state.comparison_product_slugs = direct_comparison
+            state.referenced_product_slugs = direct_comparison
+            state.focus_product_slug = direct_comparison[-1]
+            state.active_topic = "coffee"
+        elif ordinal is not None:
             if ordinal < len(state.last_recommended_product_slugs):
                 state.referenced_product_slugs = [state.last_recommended_product_slugs[ordinal]]
                 state.focus_product_slug = state.referenced_product_slugs[0]
