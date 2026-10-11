@@ -145,7 +145,12 @@ export async function POST(req: NextRequest) {
                 };
               }).filter((action: unknown): action is VirtualBaristaAction => {
                 if (!isVirtualBaristaAction(action)) return false;
-                return action.type === 'open_feature' || publishedSlugs.has(action.product_slug);
+                if (action.type === 'open_feature') return true;
+                const product = publishedProductsBySlug.get(action.product_slug);
+                if (!product) return false;
+                return action.type !== 'add_to_cart' || product.variants.some(
+                  (variant) => variant.weightGrams === action.variant_weight && variant.inStock,
+                );
               })
             : [];
 

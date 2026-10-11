@@ -244,7 +244,11 @@ export function VirtualBaristaWidget() {
         data.recommendedProducts,
       );
 
-      const rawReply = (data.reply || 'Berikut rekomendasi kurasi biji kopi segar dari roastery kami di Malang yang sangat pas dengan selera kamu:').replace(/\*/g, '');
+      const rawReply = [data.reply, data.clarifyingQuestion, data.safetyNote]
+        .filter((part: unknown): part is string => typeof part === 'string' && part.trim().length > 0)
+        .filter((part: string, index: number, parts: string[]) => index === 0 || !parts[0].includes(part))
+        .join('\n\n')
+        .replace(/\*/g, '') || 'Virtual Barista sedang tidak tersedia. Silakan coba lagi.';
       const sources = Array.isArray(data.sources)
         ? data.sources.filter(
             (source: unknown): source is { title: string; url: string } =>

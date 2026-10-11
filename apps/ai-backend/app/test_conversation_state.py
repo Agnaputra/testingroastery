@@ -174,6 +174,40 @@ class ConversationStateTest(unittest.TestCase):
         self.assertEqual(response["intent"], "off_topic")
         web_branch.assert_not_called()
 
+    def test_health_clarification_keeps_manual_brew_followup_in_coffee_context(self) -> None:
+        history = [
+            {"role": "user", "content": "apa kopi yang aman untuk penderita maag"},
+            {"role": "assistant", "content": "Aku bisa bantu memilih berdasarkan rasa dan metode seduh.",
+             "intent": "health_sensitive_recommendation", "grounding": "none"},
+        ]
+        for query in ("manual", "saya ingin yang manual"):
+            state = derive_conversation_state(history, query, PRODUCTS)
+            self.assertEqual(state.brew_method, "Manual Brew")
+            self.assertTrue(state.used_history)
+            with (
+                patch.object(guardrail_service, "check_input", return_value=GuardrailDecision(True, "passed_nemo")),
+                patch.object(rag_service, "search_similar_products") as retrieval,
+            ):
+                response = rag_service.generate_barista_response(query, history)
+            self.assertEqual(response["intent"], "product_recommendation")
+            self.assertEqual(response["grounding"], "conversation")
+            self.assertTrue(response["needsClarification"])
+            self.assertEqual(response["recommendedProductSlugs"], [])
+            self.assertIsNone(response["safetyNote"])
+            retrieval.assert_not_called()
+        with patch.object(guardrail_service, "check_input", return_value=GuardrailDecision(True, "passed_nemo")):
+            unrelated = rag_service.generate_barista_response("berita teknologi terbaru?", history)
+        self.assertEqual(unrelated["intent"], "off_topic")
+
+    def test_sales_clarification_keeps_taste_followup_in_coffee_context(self) -> None:
+        history = [
+            {"role": "user", "content": "apa yang paling best seller?"},
+            {"role": "assistant", "content": "Kamu suka rasa apa?", "intent": "sales_question", "grounding": "none"},
+        ]
+        state = derive_conversation_state(history, "cokelat dan creamy", PRODUCTS)
+        self.assertEqual(state.taste_preferences, ["chocolate"])
+        self.assertTrue(state.used_history)
+
     def test_ambiguous_reference_requests_clarification(self) -> None:
         with patch.object(guardrail_service, "check_input", return_value=GuardrailDecision(True, "passed_nemo")):
             response = rag_service.generate_barista_response("yang tadi gimana?", [])

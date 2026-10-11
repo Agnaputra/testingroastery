@@ -23,6 +23,7 @@ TASTE_TERMS = {
     "bright": ("bright", "cerah"),
 }
 BREW_METHODS = {
+    "Manual Brew": ("manual brew", "manual"),
     "V60": ("v60", "v-60"),
     "Aeropress": ("aeropress",),
     "Kalita": ("kalita",),
@@ -468,9 +469,9 @@ def derive_conversation_state(
             elif message.intent == "coffee_knowledge":
                 state.active_topic = "coffee_knowledge"
                 state.active_intent = message.intent
-            elif message.intent in {"catalog_query", "product_recommendation", "product_comparison"}:
+            elif message.intent in {"catalog_query", "product_recommendation", "product_comparison", "sales_question", "health_sensitive_recommendation"}:
                 state.active_topic = "coffee"
-                state.active_intent = message.intent
+                state.active_intent = "product_recommendation" if message.intent in {"sales_question", "health_sensitive_recommendation"} else message.intent
             continue
 
         query = message.content.lower()

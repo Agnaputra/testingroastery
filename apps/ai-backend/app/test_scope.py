@@ -6,7 +6,7 @@ import psycopg2
 from .publication_service import apply_publication_overrides
 from .chat_router import route_chat_intent
 from .guardrail_service import GuardrailDecision, NemoGuardrailService, guardrail_service
-from .rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE, RAGService, _active_catalog_products, is_contextual_followup, is_supported_question, is_website_feature_question, rag_service
+from .rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE, RAGService, _active_catalog_products, _model_reply_prices_valid, is_contextual_followup, is_supported_question, is_website_feature_question, rag_service
 
 
 class ScopeTest(unittest.TestCase):
@@ -31,6 +31,7 @@ class ScopeTest(unittest.TestCase):
     def test_router_distinguishes_catalog_feature_and_action(self) -> None:
         self.assertEqual(route_chat_intent("Jelaskan Prau Natural", catalog_match=True), "catalog_query")
         self.assertEqual(route_chat_intent("Bantu pilih kopi fruity untuk V60"), "product_recommendation")
+        self.assertEqual(route_chat_intent("bantu pilih kopi sesuai selera"), "product_recommendation")
         self.assertEqual(route_chat_intent("Jelaskan Brewing Guidance"), "website_feature")
         self.assertEqual(route_chat_intent("Tambahkan produk ini ke keranjang", has_coffee_context=True), "website_action")
 
@@ -55,6 +56,39 @@ class ScopeTest(unittest.TestCase):
         self.assertEqual(response["recommendedProductSlugs"], [])
         self.assertEqual(response["recommendedProducts"], [])
         self.assertEqual(response["grounding"], "coffee_web")
+
+    def test_sales_question_does_not_claim_bestseller_without_data(self) -> None:
+        passed = GuardrailDecision(True, "passed")
+        with (
+            patch.object(guardrail_service, "check_input", return_value=passed),
+            patch.object(rag_service, "search_similar_products") as retrieval,
+        ):
+            response = rag_service.generate_barista_response("Yang paling best seller apa?")
+        self.assertEqual(response["intent"], "sales_question")
+        self.assertEqual(response["recommendedProductSlugs"], [])
+        self.assertTrue(response["needsClarification"])
+        retrieval.assert_not_called()
+
+    def test_health_question_does_not_recommend_as_medical_solution(self) -> None:
+        passed = GuardrailDecision(True, "passed")
+        with patch.object(guardrail_service, "check_input", return_value=passed):
+            response = rag_service.generate_barista_response("Aku punya maag, rekomen dong")
+        self.assertEqual(response["intent"], "health_sensitive_recommendation")
+        self.assertEqual(response["recommendedProductSlugs"], [])
+        self.assertIn("bukan saran medis", response["safetyNote"])
+
+    def test_model_price_must_exist_in_active_catalog_context(self) -> None:
+        product = PUBLISHED_COFFEE_KNOWLEDGE_BASE[0]
+        self.assertTrue(_model_reply_prices_valid(f"Mulai Rp {product['price_100g']:,}.", [product]))
+        self.assertFalse(_model_reply_prices_valid("Mulai Rp 999.999.", [product]))
+
+    def test_generic_recommendation_asks_taste_before_listing_products(self) -> None:
+        passed = GuardrailDecision(True, "passed")
+        with patch.object(guardrail_service, "check_input", return_value=passed):
+            response = rag_service.generate_barista_response("bantu pilih kopi sesuai selera")
+        self.assertEqual(response["intent"], "product_recommendation")
+        self.assertTrue(response["needsClarification"])
+        self.assertEqual(response["recommendedProductSlugs"], [])
 
     def test_web_citations_are_extracted_and_internal_markers_removed(self) -> None:
         reply, sources = RAGService._extract_response({"output": [{"content": [{

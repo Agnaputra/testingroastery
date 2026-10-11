@@ -22,6 +22,9 @@ type BackendRecommendation = {
 export type BackendChatResponse = {
   reply: string;
   intent: string;
+  needsClarification?: boolean;
+  clarifyingQuestion?: string | null;
+  safetyNote?: string | null;
   grounding: string;
   recommendedProductSlugs: string[];
   actions: VirtualBaristaAction[];
@@ -67,6 +70,9 @@ function isRecommendation(value: unknown): value is BackendRecommendation {
 export function isVirtualBaristaChatResponse(value: unknown): value is BackendChatResponse {
   if (!isRecord(value) || typeof value.reply !== 'string' || !value.reply.trim()) return false;
   return typeof value.intent === 'string'
+    && (value.needsClarification === undefined || typeof value.needsClarification === 'boolean')
+    && (value.clarifyingQuestion === undefined || value.clarifyingQuestion === null || typeof value.clarifyingQuestion === 'string')
+    && (value.safetyNote === undefined || value.safetyNote === null || typeof value.safetyNote === 'string')
     && typeof value.grounding === 'string'
     && GROUNDING_VALUES.has(value.grounding)
     && isStringArray(value.recommendedProductSlugs)

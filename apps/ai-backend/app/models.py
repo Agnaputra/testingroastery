@@ -53,6 +53,9 @@ class ChatAction(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     intent: str = "off_topic"
+    needsClarification: bool = False
+    clarifyingQuestion: Optional[str] = None
+    safetyNote: Optional[str] = None
     grounding: Literal["catalog", "website", "coffee_web", "conversation", "none"] = "none"
     recommendedProductSlugs: List[str] = Field(default_factory=list)
     actions: List[ChatAction] = Field(default_factory=list)

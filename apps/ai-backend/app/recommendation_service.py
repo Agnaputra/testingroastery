@@ -119,7 +119,7 @@ def _brew_evidence(product: Mapping[str, Any], method: str | None) -> str:
     recipe = _normalise(product.get("recipe", ""))
     if normalised_method in recipe or (normalised_method == "espresso" and product.get("category") == "espresso"):
         return "explicit"
-    if product.get("category") == "filter" and normalised_method in {"v60", "kalita", "aeropress", "french press"}:
+    if product.get("category") == "filter" and normalised_method in {"manual brew", "v60", "kalita", "aeropress", "french press"}:
         return "inferred"
     return "unknown"
 
