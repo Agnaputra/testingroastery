@@ -19,6 +19,12 @@ class ScopeTest(unittest.TestCase):
         self.assertTrue(is_supported_question("buntu lenta"))
         self.assertTrue(is_supported_question("apa saja produk yang ada disini?"))
 
+    def test_help_selecting_coffee_routes_to_catalog_recommendations(self) -> None:
+        self.assertEqual(
+            route_chat_intent("Bantu saya memilih kopi sesuai selera"),
+            "product_recommendation",
+        )
+
     def test_router_keeps_web_search_inside_coffee_domain(self) -> None:
         self.assertEqual(route_chat_intent("Pink Bourbon itu apa?"), "coffee_knowledge")
         self.assertEqual(route_chat_intent("Kenapa natural process lebih fruity?"), "coffee_knowledge")

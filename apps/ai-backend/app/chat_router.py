@@ -40,7 +40,7 @@ WEBSITE_FEATURE_TERMS = (
 )
 ACTION_TERMS = ("buka", "lihat", "tampilkan", "tambahkan", "masukkan", "add", "ke keranjang")
 RECOMMENDATION_TERMS = (
-    "rekomendasi", "rekomendasikan", "rekomen", "pilihkan", "bantu pilih", "pilih kopi", "cocok", "budget",
+    "rekomendasi", "rekomendasikan", "rekomen", "pilihkan", "bantu pilih", "pilih kopi", "memilih kopi", "cocok", "budget",
     "maksimal", "di bawah", "lebih murah", "lebih mahal", "lebih suka", "kalau bisa",
     "prefer", "harus", "jangan", "fruity", "floral", "chocolate", "cokelat", "nutty",
     "clean", "funky", "bright", "citrus", "jeruk", "sweet", "manis", "bold", "tebal",
