@@ -52,6 +52,13 @@ FOLLOW_UP_TERMS = (
     "nomor 3", "coba lagi", "jelaskan lagi", "lanjut", "boleh", "apa", "kenapa",
 )
 
+CATALOG_LIST_TERMS = (
+    "apa saja produk", "apa saja produknya", "produk apa", "produk yang ada",
+    "daftar produk", "punya kopi apa", "apa yang bisa saya beli", "apa yang bisa aku beli",
+    "beli apa di sini", "beli apa disini",
+)
+WEBSITE_INTRO_TERMS = ("website apa", "web apa", "situs apa", "tentang 52 coffee")
+
 
 def _matches_phrase(query: str, phrases: tuple[str, ...]) -> bool:
     return any(query == phrase or query.startswith(f"{phrase} ") for phrase in phrases)
@@ -69,6 +76,10 @@ def route_chat_intent(
         return "greeting"
     if _matches_phrase(query, SOCIAL_TERMS):
         return "social"
+    if any(term in query for term in WEBSITE_INTRO_TERMS):
+        return "website_feature"
+    if catalog_list or any(term in query for term in CATALOG_LIST_TERMS):
+        return "catalog_query"
     if any(term in query for term in ACTION_TERMS) and any(
         term in query for term in ("produk", "keranjang", "catalogue", "katalog", "fitur", "halaman")
     ):
@@ -82,7 +93,8 @@ def route_chat_intent(
     ):
         return "coffee_knowledge"
     if any(term in query for term in RECOMMENDATION_TERMS) and (
-        catalog_match or has_coffee_context or any(term in query for term in COFFEE_KNOWLEDGE_TERMS)
+        catalog_match or has_coffee_context or "budget" in query
+        or any(term in query for term in COFFEE_KNOWLEDGE_TERMS)
     ):
         return "product_recommendation"
     if catalog_match or catalog_list:

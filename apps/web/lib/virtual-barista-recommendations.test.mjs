@@ -27,6 +27,10 @@ assert.equal(ranked[1].selectedVariant?.price, sindoro.variants.find((item) => i
 
 const filtered = mapRecommendationsToCatalog(catalog, [buntu.slug, 'unpublished-product', sindoro.slug, puntang.slug], []);
 assert.deepEqual(filtered.map((product) => product.slug), backendOrder);
+assert.equal(filtered[0].selectedVariant, undefined, 'Catalog lists must not silently select a package.');
+assert.deepEqual(filtered[0].variants, buntu.variants, 'Available weights, prices and stock come from frontend catalog.');
+const invalidVariant = mapRecommendationsToCatalog(catalog, [buntu.slug], [{slug: buntu.slug, selectedVariant: {weightGrams: 999, price: 1}}]);
+assert.equal(invalidVariant[0].selectedVariant, undefined, 'Unknown weight must not enable a cart action.');
 
 const deduplicated = mapRecommendationsToCatalog(catalog, [buntu.slug, sindoro.slug, sindoro.slug, puntang.slug], []);
 assert.deepEqual(deduplicated.map((product) => product.slug), backendOrder);

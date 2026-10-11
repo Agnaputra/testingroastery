@@ -438,7 +438,7 @@ export function VirtualBaristaWidget() {
                       {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
                         <div className="space-y-2 pt-1">
                           <span className="text-[10px] font-mono text-on-surface-variant font-bold uppercase tracking-wider block">
-                            Rekomendasi Biji Kopi Terpilih:
+                            {msg.intent === 'catalog_query' ? 'Pilihan di katalog:' : 'Rekomendasi Biji Kopi Terpilih:'}
                           </span>
                           {msg.recommendedProducts.map((prod) => (
                             <div
@@ -466,7 +466,9 @@ export function VirtualBaristaWidget() {
                                   <div className="text-[10px] font-mono text-brand-maroon font-bold">
                                     {prod.selectedVariant
                                       ? `${formatRupiah(prod.selectedVariant.price)} / ${prod.selectedVariant.weightLabel}`
-                                      : 'Varian pilihan belum tersedia'}
+                                      : prod.variants.filter((variant) => variant.inStock)
+                                          .map((variant) => `${variant.weightLabel} ${formatRupiah(variant.price)}`).join(' · ')
+                                        || 'Stok belum tersedia'}
                                   </div>
                                 </div>
                               </div>
@@ -485,7 +487,7 @@ export function VirtualBaristaWidget() {
                                   onClick={() => setIsOpen(false)}
                                   className="flex h-11 shrink-0 items-center gap-1 rounded-full bg-brand-navy px-3 text-[11px] font-bold text-white transition-colors hover:bg-brand-navy-light"
                                 >
-                                  <span>Pilih varian</span>
+                                  <span>Pilih kemasan</span>
                                 </Link>
                               )}
                             </div>

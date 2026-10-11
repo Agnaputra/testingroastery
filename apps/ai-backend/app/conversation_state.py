@@ -31,6 +31,7 @@ BREW_METHODS = {
     "French Press": ("french press",),
     "Moka Pot": ("moka pot",),
     "Tubruk": ("tubruk",),
+    "Kopi Susu": ("kopi susu", "coffee susu", "latte", "cappuccino"),
 }
 ATTRIBUTE_TERMS = {
     "process": ("proses", "process"),

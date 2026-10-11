@@ -66,6 +66,7 @@ class ChatResponse(BaseModel):
     sources: List[SourceLink] = Field(default_factory=list)
     groundedInCatalog: bool = True
     guardrailStatus: str = "passed"
+    responseSource: Literal["deterministic", "openai", "local_fallback"] = "deterministic"
 
 class SearchRequest(BaseModel):
     query: str

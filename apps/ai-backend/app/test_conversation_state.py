@@ -193,7 +193,7 @@ class ConversationStateTest(unittest.TestCase):
             self.assertEqual(response["grounding"], "conversation")
             self.assertTrue(response["needsClarification"])
             self.assertEqual(response["recommendedProductSlugs"], [])
-            self.assertIsNone(response["safetyNote"])
+            self.assertIn("bukan saran medis", response["safetyNote"])
             retrieval.assert_not_called()
         with patch.object(guardrail_service, "check_input", return_value=GuardrailDecision(True, "passed_nemo")):
             unrelated = rag_service.generate_barista_response("berita teknologi terbaru?", history)
