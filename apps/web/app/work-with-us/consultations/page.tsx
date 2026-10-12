@@ -2,9 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Calculator, Coffee, MessageSquare, SlidersHorizontal, TestTube2 } from 'lucide-react';
 import { SectionIntro } from '../../../components/ui/page-structure';
-import { ReserveLayout } from '../../../components/ui/reserve-layout';
 import { BlendBuilderExperience } from '../../../components/blend-builder-experience';
-import { ConsultationFormSection } from './consultation-form-section';
 
 export const metadata: Metadata = {
   title: 'Consultations & Custom Blend | 52 Coffee & Roastery',
@@ -56,21 +54,21 @@ export default function ConsultationsPage() {
               className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
             >
               <MessageSquare className="w-3.5 h-3.5 text-brand-maroon" />
-              <span>01. Formulir Consultation</span>
+              <span>Formulir konsultasi</span>
             </a>
             <a
               href="#byob"
               className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-brand-maroon" />
-              <span>02. Build Your Own Blend</span>
+              <span>Build Your Own Blend</span>
             </a>
             <a
               href="#pricing-calculator"
               className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
             >
               <Calculator className="w-3.5 h-3.5 text-brand-maroon" />
-              <span>03. Pricing Calculator</span>
+              <span>Pricing Calculator</span>
             </a>
           </div>
           <Link
@@ -83,34 +81,22 @@ export default function ConsultationsPage() {
         </div>
       </nav>
 
-      <ReserveLayout
-        id="consultation-form"
-        tone="maroon"
-        kicker="Mulai diskusi"
-        title="Ceritakan kebutuhan bisnismu."
-        description="Isi brief singkat agar tim 52 Coffee memahami skala usaha, kebutuhan pasokan, dan arah rasa yang ingin dibangun."
-        details={[
-          { icon: <MessageSquare className="h-4 w-4" aria-hidden="true" />, title: 'Brief terarah', description: 'Profil usaha, kota, volume, dan kebutuhan layanan.' },
-          { icon: <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />, title: 'Solusi relevan', description: 'Pasokan beans, custom blend, atau konsultasi bisnis.' },
-          { icon: <ArrowRight className="h-4 w-4" aria-hidden="true" />, title: 'Lanjut via WhatsApp', description: 'Pesan disiapkan otomatis dan baru terkirim setelah Anda mengonfirmasi.' },
-        ]}
-      >
-        {/* SECTION 1: FORMULIR CONSULTATION */}
-        <div className="space-y-6">
+      <section className="site-container page-section space-y-6">
           <SectionIntro
-            kicker="Langkah 1 • Mulai Diskusi"
-            title="Formulir Consultation"
-            description="Kirimkan profil usaha, estimasi kebutuhan pasokan, atau rencana racikan menu Anda. Pesan otomatis disusun dan dilanjutkan melalui WhatsApp resmi 52 Coffee (+62 857-9252-4863)."
+            kicker="Konsultasi bisnis"
+            title="Rencanakan kebutuhan kopi bisnismu."
+            description="Diskusikan pasokan beans, custom blend, atau racikan menu bersama 52 Coffee. Kamu bisa mencoba BYOB dan kalkulator HPP terlebih dahulu, atau langsung mengisi brief konsultasi di bagian bawah."
           />
-          <ConsultationFormSection />
-        </div>
-      </ReserveLayout>
+          <a href="#consultation-form" className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 text-sm">
+            Isi brief konsultasi <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </a>
+      </section>
 
       <section className="site-container page-section space-y-20">
         {/* SECTION 2: BUILD YOUR OWN BLEND (BYOB) */}
         <section id="byob" className="scroll-mt-32 space-y-8 border-t border-border-subtle pt-16">
           <SectionIntro
-            kicker="Langkah 2 • Simulasi Racikan"
+            kicker="Simulasi racikan"
             title="Build Your Own Blend (BYOB)"
             description="Rancang proporsi komponen beans espresso, tentukan ukuran kemasan, evaluasi proyeksi rasa real-time dengan radar sensorik, dan simulasikan harga racikan langsung."
           />

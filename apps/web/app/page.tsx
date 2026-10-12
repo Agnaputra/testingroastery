@@ -286,10 +286,21 @@ export default function HomePage() {
       <HeroSection />
 
       <section className={styles.manifesto} aria-labelledby="manifesto-heading">
-        <p>52 Coffee &amp; Roastery / Malang</p>
-        <h2 id="manifesto-heading">
+        <motion.p
+          initial={reducedMotion ? false : { opacity: 0.55, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.7 }}
+          transition={{ duration: reducedMotion ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >52 Coffee &amp; Roastery / Malang</motion.p>
+        <motion.h2
+          id="manifesto-heading"
+          initial={reducedMotion ? false : { opacity: 0.6, y: 22, clipPath: 'inset(0 0 12% 0)' }}
+          whileInView={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }}
+          viewport={{ once: true, amount: 0.45 }}
+          transition={{ duration: reducedMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1] }}
+        >
           Kami menyangrai kopi. Karakter asal, profil rasa, dan ritual seduh yang mengikutinya adalah bagian dari cerita setiap cangkir.
-        </h2>
+        </motion.h2>
       </section>
 
       <section className={styles.marquee} aria-label="Pilihan roastery">
@@ -310,10 +321,10 @@ export default function HomePage() {
         <div className={styles.sectionShell}>
           <motion.header
             className={styles.sectionHeader}
-            initial={{ opacity: 0, y: 18 }}
+            initial={reducedMotion ? false : { opacity: 0.6, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
           >
             <div>
               <p className={styles.eyebrow}>Pilihan roastery / 04</p>
@@ -350,10 +361,10 @@ export default function HomePage() {
               <motion.article
                 key={product.id}
                 className={styles.productCard}
-                initial={{ opacity: 0, y: 20 }}
+                initial={reducedMotion ? false : { opacity: 0.65, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.45, delay: index * 0.04 }}
+                transition={{ duration: reducedMotion ? 0 : 0.45, delay: reducedMotion ? 0 : index * 0.04, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className={styles.productTopline}>
                   <span>{product.series}</span>
@@ -397,11 +408,24 @@ export default function HomePage() {
 
       <section className={styles.catalogIndex} aria-labelledby="catalog-index-heading">
         <div className={styles.sectionShell}>
-          <div className={styles.indexIntro}>
+          <motion.div
+            className={styles.indexIntro}
+            initial={reducedMotion ? false : { opacity: 0.55, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.6 }}
+            transition={{ duration: reducedMotion ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
             <p>Pilih jalur eksplorasi</p>
             <h2 id="catalog-index-heading">Dari profil rasa hingga racikan kedai.</h2>
-          </div>
-          <nav className={styles.categoryGrid} aria-label="Kategori koleksi kopi">
+          </motion.div>
+          <motion.nav
+            className={styles.categoryGrid}
+            aria-label="Kategori koleksi kopi"
+            initial={reducedMotion ? false : { opacity: 0.7, clipPath: 'inset(0 0 14% 0)' }}
+            whileInView={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: reducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
             {CATEGORIES.map((category) =>
               category.id === 'barista' ? (
                 <button
@@ -426,7 +450,7 @@ export default function HomePage() {
                 </Link>
               )
             )}
-          </nav>
+          </motion.nav>
         </div>
       </section>
 
@@ -609,7 +633,13 @@ export default function HomePage() {
       </section>
 
       <section className={styles.b2b} aria-labelledby="b2b-heading">
-        <div className={styles.b2bCopy}>
+        <motion.div
+          className={styles.b2bCopy}
+          initial={reducedMotion ? false : { opacity: 0.55, x: -24 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: reducedMotion ? 0 : 0.58, ease: [0.16, 1, 0.3, 1] }}
+        >
           <p className={styles.eyebrow}>Kemitraan / B2B</p>
           <h2 id="b2b-heading">Kemitraan kopi untuk bisnismu.</h2>
           <p>
@@ -620,8 +650,14 @@ export default function HomePage() {
           <Link href="/work-with-us" className={styles.lightButton}>
             Lihat program kemitraan <ArrowUpRight aria-hidden="true" size={17} />
           </Link>
-        </div>
-        <figure className={styles.b2bMedia}>
+        </motion.div>
+        <motion.figure
+          className={styles.b2bMedia}
+          initial={reducedMotion ? false : { opacity: 0.7, clipPath: 'inset(0 0 0 12%)' }}
+          whileInView={{ opacity: 1, clipPath: 'inset(0 0 0 0%)' }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: reducedMotion ? 0 : 0.68, ease: [0.16, 1, 0.3, 1] }}
+        >
           <Image
             src="/images/byob-craft-collage.jpg"
             alt="Kolase proses meracik kopi dan penyajian minuman"
@@ -630,13 +666,19 @@ export default function HomePage() {
             className={styles.coverImage}
           />
           <figcaption>Racik / Uji / Sajikan</figcaption>
-        </figure>
+        </motion.figure>
       </section>
 
       <section className={styles.faq} aria-labelledby="faq-heading">
         <div className={styles.sectionShell}>
           <div className={styles.faqGrid}>
-            <div className={styles.faqIntro}>
+            <motion.div
+              className={styles.faqIntro}
+              initial={reducedMotion ? false : { opacity: 0.6, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
+            >
               <p className={styles.eyebrow}>Virtual Barista / AI</p>
               <h2 id="faq-heading">Kenali asisten kopi digital kami.</h2>
               <p>Pelajari cara menggunakan Virtual Barista untuk menjelajahi kopi dan fitur 52 Coffee dengan percakapan yang lebih personal.</p>
@@ -649,9 +691,15 @@ export default function HomePage() {
                   className={styles.coverImage}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div className={styles.faqList}>
+            <motion.div
+              className={styles.faqList}
+              initial={reducedMotion ? false : { opacity: 0.65, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
+            >
               {FAQS.map((faq, index) => {
                 const isOpen = openFaq === index;
                 const panelId = `faq-panel-${index}`;
@@ -687,22 +735,40 @@ export default function HomePage() {
                   </div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       <section className={styles.finalCta} aria-labelledby="final-cta-heading">
         <div className={styles.sectionShell}>
-          <p className={styles.eyebrow}>Mulai dari satu cangkir</p>
-          <h2 id="final-cta-heading">WAKTUNYA<br />SEDUH.</h2>
-          <div className={styles.finalCtaFooter}>
+          <motion.p
+            className={styles.eyebrow}
+            initial={reducedMotion ? false : { opacity: 0.55, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.7 }}
+            transition={{ duration: reducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >Mulai dari satu cangkir</motion.p>
+          <motion.h2
+            id="final-cta-heading"
+            initial={reducedMotion ? false : { opacity: 0.65, y: 26, clipPath: 'inset(0 0 20% 0)' }}
+            whileInView={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: reducedMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1] }}
+          >WAKTUNYA<br />SEDUH.</motion.h2>
+          <motion.div
+            className={styles.finalCtaFooter}
+            initial={reducedMotion ? false : { opacity: 0.6, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: reducedMotion ? 0 : 0.52, ease: [0.16, 1, 0.3, 1] }}
+          >
             <p>Temukan kopi yang cocok dengan cara kamu menikmati hari.</p>
             <div>
               <Link href="/catalog" className={styles.darkButton}>Pesan kopi <ArrowRight aria-hidden="true" size={17} /></Link>
               <Link href="/coffee-lab/brewing-guidance" className={styles.textLink}>Buka panduan seduh <ArrowUpRight aria-hidden="true" size={17} /></Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

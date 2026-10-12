@@ -1123,10 +1123,11 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
           </div>
         </section>
 
-        {isPartnership && consultationSelection && (
-          <section id="business-blend-brief" className="scroll-mt-28 pt-12">
-            <SectionIntro title="Lanjutkan hasil kalkulator ke konsultasi" description="Pilihan beans dan hasil HPP di atas otomatis disertakan dalam brief. Lengkapi konteks bisnis sebelum membuka WhatsApp." />
-            <PartnershipBlendBrief selection={consultationSelection} />
+        {isPartnership && (
+          <section id="consultation-form" className="scroll-mt-40 space-y-8 border-t border-border-subtle pt-12">
+            <span id="business-blend-brief" className="block scroll-mt-40" aria-hidden="true" />
+            <SectionIntro kicker="Mulai diskusi" title="Konsultasikan kebutuhan bisnismu" description="Isi brief di bawah untuk membahas pasokan beans, custom blend, atau racikan menu. Jika tersedia, pilihan beans dan estimasi HPP dari kalkulator otomatis disertakan dalam pesan WhatsApp." />
+            <PartnershipBlendBrief selection={consultationSelection ?? undefined} />
           </section>
         )}
       </div>

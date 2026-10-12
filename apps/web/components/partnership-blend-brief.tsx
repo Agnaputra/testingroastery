@@ -17,24 +17,25 @@ export interface ConsultationCoffeeSelection {
   beanKg: number;
 }
 
-export function PartnershipBlendBrief({ selection }: { selection: ConsultationCoffeeSelection }) {
+export function PartnershipBlendBrief({ selection }: { selection?: ConsultationCoffeeSelection }) {
   const [opened, setOpened] = useState(false);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const message = [
-      'Halo 52 Coffee, saya ingin mendiskusikan custom blend untuk bisnis.',
+      'Halo 52 Coffee, saya ingin berkonsultasi tentang kebutuhan kopi untuk bisnis.',
       '',
       `Bisnis: ${data.get('businessName')}`,
       `Kontak: ${data.get('contactName')}`,
       `WhatsApp: ${data.get('whatsapp')}`,
       `Kota: ${data.get('city')}`,
       `Jenis bisnis: ${data.get('businessType')}`,
+      `Layanan kemitraan: ${data.get('serviceType')}`,
       `Penggunaan: ${data.get('useCase')}`,
       `Arah rasa: ${data.get('profile')}`,
       '',
-      'Pilihan bahan baku & simulasi HPP:',
+      ...(selection ? ['Pilihan bahan baku & simulasi HPP:',
       `Sumber bahan baku: ${selection.sourceLabel}`,
       `Produk/racikan: ${selection.beanLabel}`,
       `Basis harga: ${selection.priceBasis}`,
@@ -43,7 +44,7 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
       `Takaran kopi: ${selection.doseGrams} g/porsi`,
       `Target penjualan: ${selection.targetCups} porsi/hari × ${selection.operationalDays} hari`,
       `Proyeksi kebutuhan bahan baku: ${selection.beanKg.toFixed(1)} kg/bulan`,
-      `Total HPP: ${formatRupiah(selection.directCostPerCup)}/porsi`,
+      `Total HPP: ${formatRupiah(selection.directCostPerCup)}/porsi`] : []),
       '',
       `Estimasi pemakaian: ${data.get('usage') || 'Belum ditentukan'}`,
       `Peralatan: ${data.get('equipment') || 'Belum diinformasikan'}`,
@@ -56,7 +57,7 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
 
   return (
     <form onSubmit={submit} className="ui-surface grid gap-8 p-6 sm:p-8" aria-describedby="blend-brief-note">
-      <section aria-labelledby="coffee-selection-heading" className="border-b border-border-subtle pb-7">
+      {selection && <section aria-labelledby="coffee-selection-heading" className="border-b border-border-subtle pb-7">
         <h3 id="coffee-selection-heading" className="font-editorial text-xl font-bold text-brand-charcoal">Pilihan dari kalkulator</h3>
         <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
           <div><dt className="text-xs text-on-surface-variant">Sumber bahan baku</dt><dd className="mt-1 font-semibold text-brand-charcoal">{selection.sourceLabel}</dd></div>
@@ -65,11 +66,11 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
           <div><dt className="text-xs text-on-surface-variant">Total HPP / porsi</dt><dd className="mt-1 font-mono font-semibold text-brand-charcoal">{formatRupiah(selection.directCostPerCup)}</dd></div>
         </dl>
         <p className="mt-4 text-xs leading-5 text-on-surface-variant">Ringkasan ini mengikuti perubahan terakhir di BYOB dan Pricing Calculator.</p>
-      </section>
+      </section>}
 
       <fieldset>
         <legend className="font-editorial text-xl font-bold text-brand-charcoal">Informasi bisnis</legend>
-        <p className="mt-1 text-xs leading-5 text-on-surface-variant">Kontak yang dapat dihubungi untuk membahas kebutuhan blend.</p>
+        <p className="mt-1 text-xs leading-5 text-on-surface-variant">Kontak yang dapat dihubungi untuk membahas kebutuhan kopimu.</p>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <Field id="businessName" label="Nama bisnis" autoComplete="organization" />
           <Field id="contactName" label="Nama penanggung jawab" autoComplete="name" />
@@ -79,10 +80,11 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
       </fieldset>
 
       <fieldset className="border-t border-border-subtle pt-7">
-        <legend className="pr-4 font-editorial text-xl font-bold text-brand-charcoal">Kebutuhan custom blend</legend>
+        <legend className="pr-4 font-editorial text-xl font-bold text-brand-charcoal">Kebutuhan kopi dan layanan</legend>
         <p className="mt-1 text-xs leading-5 text-on-surface-variant">Berikan konteks awal; detail teknis tetap dibahas saat konsultasi.</p>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <Select id="businessType" label="Jenis bisnis" options={['Café / coffee shop', 'Restoran', 'Hotel / HORECA', 'Office / corporate', 'Retail / reseller', 'Lainnya']} />
+          <Select id="serviceType" label="Jenis layanan kemitraan" options={['Pasokan beans rutin', 'Custom blend / label khusus', 'Konsultasi menu, SOP, mesin, dan HPP', 'Masih ingin dikonsultasikan']} />
           <Select id="useCase" label="Penggunaan utama" options={['Espresso & milk-based', 'Black coffee', 'Manual brew', 'Ready-to-drink', 'House blend multipurpose', 'Masih ingin dikonsultasikan']} />
           <Select id="profile" label="Arah profil rasa" options={['Chocolatey & nutty', 'Sweet & balanced', 'Fruity & bright', 'Bold & full-bodied', 'Masih ingin dieksplorasi']} />
           <Field id="usage" label="Estimasi pemakaian" required={false} placeholder="Contoh: kg per bulan atau cangkir per hari" />
@@ -95,8 +97,8 @@ export function PartnershipBlendBrief({ selection }: { selection: ConsultationCo
       </fieldset>
 
       <div className="flex flex-col gap-4 border-t border-border-subtle pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <p id="blend-brief-note" className="max-w-xl text-xs leading-5 text-on-surface-variant">Data hanya dipakai untuk menyusun pesan. Brief belum terkirim sampai Anda menekan kirim di WhatsApp.</p>
-        <button type="submit" className="btn-primary inline-flex min-h-11 items-center justify-center gap-2 text-sm"><MessageCircle className="h-4 w-4" aria-hidden="true" /> Siapkan brief di WhatsApp</button>
+        <p id="blend-brief-note" className="max-w-xl text-xs leading-5 text-on-surface-variant">Data hanya dipakai untuk menyusun pesan. Kamu dapat memeriksanya sebelum menekan kirim di WhatsApp resmi 52 Coffee.</p>
+        <button type="submit" className="btn-primary inline-flex min-h-11 items-center justify-center gap-2 text-sm"><MessageCircle className="h-4 w-4" aria-hidden="true" /> Lanjutkan ke WhatsApp</button>
       </div>
       {opened && <p role="status" className="border-l-2 border-brand-maroon pl-4 text-sm font-medium text-brand-maroon">WhatsApp telah dibuka. Periksa ringkasan, lalu kirim pesannya untuk memulai konsultasi.</p>}
     </form>

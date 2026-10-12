@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, BadgeCheck, Eye, Route } from 'lucide-react';
 import { SENSORY_PROFILES } from './spectrum-data';
 import styles from './SensorySection.module.css';
@@ -53,6 +54,7 @@ const VALUE_POINTS = [
 ];
 
 export function SensorySection() {
+  const reducedMotion = useReducedMotion();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const activeProfile = SENSORY_PROFILES.find(({ id }) => id === (hoveredId ?? selectedId));
@@ -62,7 +64,13 @@ export function SensorySection() {
     <section id="sensory-spectrum" aria-labelledby="sensory-heading" className={styles.section}>
       <div className={styles.container}>
         <div className={styles.mainGrid}>
-          <figure className={styles.visual}>
+          <motion.figure
+            className={styles.visual}
+            initial={reducedMotion ? false : { opacity: 0.65, scale: 0.96, rotate: -3 }}
+            whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: reducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className={styles.wheelStage}>
               <Image
                 src="/images/coffee-tasting-wheel-interactive.png"
@@ -112,9 +120,15 @@ export function SensorySection() {
             <figcaption id="sensory-instructions" className={styles.visualHint}>
               Arahkan kursor, gunakan Tab, atau sentuh kategori rasa.
             </figcaption>
-          </figure>
+          </motion.figure>
 
-          <div className={styles.intro}>
+          <motion.div
+            className={styles.intro}
+            initial={reducedMotion ? false : { opacity: 0.6, x: 22 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: reducedMotion ? 0 : 0.58, ease: [0.16, 1, 0.3, 1] }}
+          >
             <h2 id="sensory-heading" className={styles.heading}>
               <span>Coffee</span>
               <span>Tasting Notes</span>
@@ -125,7 +139,7 @@ export function SensorySection() {
               berbagai karakter rasa yang dapat muncul dalam secangkir kopi — dari fruity yang cerah
               hingga roasted yang hangat — dan kenali lebih dalam profil sensori kopi bersama 52 Coffee.
             </p>
-          </div>
+          </motion.div>
 
           <div
             id="sensory-readout"
