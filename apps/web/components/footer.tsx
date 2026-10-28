@@ -108,7 +108,10 @@ export function Footer() {
 
         <div className="pt-7 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between text-xs leading-6 text-white/60 gap-4">
           <p>© {new Date().getFullYear()} 52 Coffee &amp; Roastery.</p>
-          <Link href="/about" className="inline-flex min-h-11 items-center gap-2 hover:text-white">Sangrai terukur, rasa yang jernih.<ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
+          <div className="flex flex-wrap items-center gap-x-6">
+            <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-white">Kebijakan Privasi</Link>
+            <Link href="/about" className="inline-flex min-h-11 items-center gap-2 hover:text-white">Sangrai terukur, rasa yang jernih.<ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
+          </div>
         </div>
       </div>
     </footer>
