@@ -1,168 +1,41 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Coffee, Layers, SlidersHorizontal, TestTube2 } from 'lucide-react';
-import { SectionIntro } from '../../../components/ui/page-structure';
-import { ReserveLayout } from '../../../components/ui/reserve-layout';
+import { ArrowRight } from 'lucide-react';
 import { BlendBuilderExperience } from '../../../components/blend-builder-experience';
 
 export const metadata: Metadata = {
   title: 'Build Your Own Blend (BYOB) | Coffee Lab 52 Coffee',
-  description: 'Eksplorasi dan bangun racikan kopi specialty Anda sendiri. Pilih beans, tentukan profil rasa, kembangkan proporsi, dan lakukan tasting & adjustment dalam satu halaman.',
-  alternates: {
-    canonical: '/coffee-lab/build-your-own-blend',
-  },
+  description: 'Eksplorasi rasa kopi dengan memilih beans dan mengatur proporsi blend di Coffee Lab 52 Coffee.',
+  alternates: { canonical: '/coffee-lab/build-your-own-blend' },
 };
 
-const BLEND_STAGES = [
-  {
-    id: 'choose-your-beans',
-    icon: Coffee,
-    title: 'Choose Your Beans',
-    description: 'Kenali fungsi setiap komponen: Base memberi struktur body, Accent menambah aroma floral/fruity, dan Bridge menyatukan karakter rasa antarkomponen.',
-    points: [
-      'Gunakan single-origin fresh roast yang terverifikasi',
-      'Pilih 2 hingga 3 origin pelengkap (Arabica, Robusta, Liberica, Excelsa)',
-      'Perhatikan proses pascapanen (Washed, Natural, Honey, Anaerob)',
-    ],
-  },
-  {
-    id: 'define-your-profile',
-    icon: SlidersHorizontal,
-    title: 'Define Your Profile',
-    description: 'Tentukan target cangkir sebelum meracik: apakah Anda mengejar body tebal untuk milk-based espresso, atau cangkir manis beraroma citrus dan floral yang kompleks.',
-    points: [
-      'Petakan target acidity, sweetness, dan body',
-      'Tentukan metode ekstraksi utama (Espresso, Filter, Cold Brew)',
-      'Gunakan radar sensorik real-time untuk memantau keseimbangan',
-    ],
-  },
-  {
-    id: 'blend-development',
-    icon: Layers,
-    title: 'Blend Development',
-    description: 'Simulasikan perbandingan rasio persentase tiap beans. Uji coba formula dengan interval terukur dan simpan racikan ke keranjang belanja Anda.',
-    points: [
-      'Mulai dari proporsi 70:30 atau 60:40',
-      'Uji penambahan komponen ketiga (maks 15%) untuk aksen aromatik',
-      'Periksa estimasi harga racikan per gramasi (250g, 500g, 1kg)',
-    ],
-  },
-  {
-    id: 'tasting-adjustment',
-    icon: TestTube2,
-    title: 'Tasting & Adjustment',
-    description: 'Seduh sampel racikan, cicipi pada rentang suhu berbeda (panas, hangat, dingin), lalu lakukan penyesuaian rasio kecil untuk menyempurnakan hasil.',
-    points: [
-      'Evaluasi aroma kering (dry aroma) dan aroma basah (crust)',
-      'Catat rasa dominan dan aftertaste pada lembar cupping',
-      'Lakukan adjustment bertahap (5-10%) pada iterasi berikutnya',
-    ],
-  },
+const stages = [
+  ['choose-your-beans', 'Pilih beans', 'Mulai dengan dua karakter rasa.'],
+  ['define-your-profile', 'Tentukan rasa', 'Cari arah manis, cerah, atau tebal.'],
+  ['blend-development-step', 'Atur proporsi', 'Lihat profil rasa berubah.'],
+  ['tasting-adjustment-step', 'Cicipi', 'Sesuaikan sedikit demi sedikit.'],
 ];
 
 export default function BuildYourOwnBlendLabPage() {
   return (
-    <main className="page-shell nav-offset relative">
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[76px] bg-brand-navy" aria-hidden="true" />
-      {/* 2. STICKY IN-PAGE NAVIGATION */}
-      <nav
-        aria-label="Navigasi Build Your Own Blend"
-        className="sticky top-[76px] z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
-      >
-        <div className="site-container flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-brand-maroon bg-brand-maroon/10 px-2.5 py-1 rounded-full border border-brand-maroon/20">
-              4 Tahap BYOB
-            </span>
-            <a
-              href="#choose-your-beans"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>01. Choose Your Beans</span>
-            </a>
-            <a
-              href="#define-your-profile"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>02. Define Your Profile</span>
-            </a>
-            <a
-              href="#blend-development"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>03. Blend Development</span>
-            </a>
-            <a
-              href="#tasting-adjustment"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>04. Tasting &amp; Adjustment</span>
-            </a>
-          </div>
-
-          <Link
-            href="/work-with-us/consultations"
-            className="hidden sm:inline-flex items-center gap-1 font-mono text-xs font-bold text-brand-navy hover:underline shrink-0"
-          >
-            <span>Kebutuhan Komersial Café?</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-      </nav>
-
-      {/* INTERACTIVE BLEND BUILDER SIMULATOR (BLEND DEVELOPMENT) */}
-      <ReserveLayout
-        id="blend-development"
-        kicker="Lab workspace"
-        title="Bangun blend langkah demi langkah."
-        description="Pilih origin, atur rasio, lalu baca perubahan profil sensorik dan harga racikan secara langsung."
-        workspaceClassName="p-4 sm:p-6"
-        details={BLEND_STAGES.map(({ icon: Icon, title, description }) => ({
-          icon: <Icon key={title} className="h-4 w-4" aria-hidden="true" />,
-          title,
-          description,
-        }))}
-      >
-        <div className="space-y-6">
-          <span id="choose-your-beans" className="sr-only" />
-          <div id="define-your-profile" className="scroll-mt-32">
-            <SectionIntro
-              kicker="Simulator Interaktif • Lab Workspace"
-              title="Workspace Blend Development & Sensorik"
-              description="Pilih origin beans, sesuaikan slider rasio persentase, amati perubahan profil rasa di Dynamic Real Time Taste radar chart, dan pesan racikan custom Anda langsung."
-            />
-          </div>
-
-          <div className="pt-4">
-            <BlendBuilderExperience mode="lab" embedded />
-          </div>
-        </div>
-      </ReserveLayout>
-
-      <section className="site-container page-section">
-        {/* CTA TO COMMERCIAL CONSULTATIONS */}
-        <div className="rounded-2xl border border-border-subtle bg-surface-container-low p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand-maroon">
-              KEMITRAAN BISNIS &amp; HORECA
-            </span>
-            <h3 className="font-editorial text-2xl font-bold text-brand-charcoal mt-1">
-              Butuh racikan house blend eksklusif untuk bisnis kedai kopi Anda?
-            </h3>
-            <p className="text-sm text-on-surface-variant mt-2 max-w-xl">
-              Gunakan formulir konsultasi dan pricing calculator HPP untuk menghitung biaya per cangkir dan kebutuhan operasional bulanan Anda.
-            </p>
-          </div>
-          <Link
-            href="/work-with-us/consultations"
-            className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 text-sm px-6 shrink-0"
-          >
-            <span>Buka Halaman Konsultasi</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+    <main className="page-shell relative bg-white">
+      <section className="lab-hero" aria-labelledby="lab-blend-title">
+        <div className="lab-hero__inner site-container">
+          <div className="editorial-hero-copy"><p className="lab-hero__eyebrow">Coffee Lab / Build Your Own Blend</p><h1 id="lab-blend-title" className="lab-hero__title">Racik kopi dari rasa yang kamu suka.</h1><p className="lab-hero__description">Kenali karakter beans. Atur proporsi dan lihat bagaimana profil rasa berubah.</p><div className="lab-hero__actions"><a href="#blend-lab" className="lab-hero__primary">Mulai meracik <ArrowRight className="h-4 w-4" aria-hidden="true" /></a></div></div>
+          <figure className="lab-hero__media editorial-hero-media"><div className="lab-hero__photo"><Image src="/images/byob-craft-collage.jpg" alt="Berbagai biji dan seduhan kopi untuk eksplorasi blend" fill priority sizes="(min-width: 1024px) 390px, 100vw" /></div><figcaption><span>Explore your taste</span><span>52 Coffee Lab</span></figcaption></figure>
         </div>
       </section>
+
+      <section id="blend-lab" className="scroll-mt-28 bg-white py-20 sm:py-28" aria-labelledby="blend-workspace-title">
+        <div className="site-container">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] lg:gap-20 editorial-reveal"><div><p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-maroon">Eksplorasi rasa</p><h2 id="blend-workspace-title" className="mt-5 max-w-[14ch] font-editorial text-4xl font-extrabold leading-[1.06] tracking-tight text-brand-charcoal sm:text-5xl">Racikanmu, seleramu.</h2></div><p className="max-w-xl self-end text-sm leading-7 text-on-surface-variant sm:text-base">Pilih beans yang tersedia, atur rasio, dan baca perubahan aroma, body, acidity, serta sweetness. Ini adalah ruang belajar rasa.</p></div>
+          <ol className="mt-12 grid border-y border-border-subtle md:grid-cols-4 editorial-reveal-list">{stages.map(([id, title, description], index) => <li id={id} key={id} className="scroll-mt-28 border-b border-border-subtle py-5 last:border-b-0 md:border-b-0 md:border-r md:px-5 md:first:pl-0 md:last:border-r-0"><span className="font-mono text-xs font-bold text-brand-maroon">0{index + 1}</span><h3 className="mt-4 font-editorial text-base font-bold text-brand-charcoal">{title}</h3><p className="mt-2 text-xs leading-5 text-on-surface-variant">{description}</p></li>)}</ol>
+          <div className="mt-14 rounded-xl border border-border-subtle bg-surface-bright p-4 sm:p-8"><BlendBuilderExperience mode="lab" embedded /></div>
+        </div>
+      </section>
+
+      <aside className="border-t border-border-subtle bg-surface-bright"><div className="site-container flex flex-col gap-4 py-9 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-mono text-[11px] font-bold uppercase tracking-[0.13em] text-brand-maroon">Untuk kebutuhan bisnis</p><p className="mt-2 text-sm text-on-surface-variant">Ingin membuat house blend dan menghitung HPP?</p></div><Link href="/work-with-us/consultations" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand-navy underline underline-offset-4">Buka Consultation <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link></div></aside>
     </main>
   );
 }
-

@@ -5,9 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Search, X, ArrowRight, Sparkles, ShoppingBag } from 'lucide-react';
 import { formatRupiah, getCustomerProductName, getProductDisplayImage } from '../lib/data';
-import { getPublishedProducts } from '../lib/catalog-master';
-
-const PUBLISHED_PRODUCTS = getPublishedProducts();
+import { useCatalogPublication } from '../lib/use-catalog-publication';
 import { useCartStore } from '../lib/store/useCartStore';
 
 interface SearchModalProps {
@@ -18,6 +16,7 @@ interface SearchModalProps {
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const { addItem } = useCartStore();
+  const { authority, refresh: refreshPublication } = useCatalogPublication(isOpen);
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
@@ -69,8 +68,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   if (!isOpen) return null;
 
+  const products = authority?.status === 'verified' ? authority.products : [];
   const filtered = query.trim()
-    ? PUBLISHED_PRODUCTS.filter((p) => {
+    ? products.filter((p) => {
         const q = query.toLowerCase();
         return (
           p.name.toLowerCase().includes(q) ||
@@ -80,7 +80,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           p.tastingNotes.some((n) => n.toLowerCase().includes(q))
         );
       })
-    : PUBLISHED_PRODUCTS.slice(0, 4);
+    : products.slice(0, 4);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/65 backdrop-blur-md animate-fade-in">
@@ -138,7 +138,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <span className="text-[11px] text-brand-maroon font-medium">@52coffeeroastery</span>
           </div>
 
-          {filtered.length === 0 ? (
+          {authority?.status !== 'verified' ? (
+            <p role="status" className="py-12 text-center text-xs text-on-surface-variant">
+              {authority?.status === 'unavailable' ? 'Status katalog sedang tidak tersedia.' : 'Memeriksa status katalog...'}
+            </p>
+          ) : filtered.length === 0 ? (
             <div className="py-12 text-center text-on-surface-variant text-xs space-y-2">
               <p>Tidak ada biji kopi yang cocok dengan &quot;{query}&quot;.</p>
               <p className="text-[11px]">Coba cari dengan kata kunci rasa: fruity, floral, chocolate, atau honey.</p>
@@ -193,8 +197,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      const v = product.variants[0];
+                    onClick={async () => {
+                      const current = await refreshPublication();
+                      const verified = current.products.find((item) => item.slug === product.slug);
+                      if (current.status !== 'verified' || !verified) return;
+                      const v = verified.variants[0];
                       addItem({
                         productId: product.id,
                         name: getCustomerProductName(product),

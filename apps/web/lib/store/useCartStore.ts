@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { GrindOption } from '../data';
 
 export interface CartItem {
-  id: string; // composite key: `${productId}-${weightGrams}-${grind}`
+  id: string; // product, weight, variant, and grind selection identify a cart line
   productId: string;
   name: string;
   slug: string;
@@ -16,6 +16,8 @@ export interface CartItem {
   quantity: number;
   series: string;
   tastingNotes: string[];
+  componentSlugs?: string[];
+  blendComponents?: Array<{ slug: string; ratio: number }>;
 }
 
 export type CartItemInput = Omit<CartItem, 'id'>;
@@ -48,9 +50,13 @@ export const useCartStore = create<CartStore>()(
       lastAddedName: null,
 
       addItem: (itemInput) => {
-        const id = `${itemInput.productId}-${itemInput.weightGrams}-${itemInput.grind}`;
+        const id = `${itemInput.productId}-${itemInput.weightGrams}-${itemInput.weightLabel}-${itemInput.grind}-${itemInput.grindLabel}`;
         const currentItems = get().items;
-        const existingIndex = currentItems.findIndex((i) => i.id === id);
+        const existingIndex = currentItems.findIndex((i) =>
+          i.productId === itemInput.productId && i.weightGrams === itemInput.weightGrams
+          && i.weightLabel === itemInput.weightLabel && i.grind === itemInput.grind
+          && i.grindLabel === itemInput.grindLabel
+        );
 
         if (existingIndex > -1) {
           const updated = [...currentItems];

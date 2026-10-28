@@ -5,7 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Sparkles, Coffee } from 'lucide-react';
 import { useCartStore } from '../lib/store/useCartStore';
+import { useCatalogPublication } from '../lib/use-catalog-publication';
+import { isCartItemAvailable } from '../lib/cart-publication';
 import { formatRupiah } from '../lib/data';
+import { PRICE_TEST_MODE } from '../lib/catalog-publication';
+import { ACCESSORIES } from '../lib/accessories';
 
 interface CrossSellItem {
   id: string;
@@ -15,29 +19,7 @@ interface CrossSellItem {
   imageUrl: string;
 }
 
-const CROSS_SELL_ADDONS: CrossSellItem[] = [
-  {
-    id: 'addon-v60-paper',
-    name: 'Kertas Filter V60 02 Hario (40 Lembar)',
-    price: 45000,
-    weightLabel: '40 Pcs',
-    imageUrl: '/images/bag-prau.jpg',
-  },
-  {
-    id: 'addon-drip-bag',
-    name: '52 Coffee Drip Bag Filter (10 Pcs)',
-    price: 35000,
-    weightLabel: '10 Pcs',
-    imageUrl: '/images/bag-walida.jpg',
-  },
-  {
-    id: 'addon-glass-server',
-    name: '52 Heatproof Glass Server 360ml',
-    price: 120000,
-    weightLabel: '1 Unit',
-    imageUrl: '/images/bag-sumbing.jpg',
-  },
-];
+const CROSS_SELL_ADDONS: CrossSellItem[] = [...ACCESSORIES];
 
 export function CartDrawer() {
   const {
@@ -50,6 +32,7 @@ export function CartDrawer() {
     getSubtotal,
     getTotalItems,
   } = useCartStore();
+  const { authority, refresh: refreshPublication } = useCatalogPublication(isDrawerOpen);
 
   const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -101,8 +84,20 @@ export function CartDrawer() {
 
   if (!mounted) return null;
 
-  const subtotal = getSubtotal();
+  const effectivePrices = new Map<string, number>(authority?.products.flatMap((product) => [
+    ...product.variants.map((variant) => [`${product.slug}:beans:${variant.weightGrams}`, variant.price] as const),
+    ...(product.cupPrice ? [[`${product.slug}:cup:1`, product.cupPrice] as const] : []),
+  ]) ?? []);
+  const itemSku = (item: typeof items[number]) => item.productId.startsWith('addon-') || item.productId.startsWith('byob-')
+    ? item.productId : `${item.slug}:${item.weightGrams === 1 && item.grindLabel.startsWith('Slowbar') ? 'cup' : 'beans'}:${item.weightGrams}`;
+  const pricesReady = items.every((item) => effectivePrices.has(itemSku(item)));
+  const subtotal = PRICE_TEST_MODE
+    ? items.reduce((total, item) => total + (effectivePrices.get(itemSku(item)) ?? 0) * item.quantity, 0)
+    : getSubtotal();
   const totalItems = getTotalItems();
+  const activeSlugs = new Set(authority?.status === 'verified' ? authority.products.map((product) => product.slug) : []);
+  const cartReady = authority?.status === 'verified' && items.every((item) => isCartItemAvailable(item, activeSlugs))
+    && (!PRICE_TEST_MODE || pricesReady);
   const freeShippingThreshold = 250000;
   const progressToFreeShipping = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
@@ -217,7 +212,7 @@ export function CartDrawer() {
                     className="flex gap-3.5 rounded-md border border-border-subtle bg-white p-3.5 transition-colors hover:border-brand-navy/40"
                   >
                     {/* Thumbnail */}
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-surface-container-low">
+                    {isCartItemAvailable(item, activeSlugs) && <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-surface-container-low">
                       <Image
                         src={item.imageUrl}
                         alt={item.name}
@@ -225,13 +220,15 @@ export function CartDrawer() {
                         sizes="80px"
                         className="object-cover"
                       />
-                    </div>
+                    </div>}
 
                     {/* Info */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          {item.productId.startsWith('addon-') ? (
+                          {!isCartItemAvailable(item, activeSlugs) ? (
+                            <span className="text-sm font-bold text-brand-charcoal">Produk tidak tersedia</span>
+                          ) : item.productId.startsWith('addon-') ? (
                             <span className="line-clamp-1 font-editorial text-sm font-bold text-brand-navy">
                               {item.name}
                             </span>
@@ -254,7 +251,7 @@ export function CartDrawer() {
                           </button>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] font-mono text-on-surface-variant">
+                        {isCartItemAvailable(item, activeSlugs) && <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] font-mono text-on-surface-variant">
                           <span className="px-1.5 py-0.5 bg-brand-pill rounded border border-border-subtle text-brand-navy font-semibold">
                             {item.weightLabel}
                           </span>
@@ -262,17 +259,22 @@ export function CartDrawer() {
                           <span className="text-brand-teal font-sans font-medium">
                             {item.grindLabel}
                           </span>
-                        </div>
+                        </div>}
                       </div>
 
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-subtle">
                         <span className="font-mono text-xs font-bold text-brand-navy">
-                          {formatRupiah(item.unitPrice * item.quantity)}
+                          {isCartItemAvailable(item, activeSlugs) && (!PRICE_TEST_MODE || effectivePrices.has(itemSku(item)))
+                            ? formatRupiah((PRICE_TEST_MODE ? effectivePrices.get(itemSku(item)) ?? 0 : item.unitPrice) * item.quantity)
+                            : 'Perlu verifikasi'}
+                          {PRICE_TEST_MODE && effectivePrices.has(itemSku(item)) && effectivePrices.get(itemSku(item)) !== item.unitPrice && (
+                            <span className="block text-[10px] text-amber-700">Harga berubah sejak ditambahkan. Tinjau saat checkout.</span>
+                          )}
                         </span>
 
                         {/* Quantity Selector */}
                         <div className="flex items-center border border-border-subtle rounded-full bg-surface-container-low">
-                          <button
+                          <button disabled={!isCartItemAvailable(item, activeSlugs)}
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="p-1 text-on-surface-variant hover:text-brand-navy rounded-full transition-colors"
                             aria-label="Decrease quantity"
@@ -282,7 +284,7 @@ export function CartDrawer() {
                           <span className="px-2 font-mono text-xs font-semibold text-brand-navy min-w-[20px] text-center">
                             {item.quantity}
                           </span>
-                          <button
+                          <button disabled={!isCartItemAvailable(item, activeSlugs)}
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="p-1 text-on-surface-variant hover:text-brand-navy rounded-full transition-colors"
                             aria-label="Increase quantity"
@@ -296,7 +298,7 @@ export function CartDrawer() {
                 ))}
 
                 {/* Cross-Sell Recommendations Section */}
-                <div className="pt-3 border-t border-border-subtle space-y-2.5">
+                {!PRICE_TEST_MODE && <div className="pt-3 border-t border-border-subtle space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono font-bold uppercase text-brand-navy tracking-wider">
                       Pelengkap Ritual Seduh
@@ -338,7 +340,7 @@ export function CartDrawer() {
                       );
                     })}
                   </div>
-                </div>
+                </div>}
               </>
             )}
           </div>
@@ -362,14 +364,22 @@ export function CartDrawer() {
                 >
                   Belanja Lagi
                 </button>
-                <Link
+                {cartReady ? <Link
                   href="/checkout"
-                  onClick={closeDrawer}
+                  onClick={async (event) => {
+                    event.preventDefault();
+                    const current = await refreshPublication();
+                    const currentSlugs = new Set(current.products.map((product) => product.slug));
+                    if (current.status === 'verified' && items.every((item) => isCartItemAvailable(item, currentSlugs))) {
+                      closeDrawer();
+                      window.location.assign('/checkout');
+                    }
+                  }}
                   className="btn-primary w-full rounded-md py-3.5 text-xs"
                 >
                   <span>Checkout</span>
                   <ArrowRight className="w-4 h-4" />
-                </Link>
+                </Link> : <button type="button" disabled className="btn-primary w-full rounded-md py-3.5 text-xs opacity-50">{PRICE_TEST_MODE && !pricesReady ? 'Harga item belum dapat diverifikasi' : 'Status produk belum terverifikasi'}</button>}
               </div>
             </div>
           )}

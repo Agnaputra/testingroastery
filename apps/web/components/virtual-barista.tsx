@@ -25,7 +25,8 @@ import {
   mapRecommendationsToCatalog,
   type CatalogRecommendedProduct,
 } from '../lib/virtual-barista-recommendations';
-import { loadCatalogPublicationAuthority } from '../lib/catalog-publication';
+import { CATALOG_AUTHORITY_PATH, PRICE_TEST_MODE, isCatalogReplyCurrent, loadCatalogPublicationAuthority } from '../lib/catalog-publication';
+import { useCatalogPublication } from '../lib/use-catalog-publication';
 
 const PUBLISHED_PRODUCTS = getPublishedProducts();
 
@@ -43,14 +44,15 @@ interface ChatMessage {
   grounding?: 'catalog' | 'website' | 'coffee_web' | 'conversation' | 'none';
   recommendedProductSlugs?: string[];
   recommendedVariants?: Array<{ productSlug: string; weightGrams: number }>;
+  effectiveCatalogFingerprint?: string;
 }
 
-type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs' | 'recommendedVariants'>;
+type ConversationMetadata = Pick<ChatMessage, 'intent' | 'grounding' | 'recommendedProductSlugs' | 'recommendedVariants' | 'effectiveCatalogFingerprint'>;
 
 function getCatalogPublicationAuthority() {
   return loadCatalogPublicationAuthority(
     PUBLISHED_PRODUCTS,
-    () => fetch('/api/catalog/publication', { cache: 'no-store' }),
+    () => fetch(CATALOG_AUTHORITY_PATH, { cache: 'no-store' }),
   );
 }
 
@@ -63,6 +65,7 @@ const QUICK_PROMPTS = [
 
 export function VirtualBaristaWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const { authority, refresh: refreshPublication } = useCatalogPublication(isOpen);
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -91,6 +94,12 @@ export function VirtualBaristaWidget() {
       messagesEndRef.current?.scrollIntoView({ behavior: shouldReduceMotion ? 'auto' : 'smooth' });
     }
   }, [messages, isOpen, shouldReduceMotion]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = window.setInterval(() => { void refreshPublication(); }, 5000);
+    return () => window.clearInterval(timer);
+  }, [isOpen, refreshPublication]);
 
   // Progressive Typewriter streaming response effect
   const streamBaristaResponse = async (
@@ -134,6 +143,7 @@ export function VirtualBaristaWidget() {
                 grounding: i === words.length - 1 ? metadata?.grounding : undefined,
                 recommendedProductSlugs: i === words.length - 1 ? metadata?.recommendedProductSlugs : undefined,
                 recommendedVariants: i === words.length - 1 ? metadata?.recommendedVariants : undefined,
+                effectiveCatalogFingerprint: i === words.length - 1 ? metadata?.effectiveCatalogFingerprint : undefined,
               }
             : msg
         )
@@ -167,8 +177,11 @@ export function VirtualBaristaWidget() {
     if (!product) return 'Produk tersebut sudah tidak aktif; item belum ditambahkan.';
     const variant = product.variants.find((item) => item.weightGrams === action.variant_weight && item.inStock);
     if (!variant) return 'Varian yang diminta tidak dapat ditambahkan saat ini.';
-    const itemId = `${product.id}-${variant.weightGrams}-whole`;
-    const previousQuantity = useCartStore.getState().items.find((item) => item.id === itemId)?.quantity ?? 0;
+    const quantityInCart = () => useCartStore.getState().items.find((item) =>
+      item.productId === product.id && item.weightGrams === variant.weightGrams
+      && item.weightLabel === variant.weightLabel && item.grind === 'whole'
+      && item.grindLabel === 'Whole Beans')?.quantity ?? 0;
+    const previousQuantity = quantityInCart();
     addItem({
       productId: product.id,
       name: product.name,
@@ -183,7 +196,7 @@ export function VirtualBaristaWidget() {
       series: product.series,
       tastingNotes: product.tastingNotes,
     });
-    const actualQuantity = useCartStore.getState().items.find((item) => item.id === itemId)?.quantity ?? 0;
+    const actualQuantity = quantityInCart();
     if (actualQuantity !== previousQuantity + action.quantity) return 'Keranjang belum dapat diperbarui; item tidak ditambahkan.';
     return `Berhasil menambahkan ${product.name} ${variant.weightLabel} sebanyak ${action.quantity} bungkus ke keranjang.`;
   };
@@ -207,7 +220,7 @@ export function VirtualBaristaWidget() {
       : `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     try {
-      const publicationAuthorityPromise = getCatalogPublicationAuthority();
+      const publicationAuthorityPromise = PRICE_TEST_MODE ? null : getCatalogPublicationAuthority();
       // Send request to /api/chat route
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -231,7 +244,14 @@ export function VirtualBaristaWidget() {
       }
 
       const data = await response.json();
-      const publicationAuthority = await publicationAuthorityPromise;
+      const publicationAuthority = PRICE_TEST_MODE
+        ? await getCatalogPublicationAuthority()
+        : await publicationAuthorityPromise!;
+      if (PRICE_TEST_MODE && data.grounding === 'catalog' && (
+        publicationAuthority.status !== 'verified'
+        || data.priceRevision !== publicationAuthority.priceRevision
+        || data.effectiveCatalogFingerprint !== publicationAuthority.effectiveCatalogFingerprint
+      )) throw new Error('Revisi harga katalog berubah');
       const currentProducts = publicationAuthority.products;
 
       let matchedProducts: BaristaRecommendedProduct[] = [];
@@ -295,6 +315,8 @@ export function VirtualBaristaWidget() {
             productSlug,
             weightGrams,
           })),
+          effectiveCatalogFingerprint: typeof data.effectiveCatalogFingerprint === 'string'
+            ? data.effectiveCatalogFingerprint : undefined,
         }
       );
       setIsLoading(false);
@@ -410,6 +432,11 @@ export function VirtualBaristaWidget() {
             <div className="flex-1 space-y-5 overflow-y-auto bg-surface-container-low/50 px-4 py-5">
               {messages.map((msg) => {
                 const isBarista = msg.sender === 'barista';
+                const catalogReplyCurrent = msg.grounding !== 'catalog' || isCatalogReplyCurrent(
+                  authority,
+                  [...(msg.recommendedProducts?.map((product) => product.slug) ?? []), ...(msg.recommendedProductSlugs ?? [])],
+                  msg.effectiveCatalogFingerprint,
+                );
                 return (
                   <div
                     key={msg.id}
@@ -429,13 +456,13 @@ export function VirtualBaristaWidget() {
                             : 'rounded-br-md bg-brand-navy text-white'
                         }`}
                       >
-                        {msg.text || (
+                        {!catalogReplyCurrent ? 'Informasi katalog pada jawaban ini perlu diperbarui. Tanyakan kembali untuk melihat produk dan harga terbaru.' : msg.text || (
                           <span className="inline-block w-1.5 h-3 bg-brand-navy animate-pulse" />
                         )}
                       </div>
 
                       {/* Product Recommendation Cards Carousel if present */}
-                      {msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
+                      {catalogReplyCurrent && msg.recommendedProducts && msg.recommendedProducts.length > 0 && (
                         <div className="space-y-2 pt-1">
                           <span className="text-[10px] font-mono text-on-surface-variant font-bold uppercase tracking-wider block">
                             {msg.intent === 'catalog_query' ? 'Pilihan di katalog:' : 'Rekomendasi Biji Kopi Terpilih:'}
@@ -495,7 +522,7 @@ export function VirtualBaristaWidget() {
                         </div>
                       )}
 
-                      {msg.sources && msg.sources.length > 0 && (
+                      {catalogReplyCurrent && msg.sources && msg.sources.length > 0 && (
                         <div className="flex flex-wrap gap-2 pt-1" aria-label="Sumber jawaban">
                           {msg.sources.map((source, index) => (
                             <a
@@ -512,7 +539,7 @@ export function VirtualBaristaWidget() {
                         </div>
                       )}
 
-                      {msg.followUpSuggestions && msg.followUpSuggestions.length > 0 && (
+                      {catalogReplyCurrent && msg.followUpSuggestions && msg.followUpSuggestions.length > 0 && (
                         <div className="flex flex-wrap gap-2 pt-1" aria-label="Saran pertanyaan lanjutan">
                           {msg.followUpSuggestions.map((suggestion) => (
                             <button

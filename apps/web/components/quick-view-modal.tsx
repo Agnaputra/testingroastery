@@ -8,6 +8,7 @@ import { CoffeeProduct, ProductVariant, GrindOption, GRIND_OPTIONS, formatRupiah
 import { WeightSelector } from './weight-selector';
 import { GrindSelector } from './grind-selector';
 import { useCartStore } from '../lib/store/useCartStore';
+import { getCurrentEffectiveProduct } from '../lib/catalog-publication';
 import { SensoryTag } from './sensory-tag';
 
 interface QuickViewModalProps {
@@ -38,7 +39,10 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
 
   const { addItem } = useCartStore();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const current = await getCurrentEffectiveProduct(product);
+    const currentVariant = current?.variants.find((variant) => variant.weightGrams === selectedVariant.weightGrams);
+    if (!currentVariant) return;
     const grindLabel = GRIND_OPTIONS.find((g) => g.id === selectedGrind)?.label || 'Biji utuh';
     addItem({
       productId: product.id,
@@ -49,7 +53,7 @@ function QuickViewContent({ product, onClose }: { product: CoffeeProduct; onClos
       weightLabel: selectedVariant.weightLabel,
       grind: selectedGrind,
       grindLabel: grindLabel,
-      unitPrice: selectedVariant.price,
+      unitPrice: currentVariant.price,
       quantity: quantity,
       series: product.series,
       tastingNotes: product.tastingNotes,

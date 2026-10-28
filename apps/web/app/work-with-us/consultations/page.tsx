@@ -1,148 +1,49 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Calculator, Coffee, MessageSquare, SlidersHorizontal, TestTube2 } from 'lucide-react';
-import { SectionIntro } from '../../../components/ui/page-structure';
+import { ArrowRight } from 'lucide-react';
 import { BlendBuilderExperience } from '../../../components/blend-builder-experience';
+import { BackButton } from '../../../components/ui/back-button';
 
 export const metadata: Metadata = {
   title: 'Consultations & Custom Blend | 52 Coffee & Roastery',
-  description: 'Konsultasi custom coffee blend, formulir kemitraan, dan pricing calculator HPP untuk café, restoran, hotel, dan kebutuhan wholesale.',
-  alternates: {
-    canonical: '/work-with-us/consultations',
-  },
+  description: 'Konsultasi custom coffee blend, formulir kemitraan, dan pricing calculator HPP untuk kafe, restoran, hotel, dan kebutuhan wholesale.',
+  alternates: { canonical: '/work-with-us/consultations' },
 };
 
-const CONSULTATION_STEPS = [
-  {
-    icon: Coffee,
-    title: 'Choose Your Beans',
-    description: 'Origin dan komponen blend dipilih berdasarkan konsistensi pasokan, fungsi rasa, dan target biaya bisnis.',
-  },
-  {
-    icon: SlidersHorizontal,
-    title: 'Define Your Profile',
-    description: 'Memetakan target sweetness, acidity, body, mesin espresso, volume bulanan, dan karakter preferensi pelanggan Anda.',
-  },
-  {
-    icon: SlidersHorizontal,
-    title: 'Blend Development',
-    description: 'Proporsi persentase dan profil sangrai diuji di roastery kami untuk membangun rasa yang khas sekaligus stabil.',
-  },
-  {
-    icon: TestTube2,
-    title: 'Tasting & Adjustment',
-    description: 'Sampel dievaluasi bersama melalui cupping sebelum resep, spesifikasi, dan jadwal pasokan ditetapkan.',
-  },
+const steps = [
+  ['Pilih beans', 'Tentukan origin dan karakter dasar.'],
+  ['Arah rasa', 'Tetapkan target sweetness, acidity, dan body.'],
+  ['Atur blend', 'Uji komposisi dan estimasi biaya.'],
+  ['Diskusikan', 'Kirim brief dan sesuaikan bersama roastery.'],
 ];
 
 export default function ConsultationsPage() {
   return (
-    <main className="page-shell nav-offset relative">
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[76px] bg-brand-maroon" aria-hidden="true" />
-      {/* 2. STICKY IN-PAGE NAVIGATION */}
-      <nav
-        aria-label="Navigasi Halaman Konsultasi"
-        className="sticky top-[76px] z-30 border-y border-border-subtle bg-surface-bright/95 backdrop-blur-md py-3 shadow-xs"
-      >
-        <div className="site-container flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-brand-maroon bg-brand-maroon/10 px-2.5 py-1 rounded-full border border-brand-maroon/20">
-              Navigasi Cepat
-            </span>
-            <a
-              href="#consultation-form"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-brand-maroon" />
-              <span>Formulir konsultasi</span>
-            </a>
-            <a
-              href="#byob"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-brand-maroon" />
-              <span>Build Your Own Blend</span>
-            </a>
-            <a
-              href="#pricing-calculator"
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-brand-charcoal hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <Calculator className="w-3.5 h-3.5 text-brand-maroon" />
-              <span>Pricing Calculator</span>
-            </a>
-          </div>
-          <Link
-            href="/work-with-us#wholesale-partnership"
-            className="hidden sm:inline-flex items-center gap-1 font-mono text-xs font-bold text-brand-navy hover:underline shrink-0"
-          >
-            <span>Wholesale &amp; Partnership</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-      </nav>
-
-      <section className="site-container page-section space-y-6">
-          <SectionIntro
-            kicker="Konsultasi bisnis"
-            title="Rencanakan kebutuhan kopi bisnismu."
-            description="Diskusikan pasokan beans, custom blend, atau racikan menu bersama 52 Coffee. Kamu bisa mencoba BYOB dan kalkulator HPP terlebih dahulu, atau langsung mengisi brief konsultasi di bagian bawah."
-          />
-          <a href="#consultation-form" className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 text-sm">
-            Isi brief konsultasi <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </a>
-      </section>
-
-      <section className="site-container page-section space-y-20">
-        {/* SECTION 2: BUILD YOUR OWN BLEND (BYOB) */}
-        <section id="byob" className="scroll-mt-32 space-y-8 border-t border-border-subtle pt-16">
-          <SectionIntro
-            kicker="Simulasi racikan"
-            title="Build Your Own Blend (BYOB)"
-            description="Rancang proporsi komponen beans espresso, tentukan ukuran kemasan, evaluasi proyeksi rasa real-time dengan radar sensorik, dan simulasikan harga racikan langsung."
-          />
-
-          <ol className="grid gap-x-6 gap-y-8 md:grid-cols-2 xl:grid-cols-4">
-            {CONSULTATION_STEPS.map(({ icon: Icon, title, description }, index) => (
-              <li key={title} className="border-t-2 border-brand-charcoal pt-5">
-                <div className="flex items-center justify-between">
-                  <Icon className="h-6 w-6 text-brand-maroon" aria-hidden="true" />
-                  <span className="font-mono text-xs font-semibold text-on-surface-variant">0{index + 1}</span>
-                </div>
-                <h3 className="mt-5 font-editorial text-xl font-bold text-brand-charcoal">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-on-surface-variant">{description}</p>
-              </li>
-            ))}
-          </ol>
-
-          {/* Embedded Interactive Blend Builder & Pricing Calculator */}
-          <div className="pt-8">
-            <BlendBuilderExperience mode="partnership" />
-          </div>
-        </section>
-
-        {/* FOOTER CTA BAR */}
-        <div className="rounded-2xl border border-border-subtle bg-surface-container-low p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand-maroon">
-              WHOLESALE &amp; PARTNERSHIP
-            </span>
-            <h3 className="font-editorial text-2xl font-bold text-brand-charcoal mt-1">
-              Ingin mempelajari skema pasokan kedai dan wholesale?
-            </h3>
-            <p className="text-sm text-on-surface-variant mt-2 max-w-xl">
-              Kami memasok roasted beans batch kecil ke puluhan kedai kopi di Malang, Surabaya, Bali, dan Jakarta dengan standarisasi roast profile.
-            </p>
-          </div>
-          <Link
-            href="/work-with-us#wholesale-partnership"
-            className="btn-primary inline-flex min-h-12 items-center justify-center gap-2 text-sm px-6 shrink-0"
-          >
-            <span>Lihat Skema Pasokan</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+    <main className="page-shell relative bg-surface-bright">
+      <section className="lab-hero" aria-labelledby="consultation-title">
+        <div className="lab-hero__inner site-container">
+          <div className="editorial-hero-copy">
+            <div className="mb-4">
+              <BackButton fallbackHref="/work-with-us" label="Kembali ke Work With Us" />
+            </div>
+            <p className="lab-hero__eyebrow">Partnerships / Consultation</p><h1 id="consultation-title" className="lab-hero__title">Rencanakan kopi untuk bisnismu.</h1><p className="lab-hero__description">Mulai dari target rasa dan biaya. Susun blend, lihat estimasi HPP, lalu bicarakan kebutuhanmu dengan tim roastery.</p><div className="lab-hero__actions"><a href="#byob" className="lab-hero__primary">Rancang blend <ArrowRight className="h-4 w-4" aria-hidden="true" /></a><a href="#consultation-form" className="lab-hero__secondary">Isi brief konsultasi</a></div></div>
+          <figure className="lab-hero__media editorial-hero-media"><div className="lab-hero__photo"><Image src="/images/byob-roaster-craft.jpg" alt="Proses menyiapkan racikan kopi di roastery" fill priority sizes="(min-width: 1024px) 390px, 100vw" /></div><figcaption><span>Custom blend</span><span>Malang roastery</span></figcaption></figure>
         </div>
       </section>
+
+      <section id="byob" className="site-container scroll-mt-28 py-20 sm:py-28">
+        <div className="grid gap-7 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] lg:gap-20 editorial-reveal">
+          <div><p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-maroon">Build Your Own Blend</p><h2 className="mt-5 max-w-[15ch] font-editorial text-4xl font-extrabold leading-[1.06] tracking-tight text-brand-charcoal sm:text-5xl">Dari ide rasa ke racikan bisnis.</h2></div>
+          <p className="max-w-xl self-end text-sm leading-7 text-on-surface-variant sm:text-base">Pilih komponen dan atur proporsi. Kalkulator HPP membantu membaca biaya dari harga katalog terverifikasi sebelum kamu mengirim brief.</p>
+        </div>
+        <ol className="mt-12 grid border-y border-border-subtle md:grid-cols-4 editorial-reveal-list">
+          {steps.map(([title, description], index) => <li key={title} className="border-b border-border-subtle py-5 last:border-b-0 md:border-b-0 md:border-r md:px-5 md:first:pl-0 md:last:border-r-0"><span className="font-mono text-xs font-bold text-brand-maroon">0{index + 1}</span><h3 className="mt-4 font-editorial text-base font-bold text-brand-charcoal">{title}</h3><p className="mt-2 text-xs leading-5 text-on-surface-variant">{description}</p></li>)}
+        </ol>
+        <div className="mt-14"><BlendBuilderExperience mode="partnership" /></div>
+      </section>
+
+      <aside className="border-t border-border-subtle bg-white"><div className="site-container flex flex-col gap-4 py-9 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-mono text-[11px] font-bold uppercase tracking-[0.13em] text-brand-maroon">Wholesale &amp; Partnership</p><p className="mt-2 text-sm text-on-surface-variant">Butuh pasokan rutin setelah racikanmu siap?</p></div><Link href="/work-with-us#wholesale-partnership" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand-navy underline underline-offset-4">Lihat skema pasokan <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link></div></aside>
     </main>
   );
 }
-

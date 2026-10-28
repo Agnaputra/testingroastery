@@ -4,6 +4,7 @@ export interface ProductVariant {
   weightLabel: string;
   price: number;
   inStock: boolean;
+  stockUnits?: number;
 }
 
 export type GrindOption = 'whole' | 'coarse' | 'medium' | 'fine';

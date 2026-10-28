@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -39,7 +40,6 @@ import {
   CURATED_RECIPES,
   BREW_TOPICS,
 } from '../lib/brewlogic-database';
-import { ReserveLayout } from './ui/reserve-layout';
 
 // Pre-configured 52 Coffee Quick Beans
 const FIFTY_TWO_BEANS = [
@@ -79,6 +79,22 @@ const FIFTY_TWO_BEANS = [
     roastLevel: 'light' as const,
   },
 ];
+
+const METHOD_IMAGES: Record<string, string> = {
+  'v60-filter': '/images/story-v60-hd.jpg',
+  'kalita-wave': '/images/brewing-kalita-editorial.webp',
+  aeropress: '/images/brewing-aeropress-editorial.webp',
+  'french-press': '/images/brewing-french-press-editorial.webp',
+  'japanese-iced': '/images/brewing-japanese-iced-editorial.webp',
+  'espresso-calibration': '/images/brewing-espresso-editorial.webp',
+};
+const METHOD_BREWERS: Record<string, string> = {
+  'v60-filter': 'hario_v60',
+  'kalita-wave': 'kalita_wave',
+  aeropress: 'aeropress',
+  'french-press': 'french_press',
+  'japanese-iced': 'hario_v60',
+};
 
 export function BrewingGuidanceExperience() {
   const searchParams = useSearchParams();
@@ -313,89 +329,172 @@ export function BrewingGuidanceExperience() {
   };
 
   return (
-    <div className="pb-24 [&>section+section]:mt-16">
+    <div className="brewing-content pb-24">
       {/* 1. IN-PAGE STICKY ANCHOR NAVIGATION */}
-      <nav
-        aria-label="Navigasi Brewing Guidance"
-        className="sticky top-[76px] z-30 border-y border-border-subtle bg-surface-bright/95 py-3 shadow-xs backdrop-blur-md"
-      >
-        <div className="site-container flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => scrollToSection('precision-console')}
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-bold text-brand-maroon bg-brand-maroon/10 border border-brand-maroon/20"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>BrewLogic Console</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection('brewing-methods')}
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-on-surface-variant hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>01.</span>
-              <span>Brewing Methods</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection('recipes')}
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-on-surface-variant hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>02.</span>
-              <span>Recipes</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection('grind-size')}
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-on-surface-variant hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>03.</span>
-              <span>Grind Size</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection('ratio-extraction')}
-              className="inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold text-on-surface-variant hover:text-brand-maroon hover:bg-surface-container-low transition-colors"
-            >
-              <span>04.</span>
-              <span>Ratio &amp; Extraction</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setConsoleStep(3);
-              scrollToSection('precision-console');
-            }}
-            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg bg-brand-navy px-4 py-2 font-mono text-xs font-bold text-white shadow-xs hover:bg-brand-navy-light transition-colors"
-          >
-            <Timer className="w-3.5 h-3.5 text-brand-teal" />
-            <span>Mode Live Timer</span>
-          </button>
+      <nav aria-label="Navigasi Brewing Guidance" className="sticky top-[76px] z-30 border-b border-border-subtle bg-white/95 backdrop-blur-md">
+        <div className="site-container flex min-h-14 items-center gap-6 overflow-x-auto whitespace-nowrap text-xs font-semibold text-brand-charcoal">
+          <a href="#brewing-methods" className="inline-flex min-h-11 shrink-0 items-center border-b-2 border-transparent hover:border-brand-maroon">Metode</a>
+          <a href="#precision-console" className="inline-flex min-h-11 shrink-0 items-center border-b-2 border-transparent hover:border-brand-maroon">Studio seduh</a>
+          <a href="#recipes" className="inline-flex min-h-11 shrink-0 items-center border-b-2 border-transparent hover:border-brand-maroon">Resep</a>
+          <a href="#grind-size" className="inline-flex min-h-11 shrink-0 items-center border-b-2 border-transparent hover:border-brand-maroon">Gilingan</a>
+          <a href="#ratio-extraction" className="inline-flex min-h-11 shrink-0 items-center border-b-2 border-transparent hover:border-brand-maroon">Rasio</a>
+          <button type="button" onClick={() => { setConsoleStep(3); scrollToSection('precision-console'); }} className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-2 font-bold text-brand-maroon"><Timer className="h-4 w-4" aria-hidden="true" /> Timer seduh</button>
         </div>
       </nav>
 
-      {/* 2. PRECISION BREWING CONSOLE (ALA BREWLOGIC) */}
-      <ReserveLayout
-        id="precision-console"
-        kicker="Brew with precision"
-        title="Rancang resep seduhmu."
-        description="Masukkan karakter beans, alat, grinder, dan air. BrewLogic menerjemahkannya menjadi parameter yang bisa langsung dipraktikkan."
-        workspaceClassName="space-y-6"
-        details={[
-          { icon: <Compass className="h-4 w-4" aria-hidden="true" />, title: 'Parameter terarah', description: 'Beans, roast, process, dan target rasa.' },
-          { icon: <Sliders className="h-4 w-4" aria-hidden="true" />, title: 'Kalibrasi alat', description: 'Brewer, grinder, serta mineral air.' },
-          { icon: <Timer className="h-4 w-4" aria-hidden="true" />, title: 'Pendamping seduh', description: 'Resep bertahap dan live timer dalam satu alur.' },
-        ]}
-      >
-        {/* Step Progression Tabs Header */}
+      {/* 1. BREWING METHODS */}
+      <section id="brewing-methods" className="site-container scroll-mt-36 space-y-8 brewing-methods">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-5">
+          <div>
+            <div className="flex items-center gap-2 text-brand-maroon font-mono text-xs font-bold uppercase tracking-wider">
+              <span>01 / Kenali metode</span>
+            </div>
+            <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-bold text-brand-charcoal">
+              Temukan gaya seduhmu.
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant font-sans">
+              Setiap alat menghasilkan karakter cangkir yang berbeda. Bandingkan lalu pilih yang sesuai selera.
+            </p>
+          </div>
+          <span className="font-mono text-xs text-on-surface-variant font-semibold">
+            6 Metode Standar Slowbar
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+          {BREW_TOPICS.map((topic) => {
+            const isSelected = METHOD_BREWERS[topic.id] === brewerId && (topic.id === 'japanese-iced' ? temperatureStyle === 'iced' : temperatureStyle === 'hot');
+            return (
+              <article
+                key={topic.id}
+                className={`brewing-method-card relative flex flex-col justify-between rounded-xl border bg-white p-3 transition-all sm:p-4 ${
+                  isSelected
+                    ? 'border-brand-maroon'
+                    : 'border-border-subtle hover:border-brand-navy/40'
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="brewing-method-photo relative aspect-[1.7/1] overflow-hidden rounded-lg bg-[#dce6e9]">
+                    <Image src={METHOD_IMAGES[topic.id]} alt={`${topic.title} di slowbar kopi`} fill sizes="(min-width: 1024px) 400px, (min-width: 640px) 48vw, 44vw" className="object-cover" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-brand-maroon">
+                      {topic.num}
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-low text-on-surface-variant border border-border-subtle">
+                      {topic.category}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-editorial text-xl font-bold text-brand-charcoal">
+                      {topic.title}
+                    </h3>
+                    <p className="font-mono text-[11px] text-brand-navy font-medium mt-0.5">
+                      {topic.subtitle}
+                    </p>
+                  </div>
+
+                  <p className="hidden text-xs text-on-surface-variant leading-relaxed font-sans sm:block">
+                    {topic.description}
+                  </p>
+
+                  <details className="brewing-method-details text-xs text-on-surface-variant">
+                    <summary className="cursor-pointer font-semibold text-brand-navy">Detail metode &amp; parameter</summary>
+                  <div className="space-y-2 pt-2 border-t border-border-subtle text-[11px] font-mono">
+                    <div className="flex items-center justify-between text-on-surface-variant">
+                      <span>Clarity (Kejernihan)</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((level) => (
+                          <span
+                            key={`c-${level}`}
+                            className={`w-2 h-2 rounded-full ${
+                              level <= topic.cupProfile.clarity
+                                ? 'bg-brand-teal'
+                                : 'bg-surface-container'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-on-surface-variant">
+                      <span>Body (Ketebalan)</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((level) => (
+                          <span
+                            key={`b-${level}`}
+                            className={`w-2 h-2 rounded-full ${
+                              level <= topic.cupProfile.body
+                                ? 'bg-brand-maroon'
+                                : 'bg-surface-container'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg bg-surface-container-low p-3 font-mono text-[11px] space-y-1 text-on-surface-variant">
+                    <p className="sm:hidden">{topic.description}</p>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Filter:</span>
+                      <span className="font-bold text-brand-charcoal truncate max-w-[170px]">
+                        {topic.filterType}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Gilingan:</span>
+                      <span className="font-bold text-brand-charcoal">
+                        {topic.grindSize}
+                      </span>
+                    </div>
+                    <div className="flex justify-between"><span>Suhu:</span><strong>{topic.waterTemp}</strong></div>
+                  </div>
+                  </details>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-border-subtle flex items-center justify-between">
+                  <button
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      const nextBrewer = METHOD_BREWERS[topic.id];
+                      if (nextBrewer) {
+                        setBrewerId(nextBrewer);
+                        setDose(topic.defaultDose);
+                        setTemperatureStyle(topic.id === 'japanese-iced' ? 'iced' : 'hot');
+                        setConsoleStep(1);
+                        scrollToSection('precision-console');
+                      } else {
+                        scrollToSection('recipes');
+                      }
+                    }}
+                    className="inline-flex min-h-11 items-center gap-1.5 text-left font-mono text-[10px] font-bold uppercase text-brand-maroon transition-colors hover:text-brand-charcoal sm:text-xs"
+                  >
+                    <span>{METHOD_BREWERS[topic.id] ? 'Gunakan metode' : 'Lihat resep'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <span className="font-mono text-xs font-bold text-on-surface-variant">
+                    {formatTimer(topic.targetSeconds)}
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 2. BREWING STUDIO */}
+      <section id="precision-console" className="brewing-studio scroll-mt-32 py-20 sm:py-28" aria-labelledby="precision-title">
+        <div className="site-container">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] lg:gap-20 editorial-reveal"><div><p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-maroon">02 / Brewing Studio</p><h2 id="precision-title" className="mt-5 font-editorial text-4xl font-extrabold leading-[1.06] tracking-tight text-brand-charcoal sm:text-5xl">Seduh dengan caramu.</h2></div><p className="max-w-xl self-end text-sm leading-7 text-on-surface-variant sm:text-base">Pilih alat, sesuaikan kopi dan air, lalu ikuti resep terkalibrasi dengan timer. Semua parameter tetap bisa kamu ubah.</p></div>
+          <div className="brewing-studio-panel mt-12 space-y-6 rounded-xl border border-border-subtle bg-white p-5 sm:p-8">        {/* Step Progression Tabs Header */}
         <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-brand-maroon" />
             <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-brand-charcoal">
-              Precision Brewing Console
+              Studio seduh
             </h2>
           </div>
 
@@ -409,7 +508,7 @@ export function BrewingGuidanceExperience() {
                   : 'text-on-surface-variant hover:text-brand-charcoal'
               }`}
             >
-              Step 1: Input
+              01 / Metode &amp; parameter
             </button>
             <span className="text-gray-300">/</span>
             <button
@@ -421,7 +520,7 @@ export function BrewingGuidanceExperience() {
                   : 'text-on-surface-variant hover:text-brand-charcoal'
               }`}
             >
-              Step 2: Resep
+              02 / Resep
             </button>
             <span className="text-gray-300">/</span>
             <button
@@ -433,14 +532,18 @@ export function BrewingGuidanceExperience() {
                   : 'text-on-surface-variant hover:text-brand-charcoal'
               }`}
             >
-              Step 3: Timer Seduh
+              03 / Seduh
             </button>
           </div>
         </div>
 
         {/* STEP 1 VIEW: INPUT PARAMETERS CONSOLE */}
         {consoleStep === 1 && (
-          <div className="rounded-2xl border border-border-subtle bg-white p-6 sm:p-10 shadow-sm space-y-8 animate-fade-in">
+          <div className="brewing-input-panel rounded-2xl border border-border-subtle bg-white p-6 sm:p-10 space-y-8 animate-fade-in">
+            <div className="brewing-selection-summary flex flex-wrap items-end justify-between gap-4 rounded-xl bg-brand-charcoal p-5 text-white sm:p-7">
+              <div><p className="font-mono text-[11px] uppercase tracking-widest text-brand-teal">Metode aktif</p><p className="mt-2 font-editorial text-2xl font-bold">{BREWER_HARDWARE.find((b) => b.id === brewerId)?.name}</p></div>
+              <div className="font-mono text-sm"><span className="block text-xs text-white/65">Dosis kopi</span><strong className="text-2xl">{dose} g</strong></div>
+            </div>
             {/* Hot vs Iced Segmented Switch */}
             <div className="mx-auto grid max-w-md grid-cols-2 rounded-2xl border border-border-subtle bg-surface-container-low p-1.5">
               <button
@@ -1194,135 +1297,7 @@ export function BrewingGuidanceExperience() {
             </div>
           </div>
         )}
-      </ReserveLayout>
-
-      {/* 3. SECTION: BREWING METHODS OVERVIEW (#brewing-methods) */}
-      <section id="brewing-methods" className="site-container scroll-mt-36 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border-subtle pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-brand-maroon font-mono text-xs font-bold uppercase tracking-wider">
-              <span>01. Educational Overview</span>
-            </div>
-            <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-bold text-brand-charcoal">
-              Spektrum Metode Seduh Specialty
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant font-sans">
-              Setiap brewer dirancang dengan geometri, filter, dan dinamika hidrolik berbeda untuk memandu bagaimana air melarutkan senyawa rasa dari bubuk kopi.
-            </p>
           </div>
-          <span className="font-mono text-xs text-on-surface-variant font-semibold">
-            6 Metode Standar Slowbar
-          </span>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {BREW_TOPICS.map((topic) => {
-            const isSelected = brewerId.includes(topic.id.split('-')[0]);
-            return (
-              <article
-                key={topic.id}
-                className={`relative flex flex-col justify-between rounded-xl p-6 border transition-all ${
-                  isSelected
-                    ? 'bg-white border-brand-maroon shadow-md ring-2 ring-brand-maroon/20'
-                    : 'bg-white border-border-subtle hover:border-brand-navy/40 shadow-xs'
-                }`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-brand-maroon">
-                      {topic.num}
-                    </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider bg-surface-container-low text-on-surface-variant border border-border-subtle">
-                      {topic.category}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="font-editorial text-xl font-bold text-brand-charcoal">
-                      {topic.title}
-                    </h3>
-                    <p className="font-mono text-[11px] text-brand-navy font-medium mt-0.5">
-                      {topic.subtitle}
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-on-surface-variant leading-relaxed font-sans line-clamp-3">
-                    {topic.description}
-                  </p>
-
-                  <div className="space-y-2 pt-2 border-t border-border-subtle text-[11px] font-mono">
-                    <div className="flex items-center justify-between text-on-surface-variant">
-                      <span>Clarity (Kejernihan)</span>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <span
-                            key={`c-${level}`}
-                            className={`w-2 h-2 rounded-full ${
-                              level <= topic.cupProfile.clarity
-                                ? 'bg-brand-teal'
-                                : 'bg-surface-container'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-on-surface-variant">
-                      <span>Body (Ketebalan)</span>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <span
-                            key={`b-${level}`}
-                            className={`w-2 h-2 rounded-full ${
-                              level <= topic.cupProfile.body
-                                ? 'bg-brand-maroon'
-                                : 'bg-surface-container'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-surface-container-low p-3 font-mono text-[11px] space-y-1 text-on-surface-variant">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Filter:</span>
-                      <span className="font-bold text-brand-charcoal truncate max-w-[170px]">
-                        {topic.filterType}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Gilingan:</span>
-                      <span className="font-bold text-brand-charcoal">
-                        {topic.grindSize}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-border-subtle flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const matchedBrewer = BREWER_HARDWARE.find((b) =>
-                        b.id.includes(topic.id.split('-')[0])
-                      );
-                      if (matchedBrewer) setBrewerId(matchedBrewer.id);
-                      setConsoleStep(1);
-                      scrollToSection('precision-console');
-                    }}
-                    className="inline-flex min-h-11 items-center gap-1.5 font-mono text-xs font-bold px-4 py-2 rounded-lg bg-surface-container text-brand-charcoal hover:bg-brand-navy hover:text-white transition-colors cursor-pointer"
-                  >
-                    <span>Muat ke Console</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-
-                  <span className="font-mono text-xs font-bold text-on-surface-variant">
-                    {formatTimer(topic.targetSeconds)}
-                  </span>
-                </div>
-              </article>
-            );
-          })}
         </div>
       </section>
 
@@ -1334,15 +1309,13 @@ export function BrewingGuidanceExperience() {
               <span>02. Tested Roastery Recipes</span>
             </div>
             <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-bold text-brand-charcoal">
-              Resep Seduh Barista 52 Coffee
+              Mulai dari resep yang jelas.
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant font-sans">
-              Resep ekstraksi yang dikalibrasi harian di tasting room kami untuk mengoptimalkan potensi rasa tiap origin kopi.
+              Gunakan resep awal ini, lalu sesuaikan dengan beans dan alat yang kamu miliki.
             </p>
           </div>
-          <span className="font-mono text-xs text-on-surface-variant font-semibold">
-            Rekomendasi Berdasarkan Lot Panen
-          </span>
+          <span className="font-mono text-xs text-on-surface-variant font-semibold">{CURATED_RECIPES.length} resep tersedia</span>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -1375,6 +1348,7 @@ export function BrewingGuidanceExperience() {
                     <span className="text-[10px] text-gray-500 block">Air:</span>
                     <span className="font-bold text-brand-charcoal text-sm">{r.waterYield}ml</span>
                   </div>
+                  <div className="p-2.5 rounded-lg bg-surface-container-low"><span className="text-[10px] text-gray-500 block">Rasio:</span><span className="font-bold text-brand-charcoal text-sm">1:{r.ratio}</span></div>
                   <div className="p-2.5 rounded-lg bg-surface-container-low">
                     <span className="text-[10px] text-gray-500 block">Suhu:</span>
                     <span className="font-bold text-brand-charcoal text-sm">{r.temp}°C</span>
@@ -1383,6 +1357,7 @@ export function BrewingGuidanceExperience() {
                     <span className="text-[10px] text-gray-500 block">Waktu:</span>
                     <span className="font-bold text-brand-charcoal text-sm">{r.time}</span>
                   </div>
+                  <div className="col-span-2 p-2.5 rounded-lg bg-surface-container-low sm:col-span-3"><span className="text-[10px] text-gray-500 block">Gilingan:</span><span className="font-bold text-brand-charcoal text-sm">{r.grind}</span></div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
@@ -1404,13 +1379,15 @@ export function BrewingGuidanceExperience() {
                   onClick={() => {
                     setOrigin(r.beanName);
                     setDose(r.dose);
+                    if (METHOD_BREWERS[r.methodId]) setBrewerId(METHOD_BREWERS[r.methodId]);
+                    setTemperatureStyle(r.methodId === 'japanese-iced' ? 'iced' : 'hot');
                     setConsoleStep(1);
                     scrollToSection('precision-console');
                   }}
                   className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brand-navy px-4 py-2.5 font-mono text-xs font-bold text-white hover:bg-brand-navy-light transition-colors shadow-xs cursor-pointer"
                 >
                   <Timer className="w-3.5 h-3.5 text-brand-teal" />
-                  <span>Kustomisasi di Console</span>
+                  <span>Gunakan resep</span>
                 </button>
 
                 <Link
@@ -1434,10 +1411,10 @@ export function BrewingGuidanceExperience() {
               <span>03. Particle Calibration</span>
             </div>
             <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-bold text-brand-charcoal">
-              Panduan Kalibrasi Ukuran Gilingan
+              Sesuaikan ukuran gilingan.
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant font-sans">
-              Ukuran partikel bubuk menentukan luas area kontak dan laju alir air. Pilih tingkat gilingan sesuai brewer yang Anda gunakan.
+              Ukuran gilingan memengaruhi laju alir dan rasa. Mulai dari acuan ini lalu evaluasi hasil seduhan.
             </p>
           </div>
           <span className="font-mono text-xs text-on-surface-variant font-semibold">
@@ -1458,13 +1435,14 @@ export function BrewingGuidanceExperience() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle font-normal">
-                {GRIND_CHART.map((item) => (
+                {GRIND_CHART.map((item, index) => (
                   <tr key={item.level} className="hover:bg-surface-container-low/50 transition-colors">
                     <td className="p-4 sm:p-5 font-mono font-bold text-brand-charcoal">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-brand-maroon shrink-0" />
                         <span>{item.level}</span>
                       </div>
+                      <div className="relative mt-3 h-1 w-32 rounded-full bg-[#dce6e9]" aria-hidden="true"><span className="absolute -top-1 h-3 w-3 rounded-full bg-brand-maroon" style={{ left: `calc(${(index / (GRIND_CHART.length - 1)) * 100}% - 6px)` }} /></div>
                     </td>
                     <td className="p-4 sm:p-5 font-mono text-brand-navy font-semibold">
                       {item.micron}
@@ -1503,7 +1481,7 @@ export function BrewingGuidanceExperience() {
               <span>04. Extraction Dynamics</span>
             </div>
             <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-bold text-brand-charcoal">
-              Rasio Seduh &amp; Teori Ekstraksi
+              Pahami rasio dan ekstraksi.
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant font-sans">
               Rasio mengatur kekuatan konsentrasi rasa, sedangkan ekstraksi menentukan seberapa banyak senyawa yang larut.

@@ -1,0 +1,615 @@
+{
+  "dataset_version": "",
+  "validation_date": "",
+  "validators": {
+    "researcher": "",
+    "owner_52_coffee": ""
+  },
+  "knowledge_base_fingerprint": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+  "draft_sha256": "50fbae6ba29e5f8e6f2848c413490887235af2a8903b223e07bb334cb14c97c2",
+  "reference_answers_final": false,
+  "source_units_confirmed": false,
+  "revision_notes": "",
+  "items": [
+    {
+      "id": "PI01",
+      "content_sha256": "41941a95b0d9889aac308f47d84330d784ab3ea9dde634cc073120c16815aca0",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI02",
+      "content_sha256": "ea3585182cd97c7b6aab51833db9be2073550da1a206c164aa7f4f9593baa84f",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI03",
+      "content_sha256": "2983b37cd1cb08710985d6afaa2a87154d5982d906db57c5115235d87a33afed",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI04",
+      "content_sha256": "27013214a4b9649b5f846e3ac67b2f97f2fcf3a9da61b58ec16b2ae10dbb5dee",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI05",
+      "content_sha256": "cb916a910a2a744d9fa62544dad1fabcaa2cece1d9d3a064639469c6876b585e",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI06",
+      "content_sha256": "641643bb725f24b51f5c37328a0bfbc348fa1baaecfbff807a22b2e27ec15fba",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI07",
+      "content_sha256": "e4a04607efe0d34999187f4d50856279dbd6b731865676975461ea824b0c4372",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI08",
+      "content_sha256": "1f67f321238f475afa0401bf4c3739358540498f8389cc0cc6815ba8b4aace6b",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI09",
+      "content_sha256": "d527eeb357f58bc62e290047dff45ea2f2fccfc7184bf74fbc1b609b8ee53c54",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PI10",
+      "content_sha256": "b2f6a0da5ce32d2c4b56ca434c8744995c835dad0db64db6e9c8d8df7ce482a5",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR01",
+      "content_sha256": "1076212db6386586adbec83af85b27fc483f43d7c580317e6880b94df8571b1f",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR02",
+      "content_sha256": "f9ea71a620d1d7807228735a0327c2d97e067ee17c1b0963e74405fa8d05cfaf",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR03",
+      "content_sha256": "646290feabaa08460a7b2b92af9ce069bb1ac6d209a408a3fa8a46d8a427455e",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR04",
+      "content_sha256": "98b68c8eb5551ddc4a575fabf11e3c664e8f69ed4f20ed09cefd72cc1dca19b5",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR05",
+      "content_sha256": "d10022332794bf01124327de934e5ea2a10f230efcdddc89179656985be378d3",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR06",
+      "content_sha256": "4475c8d04690731b52aa1be251d68ecf4cab98d077a8d7748fd27c53b9a8dc06",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR07",
+      "content_sha256": "ba37b8a152d2087b7abf83d3ae5ee02566c4fe9945116efb0f51fe6163ef5199",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR08",
+      "content_sha256": "5a8f7d8aa110eb6f963623266f536f5757730a0abd0851f96fcca9c5c51075c3",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR09",
+      "content_sha256": "101a83596ad4ea812b5c55a301dc6f6275e7cbfb3ef346d8a0874aa86e76b18f",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PR10",
+      "content_sha256": "242cd4ebf7efcf7f2d503ed70010967a64d3728e7193d4d261fd78d74e8c8484",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS01",
+      "content_sha256": "893cdbf190c89a43a15f16d6502307c883f43513cb7c65d01eb9c5d38cdb89d5",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS02",
+      "content_sha256": "d391e5292e3c5e9f808379ae7e968bcd392cb191ba57025f9e8c65b15673d779",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS03",
+      "content_sha256": "b1e47ebb545fb9bd29b01c882e8a046f17652405ded0ba6613481a5eb5e0baca",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS04",
+      "content_sha256": "e54ee875a567460300adb486a82b106ee7b2238b0dc49b6c4025fb5235ad887e",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS05",
+      "content_sha256": "86ebdfc68e435debb2376a74509291e419683a28c432679911f9111687cd0ff9",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS06",
+      "content_sha256": "fef63d8dbd77df6d698232c92d931d401f0d0c9371dab7b1cf182dd7b002fc0d",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS07",
+      "content_sha256": "1935c8ca443b6104ac2afdf3024d9efc1ec3f3c74b0bbf96091b9514e4fbc443",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS08",
+      "content_sha256": "1b84d59f943a6a5980af8a6c1ab85fe61b62de0463abef7bb0361af2e34918d1",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS09",
+      "content_sha256": "3bfdf240a1161b449bd7c035adc4569f9bd8f181cff57f12434e8bb019ca61ad",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "BS10",
+      "content_sha256": "29ee7f47b8d83ed5b40c720e98461e0285f4dd95e27a8ebb9787df21fdc7e700",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC01",
+      "content_sha256": "4dd997654334196d16a3aaa982b0bc880c3507e9090602cf73c3efa1491fca8b",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC02",
+      "content_sha256": "5b9ef2daf20c7bdb130c6f9d20b1dd70bad41cdb7c42b5b0b22a623cf9771962",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC03",
+      "content_sha256": "4a03a583e8f7fedab654cd295696746d5a8f36d2aadbcbb7d7950d634f337216",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC04",
+      "content_sha256": "da0e3e9592f0618a9d8f64857809caaed55f1e7a1f34ae2b5474e575aca74747",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC05",
+      "content_sha256": "fb08162f83c53569e5e6bd67abeae32b098775d4de7b2a6a091b55d4db528b3c",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC06",
+      "content_sha256": "66cab77467de366d914c71ce41f3668e9e70890d67172115add276a52862ef89",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC07",
+      "content_sha256": "1bbe1f35d83d2d8602dd1d7469517acd6ea80c36fb8aa811dc1fe099e722b519",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC08",
+      "content_sha256": "00d073121fbd2f2fbca7af9a29fac9255d098b15b2379d7ffd494b21fd717a6d",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC09",
+      "content_sha256": "f5d79387202f1e5e38a23e10b8d97f8ae2727f32727ec060156fb028fec889cf",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    },
+    {
+      "id": "PC10",
+      "content_sha256": "4d86947192723d76411c413504f12c3578f51d3bd6cb8f5874ad8e6ba41ffc5a",
+      "researcher": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "owner_52_coffee": {
+        "approved": false,
+        "validator": "",
+        "date": ""
+      },
+      "revision_note": ""
+    }
+  ]
+}

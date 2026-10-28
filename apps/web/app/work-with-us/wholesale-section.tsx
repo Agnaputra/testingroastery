@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   Package,
   Flame,
   TrendingUp,
-  Calculator,
   Phone,
   CheckCircle2,
 } from 'lucide-react';
@@ -43,86 +43,45 @@ export function WholesaleSection() {
   return (
     <>
       {/* 2. 3 KEY PARTNERSHIP SERVICES */}
-      <section id="wholesale-services" className="site-container page-section scroll-mt-28">
+      <section id="wholesale-services" className="site-container scroll-mt-28 py-20 sm:py-28">
         <SectionIntro
           className="partnership-section-intro"
-          align="center"
+          align="left"
           kicker="Solusi kemitraan"
-          title="Layanan roastery untuk bisnis Anda"
-          description="Pilih dukungan yang paling sesuai dengan tahap dan kebutuhan operasional bisnis Anda."
+          title="Kopi yang tepat untuk cara kerjamu."
+          description="Tiga pilihan kerja sama, dari pasokan rutin hingga pengembangan menu."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.05 }}
-            className="ui-surface p-6 space-y-3 group"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#49697a]/25 bg-[#49697a]/10 text-[#49697a] transition-transform group-hover:scale-105">
-              <Package className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 1</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Supplier Roast Beans</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Pasokan roast beans terjadwal untuk kedai kopi, restoran, dan hotel dengan SOP mutu dan konsistensi ekstraksi.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="ui-surface p-6 space-y-3 group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-brand-navy/10 border border-brand-navy/20 flex items-center justify-center text-brand-navy group-hover:scale-105 transition-transform">
-              <Flame className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 2</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Label Khusus &amp; Special Blends</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Pembuatan signature blend eksklusif dengan profil sangrai yang dirancang khusus untuk identitas brand mitra (seperti BYOB).
-            </p>
-            <Link href="/work-with-us/blend-builder" className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-maroon hover:underline">Buka konsultasi custom blend →</Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-            className="ui-surface p-6 space-y-3 group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-brand-charcoal/10 border border-brand-charcoal/20 flex items-center justify-center text-brand-charcoal group-hover:scale-105 transition-transform">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-mono uppercase text-gray-500 block font-bold">Layanan 3</span>
-            <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Consultation Business Beverages</h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Pendampingan menyeluruh mencakup SOP barista, supply mesin &amp; grinder, perancangan layout coffee bar, kalkulasi HPP cangkir, dan racikan signature menu.
-            </p>
-            <Link href="/tools/price-calculator" className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-maroon hover:underline">Buka kalkulator HPP →</Link>
-          </motion.div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3 editorial-reveal-list">
+          {[
+            { label: 'Pasokan rutin', title: 'Supplier Roast Beans', description: 'Roasted beans dengan profil rasa dan jadwal pasokan yang disepakati untuk operasional harian.', image: '/images/canva-pouch-showcase.jpg', alt: 'Kemasan roasted beans 52 Coffee', href: '#wholesale-partnership', action: 'Diskusikan pasokan' },
+            { label: 'Identitas rasa', title: 'Label Khusus & Special Blends', description: 'Kembangkan karakter kopi untuk menu dan identitas bisnismu bersama tim roastery.', image: '/images/byob-roaster-craft.jpg', alt: 'Proses meracik dan menyangrai blend', href: '/work-with-us/consultations#byob', action: 'Rancang custom blend' },
+            { label: 'Pendampingan', title: 'Consultation Business Beverages', description: 'Diskusikan peralatan, SOP seduh, menu, dan biaya per sajian sebelum mengambil keputusan.', image: '/images/canva-cafe-table.jpg', alt: 'Penyajian kopi di meja kafe', href: '/work-with-us/consultations#consultation-form', action: 'Mulai konsultasi' },
+          ].map((service) => (
+            <article key={service.title} className="group overflow-hidden rounded-xl border border-border-subtle bg-white">
+              <div className="relative aspect-[4/3] overflow-hidden bg-brand-mist"><Image src={service.image} alt={service.alt} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" /></div>
+              <div className="space-y-3 p-6"><span className="block font-mono text-[10px] font-bold uppercase tracking-widest text-brand-maroon">{service.label}</span><h3 className="font-editorial text-xl font-bold text-brand-charcoal">{service.title}</h3><p className="min-h-20 text-sm leading-6 text-on-surface-variant">{service.description}</p><Link href={service.href} className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-maroon underline-offset-4 hover:underline">{service.action} →</Link></div>
+            </article>
+          ))}
         </div>
       </section>
 
-      {/* Kalkulator HPP Banner */}
-      <section id="kalkulator-hpp" className="site-container pb-4" aria-labelledby="hpp-heading">
-        <div className="grid gap-6 border border-border-subtle bg-surface-container-low p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="flex gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-maroon/10 text-brand-maroon">
-              <Calculator className="h-6 w-6" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-maroon">Kemitraan Bisnis</p>
-              <h2 id="hpp-heading" className="mt-1 font-editorial text-2xl font-bold text-brand-charcoal">Kalkulator HPP Bisnis</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">Hitung estimasi kebutuhan beans, biaya per sajian, harga jual, dan margin berdasarkan input bisnis Anda sebelum memulai diskusi kemitraan.</p>
-            </div>
-          </div>
-          <Link href="/tools/price-calculator" className="btn-primary shrink-0 text-sm">Buka Kalkulator HPP</Link>
-        </div>
+      <section className="site-container pb-20 sm:pb-28 editorial-reveal" aria-labelledby="supply-process-title">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-maroon">Dari brief ke pasokan</p>
+        <h2 id="supply-process-title" className="mt-3 max-w-[22ch] font-editorial text-3xl font-extrabold text-brand-charcoal sm:text-4xl">Proses yang jelas untuk bisnis Anda.</h2>
+        <ol className="mt-8 grid border-y border-border-subtle md:grid-cols-3">
+          {[
+            ['01', 'Ceritakan kebutuhan', 'Jenis usaha, menu, volume, dan target rasa.'],
+            ['02', 'Coba dan sesuaikan', 'Kami diskusikan pilihan beans atau sampel blend.'],
+            ['03', 'Tetapkan pasokan', 'Sepakati spesifikasi, jumlah, dan jadwal bersama tim.'],
+          ].map(([number, title, description]) => (
+            <li key={number} className="border-b border-border-subtle py-5 last:border-b-0 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0">
+              <span className="font-mono text-xs font-bold text-brand-maroon">{number}</span>
+              <h3 className="mt-7 font-editorial text-lg font-bold text-brand-charcoal">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-on-surface-variant">{description}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {/* 3. B2B INQUIRY FORM */}

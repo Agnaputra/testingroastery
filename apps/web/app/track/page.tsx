@@ -21,8 +21,12 @@ import {
 import { PageIntro } from '../../components/ui/page-structure';
 import { useOrderStore, OrderRecord, OrderStatus } from '../../lib/store/useOrderStore';
 import { formatRupiah } from '../../lib/data';
+import { CustomerTrack } from '../../components/customer-track';
 
 export default function TrackOrderPage() {
+  if (process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1') {
+    return <Suspense><CustomerTrack /></Suspense>;
+  }
   return (
     <Suspense
       fallback={

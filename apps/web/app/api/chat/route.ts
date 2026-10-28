@@ -3,13 +3,12 @@ import { getPublishedProducts, toKnowledgeCatalogSlug, toWebCatalogSlug } from '
 import { isVirtualBaristaAction, type VirtualBaristaAction } from '../../../lib/virtual-barista-actions';
 import { resolveCatalogSelectedVariant } from '../../../lib/virtual-barista-recommendations';
 import { isVirtualBaristaChatResponse } from '../../../lib/virtual-barista-response';
+import { loadCatalogPublicationAuthority, PRICE_TEST_MODE } from '../../../lib/catalog-publication';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 const publishedProducts = getPublishedProducts();
-const publishedProductsBySlug = new Map(publishedProducts.map((product) => [product.slug, product]));
-const publishedSlugs = new Set(publishedProductsBySlug.keys());
 const BLOCKED_PHRASES = [
   'ignore previous instructions', 'ignore all instructions', 'system prompt', 'jailbreak',
   'bypass filter', 'bypass guardrail', 'act as dan', 'you are dan', 'pretend you are',
@@ -104,6 +103,18 @@ export async function POST(req: NextRequest) {
         if (backendRes.ok) {
           const payload: unknown = await backendRes.json();
           if (!isVirtualBaristaChatResponse(payload)) return unavailableResponse();
+          const authority = await loadCatalogPublicationAuthority(
+            publishedProducts,
+            () => fetch(`${aiBackendUrl}${PRICE_TEST_MODE ? '/api/catalog/authority' : '/api/catalog/publication'}`, { cache: 'no-store' }),
+          );
+          if (authority.status === 'unavailable' && payload.grounding === 'catalog') return unavailableResponse();
+          if (PRICE_TEST_MODE && payload.grounding === 'catalog' && (
+            authority.status !== 'verified'
+            || payload.priceRevision !== authority.priceRevision
+            || payload.effectiveCatalogFingerprint !== authority.effectiveCatalogFingerprint
+          )) return unavailableResponse();
+          const publishedProductsBySlug = new Map(authority.products.map((product) => [product.slug, product]));
+          const publishedSlugs = new Set(publishedProductsBySlug.keys());
           const sourceSlugs = Array.isArray(payload.recommendedProductSlugs)
             ? payload.recommendedProductSlugs
             : Array.isArray(payload.recommendedSlugs)

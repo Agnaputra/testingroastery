@@ -5,7 +5,9 @@ import { ArrowLeft, ArrowRight, FlaskConical, Info } from 'lucide-react';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { PageIntro } from '../../../components/ui/page-structure';
 import { COFFEE_LAB_CONTENT, getCoffeeLabEntry } from '../../../lib/coffee-lab-content';
-import { getPublishedProducts } from '../../../lib/catalog-master';
+import { getServerCatalogPublicationAuthority } from '../../../lib/catalog-publication-server';
+
+export const dynamic = 'force-dynamic';
 
 type Props = { params: { slug: string[] } };
 
@@ -19,8 +21,8 @@ const LEGACY_ROUTES: Record<string, string> = {
   'blend/blend-development': '/coffee-lab/build-your-own-blend#blend-development',
   'blend/tasting-adjustment': '/coffee-lab/build-your-own-blend#tasting-adjustment',
   'experiments/cupping': '/coffee-lab/coffee-experiments#cupping-events',
-  'experiments/roasting': '/coffee-lab/coffee-experiments#roasting-experiments',
-  'experiments/brewing': '/coffee-lab/coffee-experiments#brewing-experiments',
+  'experiments/roasting': '/coffee-lab/coffee-experiments#agenda-events',
+  'experiments/brewing': '/coffee-lab/coffee-experiments#agenda-events',
 };
 
 export function generateStaticParams() {
@@ -32,15 +34,16 @@ export function generateMetadata({ params }: Props): Metadata {
   return entry ? { title: `${entry.title} | Coffee Lab`, description: entry.description } : {};
 }
 
-export default function CoffeeLabDetailPage({ params }: Props) {
+export default async function CoffeeLabDetailPage({ params }: Props) {
   const legacyTarget = LEGACY_ROUTES[params.slug.join('/')];
   if (legacyTarget) permanentRedirect(legacyTarget);
 
   const entry = getCoffeeLabEntry(params.slug);
   if (!entry) notFound();
 
-  const beans = entry.group === 'blend'
-    ? getPublishedProducts().filter((product) => ['filter', 'espresso', 'reserve'].includes(product.category)).slice(0, 4)
+  const authority = entry.group === 'blend' ? await getServerCatalogPublicationAuthority() : null;
+  const beans = authority?.status === 'verified'
+    ? authority.products.filter((product) => ['filter', 'espresso', 'reserve'].includes(product.category)).slice(0, 4)
     : [];
 
   return (

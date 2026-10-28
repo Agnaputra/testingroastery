@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CatalogProductDetail from '../../../components/catalog-product-detail';
-import { getProductBySlug } from '../../../lib/data';
 import { getPublishedProducts } from '../../../lib/catalog-master';
+import { getServerCatalogPublicationAuthority } from '../../../lib/catalog-publication-server';
+
+export const dynamic = 'force-dynamic';
 
 interface ProductPageProps {
   params: {
@@ -14,10 +16,11 @@ export function generateStaticParams() {
   return getPublishedProducts().map(({ slug }) => ({ slug }));
 }
 
-export function generateMetadata({ params }: ProductPageProps): Metadata {
-  const product = getProductBySlug(params.slug);
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const authority = await getServerCatalogPublicationAuthority();
+  const product = authority.products.find((item) => item.slug === params.slug);
 
-  if (!product) {
+  if (!product || authority.status !== 'verified') {
     return {
       title: 'Produk tidak ditemukan | 52 Coffee & Roastery',
     };
@@ -32,10 +35,12 @@ export function generateMetadata({ params }: ProductPageProps): Metadata {
   };
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  if (!getProductBySlug(params.slug)) {
-    notFound();
+export default async function ProductPage({ params }: ProductPageProps) {
+  const authority = await getServerCatalogPublicationAuthority();
+  if (authority.status === 'unavailable') {
+    return <main className="site-container py-32 text-center">Status katalog sedang tidak tersedia. Silakan coba lagi.</main>;
   }
-
-  return <CatalogProductDetail slug={params.slug} />;
+  const effectiveProduct = authority.products.find((item) => item.slug === params.slug);
+  if (!effectiveProduct) notFound();
+  return <CatalogProductDetail slug={params.slug} effectiveProduct={effectiveProduct} />;
 }

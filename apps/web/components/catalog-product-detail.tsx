@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import {
   getProductBySlug,
+  type CoffeeProduct,
   ProductVariant,
   formatRupiah,
   getProductDisplayImage,
@@ -30,22 +31,24 @@ import {
   TOKOPEDIA_URL,
 } from '../lib/data';
 import { useCartStore } from '../lib/store/useCartStore';
+import { getCurrentEffectiveProduct } from '../lib/catalog-publication';
 import { FlavorRadarChart, FlavorMetrics } from './flavor-radar-chart';
 
 interface CatalogProductDetailProps {
   slug: string;
+  effectiveProduct?: CoffeeProduct;
 }
 
-export default function CatalogProductDetail({ slug }: CatalogProductDetailProps) {
+export default function CatalogProductDetail({ slug, effectiveProduct }: CatalogProductDetailProps) {
   return (
     <Suspense fallback={<div className="p-20 text-center text-xs font-mono text-gray-400">Memuat detail produk...</div>}>
-      <ProductDetailContent slug={slug} />
+      <ProductDetailContent slug={slug} effectiveProduct={effectiveProduct} />
     </Suspense>
   );
 }
 
-function ProductDetailContent({ slug }: CatalogProductDetailProps) {
-  const product = getProductBySlug(slug);
+function ProductDetailContent({ slug, effectiveProduct }: CatalogProductDetailProps) {
+  const product = effectiveProduct ?? getProductBySlug(slug);
 
   const searchParams = useSearchParams();
   const modeParam = searchParams.get('mode');
@@ -100,7 +103,9 @@ function ProductDetailContent({ slug }: CatalogProductDetailProps) {
   const cleanName = getCustomerProductName(product);
   const currentPrice = orderMode === 'cup' ? (product.cupPrice || product.basePrice) : selectedVariant.price;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const current = await getCurrentEffectiveProduct(product);
+    if (!current) return;
     if (orderMode === 'cup') {
       addItem({
         productId: product.id,
@@ -111,12 +116,14 @@ function ProductDetailContent({ slug }: CatalogProductDetailProps) {
         weightLabel: '1 sajian',
         grind: 'whole',
         grindLabel: `Slowbar Brew (${servingTemp === 'hot' ? 'Hot Filter' : 'Ice Filter'})`,
-        unitPrice: product.cupPrice || product.basePrice,
+        unitPrice: current.cupPrice || current.basePrice,
         quantity: quantity,
         series: product.series,
         tastingNotes: product.tastingNotes,
       });
     } else {
+      const currentVariant = current.variants.find((variant) => variant.weightGrams === selectedVariant.weightGrams && variant.inStock);
+      if (!currentVariant) return;
       addItem({
         productId: product.id,
         name: cleanName,
@@ -126,7 +133,7 @@ function ProductDetailContent({ slug }: CatalogProductDetailProps) {
         weightLabel: selectedVariant.weightLabel,
         grind: 'whole',
         grindLabel: 'Biji utuh',
-        unitPrice: selectedVariant.price,
+        unitPrice: currentVariant.price,
         quantity: quantity,
         series: product.series,
         tastingNotes: product.tastingNotes,

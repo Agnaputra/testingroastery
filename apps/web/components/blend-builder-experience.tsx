@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
@@ -11,8 +11,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useCartStore } from '../lib/store/useCartStore';
-import { formatRupiah, getProductDisplayImage } from '../lib/data';
+import { formatRupiah, getProductDisplayImage, type CoffeeProduct } from '../lib/data';
 import { getPublishedProducts } from '../lib/catalog-master';
+import { useCatalogPublication } from '../lib/use-catalog-publication';
 import { calculateBlendPackagePrice, combineBlendTastingNotes, getPackagePrice, getVariantPricePerKg, type BlendPackagePrices, type BlendWeight } from '../lib/blend-profile';
 import { calculatePartnershipEstimate } from '../lib/partnership-estimate';
 import { FlavorRadarChart, FlavorMetrics } from './flavor-radar-chart';
@@ -21,6 +22,7 @@ import { PageIntro, SectionIntro } from './ui/page-structure';
 
 interface BlendComponent {
   id: string;
+  slug: string;
   name: string;
   process: string;
   region: string;
@@ -31,9 +33,7 @@ interface BlendComponent {
   image: string;
 }
 
-const AVAILABLE_BEANS: BlendComponent[] = getPublishedProducts()
-  .filter((product) => product.category === 'espresso' && !product.isSoldOut)
-  .map((product) => {
+const toBlendComponent = (product: CoffeeProduct): BlendComponent => {
     const name = product.name.toLowerCase();
     const species: BlendComponent['species'] = name.includes('robusta')
       ? 'Robusta'
@@ -45,6 +45,7 @@ const AVAILABLE_BEANS: BlendComponent[] = getPublishedProducts()
 
     return {
       id: product.id,
+      slug: product.slug,
       name: product.name,
       process: product.process,
       region: product.region,
@@ -65,7 +66,11 @@ const AVAILABLE_BEANS: BlendComponent[] = getPublishedProducts()
         balance: Math.min(10, ((product.acidity || 3) + (product.sweetness || 3.5) + (product.body || 3.5)) / 1.5),
       },
     };
-  });
+  };
+
+const AVAILABLE_BEANS: BlendComponent[] = getPublishedProducts()
+  .filter((product) => product.category === 'espresso' && !product.isSoldOut)
+  .map(toBlendComponent);
 
 const RETAIL_BEANS = getPublishedProducts().filter(
   (product) => ['filter', 'espresso', 'reserve'].includes(product.category)
@@ -80,8 +85,17 @@ const SIZE_OPTIONS: Array<{ label: '250 g' | '500 g' | '1 kg'; grams: BlendWeigh
 ];
 
 export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mode?: 'lab' | 'partnership'; embedded?: boolean }) {
+  const { authority, refresh: refreshPublication } = useCatalogPublication();
+  const activeBeans = useMemo(() => authority?.status === 'verified'
+    ? authority.products.filter((product) => product.category === 'espresso' && !product.isSoldOut).map(toBlendComponent)
+    : [], [authority]);
+  const activeRetailBeans = useMemo(() => authority?.status === 'verified'
+    ? authority.products.filter((product) => ['filter', 'espresso', 'reserve'].includes(product.category)
+      && !product.isSoldOut && product.variants.some((variant) => variant.inStock))
+    : [], [authority]);
   const [componentA, setComponentA] = useState<BlendComponent>(AVAILABLE_BEANS[0] || {
     id: 'default-a',
+    slug: 'default-a',
     name: 'Arabica Java Ijen',
     process: 'Full Wash',
     region: 'Bondowoso, Jawa Timur',
@@ -95,6 +109,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
 
   const [componentB, setComponentB] = useState<BlendComponent>(AVAILABLE_BEANS[1] || AVAILABLE_BEANS[0] || {
     id: 'default-b',
+    slug: 'default-b',
     name: 'Dampit Fine Robusta',
     process: 'Natural',
     region: 'Malang, Jawa Timur',
@@ -115,6 +130,15 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
   const [hppSource, setHppSource] = useState<'byob' | 'retail'>('byob');
   const [retailBeanId, setRetailBeanId] = useState(RETAIL_BEANS[0]?.id ?? '');
   const [retailVariantWeight, setRetailVariantWeight] = useState(RETAIL_BEANS[0]?.variants.find((variant) => variant.inStock)?.weightGrams ?? 0);
+  useEffect(() => {
+    if (authority?.status !== 'verified') return;
+    if (activeBeans[0]) {
+      setComponentA((current) => activeBeans.find((bean) => bean.id === current.id) ?? activeBeans[0]);
+      setComponentB((current) => activeBeans.find((bean) => bean.id === current.id) ?? activeBeans[1] ?? activeBeans[0]);
+      setComponentC((current) => activeBeans.find((bean) => bean.id === current?.id) ?? activeBeans[2] ?? activeBeans[0]);
+    }
+    if (activeRetailBeans[0]) setRetailBeanId((current) => activeRetailBeans.find((bean) => bean.id === current)?.id ?? activeRetailBeans[0].id);
+  }, [authority, activeBeans, activeRetailBeans]);
   const [doseGrams, setDoseGrams] = useState(18);
   const [targetCups, setTargetCups] = useState(100);
   const [menuPrice, setMenuPrice] = useState(22000);
@@ -129,8 +153,8 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
   const selectedWeight = SIZE_OPTIONS.find((option) => option.label === selectedSize)?.grams ?? 250;
 
   const applyPreset = (beanAId: string, beanBId: string, rA: number = 70, rB: number = 30) => {
-    const a = AVAILABLE_BEANS.find((b) => b.id === beanAId) || AVAILABLE_BEANS[0];
-    const b = AVAILABLE_BEANS.find((b) => b.id === beanBId) || AVAILABLE_BEANS[1];
+    const a = activeBeans.find((b) => b.id === beanAId) || activeBeans[0];
+    const b = activeBeans.find((b) => b.id === beanBId) || activeBeans[1];
     setComponentA(a);
     setComponentB(b);
     setRatioA(rA);
@@ -216,7 +240,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
     ]);
   }, [componentA.notes, componentB.notes, componentC.notes, hasComponentC, ratioA, ratioB, ratioC]);
 
-  const selectedRetailBean = RETAIL_BEANS.find((product) => product.id === retailBeanId) ?? RETAIL_BEANS[0];
+  const selectedRetailBean = activeRetailBeans.find((product) => product.id === retailBeanId) ?? activeRetailBeans[0];
   const retailVariants = selectedRetailBean?.variants.filter((variant) => variant.inStock) ?? [];
   const selectedRetailVariant = retailVariants.find((variant) => variant.weightGrams === retailVariantWeight) ?? retailVariants[0];
   const hppUsesRetail = hppSource === 'retail' && Boolean(selectedRetailBean && selectedRetailVariant);
@@ -357,7 +381,11 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
     setRatioC(0);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const current = await refreshPublication();
+    const currentSlugs = new Set(current.products.map((product) => product.slug));
+    const componentSlugs = [componentA.slug, componentB.slug, ...(hasComponentC ? [componentC.slug] : [])];
+    if (current.status !== 'verified' || !componentSlugs.every((slug) => currentSlugs.has(slug))) return;
     const blendComponentsList = hasComponentC
       ? `${ratioA}% ${componentA.name.split(' ')[0]} + ${ratioB}% ${componentB.name.split(' ')[0]} + ${ratioC}% ${componentC.name.split(' ')[0]}`
       : `${ratioA}% ${componentA.name.split(' ')[0]} + ${ratioB}% ${componentB.name.split(' ')[0]}`;
@@ -377,6 +405,12 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
       quantity: 1,
       series: 'BYOB Custom Blend',
       tastingNotes: predictedNotes,
+      componentSlugs,
+      blendComponents: [
+        { slug: componentA.slug, ratio: ratioA },
+        { slug: componentB.slug, ratio: ratioB },
+        ...(hasComponentC ? [{ slug: componentC.slug, ratio: ratioC }] : []),
+      ],
     });
 
     setIsAdded(true);
@@ -390,6 +424,26 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  if (!authority) return <p role="status" className="py-8 text-sm text-on-surface-variant">Memuat pilihan beans dan harga katalog...</p>;
+
+  if (authority.status !== 'verified' || activeBeans.length < 2) {
+    if (isPartnership) {
+      return <div className="space-y-10">
+        <section id="pricing-calculator" className="scroll-mt-32 rounded-xl border border-border-subtle bg-white p-6 sm:p-8" aria-labelledby="pricing-unavailable-title">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-brand-maroon">Build Your Own Blend / Kalkulator HPP</p>
+          <h3 id="pricing-unavailable-title" className="mt-3 font-editorial text-2xl font-bold text-brand-charcoal">Data katalog belum tersedia.</h3>
+          <p role="status" className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">Pemilihan beans dan estimasi HPP membutuhkan harga katalog yang terverifikasi. Anda tetap dapat mengirim brief tanpa estimasi.</p>
+          <button type="button" onClick={() => void refreshPublication()} className="mt-5 min-h-11 rounded-md border border-brand-navy px-5 text-sm font-bold text-brand-navy hover:bg-brand-mist">Coba muat ulang katalog</button>
+        </section>
+        <section id="consultation-form" className="scroll-mt-40 space-y-6 border-t border-border-subtle pt-10">
+          <SectionIntro kicker="Mulai diskusi" title="Konsultasikan kebutuhan bisnismu" description="Ceritakan kebutuhan pasokan atau karakter kopi yang Anda cari. Tim kami akan menindaklanjuti melalui WhatsApp." />
+          <PartnershipBlendBrief />
+        </section>
+      </div>;
+    }
+    return <div className="rounded-xl border border-border-subtle bg-white p-6 text-sm text-on-surface-variant" role="status">Pilihan beans belum tersedia dari katalog. <button type="button" onClick={() => void refreshPublication()} className="min-h-11 font-bold text-brand-navy underline">Coba muat ulang</button></div>;
+  }
 
   return (
     <motion.div
@@ -729,12 +783,12 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                     <select
                       value={componentA.id}
                       onChange={(e) => {
-                        const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
+                        const found = activeBeans.find((b) => b.id === e.target.value);
                         if (found) setComponentA(found);
                       }}
                       className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-brand-charcoal focus:ring-0 cursor-pointer"
                     >
-                      {AVAILABLE_BEANS.map((b) => (
+                      {activeBeans.map((b) => (
                         <option key={b.id} value={b.id}>
                           {b.name} ({b.species}) — {formatRupiah(b.prices[selectedWeight])}/{selectedSize}
                         </option>
@@ -776,12 +830,12 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                     <select
                       value={componentB.id}
                       onChange={(e) => {
-                        const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
+                        const found = activeBeans.find((b) => b.id === e.target.value);
                         if (found) setComponentB(found);
                       }}
                       className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-brand-charcoal focus:ring-0 cursor-pointer"
                     >
-                      {AVAILABLE_BEANS.map((b) => (
+                      {activeBeans.map((b) => (
                         <option key={b.id} value={b.id}>
                           {b.name} ({b.species}) — {formatRupiah(b.prices[selectedWeight])}/{selectedSize}
                         </option>
@@ -824,12 +878,12 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                       <select
                         value={componentC.id}
                         onChange={(e) => {
-                          const found = AVAILABLE_BEANS.find((b) => b.id === e.target.value);
+                          const found = activeBeans.find((b) => b.id === e.target.value);
                           if (found) setComponentC(found);
                         }}
                         className="w-full bg-transparent border-none text-xs sm:text-sm font-bold text-brand-charcoal focus:ring-0 cursor-pointer"
                       >
-                        {AVAILABLE_BEANS.map((b) => (
+                        {activeBeans.map((b) => (
                           <option key={b.id} value={b.id}>
                             {b.name} ({b.species}) — {formatRupiah(b.prices[selectedWeight])}/{selectedSize}
                           </option>
@@ -953,11 +1007,11 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                     <label htmlFor="retail-bean" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
                       <span className="block">Produk retail</span>
                       <select id="retail-bean" value={selectedRetailBean.id} onChange={(event) => {
-                        const nextBean = RETAIL_BEANS.find((product) => product.id === event.target.value);
+                        const nextBean = activeRetailBeans.find((product) => product.id === event.target.value);
                         setRetailBeanId(event.target.value);
                         setRetailVariantWeight(nextBean?.variants.find((variant) => variant.inStock)?.weightGrams ?? 0);
                       }} className="field-control">
-                        {RETAIL_BEANS.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
+                        {activeRetailBeans.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
                       </select>
                     </label>
                     <label htmlFor="retail-variant" className="space-y-1.5 text-xs font-semibold text-brand-charcoal">
@@ -1049,21 +1103,21 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => applyPreset(AVAILABLE_BEANS[0]?.id || '', AVAILABLE_BEANS[1]?.id || '', 70, 30)}
+                  onClick={() => applyPreset(activeBeans[0]?.id || '', activeBeans[1]?.id || '', 70, 30)}
                   className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {AVAILABLE_BEANS[0]?.name} + {AVAILABLE_BEANS[1]?.name}</div>
-                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: AVAILABLE_BEANS[0]?.notes || [] }, { ratio: 30, notes: AVAILABLE_BEANS[1]?.notes || [] }], 3).join(' · ')}</div>
-                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: AVAILABLE_BEANS[0]?.prices || componentA.prices }, { ratio: 30, prices: AVAILABLE_BEANS[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {activeBeans[0]?.name} + {activeBeans[1]?.name}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: activeBeans[0]?.notes || [] }, { ratio: 30, notes: activeBeans[1]?.notes || [] }], 3).join(' · ')}</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: activeBeans[0]?.prices || componentA.prices }, { ratio: 30, prices: activeBeans[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => applyPreset(AVAILABLE_BEANS[0]?.id || '', AVAILABLE_BEANS[2]?.id || AVAILABLE_BEANS[1]?.id || '', 70, 30)}
+                  onClick={() => applyPreset(activeBeans[0]?.id || '', activeBeans[2]?.id || activeBeans[1]?.id || '', 70, 30)}
                   className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
                 >
-                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {AVAILABLE_BEANS[0]?.name} + {AVAILABLE_BEANS[2]?.name || AVAILABLE_BEANS[1]?.name}</div>
-                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: AVAILABLE_BEANS[0]?.notes || [] }, { ratio: 30, notes: AVAILABLE_BEANS[2]?.notes || AVAILABLE_BEANS[1]?.notes || [] }], 3).join(' · ')}</div>
-                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: AVAILABLE_BEANS[0]?.prices || componentA.prices }, { ratio: 30, prices: AVAILABLE_BEANS[2]?.prices || AVAILABLE_BEANS[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {activeBeans[0]?.name} + {activeBeans[2]?.name || activeBeans[1]?.name}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: activeBeans[0]?.notes || [] }, { ratio: 30, notes: activeBeans[2]?.notes || activeBeans[1]?.notes || [] }], 3).join(' · ')}</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: activeBeans[0]?.prices || componentA.prices }, { ratio: 30, prices: activeBeans[2]?.prices || activeBeans[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
                 </button>
               </div>
             </div>

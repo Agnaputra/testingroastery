@@ -24,6 +24,7 @@ import { HeroSection } from '../components/hero/HeroSection';
 import { SensorySection } from '../components/sensory/SensorySection';
 import { formatRupiah, getCustomerProductName } from '../lib/data';
 import { getPublishedProducts } from '../lib/catalog-master';
+import { useCatalogPublication } from '../lib/use-catalog-publication';
 import { useCartStore } from '../lib/store/useCartStore';
 import { openVirtualBarista } from '../lib/virtual-barista-events';
 import styles from './page.module.css';
@@ -181,6 +182,12 @@ const FAQS = [
 
 export default function HomePage() {
   const { addItem } = useCartStore();
+  const { authority, refresh: refreshPublication } = useCatalogPublication();
+  const activeFeaturedProducts = FEATURED_PRODUCTS.flatMap((product) => {
+    const current = authority?.products.find((item) => item.slug === product.slug);
+    const variant = current?.variants.find((item) => item.weightGrams === product.weightGrams);
+    return current && variant ? [{ ...product, price: variant.price }] : [];
+  });
   const [addedId, setAddedId] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeProcess, setActiveProcess] = useState(0);
@@ -212,7 +219,11 @@ export default function HomePage() {
     setActiveProcess((current) => (current === nextProcess ? current : nextProcess));
   });
 
-  const handleQuickAdd = (product: ProductItem) => {
+  const handleQuickAdd = async (product: ProductItem) => {
+    const current = await refreshPublication();
+    const currentProduct = current.products.find((item) => item.slug === product.slug);
+    const currentVariant = currentProduct?.variants.find((item) => item.weightGrams === product.weightGrams);
+    if (current.status !== 'verified' || !currentVariant) return;
     addItem({
       productId: product.id,
       name: product.name,
@@ -222,7 +233,7 @@ export default function HomePage() {
       weightLabel: product.weightLabel,
       grind: 'whole',
       grindLabel: 'Biji utuh',
-      unitPrice: product.price,
+      unitPrice: currentVariant.price,
       quantity: 1,
       series: product.series,
       tastingNotes: product.notes,
@@ -357,7 +368,8 @@ export default function HomePage() {
             }}
             onClickCapture={preventClickAfterDrag}
           >
-            {FEATURED_PRODUCTS.map((product, index) => (
+            {authority?.status === 'unavailable' && <p role="status">Koleksi kopi sedang tidak tersedia. Silakan coba lagi.</p>}
+            {activeFeaturedProducts.map((product, index) => (
               <motion.article
                 key={product.id}
                 className={styles.productCard}

@@ -1,0 +1,1428 @@
+{
+  "dataset_id": "52coffee-ragas-3b-draft-v1",
+  "dataset_status": "DRAFT",
+  "created_at_utc": "2026-10-17T14:12:05.052673+00:00",
+  "code_revision": "2cce6728e0ddc4eefe3e172f6ba8f1877c8ea67a",
+  "knowledge_base_fingerprint": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+  "knowledge_base_source": "published, embedded coffee_knowledge.metadata using the runtime pgvector publication filter",
+  "human_validation": "PENDING",
+  "usage": "Candidate dataset only. Do not feed directly to final RAGAS before human and route validation.",
+  "candidates": [
+    {
+      "id": "PI01",
+      "category": "Product Information",
+      "question": "Dari mana asal Ijen Kenyan Wening dan bagaimana prosesnya?",
+      "reference": "Ijen Kenyan (Wening) berasal dari East Java, Indonesia (Gunung Ijen 1400-1600 MASL) dan diproses dengan Kenyan Process (Double Washed).",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-kenyan-wening",
+          "fields": [
+            "name",
+            "origin",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-kenyan-wening"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Ejaan nama mengikuti metadata.",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI02",
+      "category": "Product Information",
+      "question": "Apa varietas dan roast profile Sumbing Supernova Wash Celestia?",
+      "reference": "Sumbing Supernova Wash (Celestia) memakai varietas Kartika / Typica dengan roast profile Light.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sumbing-supernova-celestia",
+          "fields": [
+            "name",
+            "varietal",
+            "roast"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "sumbing-supernova-celestia"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI03",
+      "category": "Product Information",
+      "question": "Tasting notes apa yang tercatat untuk Puntang Natural Aromanis?",
+      "reference": "Tasting notes Puntang Natural (Aromanis) adalah Pineapple, Berry, Jackfruit.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "puntang-natural-aromanis",
+          "fields": [
+            "name",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "puntang-natural-aromanis"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PI04",
+      "category": "Product Information",
+      "question": "Apa metode proses dan karakter rasa Buntu Lenta Wine Duharman?",
+      "reference": "Buntu Lenta Wine (Duharman Winey) memakai proses Wine Processed, dengan notes Wine, Tangerine, Caramel.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "buntu-lenta-wine-duharman",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "buntu-lenta-wine-duharman"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI05",
+      "category": "Product Information",
+      "question": "Apa varietas dan asal Brazil Santos Espresso?",
+      "reference": "Brazil Santos Espresso berasal dari Minas Gerais, Santos, Brazil (900-1200 MASL); varietasnya Mundo Novo, Catuai.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "brazil-santos-espresso",
+          "fields": [
+            "name",
+            "origin",
+            "varietal"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "brazil-santos-espresso"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI06",
+      "category": "Product Information",
+      "question": "Bagaimana profil roast dan notes Kalaciri Wash Process?",
+      "reference": "Kalaciri Wash Process memiliki roast Medium-Light dan notes Palm Sugar, Sweet Spicy, Chocolate.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "kalaciri-wash-process",
+          "fields": [
+            "name",
+            "roast",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "kalaciri-wash-process"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI07",
+      "category": "Product Information",
+      "question": "Apa proses pengolahan dan varietas El Triunfo Geisha Tolima Aurora?",
+      "reference": "El Triunfo Geisha Tolima (Aurora) menggunakan proses Washed Extended Fermentation dan varietas Geisha (Gesha).",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "el-triunfo-geisha-tolima-aurora",
+          "fields": [
+            "name",
+            "process",
+            "varietal"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "el-triunfo-geisha-tolima-aurora"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI08",
+      "category": "Product Information",
+      "question": "Asal dan tasting notes Yemen Haraz Golden Harvest Sahara apa saja?",
+      "reference": "Yemen Haraz Golden Harvest (Sahara) berasal dari Haraz Mountain, Yemen (2000-2200 MASL); notes yang tercatat adalah Sweet Jammy Strawberry, Vanilla.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "yemen-haraz-golden-harvest-sahara",
+          "fields": [
+            "name",
+            "origin",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "yemen-haraz-golden-harvest-sahara"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI09",
+      "category": "Product Information",
+      "question": "Karakter rasa dan proses Ijen Lactic Laras seperti apa?",
+      "reference": "Ijen Lactic (Laras) diproses dengan Lactic Process; notes-nya Mango, Lychee, Lime, Creamy, Chocolate.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-lactic-laras",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-lactic-laras"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI10",
+      "category": "Product Information",
+      "question": "Apa asal, proses, dan roast profile Dampit Natural Espresso?",
+      "reference": "Dampit Natural Robusta Espresso berasal dari Dampit, Malang, East Java (700-900 MASL), memakai Natural Process, dan di-roast Medium-Dark.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "dampit-natural-espresso",
+          "fields": [
+            "name",
+            "origin",
+            "process",
+            "roast"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "dampit-natural-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI11",
+      "category": "Product Information",
+      "question": "Berapa harga kemasan 100g Sumbing Supernova Celestia saat ini?",
+      "reference": "Harga 100g Sumbing Supernova Wash (Celestia) pada snapshot katalog ini adalah Rp139,000.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sumbing-supernova-celestia",
+          "fields": [
+            "name",
+            "price_100g"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "sumbing-supernova-celestia"
+      ],
+      "difficulty": "medium",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Harga berubah; verifikasi ulang sebelum studi. Frasa saat ini berisiko usang.",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "PI12",
+      "category": "Product Information",
+      "question": "Apakah Sindoro Strawberry Selai tergolong best seller?",
+      "reference": "Knowledge base tidak memuat data penjualan terverifikasi untuk menetapkan status best seller Sindoro Strawberry Triple Yeast (Selai).",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sindoro-strawberry-selai",
+          "fields": [
+            "name"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "sindoro-strawberry-selai"
+      ],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Jalur sales_question deterministic; bukan kasus RAGAS utama.",
+      "static_intent": "catalog_query",
+      "route_risks": [
+        "deterministic_sales_question"
+      ]
+    },
+    {
+      "id": "PI13",
+      "category": "Product Information",
+      "question": "Apakah Ijen Full Wash Washey aman untuk penderita maag?",
+      "reference": "Knowledge base tidak memuat bukti keamanan medis Ijen Full Wash (Washey) bagi penderita maag.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-full-wash-washey",
+          "fields": [
+            "name"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-full-wash-washey"
+      ],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Jalur health_sensitive_recommendation; butuh sumber klinis, eksklusi.",
+      "static_intent": "catalog_query",
+      "route_risks": [
+        "deterministic_health_question"
+      ]
+    },
+    {
+      "id": "PR01",
+      "category": "Product Recommendation",
+      "question": "Rekomendasikan kopi 52 Coffee dengan notes jasmine dan citrus yang clean.",
+      "reference": "Ijen Kenyan (Wening) sesuai sebagai contoh: notes-nya Clean, Jasmine, Crisp Citrus; roast Light.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-kenyan-wening",
+          "fields": [
+            "name",
+            "notes",
+            "roast"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-kenyan-wening"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Pilihan berdasarkan atribut, bukan klaim terbaik.",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR02",
+      "category": "Product Recommendation",
+      "question": "Aku mencari beans 52 Coffee yang manis dengan honey dan almond; pilihkan satu.",
+      "reference": "Ijen Yellow Bourbon (Kencana) merupakan pilihan yang sesuai karena notes-nya Honey, Almond, Smooth Body dan prosesnya Honey Process.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-yellow-bourbon-kencana",
+          "fields": [
+            "name",
+            "notes",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-yellow-bourbon-kencana"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR03",
+      "category": "Product Recommendation",
+      "question": "Pilihkan kopi filter 52 Coffee yang fruity dengan nuansa blueberry dan strawberry.",
+      "reference": "Buntu Lenta Natural (Duharman Natural) sesuai: kategori filter, notes Blueberry, Strawberry, Bold Body, Sweetness, proses Natural Process.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "buntu-lenta-natural-duharman",
+          "fields": [
+            "name",
+            "category",
+            "notes",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "buntu-lenta-natural-duharman"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR04",
+      "category": "Product Recommendation",
+      "question": "Ada rekomendasi kopi 52 Coffee dengan rasa cokelat dan brown sugar untuk espresso?",
+      "reference": "Kintamani Full Wash Arabica Espresso adalah salah satu opsi: kategori espresso, notes Chocolate, Brown Sugar, Full Body, dengan resep Espresso Machine: 18g in, 36g out, 28 detik suhu 93°C.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "kintamani-full-wash-arabica-espresso",
+          "fields": [
+            "name",
+            "category",
+            "notes",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "kintamani-full-wash-arabica-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Ada opsi lain; jangan nilai jawaban alternatif yang benar sebagai salah.",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR05",
+      "category": "Product Recommendation",
+      "question": "Aku ingin kopi 52 Coffee yang floral, peach, dan terasa seperti teh. Apa opsinya?",
+      "reference": "El Triunfo Geisha Tolima (Aurora) sesuai karena notes-nya Jasmine, Bergamot, Peach, Tea-like, Crystalline.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "el-triunfo-geisha-tolima-aurora",
+          "fields": [
+            "name",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "el-triunfo-geisha-tolima-aurora"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR06",
+      "category": "Product Recommendation",
+      "question": "Rekomendasikan kopi 52 Coffee yang fruity dengan profil mango, lychee, dan lime.",
+      "reference": "Ijen Lactic (Laras) sesuai dengan notes Mango, Lychee, Lime, Creamy, Chocolate; prosesnya Lactic Process.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-lactic-laras",
+          "fields": [
+            "name",
+            "notes",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-lactic-laras"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR07",
+      "category": "Product Recommendation",
+      "question": "Kalau mengejar rasa winey seperti permen, pilihkan beans 52 Coffee yang relevan.",
+      "reference": "Damarkandang Carbonic Maceration Kismis dapat dipilih karena notes-nya Intensely Sweet, Winey, Candy Like Cup; prosesnya Damarkandang Carbonic Maceration.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "damarkandang-cm-kismis",
+          "fields": [
+            "name",
+            "notes",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "damarkandang-cm-kismis"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR08",
+      "category": "Product Recommendation",
+      "question": "Saya suka kopi boozy dan candy-like fruit; produk 52 Coffee apa yang cocok?",
+      "reference": "Argopuro Natural Anaerob (Arcapada) sesuai dengan preferensi tersebut: notes Intensely Sweet, Boozy, Candy Like Fruit, proses Argopuro Natural Anaerob.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "argopuro-walida-anaerob-arcapada",
+          "fields": [
+            "name",
+            "notes",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "argopuro-walida-anaerob-arcapada"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR09",
+      "category": "Product Recommendation",
+      "question": "Pilih kopi 52 Coffee yang citrus dengan notes lime, cashew, dan caramel.",
+      "reference": "Benteng Alla Wash (Sembada) cocok berdasarkan notes Lime, Brown Sugar, Cashew, Caramel, Tamarind; prosesnya Benteng Alla Wash Process.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "benteng-alla-wash-sembada",
+          "fields": [
+            "name",
+            "notes",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "benteng-alla-wash-sembada"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR10",
+      "category": "Product Recommendation",
+      "question": "Aku mencari espresso 52 Coffee yang earthy, dark chocolate, dan full body. Sarankan satu.",
+      "reference": "Arabica Ijen Full Wash Espresso adalah salah satu pilihan dengan notes Earthy, Dark Chocolate, Full Body dan roast Medium.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "arabica-ijen-full-wash-espresso",
+          "fields": [
+            "name",
+            "notes",
+            "roast"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "arabica-ijen-full-wash-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Brazil Santos juga memenuhi notes; validasi jawaban alternatif.",
+      "static_intent": "product_recommendation",
+      "route_risks": []
+    },
+    {
+      "id": "PR11",
+      "category": "Product Recommendation",
+      "question": "Rekomendasikan kopi 52 Coffee paling enak untuk semua orang.",
+      "reference": "Tidak ada data preferensi universal; pilihan produk perlu didasarkan pada rasa atau metode seduh yang diinginkan.",
+      "supporting_kb_source": [],
+      "expected_slugs": [],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Kurang spesifik, kemungkinan klarifikasi deterministic.",
+      "static_intent": "product_recommendation",
+      "route_risks": [
+        "recommendation_preference_missing",
+        "not_answerable_from_product_metadata"
+      ]
+    },
+    {
+      "id": "PR12",
+      "category": "Product Recommendation",
+      "question": "Saya maag, tolong pilih kopi 52 Coffee yang pasti aman diminum.",
+      "reference": "Knowledge base tidak dapat menjamin keamanan medis kopi untuk kondisi maag.",
+      "supporting_kb_source": [],
+      "expected_slugs": [],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Eksklusi: health-sensitive deterministic dan membutuhkan bukti medis.",
+      "static_intent": "product_recommendation",
+      "route_risks": [
+        "recommendation_preference_missing",
+        "not_answerable_from_product_metadata",
+        "deterministic_health_question"
+      ]
+    },
+    {
+      "id": "PR13",
+      "category": "Product Recommendation",
+      "question": "Apa kopi 52 Coffee terlaris minggu ini yang sebaiknya saya beli?",
+      "reference": "Knowledge base tidak memiliki data penjualan mingguan yang terverifikasi.",
+      "supporting_kb_source": [],
+      "expected_slugs": [],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Eksklusi: sales_question deterministic dan data tidak tersedia.",
+      "static_intent": "coffee_knowledge",
+      "route_risks": [
+        "recommendation_preference_missing",
+        "not_answerable_from_product_metadata",
+        "routing_coffee_knowledge",
+        "deterministic_sales_question"
+      ]
+    },
+    {
+      "id": "BS01",
+      "category": "Brewing Suitability",
+      "question": "Untuk Ijen Carbonic Maceration Asmara, metode seduh apa yang tertulis dalam resep 52 Coffee?",
+      "reference": "Resep Ijen Carbonic Maceration (Asmara) menyebut V60 15g kopi, 225ml air (1:15), 92°C, 2m 15s. Bloom 45g 40s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-carbonic-maceration-asmara",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-carbonic-maceration-asmara"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Metode resep, bukan klaim satu-satunya metode cocok.",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS02",
+      "category": "Brewing Suitability",
+      "question": "Bagaimana dosis kopi dan air untuk V60 Ijen Kenyan Wening menurut resep produk?",
+      "reference": "Resep Ijen Kenyan (Wening): V60 15g kopi, 240ml air (1:16), 93°C, 2m 10s. Bloom 45g 35s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-kenyan-wening",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-kenyan-wening"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS03",
+      "category": "Brewing Suitability",
+      "question": "Kalau menyeduh Ijen Anaerob Rahsa, alat apa yang dicantumkan di resepnya?",
+      "reference": "Resep Ijen Anaerob (Rahsa) mencantumkan Kalita Wave 15g kopi, 225ml air (1:15), 91°C, 2m 20s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-anaerob-rahsa",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-anaerob-rahsa"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS04",
+      "category": "Brewing Suitability",
+      "question": "Apakah resep Ijen Lactic Laras menyebut V60 atau Origami?",
+      "reference": "Resep Ijen Lactic (Laras): Origami / V60 15g, 225ml air (1:15), 91°C, 2m 25s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-lactic-laras",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-lactic-laras"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS05",
+      "category": "Brewing Suitability",
+      "question": "Rasio dan dosis yang tercatat untuk Puntang Honey Gulali bagaimana?",
+      "reference": "Resep Puntang Honey (Gulali): V60 16g kopi, 250ml air (1:15.6), 92°C, 2m 30s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "puntang-honey-gulali",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "puntang-honey-gulali"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS06",
+      "category": "Brewing Suitability",
+      "question": "Apa resep seduh V60 untuk Prau Natural El Davisio Surya?",
+      "reference": "Resep Prau Natural El Davisio Double Mosto (Surya): V60 15g, 230ml air (1:15.3), 92°C, 2m 15s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "prau-natural-el-davisio-surya",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "prau-natural-el-davisio-surya"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS07",
+      "category": "Brewing Suitability",
+      "question": "Ijen Full Wash Washey diresepkan untuk alat seduh apa?",
+      "reference": "Resep Ijen Full Wash (Washey) menyebut V60 15g, 225ml air (1:15), 90°C, 2m 15s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-full-wash-washey",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-full-wash-washey"
+      ],
+      "difficulty": "easy",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS08",
+      "category": "Brewing Suitability",
+      "question": "Bagaimana resep espresso Brazil Santos yang tersedia di knowledge base?",
+      "reference": "Resep Brazil Santos Espresso: Espresso Machine: 18.5g in, 37g out, 28 detik suhu 92°C.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "brazil-santos-espresso",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "brazil-santos-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS09",
+      "category": "Brewing Suitability",
+      "question": "Apa input dan output espresso yang diresepkan untuk Kintamani Full Wash?",
+      "reference": "Resep Kintamani Full Wash Arabica Espresso: Espresso Machine: 18g in, 36g out, 28 detik suhu 93°C.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "kintamani-full-wash-arabica-espresso",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "kintamani-full-wash-arabica-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS10",
+      "category": "Brewing Suitability",
+      "question": "El Triunfo Geisha Aurora punya panduan V60 berapa gram kopi dan air?",
+      "reference": "Resep El Triunfo Geisha Tolima (Aurora): Hario V60 Plastic 16g kopi, 256ml air (1:16), 93°C, 2m 15s. Bloom 50g 45s.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "el-triunfo-geisha-tolima-aurora",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "el-triunfo-geisha-tolima-aurora"
+      ],
+      "difficulty": "hard",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS11",
+      "category": "Brewing Suitability",
+      "question": "Bisakah Sumbing Celestia diseduh dengan moka pot?",
+      "reference": "Resep yang tercatat untuk Sumbing Supernova Wash (Celestia) adalah Origami / V60 15g, 225ml air (1:15), 91°C, 2m 10s.; tidak ada panduan moka pot dalam metadata produk ini.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sumbing-supernova-celestia",
+          "fields": [
+            "name",
+            "recipe"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "sumbing-supernova-celestia"
+      ],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Pertanyaan metode lain; jawaban harus membedakan ketiadaan data dari ketidakcocokan.",
+      "static_intent": "catalog_query",
+      "route_risks": []
+    },
+    {
+      "id": "BS12",
+      "category": "Brewing Suitability",
+      "question": "Buka panduan seduh lengkap Coffee Lab untuk saya.",
+      "reference": "Ini adalah permintaan navigasi fitur situs, bukan fakta resep produk pada knowledge base.",
+      "supporting_kb_source": [],
+      "expected_slugs": [],
+      "difficulty": "easy",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Jalur website_action/website_feature; eksklusi RAGAS utama.",
+      "static_intent": "website_feature",
+      "route_risks": [
+        "not_answerable_from_product_metadata",
+        "routing_website_feature"
+      ]
+    },
+    {
+      "id": "PC01",
+      "category": "Product Comparison",
+      "question": "Bandingkan proses dan notes Buntu Lenta Wash Duharman dengan Kalaciri Wash Process.",
+      "reference": "Buntu Lenta Wash (Duharman Wash): Wash Process, notes Mandarin, Honey, Caramel, Floral. Kalaciri Wash Process: Kalaciri Dammang Wash Process, notes Palm Sugar, Sweet Spicy, Chocolate.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "buntu-lenta-wash-duharman",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "kalaciri-wash-process",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "buntu-lenta-wash-duharman",
+        "kalaciri-wash-process"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Perlu kedua produk dalam context; top-k 3 dapat meleset.",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC02",
+      "category": "Product Comparison",
+      "question": "Bandingkan Buntu Lenta Natural Duharman dengan slowbar Aromanis dari sisi proses dan notes buah.",
+      "reference": "Buntu Lenta Natural (Duharman Natural): Natural Process, notes Blueberry, Strawberry, Bold Body, Sweetness. Puntang Natural (Aromanis): Puntang Natural Process, notes Pineapple, Berry, Jackfruit.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "buntu-lenta-natural-duharman",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "puntang-natural-aromanis",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "buntu-lenta-natural-duharman",
+        "puntang-natural-aromanis"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC03",
+      "category": "Product Comparison",
+      "question": "Bandingkan roast dan karakter rasa Puntang Honey Gulali dengan Puntang Natural Aromanis.",
+      "reference": "Puntang Honey (Gulali): roast Light-Medium, notes Honey, Peach, Chocolate-Like. Puntang Natural (Aromanis): roast Light, notes Pineapple, Berry, Jackfruit.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "puntang-honey-gulali",
+          "fields": [
+            "name",
+            "roast",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "puntang-natural-aromanis",
+          "fields": [
+            "name",
+            "roast",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "puntang-honey-gulali",
+        "puntang-natural-aromanis"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC04",
+      "category": "Product Comparison",
+      "question": "Bandingkan slowbar Kencana dengan Laras dari proses dan tasting notes.",
+      "reference": "Ijen Yellow Bourbon (Kencana): Honey Process, notes Honey, Almond, Smooth Body. Ijen Lactic (Laras): Lactic Process, notes Mango, Lychee, Lime, Creamy, Chocolate.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-yellow-bourbon-kencana",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-lactic-laras",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-yellow-bourbon-kencana",
+        "ijen-lactic-laras"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC05",
+      "category": "Product Comparison",
+      "question": "Bandingkan roast serta notes Brazil Santos Espresso versus Dampit Natural Robusta Espresso.",
+      "reference": "Brazil Santos Espresso: roast Medium-Dark, notes Earthy, Dark Chocolate, Full Body. Dampit Natural Robusta Espresso: roast Medium-Dark, notes Chocolate, Brown Sugar, Full Body.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "brazil-santos-espresso",
+          "fields": [
+            "name",
+            "roast",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "dampit-natural-espresso",
+          "fields": [
+            "name",
+            "roast",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "brazil-santos-espresso",
+        "dampit-natural-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "Notes sama; beda roast dan origin juga bisa disebut jika ada context.",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC06",
+      "category": "Product Comparison",
+      "question": "Apa perbedaan asal dan proses Kintamani Full Wash Espresso dengan Dampit Natural Espresso?",
+      "reference": "Kintamani Full Wash Arabica Espresso: asal Kintamani, Bali (1200-1400 MASL), proses Full Wash. Dampit Natural Robusta Espresso: asal Dampit, Malang, East Java (700-900 MASL), proses Natural Process.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "kintamani-full-wash-arabica-espresso",
+          "fields": [
+            "name",
+            "origin",
+            "process"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "dampit-natural-espresso",
+          "fields": [
+            "name",
+            "origin",
+            "process"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "kintamani-full-wash-arabica-espresso",
+        "dampit-natural-espresso"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC07",
+      "category": "Product Comparison",
+      "question": "Apa perbedaan varietas dan notes slowbar Wening versus Asmara?",
+      "reference": "Ijen Kenyan (Wening): varietas Kartika / Typica, notes Clean, Jasmine, Crisp Citrus. Ijen Carbonic Maceration (Asmara): varietas Kartika, USDA 762, notes Peach, Jasmine, Rich Taste, Medium Body.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-kenyan-wening",
+          "fields": [
+            "name",
+            "varietal",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "ijen-carbonic-maceration-asmara",
+          "fields": [
+            "name",
+            "varietal",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "ijen-kenyan-wening",
+        "ijen-carbonic-maceration-asmara"
+      ],
+      "difficulty": "hard",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC08",
+      "category": "Product Comparison",
+      "question": "Sumbing Supernova Celestia vs Sindoro Strawberry Selai: apa beda proses dan tasting notes?",
+      "reference": "Sumbing Supernova Wash (Celestia): proses Sumbing Supernova Wash, notes Explosive Berry, Complex, Candy-Like. Sindoro Strawberry Triple Yeast (Selai): proses Sindoro Strawberry Triple Yeast, notes Sweet Jammy Strawberry, Vanilla.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sumbing-supernova-celestia",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sindoro-strawberry-selai",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "sumbing-supernova-celestia",
+        "sindoro-strawberry-selai"
+      ],
+      "difficulty": "medium",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC09",
+      "category": "Product Comparison",
+      "question": "Bandingkan El Triunfo Geisha Aurora dengan Sudan Rume Huila Carmin dari sisi proses dan notes.",
+      "reference": "El Triunfo Geisha Tolima (Aurora): proses Washed Extended Fermentation, notes Jasmine, Bergamot, Peach, Tea-like, Crystalline. Sudan Rume Huila (Carmin): proses Natural Fermented, notes Deepberry, Wine-Like, Red Fruit.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "el-triunfo-geisha-tolima-aurora",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "sudan-rume-huila-carmin",
+          "fields": [
+            "name",
+            "process",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "el-triunfo-geisha-tolima-aurora",
+        "sudan-rume-huila-carmin"
+      ],
+      "difficulty": "hard",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC10",
+      "category": "Product Comparison",
+      "question": "Apa beda origin dan profil rasa Magnum Sidra Soberano dibanding Yemen Haraz Sahara?",
+      "reference": "Magnum Sidra El Vergel Cauca (Soberano): origin Cauca, Colombia (1850 MASL), notes Tropical, Syrup, Layered Cocoa, Brown Sugar. Yemen Haraz Golden Harvest (Sahara): origin Haraz Mountain, Yemen (2000-2200 MASL), notes Sweet Jammy Strawberry, Vanilla.",
+      "supporting_kb_source": [
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "magnum-sidra-el-vergel-soberano",
+          "fields": [
+            "name",
+            "origin",
+            "notes"
+          ]
+        },
+        {
+          "table": "coffee_knowledge",
+          "column": "metadata",
+          "slug": "yemen-haraz-golden-harvest-sahara",
+          "fields": [
+            "name",
+            "origin",
+            "notes"
+          ]
+        }
+      ],
+      "expected_slugs": [
+        "magnum-sidra-el-vergel-soberano",
+        "yemen-haraz-golden-harvest-sahara"
+      ],
+      "difficulty": "hard",
+      "validation_status": "VERIFIED BY SOURCE",
+      "proposed_final": true,
+      "notes": "",
+      "static_intent": "product_comparison",
+      "route_risks": [
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC11",
+      "category": "Product Comparison",
+      "question": "Dari dua kopi yang tadi, mana yang lebih murah?",
+      "reference": "Tidak dapat dijawab tanpa riwayat percakapan yang menunjuk dua produk dan varian yang sama.",
+      "supporting_kb_source": [],
+      "expected_slugs": [],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Butuh multi-turn dan varian; eksklusi dari single-turn utama.",
+      "static_intent": "product_recommendation",
+      "route_risks": [
+        "deterministic_clarification_likely",
+        "not_answerable_from_product_metadata",
+        "requires_multiturn_history",
+        "two_product_context_required"
+      ]
+    },
+    {
+      "id": "PC12",
+      "category": "Product Comparison",
+      "question": "Bandingkan semua produk 52 Coffee dan pilih satu yang paling laris.",
+      "reference": "Knowledge base tidak memuat data penjualan untuk menentukan produk paling laris.",
+      "supporting_kb_source": [],
+      "expected_slugs": [],
+      "difficulty": "hard",
+      "validation_status": "NEEDS REVIEW",
+      "proposed_final": false,
+      "notes": "Jalur sales_question deterministic dan cakupan terlalu luas.",
+      "static_intent": "coffee_knowledge",
+      "route_risks": [
+        "not_answerable_from_product_metadata",
+        "routing_coffee_knowledge",
+        "deterministic_sales_question",
+        "two_product_context_required"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,822 @@
+{
+  "baseline_revision": 1,
+  "source": "apps/web/lib/data.ts (31 coffee products only; test baseline, not owner validated)",
+  "source_sha256": "66978f35351893a109c788affdcf21ae0e6539c680d05f9d0a3c83da0b4ba456",
+  "exported_at_utc": "2026-10-19T09:46:08.776Z",
+  "product_count": 31,
+  "sku_count": 116,
+  "skus": [
+    {
+      "sku_id": "arabica-ijen-full-wash-espresso:beans:1000",
+      "slug": "arabica-ijen-full-wash-espresso",
+      "kind": "beans",
+      "weight_grams": 1000,
+      "amount_idr": 250000
+    },
+    {
+      "sku_id": "arabica-ijen-full-wash-espresso:beans:200",
+      "slug": "arabica-ijen-full-wash-espresso",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 60000
+    },
+    {
+      "sku_id": "arabica-ijen-full-wash-espresso:beans:500",
+      "slug": "arabica-ijen-full-wash-espresso",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 140000
+    },
+    {
+      "sku_id": "argopuro-walida-anaerob-arcapada:beans:100",
+      "slug": "argopuro-walida-anaerob-arcapada",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 80000
+    },
+    {
+      "sku_id": "argopuro-walida-anaerob-arcapada:beans:200",
+      "slug": "argopuro-walida-anaerob-arcapada",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 150000
+    },
+    {
+      "sku_id": "argopuro-walida-anaerob-arcapada:cup:1",
+      "slug": "argopuro-walida-anaerob-arcapada",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 50000
+    },
+    {
+      "sku_id": "benteng-alla-wash-sembada:beans:100",
+      "slug": "benteng-alla-wash-sembada",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 115000
+    },
+    {
+      "sku_id": "benteng-alla-wash-sembada:beans:200",
+      "slug": "benteng-alla-wash-sembada",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 215000
+    },
+    {
+      "sku_id": "benteng-alla-wash-sembada:beans:500",
+      "slug": "benteng-alla-wash-sembada",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 459000
+    },
+    {
+      "sku_id": "benteng-alla-wash-sembada:cup:1",
+      "slug": "benteng-alla-wash-sembada",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 50000
+    },
+    {
+      "sku_id": "brazil-santos-espresso:beans:1000",
+      "slug": "brazil-santos-espresso",
+      "kind": "beans",
+      "weight_grams": 1000,
+      "amount_idr": 340000
+    },
+    {
+      "sku_id": "brazil-santos-espresso:beans:200",
+      "slug": "brazil-santos-espresso",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 92000
+    },
+    {
+      "sku_id": "brazil-santos-espresso:beans:500",
+      "slug": "brazil-santos-espresso",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 175000
+    },
+    {
+      "sku_id": "buntu-lenta-natural-duharman:beans:100",
+      "slug": "buntu-lenta-natural-duharman",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "buntu-lenta-natural-duharman:beans:200",
+      "slug": "buntu-lenta-natural-duharman",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 199000
+    },
+    {
+      "sku_id": "buntu-lenta-natural-duharman:beans:500",
+      "slug": "buntu-lenta-natural-duharman",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 439000
+    },
+    {
+      "sku_id": "buntu-lenta-natural-duharman:cup:1",
+      "slug": "buntu-lenta-natural-duharman",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 45000
+    },
+    {
+      "sku_id": "buntu-lenta-wash-duharman:beans:100",
+      "slug": "buntu-lenta-wash-duharman",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "buntu-lenta-wash-duharman:beans:200",
+      "slug": "buntu-lenta-wash-duharman",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 199000
+    },
+    {
+      "sku_id": "buntu-lenta-wash-duharman:beans:500",
+      "slug": "buntu-lenta-wash-duharman",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 439000
+    },
+    {
+      "sku_id": "buntu-lenta-wash-duharman:cup:1",
+      "slug": "buntu-lenta-wash-duharman",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 45000
+    },
+    {
+      "sku_id": "buntu-lenta-wine-duharman:beans:100",
+      "slug": "buntu-lenta-wine-duharman",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 115000
+    },
+    {
+      "sku_id": "buntu-lenta-wine-duharman:beans:200",
+      "slug": "buntu-lenta-wine-duharman",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 215000
+    },
+    {
+      "sku_id": "buntu-lenta-wine-duharman:beans:500",
+      "slug": "buntu-lenta-wine-duharman",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 459000
+    },
+    {
+      "sku_id": "buntu-lenta-wine-duharman:cup:1",
+      "slug": "buntu-lenta-wine-duharman",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 52000
+    },
+    {
+      "sku_id": "damarkandang-cm-kismis:beans:100",
+      "slug": "damarkandang-cm-kismis",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 90000
+    },
+    {
+      "sku_id": "damarkandang-cm-kismis:beans:200",
+      "slug": "damarkandang-cm-kismis",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 175000
+    },
+    {
+      "sku_id": "damarkandang-cm-kismis:cup:1",
+      "slug": "damarkandang-cm-kismis",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 60000
+    },
+    {
+      "sku_id": "dampit-natural-espresso:beans:1000",
+      "slug": "dampit-natural-espresso",
+      "kind": "beans",
+      "weight_grams": 1000,
+      "amount_idr": 150000
+    },
+    {
+      "sku_id": "dampit-natural-espresso:beans:200",
+      "slug": "dampit-natural-espresso",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 35000
+    },
+    {
+      "sku_id": "dampit-natural-espresso:beans:500",
+      "slug": "dampit-natural-espresso",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 85000
+    },
+    {
+      "sku_id": "el-triunfo-geisha-tolima-aurora:beans:100",
+      "slug": "el-triunfo-geisha-tolima-aurora",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 380000
+    },
+    {
+      "sku_id": "el-triunfo-geisha-tolima-aurora:beans:16",
+      "slug": "el-triunfo-geisha-tolima-aurora",
+      "kind": "beans",
+      "weight_grams": 16,
+      "amount_idr": 86000
+    },
+    {
+      "sku_id": "el-triunfo-geisha-tolima-aurora:beans:200",
+      "slug": "el-triunfo-geisha-tolima-aurora",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 709000
+    },
+    {
+      "sku_id": "el-triunfo-geisha-tolima-aurora:beans:50",
+      "slug": "el-triunfo-geisha-tolima-aurora",
+      "kind": "beans",
+      "weight_grams": 50,
+      "amount_idr": 200000
+    },
+    {
+      "sku_id": "el-triunfo-geisha-tolima-aurora:cup:1",
+      "slug": "el-triunfo-geisha-tolima-aurora",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 200000
+    },
+    {
+      "sku_id": "gayo-full-wash-arabica-espresso:beans:1000",
+      "slug": "gayo-full-wash-arabica-espresso",
+      "kind": "beans",
+      "weight_grams": 1000,
+      "amount_idr": 265000
+    },
+    {
+      "sku_id": "gayo-full-wash-arabica-espresso:beans:200",
+      "slug": "gayo-full-wash-arabica-espresso",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 75000
+    },
+    {
+      "sku_id": "gayo-full-wash-arabica-espresso:beans:500",
+      "slug": "gayo-full-wash-arabica-espresso",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 140000
+    },
+    {
+      "sku_id": "ijen-anaerob-rahsa:beans:100",
+      "slug": "ijen-anaerob-rahsa",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 59000
+    },
+    {
+      "sku_id": "ijen-anaerob-rahsa:beans:200",
+      "slug": "ijen-anaerob-rahsa",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "ijen-anaerob-rahsa:beans:500",
+      "slug": "ijen-anaerob-rahsa",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 290000
+    },
+    {
+      "sku_id": "ijen-anaerob-rahsa:cup:1",
+      "slug": "ijen-anaerob-rahsa",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 35000
+    },
+    {
+      "sku_id": "ijen-carbonic-maceration-asmara:beans:100",
+      "slug": "ijen-carbonic-maceration-asmara",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 65000
+    },
+    {
+      "sku_id": "ijen-carbonic-maceration-asmara:beans:200",
+      "slug": "ijen-carbonic-maceration-asmara",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 120000
+    },
+    {
+      "sku_id": "ijen-carbonic-maceration-asmara:beans:500",
+      "slug": "ijen-carbonic-maceration-asmara",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 320000
+    },
+    {
+      "sku_id": "ijen-carbonic-maceration-asmara:cup:1",
+      "slug": "ijen-carbonic-maceration-asmara",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 38000
+    },
+    {
+      "sku_id": "ijen-full-wash-washey:beans:100",
+      "slug": "ijen-full-wash-washey",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 59000
+    },
+    {
+      "sku_id": "ijen-full-wash-washey:beans:200",
+      "slug": "ijen-full-wash-washey",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "ijen-full-wash-washey:beans:500",
+      "slug": "ijen-full-wash-washey",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 290000
+    },
+    {
+      "sku_id": "ijen-full-wash-washey:cup:1",
+      "slug": "ijen-full-wash-washey",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 25000
+    },
+    {
+      "sku_id": "ijen-kenyan-wening:beans:100",
+      "slug": "ijen-kenyan-wening",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 59000
+    },
+    {
+      "sku_id": "ijen-kenyan-wening:beans:200",
+      "slug": "ijen-kenyan-wening",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "ijen-kenyan-wening:beans:500",
+      "slug": "ijen-kenyan-wening",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 290000
+    },
+    {
+      "sku_id": "ijen-kenyan-wening:cup:1",
+      "slug": "ijen-kenyan-wening",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 30000
+    },
+    {
+      "sku_id": "ijen-lactic-laras:beans:100",
+      "slug": "ijen-lactic-laras",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 59000
+    },
+    {
+      "sku_id": "ijen-lactic-laras:beans:200",
+      "slug": "ijen-lactic-laras",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "ijen-lactic-laras:beans:500",
+      "slug": "ijen-lactic-laras",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 290000
+    },
+    {
+      "sku_id": "ijen-lactic-laras:cup:1",
+      "slug": "ijen-lactic-laras",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 35000
+    },
+    {
+      "sku_id": "ijen-yellow-bourbon-kencana:beans:100",
+      "slug": "ijen-yellow-bourbon-kencana",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 59000
+    },
+    {
+      "sku_id": "ijen-yellow-bourbon-kencana:beans:200",
+      "slug": "ijen-yellow-bourbon-kencana",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 109000
+    },
+    {
+      "sku_id": "ijen-yellow-bourbon-kencana:beans:500",
+      "slug": "ijen-yellow-bourbon-kencana",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 290000
+    },
+    {
+      "sku_id": "ijen-yellow-bourbon-kencana:cup:1",
+      "slug": "ijen-yellow-bourbon-kencana",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 30000
+    },
+    {
+      "sku_id": "inmaculada-pink-bourbon-marfil:beans:100",
+      "slug": "inmaculada-pink-bourbon-marfil",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 348000
+    },
+    {
+      "sku_id": "inmaculada-pink-bourbon-marfil:beans:16",
+      "slug": "inmaculada-pink-bourbon-marfil",
+      "kind": "beans",
+      "weight_grams": 16,
+      "amount_idr": 62000
+    },
+    {
+      "sku_id": "inmaculada-pink-bourbon-marfil:beans:200",
+      "slug": "inmaculada-pink-bourbon-marfil",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 687000
+    },
+    {
+      "sku_id": "inmaculada-pink-bourbon-marfil:beans:50",
+      "slug": "inmaculada-pink-bourbon-marfil",
+      "kind": "beans",
+      "weight_grams": 50,
+      "amount_idr": 177000
+    },
+    {
+      "sku_id": "inmaculada-pink-bourbon-marfil:cup:1",
+      "slug": "inmaculada-pink-bourbon-marfil",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 140000
+    },
+    {
+      "sku_id": "kalaciri-wash-process:beans:100",
+      "slug": "kalaciri-wash-process",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 99000
+    },
+    {
+      "sku_id": "kalaciri-wash-process:beans:200",
+      "slug": "kalaciri-wash-process",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 185000
+    },
+    {
+      "sku_id": "kalaciri-wash-process:beans:500",
+      "slug": "kalaciri-wash-process",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 399000
+    },
+    {
+      "sku_id": "kalaciri-wash-process:cup:1",
+      "slug": "kalaciri-wash-process",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 35000
+    },
+    {
+      "sku_id": "kintamani-full-wash-arabica-espresso:beans:1000",
+      "slug": "kintamani-full-wash-arabica-espresso",
+      "kind": "beans",
+      "weight_grams": 1000,
+      "amount_idr": 260000
+    },
+    {
+      "sku_id": "kintamani-full-wash-arabica-espresso:beans:200",
+      "slug": "kintamani-full-wash-arabica-espresso",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 70000
+    },
+    {
+      "sku_id": "kintamani-full-wash-arabica-espresso:beans:500",
+      "slug": "kintamani-full-wash-arabica-espresso",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 135000
+    },
+    {
+      "sku_id": "magnum-sidra-el-vergel-soberano:beans:100",
+      "slug": "magnum-sidra-el-vergel-soberano",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 350000
+    },
+    {
+      "sku_id": "magnum-sidra-el-vergel-soberano:beans:16",
+      "slug": "magnum-sidra-el-vergel-soberano",
+      "kind": "beans",
+      "weight_grams": 16,
+      "amount_idr": 72000
+    },
+    {
+      "sku_id": "magnum-sidra-el-vergel-soberano:beans:200",
+      "slug": "magnum-sidra-el-vergel-soberano",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 685000
+    },
+    {
+      "sku_id": "magnum-sidra-el-vergel-soberano:beans:50",
+      "slug": "magnum-sidra-el-vergel-soberano",
+      "kind": "beans",
+      "weight_grams": 50,
+      "amount_idr": 180000
+    },
+    {
+      "sku_id": "magnum-sidra-el-vergel-soberano:cup:1",
+      "slug": "magnum-sidra-el-vergel-soberano",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 180000
+    },
+    {
+      "sku_id": "prau-natural-el-davisio-surya:beans:100",
+      "slug": "prau-natural-el-davisio-surya",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 139000
+    },
+    {
+      "sku_id": "prau-natural-el-davisio-surya:beans:200",
+      "slug": "prau-natural-el-davisio-surya",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 259000
+    },
+    {
+      "sku_id": "prau-natural-el-davisio-surya:cup:1",
+      "slug": "prau-natural-el-davisio-surya",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 60000
+    },
+    {
+      "sku_id": "prau-not-chiroso-unchiro:beans:100",
+      "slug": "prau-not-chiroso-unchiro",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 139000
+    },
+    {
+      "sku_id": "prau-not-chiroso-unchiro:beans:200",
+      "slug": "prau-not-chiroso-unchiro",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 259000
+    },
+    {
+      "sku_id": "prau-not-chiroso-unchiro:cup:1",
+      "slug": "prau-not-chiroso-unchiro",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 56000
+    },
+    {
+      "sku_id": "puntang-honey-gulali:beans:100",
+      "slug": "puntang-honey-gulali",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 95000
+    },
+    {
+      "sku_id": "puntang-honey-gulali:beans:200",
+      "slug": "puntang-honey-gulali",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 179000
+    },
+    {
+      "sku_id": "puntang-honey-gulali:beans:500",
+      "slug": "puntang-honey-gulali",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 379000
+    },
+    {
+      "sku_id": "puntang-honey-gulali:cup:1",
+      "slug": "puntang-honey-gulali",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 45000
+    },
+    {
+      "sku_id": "puntang-natural-aromanis:beans:100",
+      "slug": "puntang-natural-aromanis",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 99000
+    },
+    {
+      "sku_id": "puntang-natural-aromanis:beans:200",
+      "slug": "puntang-natural-aromanis",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 185000
+    },
+    {
+      "sku_id": "puntang-natural-aromanis:beans:500",
+      "slug": "puntang-natural-aromanis",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 399000
+    },
+    {
+      "sku_id": "puntang-natural-aromanis:cup:1",
+      "slug": "puntang-natural-aromanis",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 52000
+    },
+    {
+      "sku_id": "sindoro-lavender-candy:beans:100",
+      "slug": "sindoro-lavender-candy",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 119000
+    },
+    {
+      "sku_id": "sindoro-lavender-candy:beans:200",
+      "slug": "sindoro-lavender-candy",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 220000
+    },
+    {
+      "sku_id": "sindoro-lavender-candy:cup:1",
+      "slug": "sindoro-lavender-candy",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 55000
+    },
+    {
+      "sku_id": "sindoro-strawberry-selai:beans:100",
+      "slug": "sindoro-strawberry-selai",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 119000
+    },
+    {
+      "sku_id": "sindoro-strawberry-selai:beans:200",
+      "slug": "sindoro-strawberry-selai",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 220000
+    },
+    {
+      "sku_id": "sindoro-strawberry-selai:cup:1",
+      "slug": "sindoro-strawberry-selai",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 56000
+    },
+    {
+      "sku_id": "sudan-rume-huila-carmin:beans:100",
+      "slug": "sudan-rume-huila-carmin",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 360000
+    },
+    {
+      "sku_id": "sudan-rume-huila-carmin:beans:16",
+      "slug": "sudan-rume-huila-carmin",
+      "kind": "beans",
+      "weight_grams": 16,
+      "amount_idr": 80000
+    },
+    {
+      "sku_id": "sudan-rume-huila-carmin:beans:200",
+      "slug": "sudan-rume-huila-carmin",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 690000
+    },
+    {
+      "sku_id": "sudan-rume-huila-carmin:beans:50",
+      "slug": "sudan-rume-huila-carmin",
+      "kind": "beans",
+      "weight_grams": 50,
+      "amount_idr": 185000
+    },
+    {
+      "sku_id": "sudan-rume-huila-carmin:cup:1",
+      "slug": "sudan-rume-huila-carmin",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 180000
+    },
+    {
+      "sku_id": "sumbing-supernova-celestia:beans:100",
+      "slug": "sumbing-supernova-celestia",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 139000
+    },
+    {
+      "sku_id": "sumbing-supernova-celestia:beans:200",
+      "slug": "sumbing-supernova-celestia",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 259000
+    },
+    {
+      "sku_id": "sumbing-supernova-celestia:cup:1",
+      "slug": "sumbing-supernova-celestia",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 48000
+    },
+    {
+      "sku_id": "telemung-honey-robusta-espresso:beans:1000",
+      "slug": "telemung-honey-robusta-espresso",
+      "kind": "beans",
+      "weight_grams": 1000,
+      "amount_idr": 150000
+    },
+    {
+      "sku_id": "telemung-honey-robusta-espresso:beans:200",
+      "slug": "telemung-honey-robusta-espresso",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 35000
+    },
+    {
+      "sku_id": "telemung-honey-robusta-espresso:beans:500",
+      "slug": "telemung-honey-robusta-espresso",
+      "kind": "beans",
+      "weight_grams": 500,
+      "amount_idr": 85000
+    },
+    {
+      "sku_id": "yemen-haraz-golden-harvest-sahara:beans:100",
+      "slug": "yemen-haraz-golden-harvest-sahara",
+      "kind": "beans",
+      "weight_grams": 100,
+      "amount_idr": 229000
+    },
+    {
+      "sku_id": "yemen-haraz-golden-harvest-sahara:beans:16",
+      "slug": "yemen-haraz-golden-harvest-sahara",
+      "kind": "beans",
+      "weight_grams": 16,
+      "amount_idr": 59000
+    },
+    {
+      "sku_id": "yemen-haraz-golden-harvest-sahara:beans:200",
+      "slug": "yemen-haraz-golden-harvest-sahara",
+      "kind": "beans",
+      "weight_grams": 200,
+      "amount_idr": 549000
+    },
+    {
+      "sku_id": "yemen-haraz-golden-harvest-sahara:beans:50",
+      "slug": "yemen-haraz-golden-harvest-sahara",
+      "kind": "beans",
+      "weight_grams": 50,
+      "amount_idr": 165000
+    },
+    {
+      "sku_id": "yemen-haraz-golden-harvest-sahara:cup:1",
+      "slug": "yemen-haraz-golden-harvest-sahara",
+      "kind": "cup",
+      "weight_grams": 1,
+      "amount_idr": 99000
+    }
+  ]
+}

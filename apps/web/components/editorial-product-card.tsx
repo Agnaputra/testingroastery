@@ -7,6 +7,7 @@ import { Eye, Plus, Check } from 'lucide-react';
 import { CoffeeProduct, formatRupiah, getCustomerProductName, getProductDisplayImage } from '../lib/data';
 import { QuickViewModal } from './quick-view-modal';
 import { useCartStore } from '../lib/store/useCartStore';
+import { getCurrentEffectiveProduct } from '../lib/catalog-publication';
 
 interface EditorialProductCardProps {
   product: CoffeeProduct;
@@ -25,10 +26,12 @@ export function EditorialProductCard({
   const displayName = getCustomerProductName(product);
   const detailUrl = `/catalog/${product.slug}?mode=${isCup ? 'cup' : 'beans'}`;
 
-  const handleDirectAdd = (e: React.MouseEvent) => {
+  const handleDirectAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const defaultVariant = product.variants[0];
+    const current = await getCurrentEffectiveProduct(product);
+    if (!current) return;
+    const defaultVariant = current.variants[0];
     addItem({
       productId: product.id,
       name: displayName,
@@ -41,8 +44,8 @@ export function EditorialProductCard({
       grind: 'whole',
       grindLabel: isCup ? 'Seduhan manual' : 'Biji utuh',
       unitPrice: isCup
-        ? product.cupPrice || product.basePrice
-        : product.basePrice,
+        ? current.cupPrice || current.basePrice
+        : current.basePrice,
       quantity: 1,
       series: product.series,
       tastingNotes: product.tastingNotes,

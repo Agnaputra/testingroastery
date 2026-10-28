@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, ChevronDown, ChevronRight, Menu, Minus, Plus, Search, ShoppingBag, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, ChevronRight, Menu, Minus, Plus, Search, ShoppingBag, UserRound, X } from 'lucide-react';
 import { useCartStore } from '../lib/store/useCartStore';
 import { getHydratedCartItemCount } from '../lib/store/cart-hydration';
 import { useCartHydration } from '../lib/store/useCartHydration';
@@ -338,6 +338,7 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-0.5 sm:gap-2">
+            <Link href="/account" aria-label="Akun pelanggan" title="Akun pelanggan" className={`icon-button rounded-lg ${iconColor}`}><UserRound aria-hidden="true" className="h-5 w-5" /></Link>
             <button type="button" aria-label="Cari kopi" title="Cari kopi (Ctrl/⌘ K)" onClick={() => { setSearchModalOpen(true); closeMobileMenu(); }} className={`icon-button rounded-lg ${iconColor}`}><Search aria-hidden="true" className="h-5 w-5" /></button>
             <button type="button" onClick={toggleDrawer} aria-label={cartItemCount === null ? 'Keranjang belanja' : `Keranjang belanja, ${cartItemCount} item`} className={`icon-button relative rounded-lg ${iconColor}`}>
               <ShoppingBag aria-hidden="true" className="h-5 w-5" />

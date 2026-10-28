@@ -1,0 +1,56 @@
+.brewing-redesign { background: #f5f2ec; color: #242729; }
+.brewing-redesign .brewing-hero { background: #202527; }
+.brewing-redesign .brewing-hero .lab-hero__inner { min-height: 684px; grid-template-columns: minmax(0, 1.4fr) minmax(320px, .85fr); gap: clamp(36px, 6vw, 94px); }
+.brewing-redesign .brewing-hero .lab-hero__eyebrow { color: #d8697b; }
+.brewing-redesign .brewing-hero .lab-hero__title { max-width: 10ch; font-size: clamp(3.5rem, 6.1vw, 5.5rem); line-height: 1.02; }
+.brewing-redesign .brewing-hero .lab-hero__description { max-width: 39ch; font-size: clamp(16px, 1.5vw, 20px); line-height: 1.6; }
+.brewing-redesign .brewing-hero .lab-hero__primary { border-radius: 999px; padding-inline: 24px; }
+.brewing-redesign .brewing-hero .lab-hero__media { width: min(100%, 447px); border-radius: 14px; background: #526a78; }
+.brewing-redesign .brewing-hero .lab-hero__photo { aspect-ratio: 447 / 470; }
+.brewing-redesign .brewing-hero .lab-hero__media figcaption { background: #fff; }
+.brewing-content > section { margin-top: 0; }
+.brewing-redesign .brewing-methods { padding-top: 72px; padding-bottom: 88px; }
+.brewing-redesign .brewing-methods > div:first-child { border: 0; padding-bottom: 0; }
+.brewing-redesign .brewing-methods h2,
+.brewing-redesign #precision-title { letter-spacing: -.045em; }
+.brewing-method-card { min-width: 0; box-shadow: 0 1px 2px rgb(32 37 39 / 4%); }
+.brewing-method-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgb(32 37 39 / 9%); }
+.brewing-method-photo img { transition: transform .5s cubic-bezier(.22,1,.36,1); }
+.brewing-method-card:hover .brewing-method-photo img { transform: scale(1.04); }
+.brewing-method-details { margin-top: 4px; }
+.brewing-method-details summary { min-height: 36px; display: flex; align-items: center; }
+.brewing-method-details[open] summary { margin-bottom: 12px; }
+.brewing-redesign .brewing-studio { border-top: 1px solid #dfe3e2; }
+.brewing-redesign .brewing-studio-panel { border-radius: 16px; border-color: transparent; box-shadow: 0 8px 35px rgb(32 37 39 / 4%); }
+.brewing-redesign .brewing-input-panel { border: 0; background: #f5f2ec; box-shadow: none; }
+.brewing-redesign #recipes,
+.brewing-redesign #grind-size,
+.brewing-redesign #ratio-extraction { padding-top: 78px; }
+.brewing-redesign #recipes { border-top: 1px solid #dfe3e2; }
+.brewing-redesign #recipes > div:first-child,
+.brewing-redesign #grind-size > div:first-child,
+.brewing-redesign #ratio-extraction > div:first-child { border-bottom: 0; }
+.brewing-redesign #recipes > div.grid > div,
+.brewing-redesign #grind-size > div:last-child,
+.brewing-redesign #ratio-extraction > div:last-child > div { box-shadow: none; }
+.brewing-redesign #grind-size table tr:hover { background: #f5f2ec; }
+.brewing-redesign :is(a,button,input,select,summary):focus-visible { outline: 2px solid #a52136; outline-offset: 3px; }
+@media (max-width: 767px) {
+  .brewing-redesign .brewing-hero .lab-hero__inner { min-height: 0; grid-template-columns: 1fr; gap: 30px; padding-top: calc(76px + 42px); padding-bottom: 44px; }
+  .brewing-redesign .brewing-hero .lab-hero__title { font-size: clamp(2.8rem, 11vw, 3.7rem); }
+  .brewing-redesign .brewing-hero .lab-hero__description { max-width: 34ch; font-size: 15px; }
+  .brewing-redesign .brewing-hero .lab-hero__media { width: min(100%, 380px); justify-self: end; }
+  .brewing-redesign .brewing-hero .lab-hero__photo { aspect-ratio: 1.65 / 1; }
+  .brewing-redesign .brewing-methods { padding-top: 46px; padding-bottom: 66px; }
+  .brewing-redesign .brewing-method-card h3 { font-size: 16px; line-height: 1.25; }
+  .brewing-redesign .brewing-method-card .font-mono.text-\[11px\] { display: none; }
+  .brewing-redesign .brewing-method-card > div:last-child { margin-top: 8px; padding-top: 8px; }
+  .brewing-redesign .brewing-method-card > div:last-child > span { display: none; }
+  .brewing-redesign #recipes,
+  .brewing-redesign #grind-size,
+  .brewing-redesign #ratio-extraction { padding-top: 58px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brewing-redesign .brewing-method-card,
+  .brewing-redesign .brewing-method-photo img { transition: none; transform: none; }
+}

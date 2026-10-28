@@ -67,6 +67,8 @@ class ChatResponse(BaseModel):
     groundedInCatalog: bool = True
     guardrailStatus: str = "passed"
     responseSource: Literal["deterministic", "openai", "local_fallback"] = "deterministic"
+    priceRevision: Optional[int] = None
+    effectiveCatalogFingerprint: Optional[str] = None
 
 class SearchRequest(BaseModel):
     query: str

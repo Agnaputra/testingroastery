@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Beaker, BookOpen, Coffee, FlaskConical, Flame, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, BookOpen, Coffee, FlaskConical, SlidersHorizontal } from 'lucide-react';
 import { PageIntro, SectionIntro } from '../../components/ui/page-structure';
 
 export const metadata: Metadata = {
@@ -15,18 +15,6 @@ const EXPERIMENTS = [
     icon: Coffee,
     title: 'Cupping Events',
     description: 'Sesi evaluasi aroma, rasa, dan karakter origin bersama tim roastery.',
-  },
-  {
-    href: '/coffee-lab/coffee-experiments#roasting-experiments',
-    icon: Flame,
-    title: 'Roasting Experiments',
-    description: 'Catatan eksplorasi profil sangrai, development, dan respons tiap origin.',
-  },
-  {
-    href: '/coffee-lab/coffee-experiments#brewing-experiments',
-    icon: Beaker,
-    title: 'Brewing Experiments',
-    description: 'Eksperimen variabel seduh untuk memahami perubahan ekstraksi di dalam cangkir.',
   },
 ];
 
@@ -81,8 +69,8 @@ export default function CoffeeLabPage() {
         <div className="site-container page-section">
           <SectionIntro
             kicker="Coffee Experiments"
-            title="Catatan dari proses yang terus diuji"
-            description="Program eksperimen akan diumumkan ketika jadwal dan materinya siap. Bagian ini menjadi rumah bagi cupping, roasting, dan brewing experiments 52 Coffee."
+            title="Temukan sesi cupping"
+            description="Jelajahi agenda, lihat detail sesi, lalu hubungi organizer untuk mendaftar melalui WhatsApp."
           />
 
           <div className="editorial-reveal-list grid gap-x-6 gap-y-8 md:grid-cols-3">

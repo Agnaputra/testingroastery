@@ -84,8 +84,8 @@ export const COFFEE_LAB_CONTENT: CoffeeLabEntry[] = [
     path: 'coffee-experiments',
     group: 'experiment',
     kicker: 'Coffee Lab / Coffee Experiments',
-    title: 'Agenda eksperimen dalam satu halaman.',
-    description: 'Temukan cupping, roasting experiments, dan brewing experiments 52 Coffee dalam satu rangkaian program.',
+    title: 'Agenda Cupping Events.',
+    description: 'Temukan sesi cupping komunitas dan hubungi organizer melalui WhatsApp.',
     image: '/images/roaster-footage.png',
     sections: [
       {
@@ -94,20 +94,8 @@ export const COFFEE_LAB_CONTENT: CoffeeLabEntry[] = [
         body: 'Sesi edukasi untuk membandingkan aroma dan rasa kopi dengan prosedur seduh yang seragam.',
         points: ['Membaca aroma, acidity, sweetness, body, dan aftertaste', 'Tema, kapasitas, lokasi, dan pendaftaran mengikuti agenda resmi'],
       },
-      {
-        id: 'roasting-experiments',
-        title: 'Roasting Experiments',
-        body: 'Eksplorasi bagaimana perubahan development, energi, dan profil sangrai memengaruhi karakter di dalam cangkir.',
-        points: ['Bandingkan profil dengan evaluasi cangkir', 'Hasil dibagikan setelah materi dan konteks siap'],
-      },
-      {
-        id: 'brewing-experiments',
-        title: 'Brewing Experiments',
-        body: 'Eksperimen terarah untuk membaca dampak grind, rasio, suhu, agitasi, dan waktu terhadap hasil seduh.',
-        points: ['Ubah satu variabel pada satu waktu', 'Dokumentasikan resep dan rasa setiap percobaan'],
-      },
     ],
-    action: { href: 'https://luma.com/', label: 'Lihat agenda di Luma', external: true },
+    action: { href: '/coffee-lab/coffee-experiments#cupping-events', label: 'Lihat agenda cupping' },
   },
 ];
 

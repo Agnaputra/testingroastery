@@ -34,6 +34,8 @@ export type BackendChatResponse = {
   sources: Array<{ title: string; url: string }>;
   groundedInCatalog: boolean;
   guardrailStatus: string;
+  priceRevision?: number | null;
+  effectiveCatalogFingerprint?: string | null;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

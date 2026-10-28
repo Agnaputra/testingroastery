@@ -5,6 +5,7 @@ node_modules/
 
 # Next.js build output
 .next/
+apps/web/.next*/
 out/
 build/
 dist/
@@ -31,6 +32,7 @@ venv.bak/
 .env.*.local
 !.env.example
 !.env.local.example
+.private/
 
 # Logs
 logs

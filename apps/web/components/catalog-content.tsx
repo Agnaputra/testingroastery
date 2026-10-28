@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import {
+  type CoffeeProduct,
   getProductDisplayImage,
 } from '../lib/data';
 import { getPublishedProducts } from '../lib/catalog-master';
@@ -47,9 +48,13 @@ const FLAVOR_PROFILES = [
 export default function CatalogContent({
   initialCategory: defaultCategory,
   publishedSlugs,
+  effectiveProducts,
+  publicationUnavailable = false,
 }: {
   initialCategory?: string;
-  publishedSlugs?: string[];
+  publishedSlugs: string[];
+  effectiveProducts?: CoffeeProduct[];
+  publicationUnavailable?: boolean;
 }) {
   return (
     <Suspense
@@ -59,21 +64,20 @@ export default function CatalogContent({
         </div>
       }
     >
-      <CatalogClientContent defaultCategory={defaultCategory} publishedSlugs={publishedSlugs} />
+      <CatalogClientContent defaultCategory={defaultCategory} publishedSlugs={publishedSlugs} effectiveProducts={effectiveProducts} publicationUnavailable={publicationUnavailable} />
     </Suspense>
   );
 }
 
-function CatalogClientContent({ defaultCategory, publishedSlugs }: { defaultCategory?: string; publishedSlugs?: string[] }) {
+function CatalogClientContent({ defaultCategory, publishedSlugs, effectiveProducts, publicationUnavailable }: { defaultCategory?: string; publishedSlugs: string[]; effectiveProducts?: CoffeeProduct[]; publicationUnavailable: boolean }) {
   const reducedMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') ?? defaultCategory ?? null;
   const initialSeries = searchParams.get('series');
   const publishedProducts = useMemo(() => {
-    if (!publishedSlugs) return DEFAULT_PUBLISHED_PRODUCTS;
     const activeSlugs = new Set(publishedSlugs);
-    return DEFAULT_PUBLISHED_PRODUCTS.filter((product) => activeSlugs.has(product.slug));
-  }, [publishedSlugs]);
+    return (effectiveProducts ?? DEFAULT_PUBLISHED_PRODUCTS).filter((product) => activeSlugs.has(product.slug));
+  }, [publishedSlugs, effectiveProducts]);
 
   const [mainTab, setMainTab] = useState<'beans' | 'slowbar' | 'glassware' | 'machine'>(() => {
     if (initialCategory) {
@@ -588,12 +592,12 @@ function CatalogClientContent({ defaultCategory, publishedSlugs }: { defaultCate
                 <Search size={22} aria-hidden="true" />
               </div>
               <h3 className="font-headline text-2xl font-semibold tracking-tight text-brand-charcoal">
-                {mainTab === 'slowbar' ? 'Menu pada kelompok ini belum tersedia.' : 'Tidak ada kopi yang sesuai filter.'}
+                {publicationUnavailable ? 'Status katalog sedang tidak tersedia.' : mainTab === 'slowbar' ? 'Menu pada kelompok ini belum tersedia.' : 'Tidak ada kopi yang sesuai filter.'}
               </h3>
               <p className="mx-auto max-w-md text-sm text-on-surface-variant">
-                {mainTab === 'slowbar' ? 'Dataset owner belum memuat item published untuk kombinasi ini. Tidak ada menu atau harga sementara yang ditampilkan.' : 'Coba sesuaikan kata kunci pencarian atau tampilkan kembali seluruh pilihan kopi 52 Coffee.'}
+                {publicationUnavailable ? 'Coba muat ulang halaman setelah layanan katalog pulih.' : mainTab === 'slowbar' ? 'Dataset owner belum memuat item published untuk kombinasi ini. Tidak ada menu atau harga sementara yang ditampilkan.' : 'Coba sesuaikan kata kunci pencarian atau tampilkan kembali seluruh pilihan kopi 52 Coffee.'}
               </p>
-              <div className="pt-2">
+              {!publicationUnavailable && <div className="pt-2">
                 <button
                   type="button"
                   onClick={resetAllFilters}
@@ -602,7 +606,7 @@ function CatalogClientContent({ defaultCategory, publishedSlugs }: { defaultCate
                   <RotateCcw size={12} aria-hidden="true" />
                   Tampilkan semua kopi
                 </button>
-              </div>
+              </div>}
             </motion.div>
           )}
         </AnimatePresence>

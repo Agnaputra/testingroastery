@@ -1,5 +1,6 @@
 import json
 import re
+from contextvars import ContextVar
 from typing import List, Dict, Any, Tuple, Optional, get_args, cast
 import httpx
 import psycopg2
@@ -22,6 +23,7 @@ from .action_service import resolve_contextual_action
 from .conversation_state import ConversationState, derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
 from .models import ProductSearchResult
 from .publication_service import apply_publication_overrides, get_publication_overrides
+from .price_service import PriceError, get_price_snapshot, overlay_knowledge_price, price_mode_requested
 from .recommendation_service import (
     RecommendationResult,
     catalog_variants,
@@ -30,6 +32,9 @@ from .recommendation_service import (
     recommend_products,
 )
 from .website_features import WEBSITE_FEATURE_CONTEXT, WEBSITE_FEATURES
+from evaluation.trace import current_trace, record as record_evaluation, record_guardrail
+
+_request_price_authority: ContextVar[Optional[Tuple[int, str]]] = ContextVar("request_price_authority", default=None)
 
 BARISTA_OUTPUT_SCHEMA = {
     "type": "object",
@@ -676,10 +681,30 @@ def _matched_catalog_products(user_query: str) -> List[Dict[str, Any]]:
 def _active_catalog_products() -> Tuple[List[Dict[str, Any]], bool]:
     """Load publication-approved products without treating an outage as approval."""
     try:
+        if price_mode_requested():
+            snapshot = get_price_snapshot()
+            request_authority = _request_price_authority.get()
+            actual_authority = (snapshot["revision"], snapshot["effectiveCatalogFingerprint"])
+            if request_authority is not None and request_authority != actual_authority:
+                return [], False
+            if request_authority is None:
+                _request_price_authority.set((snapshot["revision"], snapshot["effectiveCatalogFingerprint"]))
+            products = apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, snapshot["overrides"])
+            priced = [overlay_knowledge_price(product, snapshot) for product in products]
+            if _request_price_authority.get() == (snapshot["revision"], snapshot["effectiveCatalogFingerprint"]):
+                record_evaluation(
+                    price_revision=snapshot["revision"],
+                    effective_catalog_fingerprint=snapshot["effectiveCatalogFingerprint"],
+                )
+            return priced, True
         overrides = get_publication_overrides()
         return apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, overrides), True
-    except psycopg2.Error:
+    except (psycopg2.Error, PriceError):
         return [], False
+
+
+def _runtime_price_fields(product: Dict[str, Any]) -> Dict[str, Any]:
+    return {key: value for key, value in product.items() if key.startswith("price_") or key == "cup_price"}
 
 
 def _requires_catalog_authority(
@@ -790,8 +815,12 @@ class RAGService:
 
     def _search_pgvector(self, query: str, top_k: int) -> List[Tuple[Dict[str, Any], float]]:
         """Retrieve public catalog chunks from PostgreSQL with pgvector cosine distance."""
+        known_slugs = [product["slug"] for product in PUBLISHED_COFFEE_KNOWLEDGE_BASE]
+        if not known_slugs:
+            return []
         embedding = self._create_embedding(query)
         if embedding is None:
+            record_evaluation(retrieval_fallback_reason="embedding_unavailable")
             return []
         try:
             with psycopg2.connect(settings.DATABASE_URL, connect_timeout=3) as connection:
@@ -804,24 +833,29 @@ class RAGService:
                         LEFT JOIN catalog_publication_overrides AS publication
                           ON publication.slug = knowledge.metadata->>'slug'
                         WHERE knowledge.embedding IS NOT NULL
+                          AND knowledge.metadata->>'slug' = ANY(%s)
                           AND COALESCE(knowledge.metadata->>'publication_status', 'published') = 'published'
                           AND COALESCE(publication.is_published, TRUE) = TRUE
                         ORDER BY knowledge.embedding <=> %s
                         LIMIT %s
                         """,
-                        (Vector(embedding), Vector(embedding), top_k),
+                        (Vector(embedding), known_slugs, Vector(embedding), top_k),
                     )
                     rows = cursor.fetchall()
             return [(metadata, float(similarity)) for metadata, similarity in rows if isinstance(metadata, dict)]
         except (psycopg2.Error, ValueError, TypeError):
+            record_evaluation(retrieval_fallback_reason="pgvector_unavailable")
             return []
 
-    def _search_in_memory(self, query: str, top_k: int) -> List[Tuple[Dict[str, Any], float]]:
+    def _search_in_memory(
+        self, query: str, top_k: int, active_products: Optional[List[Dict[str, Any]]] = None
+    ) -> List[Tuple[Dict[str, Any], float]]:
         """Deterministic availability fallback; this is not presented as vector RAG."""
         query_lower = query.lower()
         results = []
 
-        active_products, _ = _active_catalog_products()
+        if active_products is None:
+            active_products, _ = _active_catalog_products()
         for product in active_products:
             score = 0.0
             
@@ -867,11 +901,43 @@ class RAGService:
 
         return results[:top_k]
 
-    def search_similar_products(self, query: str, top_k: Optional[int] = None) -> List[Tuple[Dict[str, Any], float]]:
+    def search_similar_products(
+        self, query: str, top_k: Optional[int] = None,
+        active_products: Optional[List[Dict[str, Any]]] = None,
+    ) -> List[Tuple[Dict[str, Any], float]]:
         """Use pgvector at runtime, falling back only when the vector service is unavailable."""
         limit = max(1, min(top_k or settings.RAG_TOP_K, 10))
-        vector_results = self._search_pgvector(query, limit)
-        return vector_results or self._search_in_memory(query, limit)
+        if active_products is None:
+            active_products, authority_available = _active_catalog_products()
+            if not authority_available:
+                record_evaluation(retrieval_source="none", retrieval_fallback_reason="publication_unavailable")
+                return []
+        active_slugs = {product["slug"] for product in active_products}
+        if not active_slugs:
+            return []
+        active_by_slug = {product["slug"]: product for product in active_products}
+        vector_results = []
+        for metadata, score in self._search_pgvector(query, limit):
+            slug = metadata.get("slug")
+            if slug not in active_slugs:
+                continue
+            if price_mode_requested():
+                metadata = {
+                    key: value for key, value in metadata.items()
+                    if not (key.startswith("price_") or key == "cup_price")
+                }
+                metadata.update({
+                    key: value for key, value in active_by_slug[slug].items()
+                    if key.startswith("price_") or key == "cup_price"
+                })
+            vector_results.append((metadata, score))
+        trace = current_trace()
+        fallback_reason = trace.data.get("retrieval_fallback_reason") if trace is not None else None
+        record_evaluation(
+            retrieval_source="pgvector" if vector_results else "in_memory",
+            retrieval_fallback_reason=None if vector_results else fallback_reason or "vector_empty",
+        )
+        return vector_results or self._search_in_memory(query, limit, active_products)
 
     def retrieval_status(self) -> Dict[str, Any]:
         """Report actual runtime readiness without issuing an embedding request."""
@@ -912,6 +978,7 @@ class RAGService:
         response_source: str = "deterministic",
     ) -> Dict[str, Any]:
         selected_slugs = slugs or []
+        authority = _request_price_authority.get() if grounding == "catalog" and price_mode_requested() else None
         return {
             "reply": reply,
             "intent": intent,
@@ -928,6 +995,7 @@ class RAGService:
             "groundedInCatalog": grounding == "catalog",
             "guardrailStatus": guardrail_status,
             "responseSource": response_source,
+            **({"priceRevision": authority[0], "effectiveCatalogFingerprint": authority[1]} if authority else {}),
         }
 
     def _classify_unrecognized_intent(self, query: str, history: List[Dict[str, Any]]) -> ChatIntent:
@@ -982,7 +1050,11 @@ class RAGService:
             or (message.get("role") == "assistant" and message.get("intent") == "health_sensitive_recommendation")
             for message in history[-8:]
         )
-        result = self._generate_barista_response(user_query, history, request_id)
+        authority_token = _request_price_authority.set(None)
+        try:
+            result = self._generate_barista_response(user_query, history, request_id)
+        finally:
+            _request_price_authority.reset(authority_token)
         # Validate every user-visible field, including web replies and suggested buttons.
         unsafe_pattern = health_pattern + r"|\b(medis|menetralkan|menetralisir|aman|nyaman|rendah asam|asamnya|keasaman rendah)\b"
         if health_context:
@@ -1004,6 +1076,12 @@ class RAGService:
             if result["clarifyingQuestion"] and re.search(unsafe_pattern, result["clarifyingQuestion"], re.IGNORECASE):
                 result["clarifyingQuestion"] = "Kamu ingin rasa cokelat-creamy atau fruity?"
             result["safetyNote"] = "Ini bukan saran medis. Aku tidak bisa menentukan keamanan kopi untuk kondisi kesehatanmu. Ikuti arahan tenaga kesehatan jika keluhan sering atau berat."
+        trace = current_trace()
+        if trace is not None:
+            try:
+                trace.finish(result)
+            except Exception as error:
+                trace.capture_error = type(error).__name__
         return result
 
     def _generate_barista_response(
@@ -1067,6 +1145,7 @@ class RAGService:
 
         # 2. Guardrail input check (NeMo when configured, deterministic policy as defence in depth).
         input_decision = guardrail_service.check_input(user_query)
+        record_guardrail("input", input_decision.status)
         if not input_decision.allowed:
             return self._response(
                 input_decision.message,
@@ -1076,6 +1155,7 @@ class RAGService:
             )
 
         if re.search(r"\b(best[ -]?seller|terlaris|paling populer|paling laku)\b", user_query, re.IGNORECASE):
+            record_evaluation(response_route="sales_question")
             return self._response(
                 "Aku belum punya data penjualan terverifikasi untuk menyebut produk sebagai best seller. Aku bisa bantu pilih berdasarkan rasa atau metode seduhmu.",
                 "sales_question", "none",
@@ -1086,6 +1166,7 @@ class RAGService:
             )
 
         if re.search(r"\b(maag|gerd|asam lambung|alergi|hamil|kehamilan|obat)\b", user_query, re.IGNORECASE):
+            record_evaluation(response_route="health_sensitive_recommendation")
             return self._response(
                 "Paham, kawan seduh. Aku tidak bisa menentukan kopi yang aman untuk kondisi kesehatanmu. Jika tetap ingin eksplorasi kopi, aku bisa bantu memilih berdasarkan rasa dan metode seduh yang kamu sukai.",
                 "health_sensitive_recommendation", "none",
@@ -1116,6 +1197,7 @@ class RAGService:
             )
 
         if catalog_list:
+            record_evaluation(retrieval_source="catalog_direct")
             listed = active_products[:6]
             names = ", ".join(str(product["name"]) for product in listed)
             reply = (
@@ -1124,6 +1206,7 @@ class RAGService:
                 if listed else "Belum ada biji kopi aktif yang bisa saya tampilkan saat ini."
             )
             decision = guardrail_service.check_output(reply)
+            record_guardrail("output", decision.status)
             return self._response(
                 reply if decision.allowed else decision.message,
                 "catalog_query", "catalog" if decision.allowed else "none",
@@ -1139,6 +1222,7 @@ class RAGService:
                 "Mau mulai dari katalog atau panduan seduh?"
             )
             decision = guardrail_service.check_output(reply)
+            record_guardrail("output", decision.status)
             return self._response(reply if decision.allowed else decision.message,
                 intent, "website" if decision.allowed else "none",
                 follow_ups=["Apa saja produknya?", "Buka Brewing Guidance"] if decision.allowed else [],
@@ -1226,7 +1310,9 @@ class RAGService:
             request_id=request_id,
         )
         if action_resolution.handled:
+            record_evaluation(retrieval_source="catalog_direct" if action_resolution.product_slug else "none")
             output_decision = guardrail_service.check_output(action_resolution.reply)
+            record_guardrail("output", output_decision.status)
             if not output_decision.allowed:
                 return self._response(
                     output_decision.message,
@@ -1246,6 +1332,7 @@ class RAGService:
         conversational_reply = self._conversation_reply(user_query, contextual_followup)
         if conversational_reply:
             output_decision = guardrail_service.check_output(conversational_reply)
+            record_guardrail("output", output_decision.status)
             return self._response(
                 output_decision.message if not output_decision.allowed else conversational_reply,
                 intent,
@@ -1264,6 +1351,7 @@ class RAGService:
             )
 
         if intent == "coffee_knowledge":
+            record_evaluation(retrieval_source="web_search")
             return self._generate_coffee_knowledge_response(user_query, history, input_decision.status)
 
         # 3. Feature questions use website context only; no unrelated product cards.
@@ -1294,7 +1382,9 @@ class RAGService:
                     guardrail_status="catalog_product_unpublished",
                 )
             search_limit = 10 if conversation_state.budget_max is not None or conversation_state.relative_price_direction else None
-            similar_items = [] if feature_question else self.search_similar_products(retrieval_query, top_k=search_limit)
+            similar_items = [] if feature_question else self.search_similar_products(
+                retrieval_query, top_k=search_limit, active_products=active_products
+            )
             if referenced_products and not feature_question:
                 referenced_items = [
                     (product, 1.0)
@@ -1340,6 +1430,20 @@ class RAGService:
                     context_items.append(item)
         retrieved_products = [item[0] for item in context_items]
 
+        # A publication change during retrieval must not enter the OpenAI payload.
+        latest_active_products, latest_authority_available = _active_catalog_products()
+        latest_active_slugs = {product["slug"] for product in latest_active_products}
+        latest_by_slug = {product["slug"]: product for product in latest_active_products}
+        if not latest_authority_available or any(
+            product["slug"] not in latest_active_slugs or (
+                price_mode_requested() and _runtime_price_fields(product) != _runtime_price_fields(latest_by_slug[product["slug"]])
+            ) for product in retrieved_products
+        ):
+            return self._response(
+                "Status katalog berubah atau sedang tidak tersedia. Silakan coba lagi.",
+                intent, "none", guardrail_status="catalog_authority_unavailable",
+            )
+
         # Retrieval provides model context. Cards are selected separately by intent.
         if intent == "product_recommendation":
             recommended_items = recommendation_pool[:3]
@@ -1356,7 +1460,7 @@ class RAGService:
         recommended_slugs = [item[0]["slug"] for item in recommended_items]
 
         # Format Context Document
-        context_text = "\n---\n".join([
+        context_blocks = [
             f"PRODUK: {p['name']} ({p['series']})\n"
             f"Slug: {p['slug']}\n"
             f"Origin: {p['origin']}\n"
@@ -1369,7 +1473,8 @@ class RAGService:
             f"Resep Seduh: {p['recipe']}\n"
             f"Deskripsi: {p['description']}"
             for p in retrieved_products
-        ])
+        ]
+        context_text = "\n---\n".join(context_blocks)
 
         # 4. Formulate the grounded prompt
         system_instruction = BARISTA_INSTRUCTIONS
@@ -1397,6 +1502,13 @@ class RAGService:
                     and isinstance(message.get("content"), str)
                     and message["content"].strip()
                 ]
+                trace = current_trace()
+                if trace is not None:
+                    try:
+                        trace.context([product["slug"] for product in retrieved_products], context_blocks, context_text)
+                        trace.update(catalog_context_sent=True)
+                    except Exception as error:
+                        trace.capture_error = type(error).__name__
                 response = httpx.post(
                     "https://api.openai.com/v1/responses",
                     headers={
@@ -1442,9 +1554,11 @@ class RAGService:
                         model_output = candidate
                         reply_text = candidate["reply"].strip()
             except (httpx.HTTPError, ValueError, KeyError, TypeError):
+                record_evaluation(fallback_reason="openai_request_or_output_invalid")
                 reply_text = ""
 
         if not reply_text:
+            record_evaluation(fallback_reason="openai_unavailable_or_output_invalid")
             if intent == "product_recommendation" and recommendation_result:
                 reply_text = format_recommendation_reply(recommendation_result)
             elif intent == "product_comparison" and referenced_products:
@@ -1458,6 +1572,7 @@ class RAGService:
             reply_text = self._feature_fallback(user_query) if feature_question else self._fallback_reply(user_query, fallback_products)
 
         output_decision = guardrail_service.check_output(reply_text)
+        record_guardrail("output", output_decision.status)
         if not output_decision.allowed:
             return self._response(
                 output_decision.message,
@@ -1507,6 +1622,19 @@ class RAGService:
             )
             for p, score in recommended_items
         ]
+
+        final_active_products, final_authority_available = _active_catalog_products()
+        final_active_slugs = {product["slug"] for product in final_active_products}
+        final_by_slug = {product["slug"]: product for product in final_active_products}
+        if not final_authority_available or any(
+            product["slug"] not in final_active_slugs or (
+                price_mode_requested() and _runtime_price_fields(product) != _runtime_price_fields(final_by_slug[product["slug"]])
+            ) for product in retrieved_products
+        ):
+            return self._response(
+                "Status katalog berubah atau sedang tidak tersedia. Silakan coba lagi.",
+                intent, "none", guardrail_status="catalog_authority_unavailable",
+            )
 
         return self._response(
             reply_text,
@@ -1582,6 +1710,7 @@ class RAGService:
             )
             response.raise_for_status()
             reply_text, sources = self._extract_response(response.json())
+            record_evaluation(web_source_urls=[source["url"] for source in sources])
         except (httpx.HTTPError, ValueError, KeyError, TypeError):
             reply_text, sources = "", []
 
@@ -1594,6 +1723,7 @@ class RAGService:
             )
 
         output_decision = guardrail_service.check_output(reply_text)
+        record_guardrail("output", output_decision.status)
         return self._response(
             output_decision.message if not output_decision.allowed else reply_text,
             "coffee_knowledge",

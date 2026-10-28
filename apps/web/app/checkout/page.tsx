@@ -6,7 +6,6 @@ import Image from 'next/image';
 import {
   ArrowLeft,
   ShieldCheck,
-  CreditCard,
   QrCode,
   Building2,
   CheckCircle2,
@@ -14,12 +13,31 @@ import {
   Sparkles,
   ShoppingBag,
   Clock,
-  Copy,
   Check,
 } from 'lucide-react';
 import { useCartStore } from '../../lib/store/useCartStore';
 import { useOrderStore, type CourierType } from '../../lib/store/useOrderStore';
 import { formatRupiah } from '../../lib/data';
+import { useCatalogPublication } from '../../lib/use-catalog-publication';
+import { isCartItemAvailable } from '../../lib/cart-publication';
+import { PRICE_TEST_MODE } from '../../lib/catalog-publication';
+import { CustomerCheckout } from '../../components/customer-checkout';
+import { QrisDynamicCard } from '../../components/ui/qris-dynamic-card';
+
+interface ServerQuote {
+  quoteId: string;
+  lines: Array<{ skuId: string; quantity: number; unitPrice: number; lineTotal: number }>;
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  total: number;
+  priceRevision: number;
+}
+
+const cartSku = (item: { productId: string; slug: string; weightGrams: number; grindLabel: string }) =>
+  item.productId.startsWith('addon-') || item.productId.startsWith('byob-')
+    ? item.productId
+    : `${item.slug}:${item.weightGrams === 1 && item.grindLabel.startsWith('Slowbar') ? 'cup' : 'beans'}:${item.weightGrams}`;
 
 interface ShippingOption {
   id: string;
@@ -29,7 +47,12 @@ interface ShippingOption {
 }
 
 export default function CheckoutPage() {
+  return process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1' ? <CustomerCheckout /> : <DemoCheckoutPage />;
+}
+
+function DemoCheckoutPage() {
   const { items, getSubtotal, clearCart } = useCartStore();
+  const { authority, refresh: refreshPublication } = useCatalogPublication();
   const { addOrder } = useOrderStore();
   const [mounted, setMounted] = useState(false);
 
@@ -53,8 +76,11 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
+  const [completedTotal, setCompletedTotal] = useState<number | null>(null);
   const [orderId, setOrderId] = useState('');
-  const [copiedVA, setCopiedVA] = useState(false);
+  const [serverQuote, setServerQuote] = useState<ServerQuote | null>(null);
+  const [checkoutError, setCheckoutError] = useState('');
+  const [priceReviewAccepted, setPriceReviewAccepted] = useState(false);
   const paymentDialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -102,7 +128,18 @@ export default function CheckoutPage() {
 
   if (!mounted) return null;
 
-  const subtotal = getSubtotal();
+  const activeSlugs = new Set(authority?.status === 'verified' ? authority.products.map((product) => product.slug) : []);
+  const effectivePrices = new Map<string, number>(authority?.products.flatMap((product) => [
+    ...product.variants.map((variant) => [`${product.slug}:beans:${variant.weightGrams}`, variant.price] as const),
+    ...(product.cupPrice ? [[`${product.slug}:cup:1`, product.cupPrice] as const] : []),
+  ]) ?? []);
+  const pricesReady = items.every((item) => effectivePrices.has(cartSku(item)));
+  const cartReady = authority?.status === 'verified' && items.every((item) => isCartItemAvailable(item, activeSlugs))
+    && (!PRICE_TEST_MODE || pricesReady);
+
+  const subtotal = PRICE_TEST_MODE
+    ? items.reduce((total, item) => total + (effectivePrices.get(cartSku(item)) ?? 0) * item.quantity, 0)
+    : getSubtotal();
   const isFreeShipping = subtotal >= 250000;
 
   const shippingOptions: ShippingOption[] = [
@@ -129,10 +166,6 @@ export default function CheckoutPage() {
   const currentShippingCost =
     shippingOptions.find((s) => s.id === selectedShipping)?.cost || 0;
   const grandTotal = Math.max(0, subtotal + currentShippingCost - discountAmount);
-  const virtualAccountNumber =
-    selectedPayment === 'bca-va' ? '8801293810294821' : '8920182399201102';
-  const formattedVirtualAccountNumber =
-    selectedPayment === 'bca-va' ? '8801 2938 1029 4821' : '8920 1823 9920 1102';
 
   const handleApplyVoucher = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,10 +178,39 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePayNow = (e: React.FormEvent) => {
+  const handlePayNow = async (e: React.FormEvent) => {
     e.preventDefault();
+    const current = await refreshPublication();
+    const currentSlugs = new Set(current.products.map((product) => product.slug));
+    if (current.status !== 'verified' || !items.every((item) => isCartItemAvailable(item, currentSlugs))) return;
     if (!fullName || !phone || !address) {
       alert('Mohon lengkapi nama, nomor WhatsApp, dan alamat pengiriman.');
+      return;
+    }
+
+    if (PRICE_TEST_MODE) {
+      setCheckoutError('');
+      setIsProcessing(true);
+      try {
+        const response = await fetch('/api/checkout/quote', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: items.map((item) => ({ skuId: cartSku(item), quantity: item.quantity })),
+            shippingOption: selectedShipping,
+            voucherCode: voucherApplied ? voucherCode : '',
+          }),
+        });
+        if (!response.ok) throw new Error('Harga salah satu item atau layanan checkout belum dapat diverifikasi. Periksa keranjang dan coba lagi.');
+        const quote = await response.json() as ServerQuote;
+        setServerQuote(quote);
+        setPriceReviewAccepted(items.every((item, index) => item.unitPrice === quote.lines[index]?.unitPrice));
+        setOrderId(`52CR-${quote.quoteId.slice(0, 6)}`);
+        setShowPaymentModal(true);
+      } catch (error) {
+        setCheckoutError(error instanceof Error ? error.message : 'Checkout belum tersedia.');
+      } finally {
+        setIsProcessing(false);
+      }
       return;
     }
 
@@ -164,7 +226,32 @@ export default function CheckoutPage() {
     }, 1000);
   };
 
-  const handleFinishPayment = () => {
+  const handleFinishPayment = async () => {
+    const current = await refreshPublication();
+    const currentSlugs = new Set(current.products.map((product) => product.slug));
+    if (current.status !== 'verified' || !items.every((item) => isCartItemAvailable(item, currentSlugs))) {
+      setShowPaymentModal(false);
+      return;
+    }
+    let confirmedQuote: ServerQuote | null = null;
+    if (PRICE_TEST_MODE) {
+      if (!serverQuote || !priceReviewAccepted) return;
+      try {
+        const response = await fetch('/api/checkout/confirm', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quoteId: serverQuote.quoteId }),
+        });
+        if (!response.ok) throw new Error(response.status === 409
+          ? 'Harga atau status produk berubah. Tinjau keranjang dan buat quote baru.'
+          : 'Konfirmasi harga tidak tersedia. Coba lagi.');
+        confirmedQuote = await response.json() as ServerQuote;
+      } catch (error) {
+        setCheckoutError(error instanceof Error ? error.message : 'Konfirmasi gagal.');
+        setShowPaymentModal(false);
+        setServerQuote(null);
+        return;
+      }
+    }
     const courierMap: Record<string, CourierType> = {
       'jne-reg': 'JNE Reguler',
       'sicepat-best': 'SiCepat BEST',
@@ -179,36 +266,31 @@ export default function CheckoutPage() {
       customerEmail: email || undefined,
       customerAddress: address || 'Alamat Belum Diisi',
       customerCity: city || 'Malang',
-      items: items.map((item) => ({
+      items: items.map((item, index) => ({
         productId: item.productId,
         name: item.name,
         slug: item.slug,
         weightLabel: item.weightLabel,
         grindLabel: item.grindLabel,
-        unitPrice: item.unitPrice,
+        unitPrice: confirmedQuote?.lines[index]?.unitPrice ?? item.unitPrice,
         quantity: item.quantity,
         imageUrl: item.imageUrl,
       })),
-      subtotal: subtotal,
-      shippingCost: currentShippingCost,
-      total: grandTotal,
+      subtotal: confirmedQuote?.subtotal ?? subtotal,
+      shippingCost: confirmedQuote?.shipping ?? currentShippingCost,
+      total: confirmedQuote?.total ?? grandTotal,
       paymentMethod: (selectedPayment as any) || 'qris',
-      paymentStatus: 'paid',
-      status: 'roasting',
+      paymentStatus: 'pending',
+      status: 'pending',
       courier: orderCourier,
       roastDate: `Batch Sangrai ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`,
       notes: notes || undefined,
     });
 
+    setCompletedTotal(confirmedQuote?.total ?? grandTotal);
     clearCart();
     setShowPaymentModal(false);
     setOrderCompleted(true);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedVA(true);
-    setTimeout(() => setCopiedVA(false), 2000);
   };
 
   if (orderCompleted) {
@@ -224,14 +306,12 @@ export default function CheckoutPage() {
           </h1>
           <p className="text-sm text-on-surface-variant max-w-md mx-auto">
             Alur checkout demo untuk referensi <strong>#{orderId}</strong> telah selesai. Tidak ada pembayaran atau pesanan nyata yang diproses.
-            Pesanan dengan referensi <strong>#{orderId}</strong> telah masuk ke antrean roasting roastery kami.
           </p>
         </div>
 
         <div className="p-6 rounded-xl bg-white border border-border-subtle max-w-md mx-auto text-left text-xs font-mono space-y-2.5 shadow-sm">
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Penerima:</span>
-            <span className="font-bold text-on-surface">{fullName}</span>
             <span className="font-bold text-on-surface">{fullName || 'Kawan Seduh'}</span>
           </div>
           <div className="flex justify-between border-b border-border-subtle pb-2">
@@ -243,11 +323,10 @@ export default function CheckoutPage() {
           <div className="flex justify-between border-b border-border-subtle pb-2">
             <span className="text-on-surface-variant">Status Pembayaran:</span>
             <span className="text-brand-teal font-bold">SIMULASI — TIDAK DITAGIHKAN</span>
-            <span className="text-brand-teal font-bold">TERKONFIRMASI (SIMULASI)</span>
           </div>
           <div className="flex justify-between pt-1 text-sm font-bold">
             <span>Total Pembayaran:</span>
-            <span className="text-brand-navy">{formatRupiah(grandTotal)}</span>
+            <span className="text-brand-navy">{formatRupiah(completedTotal ?? 0)}</span>
           </div>
         </div>
 
@@ -287,8 +366,21 @@ export default function CheckoutPage() {
     );
   }
 
+  if (!cartReady) {
+    return (
+      <main className="nav-offset site-container page-section text-center space-y-4" role="status">
+        <h1 className="font-editorial text-2xl font-bold">Checkout sementara tidak tersedia</h1>
+        <p>{PRICE_TEST_MODE && !pricesReady
+          ? 'Harga salah satu item (termasuk addon atau BYOB) belum dapat dihitung dan diverifikasi oleh server. Hapus item tersebut atau coba lagi setelah aturan harganya tersedia.'
+          : 'Status produk dalam keranjang belum dapat diverifikasi atau salah satu produk sudah tidak aktif.'}</p>
+        <Link href="/catalog" className="btn-secondary inline-flex">Kembali ke katalog</Link>
+      </main>
+    );
+  }
+
   return (
     <div className="nav-offset site-container page-section space-y-8">
+      {checkoutError && <p role="alert" className="border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{checkoutError}</p>}
       {/* Top Breadcrumb / Back Navigation */}
       <div className="flex items-center justify-between text-xs font-mono">
         <div className="flex items-center gap-2">
@@ -486,10 +578,8 @@ export default function CheckoutPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { id: 'qris', name: 'QRIS', sub: 'GoPay, OVO, ShopeePay, BCA', icon: QrCode },
-                { id: 'bca-va', name: 'Virtual Account BCA', sub: 'Simulasi verifikasi pembayaran', icon: Building2 },
-                { id: 'mandiri-va', name: 'Virtual Account Mandiri', sub: 'Livin’ by Mandiri atau ATM', icon: Building2 },
-                { id: 'card', name: 'Kartu Kredit / Debit', sub: 'Visa, Mastercard, JCB', icon: CreditCard },
+                { id: 'qris', name: 'QRIS (demo)', sub: 'QR tidak dapat dipindai', icon: QrCode },
+                { id: 'bca-va', name: 'BCA (demo)', sub: 'Belum tersedia untuk transfer', icon: Building2 },
               ].map((method) => {
                 const isSelected = selectedPayment === method.id;
                 const Icon = method.icon;
@@ -549,7 +639,10 @@ export default function CheckoutPage() {
                     <div className="flex justify-between items-center mt-1 font-mono text-xs">
                       <span className="text-roastery-muted">{item.quantity}x</span>
                       <span className="font-bold text-roastery-dark">
-                        {formatRupiah(item.unitPrice * item.quantity)}
+                        {formatRupiah((PRICE_TEST_MODE ? effectivePrices.get(cartSku(item)) ?? 0 : item.unitPrice) * item.quantity)}
+                        {PRICE_TEST_MODE && effectivePrices.get(cartSku(item)) !== item.unitPrice && (
+                          <span className="block text-[10px] text-amber-700">Harga diperbarui; perlu persetujuan sebelum simulasi selesai.</span>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -662,77 +755,29 @@ export default function CheckoutPage() {
             </div>
 
             {selectedPayment === 'qris' && (
-              <div className="text-center space-y-3 py-2">
-                <p className="text-xs text-gray-600">Pratinjau QRIS untuk demonstrasi alur checkout:</p>
-                <div className="mx-auto flex h-56 w-56 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-brand-maroon/40 bg-gray-50 text-brand-maroon">
-                  <QrCode className="h-20 w-20" aria-hidden="true" />
-                  <p className="max-w-[18ch] font-mono text-[10px] font-bold uppercase tracking-wider">
-                    QR demo tidak dapat dipindai
-                  </p>
-                </div>
+              <div className="py-2">
+                <QrisDynamicCard amount={grandTotal} orderId={orderId} />
               </div>
             )}
-
-            {(selectedPayment === 'bca-va' || selectedPayment === 'mandiri-va') && (
+            {selectedPayment === 'bca-va' && (
               <div className="space-y-3 py-2 text-xs">
-                <p className="text-gray-600">Nomor Virtual Account berikut hanya untuk simulasi. Jangan melakukan transfer.</p>
-                <div className="p-4 bg-gray-50 rounded-xl border flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-gray-500 block">Nomor Virtual Account</span>
-                    <span className="font-mono text-base font-bold text-gray-900">
-                      {formattedVirtualAccountNumber}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(virtualAccountNumber)}
-                    className="p-2 text-roastery-crimson hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-mono"
-                  >
-                    {copiedVA ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    <span>{copiedVA ? 'Tersalin' : 'Salin'}</span>
-                  </button>
-                </div>
+                <p className="text-gray-600">Rekening pembayaran tidak ditampilkan dalam mode demo. Jangan melakukan transfer.</p>
                 <p className="text-[11px] text-gray-500">
                   Mode demo tidak mengirim data ke bank atau payment gateway.
                 </p>
               </div>
             )}
 
-            {selectedPayment === 'card' && (
-              <div className="space-y-3 py-2 text-xs">
-                <div className="space-y-1">
-                  <label className="font-mono text-[10px] uppercase text-gray-500">Nomor Kartu (Simulasi)</label>
-                  <input
-                    type="text"
-                    defaultValue="4000 1234 5678 9010"
-                    className="w-full p-2.5 border rounded-lg bg-gray-50 font-mono text-xs"
-                    readOnly
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="font-mono text-[10px] uppercase text-gray-500">Expiry</label>
-                    <input
-                      type="text"
-                      defaultValue="12/28"
-                      className="w-full p-2.5 border rounded-lg bg-gray-50 font-mono text-xs"
-                      readOnly
-                    />
-                  </div>
-                  <div>
-                    <label className="font-mono text-[10px] uppercase text-gray-500">CVV</label>
-                    <input
-                      type="text"
-                      defaultValue="888"
-                      className="w-full p-2.5 border rounded-lg bg-gray-50 font-mono text-xs"
-                      readOnly
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className="pt-2 flex gap-2">
+              {PRICE_TEST_MODE && serverQuote && (
+                <div className="w-full text-xs">
+                  <p>Harga server revisi {serverQuote.priceRevision}: {formatRupiah(serverQuote.total)} (subtotal {formatRupiah(serverQuote.subtotal)}, ongkir {formatRupiah(serverQuote.shipping)}, diskon {formatRupiah(serverQuote.discount)}).</p>
+                  {!priceReviewAccepted && <label className="mt-2 flex items-center gap-2">
+                    <input type="checkbox" checked={priceReviewAccepted} onChange={(event) => setPriceReviewAccepted(event.target.checked)} />
+                    Saya meninjau dan menyetujui harga terbaru sebelum menyelesaikan simulasi.
+                  </label>}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
@@ -744,6 +789,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={handleFinishPayment}
+                disabled={PRICE_TEST_MODE && (!serverQuote || !priceReviewAccepted)}
                 className="flex-1 py-2.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-md transition-colors"
               >
                 Selesaikan Simulasi

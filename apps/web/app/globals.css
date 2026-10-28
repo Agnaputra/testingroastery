@@ -490,6 +490,31 @@
   animation: editorial-enter 700ms cubic-bezier(.22, 1, .36, 1) both;
 }
 
+.editorial-hero-copy { animation: editorial-enter 850ms cubic-bezier(.22, 1, .36, 1) both; }
+.editorial-hero-media { animation: editorial-enter 950ms 120ms cubic-bezier(.22, 1, .36, 1) both; }
+
+.lab-hero { background: #15191b; color: #fff; }
+.lab-hero__inner { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); gap: clamp(36px, 7vw, 110px); min-height: 610px; align-items: center; padding-top: calc(76px + 48px); padding-bottom: 64px; }
+.lab-hero__eyebrow { color: #8fb9bc; font: 700 11px/1.5 'Cascadia Code', monospace; letter-spacing: .16em; text-transform: uppercase; }
+.lab-hero__title { max-width: 13ch; margin-top: 28px; font: 800 clamp(3rem, 6vw, 5.7rem)/.98 'Raleway', sans-serif; letter-spacing: -.06em; }
+.lab-hero__description { max-width: 49ch; margin-top: 26px; color: rgb(255 255 255 / 74%); font-size: clamp(15px, 1.2vw, 17px); line-height: 1.75; }
+.lab-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 30px; }
+.lab-hero__primary { display: inline-flex; min-height: 48px; align-items: center; gap: 20px; border-radius: 4px; background: #a52136; padding: 0 19px; color: #fff; font-size: 13px; font-weight: 700; transition: background .25s, transform .25s; }
+.lab-hero__primary:hover { background: #bd2b42; transform: translateY(-2px); }
+.lab-hero__secondary { display: inline-flex; min-height: 44px; align-items: center; border-bottom: 1px solid rgb(255 255 255 / 60%); color: #fff; font-size: 13px; font-weight: 700; }
+.lab-hero__media { width: min(100%, 390px); justify-self: end; margin: 0; overflow: hidden; border-radius: 5px; background: #fff; color: #2c3136; }
+.lab-hero__photo { position: relative; aspect-ratio: 1 / 1.08; overflow: hidden; background: #465c70; }
+.lab-hero__photo img { object-fit: cover; transition: transform .7s cubic-bezier(.22,1,.36,1); }
+.lab-hero__media:hover img { transform: scale(1.045); }
+.lab-hero__media figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; font: 700 10px/1.5 'Cascadia Code', monospace; letter-spacing: .05em; text-transform: uppercase; }
+.editorial-divider { border-top: 1px solid #cbd5d9; }
+@media (max-width: 767px) {
+  .lab-hero__inner { grid-template-columns: 1fr; min-height: 0; gap: 44px; padding-top: calc(76px + 54px); padding-bottom: 58px; }
+  .lab-hero__title { font-size: clamp(2.8rem, 11vw, 4rem); }
+  .lab-hero__media { width: min(100%, 420px); justify-self: stretch; }
+  .lab-hero__photo { aspect-ratio: 1.5 / 1; }
+}
+
 @supports (animation-timeline: view()) {
   .editorial-reveal,
   .editorial-reveal-list > * {
@@ -513,6 +538,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .editorial-hero-copy,
+  .editorial-hero-media,
+  .editorial-reveal,
+  .editorial-reveal-list > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   html {
     scroll-behavior: auto !important;
   }
