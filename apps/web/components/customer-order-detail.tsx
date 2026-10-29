@@ -127,8 +127,8 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
       </section>
       <div className="space-y-6">
         <section className="rounded-xl border border-border-subtle bg-white p-5">
-          <h2 className="font-editorial text-xl font-bold">Instruksi pembayaran testing</h2>
-          {!paymentInstructions ? <p className="mt-3 text-sm text-on-surface-variant">{order.paymentStatus === 'paid' ? 'Pembayaran testing telah disetujui admin.' : order.paymentStatus === 'awaiting_verification' ? 'Bukti sedang menunggu verifikasi admin. Jangan membayar ulang.' : order.paymentStatus === 'cancelled' ? 'Pesanan dibatalkan. Jangan melakukan pembayaran.' : 'Instruksi belum tersedia. Jangan melakukan pembayaran.'}</p>
+          <h2 className="font-editorial text-xl font-bold">Instruksi pembayaran</h2>
+          {!paymentInstructions ? <p className="mt-3 text-sm text-on-surface-variant">{order.paymentStatus === 'paid' ? 'Pembayaran telah disetujui admin.' : order.paymentStatus === 'awaiting_verification' ? 'Bukti sedang menunggu verifikasi admin. Jangan membayar ulang.' : order.paymentStatus === 'cancelled' ? 'Pesanan dibatalkan. Jangan melakukan pembayaran.' : 'Instruksi belum tersedia. Jangan melakukan pembayaran.'}</p>
             : paymentInstructions.method === 'qris_static' ? <div className="mt-4 space-y-4 text-sm">
               <QrisDynamicCard amount={order.total} orderId={order.id} />
               <p className="text-center text-xs text-on-surface-variant">Merchant ShopeePay: <strong>{paymentInstructions.merchant}</strong>. Nominal di atas telah terkunci otomatis.</p>

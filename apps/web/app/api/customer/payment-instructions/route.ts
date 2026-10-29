@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const config = manualPaymentConfig();
-  if (!config) return NextResponse.json({ detail: 'Pembayaran testing belum tersedia.' }, { status: 503 });
+  if (!config) return NextResponse.json({ detail: 'Pembayaran belum tersedia.' }, { status: 503 });
   const order = await paymentOrder(request, request.nextUrl.searchParams.get('order') ?? '');
   if (!order) return NextResponse.json({ detail: 'Pesanan tidak ditemukan.' }, { status: 404 });
   if (!['pending', 'rejected'].includes(order.paymentStatus)) {

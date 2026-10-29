@@ -57,7 +57,7 @@ export function CustomerCheckout() {
       setAddressId(saved.find((item) => item.isDefault)?.id ?? saved[0]?.id ?? '');
     }).catch((cause) => {
       if (cause instanceof CustomerApiError && cause.status === 401) router.replace('/login?next=%2Fcheckout');
-      else setError(cause instanceof Error ? cause.message : 'Checkout testing belum tersedia.');
+      else setError(cause instanceof Error ? cause.message : 'Checkout belum tersedia.');
     }).finally(() => setLoading(false));
   }, [router]);
 
@@ -121,7 +121,7 @@ export function CustomerCheckout() {
   if (!user) return <main className="nav-offset site-container page-section" role="alert">{error}</main>;
   return <main className="nav-offset site-container page-section max-w-4xl">
     <Link href="/catalog" className="text-sm text-brand-navy underline">Kembali ke katalog</Link>
-    <h1 className="mt-5 font-editorial text-3xl font-bold text-brand-charcoal">{policy?.mode === 'operational' ? 'Checkout operasional lokal' : 'Checkout testing'}</h1>
+    <h1 className="mt-5 font-editorial text-3xl font-bold text-brand-charcoal">{policy?.mode === 'operational' ? 'Checkout' : 'Checkout testing'}</h1>
     <p className="mt-2 text-sm text-on-surface-variant">{policy?.mode === 'operational'
       ? 'Pesanan memakai stok dan ongkir yang diverifikasi admin. Pembayaran tetap dikonfirmasi manual.'
       : 'Mode pengujian lokal. Jangan melakukan transfer dana sungguhan. Pesanan dan pembayaran di sini hanya untuk uji alur.'}</p>

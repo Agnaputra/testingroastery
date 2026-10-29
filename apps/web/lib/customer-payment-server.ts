@@ -10,15 +10,17 @@ export interface PaymentOrder {
 }
 
 export function manualPaymentConfig() {
-  if (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE !== '1') return null;
-  const account = process.env.PAYMENT_TEST_BCA_ACCOUNT;
-  const holder = process.env.PAYMENT_TEST_BCA_HOLDER;
-  const merchant = process.env.PAYMENT_TEST_QRIS_MERCHANT;
-  const file = process.env.PAYMENT_TEST_QRIS_PATH;
+  const operational = process.env.CUSTOMER_COMMERCE_MODE === 'operational';
+  if (process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE !== '1'
+      || (process.env.NODE_ENV === 'production' && !operational)) return null;
+  const account = process.env.PAYMENT_BCA_ACCOUNT ?? process.env.PAYMENT_TEST_BCA_ACCOUNT;
+  const holder = process.env.PAYMENT_BCA_HOLDER ?? process.env.PAYMENT_TEST_BCA_HOLDER;
+  const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? process.env.PAYMENT_TEST_QRIS_MERCHANT;
+  const file = process.env.PAYMENT_QRIS_PATH ?? process.env.PAYMENT_TEST_QRIS_PATH;
   if (!account || !/^\d{8,20}$/.test(account) || !holder || !merchant || !file) return null;
-  const allowed = path.resolve(process.cwd(), '.private', 'payment');
   const resolved = path.resolve(process.cwd(), file);
-  if (!resolved.startsWith(allowed + path.sep)) return null;
+  const allowed = [path.resolve(process.cwd(), '.private', 'payment'), path.resolve(process.cwd(), 'public')];
+  if (!allowed.some((root) => resolved.startsWith(root + path.sep))) return null;
   return { account, holder, merchant, file: resolved };
 }
 

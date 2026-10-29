@@ -32,18 +32,23 @@ JAVA_PROVINCES = {
 
 
 def operational_mode():
-    return os.getenv("CUSTOMER_OPERATIONAL_TEST_MODE") == "1"
+    return (os.getenv("CUSTOMER_COMMERCE_MODE") == "operational"
+            or os.getenv("CUSTOMER_OPERATIONAL_TEST_MODE") == "1")
 
 
 def require_test_commerce():
     address = urlparse(settings.DATABASE_URL)
-    if (os.getenv("CUSTOMER_COMMERCE_TEST_MODE") != "1"
-            or settings.ENVIRONMENT not in {"development", "test"}
-            or address.hostname not in {"localhost", "127.0.0.1"}):
-        raise HTTPException(503, "Checkout manual hanya tersedia di lingkungan testing.")
+    local_database = address.hostname in {"localhost", "127.0.0.1"}
+    testing = (os.getenv("CUSTOMER_COMMERCE_TEST_MODE") == "1"
+               and settings.ENVIRONMENT in {"development", "test"} and local_database)
+    production = operational_mode() and settings.ENVIRONMENT == "production" and not local_database
+    if not testing and not production:
+        raise HTTPException(503, "Checkout manual belum tersedia.")
 
 
 def require_tester(user):
+    if operational_mode():
+        return
     allowed = {email.strip().lower() for email in os.getenv("CUSTOMER_TEST_EMAIL_ALLOWLIST", "").split(",") if email.strip()}
     if user["email"].lower() not in allowed:
         raise HTTPException(403, "Akun belum diizinkan untuk checkout testing.")

@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { formatRupiah } from '../lib/data';
+import { Check, Copy, FileText, MapPin, Phone, Search } from 'lucide-react';
+import { PRODUCTS, formatRupiah, getProductDisplayImage } from '../lib/data';
 import { customerApi, customerJson } from '../lib/customer-api';
 import type { CustomerOrder } from '../lib/customer-types';
 
@@ -25,6 +27,27 @@ function getStatusBadge(status: string) {
     return 'bg-brand-maroon/10 text-brand-maroon border border-brand-maroon/20';
   }
   return 'bg-slate-100 text-slate-700 border border-slate-300';
+}
+
+const fulfillmentLabels: Record<CustomerOrder['fulfillmentStatus'], string> = {
+  pending: 'Menunggu Pembayaran',
+  processing: 'Sedang Diproses',
+  roasting: 'Sedang Disangrai & Packing',
+  shipped: 'Dalam Pengiriman Kurir',
+  completed: 'Pesanan Selesai',
+  cancelled: 'Pesanan Dibatalkan',
+};
+
+function formatOrderDate(value: string) {
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  }).format(new Date(value));
+}
+
+function getOrderItemImage(item: CustomerOrder['items'][number]) {
+  const product = PRODUCTS.find((entry) =>
+    item.skuId.startsWith(entry.id) || entry.name.toLowerCase() === item.productName.toLowerCase());
+  return product ? getProductDisplayImage(product) : '/images/bag-prau.jpg';
 }
 
 export function AdminVerifiedPayments() {
@@ -53,12 +76,11 @@ export function AdminVerifiedPayments() {
 
 export function AdminRealOrders() {
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
-  const [summary, setSummary] = useState<{ paidCount: number; paidTotal: number } | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
   const [search, setSearch] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState('');
   const [fulfillmentFilter, setFulfillmentFilter] = useState('');
+  const [copiedId, setCopiedId] = useState('');
   const [decision, setDecision] = useState<{ orderId: string; action: 'approve' | 'reject' | 'shipped' } | null>(null);
   const [reason, setReason] = useState('');
   const [trackingNumber, setTrackingNumber] = useState('');
@@ -74,11 +96,8 @@ export function AdminRealOrders() {
 
   async function refresh() {
     try {
-      const [saved, totals] = await Promise.all([
-        customerApi<CustomerOrder[]>('admin/orders'),
-        customerApi<{ paidCount: number; paidTotal: number }>('admin/payment-summary'),
-      ]);
-      setOrders(saved); setSummary(totals);
+      const saved = await customerApi<CustomerOrder[]>('admin/orders');
+      setOrders(saved);
       setError('');
     } catch {
       setError('Masuk dengan akun berperan admin untuk melihat order database.');
@@ -108,30 +127,20 @@ export function AdminRealOrders() {
     finally { setBusy(''); }
   }
 
+  const query = search.trim().toLowerCase();
   const filtered = orders.filter((order) =>
-    (!search || order.id.toLowerCase().includes(search.toLowerCase()))
-    && (!paymentFilter || order.paymentStatus === paymentFilter)
+    (!query || [order.id, order.customerName, order.customerEmail, order.shipping.whatsapp,
+      order.shipping.city, order.trackingNumber ?? ''].some((value) => value.toLowerCase().includes(query)))
     && (!fulfillmentFilter || order.fulfillmentStatus === fulfillmentFilter));
 
+  function copy(text: string, id: string) {
+    void navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    window.setTimeout(() => setCopiedId(''), 1800);
+  }
+
   return (
-    <section className="rounded-sm border border-border-subtle bg-white p-5 shadow-2xs sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle pb-4">
-        <div>
-          <h3 className="font-headline text-lg font-bold text-brand-charcoal">
-            Order Database Testing
-          </h3>
-          <p className="mt-1 text-xs text-on-surface-variant">
-            Terpisah dari data demo browser. Hanya pembayaran yang disetujui setelah cek dana yang berstatus paid.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={refresh}
-          className="min-h-9 rounded-xs border border-border-subtle bg-white px-3.5 text-xs font-semibold text-brand-charcoal hover:border-brand-navy/40 hover:text-brand-navy transition-colors"
-        >
-          Muat ulang
-        </button>
-      </div>
+    <section className="space-y-6">
 
       {error && (
         <p role="alert" className="mt-4 rounded-xs border border-brand-maroon/20 bg-brand-maroon/5 p-3 text-sm text-brand-maroon">
@@ -139,45 +148,31 @@ export function AdminRealOrders() {
         </p>
       )}
 
-      {!error && summary && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xs border border-brand-teal/30 bg-brand-teal/5 p-3 font-mono text-xs text-brand-charcoal">
-          <span>Transaksi testing terverifikasi: <strong>{summary.paidCount}</strong></span>
-          <span className="text-border-subtle">|</span>
-          <span>Total pembayaran disetujui: <strong>{formatRupiah(summary.paidTotal)}</strong></span>
-          <span className="text-[10px] text-on-surface-variant">(Pending dan rejected tidak dihitung)</span>
+      <div className="rounded-xl border border-border-subtle bg-white p-4 shadow-xs">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <label className="relative max-w-md flex-1">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
+            <span className="sr-only">Cari pesanan</span>
+            <input
+              className="h-10 w-full rounded-md border border-border-subtle bg-slate-50/70 pl-9 pr-3 text-xs text-brand-charcoal placeholder:text-on-surface-variant focus:border-brand-navy focus:bg-white focus:outline-none"
+              placeholder="Cari ID pesanan, nama pemesan, no HP, kota, resi..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </label>
+          <div className="flex flex-wrap rounded-lg border border-border-subtle bg-slate-100/60 p-0.5 font-mono text-xs">
+            {(['', 'pending', 'processing', 'roasting', 'shipped', 'completed', 'cancelled'] as const).map((status) => {
+              const labels = { '': 'Semua', pending: 'Menunggu', processing: 'Diproses', roasting: 'Sangrai & Pack', shipped: 'Dikirim', completed: 'Selesai', cancelled: 'Batal' };
+              const count = status ? orders.filter((order) => order.fulfillmentStatus === status).length : orders.length;
+              return (
+                <button key={status || 'all'} type="button" onClick={() => setFulfillmentFilter(status)}
+                  className={`rounded-md px-3 py-1.5 transition ${fulfillmentFilter === status ? 'bg-white font-semibold text-brand-charcoal shadow-xs' : 'text-on-surface-variant hover:text-brand-charcoal'}`}>
+                  {labels[status]} <span className="text-[10px]">{count}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
-
-      <div className="mt-5 flex flex-wrap gap-3 text-xs">
-        <input
-          className="min-h-10 rounded-xs border border-border-subtle bg-white px-3 text-xs focus:border-brand-maroon focus:outline-none flex-1 min-w-[200px]"
-          placeholder="Cari Order ID..."
-          aria-label="Cari Order ID"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        <select
-          className="min-h-10 rounded-xs border border-border-subtle bg-white px-3 text-xs focus:border-brand-maroon focus:outline-none font-mono"
-          aria-label="Filter pembayaran"
-          value={paymentFilter}
-          onChange={(event) => setPaymentFilter(event.target.value)}
-        >
-          <option value="">Semua status pembayaran</option>
-          {['pending', 'awaiting_verification', 'paid', 'rejected', 'cancelled'].map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </select>
-        <select
-          className="min-h-10 rounded-xs border border-border-subtle bg-white px-3 text-xs focus:border-brand-maroon focus:outline-none font-mono"
-          aria-label="Filter pengiriman"
-          value={fulfillmentFilter}
-          onChange={(event) => setFulfillmentFilter(event.target.value)}
-        >
-          <option value="">Semua status pengiriman</option>
-          {['pending', 'processing', 'roasting', 'shipped', 'completed', 'cancelled'].map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </select>
       </div>
 
       {!error && filtered.length === 0 && (
@@ -186,68 +181,80 @@ export function AdminRealOrders() {
         </div>
       )}
 
-      <div className="mt-5 space-y-4">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {filtered.map((order) => (
           <article
             key={order.id}
-            className="rounded-sm border border-border-subtle bg-white p-4 shadow-2xs hover:border-brand-navy/40 transition-colors text-sm"
+            className="flex flex-col rounded-xl border border-border-subtle bg-white p-5 shadow-xs transition-colors hover:border-brand-navy/30 text-sm"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle pb-3">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-brand-charcoal">{order.id}</span>
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-bold ${getStatusBadge(order.paymentStatus)}`}>
-                  {order.paymentStatus}
-                </span>
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-bold ${getStatusBadge(order.fulfillmentStatus)}`}>
-                  {order.fulfillmentStatus}
-                </span>
-              </div>
-              <strong className="font-mono text-base font-bold text-brand-charcoal">
-                {formatRupiah(order.total)}
-              </strong>
-            </div>
-
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 text-xs">
+            <div className="flex items-start justify-between gap-3 border-b border-border-subtle pb-3.5">
               <div>
-                <p className="font-semibold text-brand-charcoal">{order.customerName}</p>
-                <p className="text-on-surface-variant font-mono">{order.customerEmail}</p>
-                <p className="mt-1 text-on-surface-variant leading-relaxed">
-                  {order.shipping.recipientName}, {order.shipping.fullAddress}, {order.shipping.district}, {order.shipping.city}, {order.shipping.province} {order.shipping.postalCode}
-                </p>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm font-bold tracking-tight text-brand-charcoal">{order.id}</span>
+                  <button type="button" onClick={() => copy(order.id, order.id)} aria-label="Salin Order ID" title="Salin Order ID" className="p-0.5 text-on-surface-variant hover:text-brand-charcoal">
+                    {copiedId === order.id ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                  </button>
+                </div>
+                <p className="mt-0.5 font-mono text-[11px] text-on-surface-variant">{formatOrderDate(order.createdAt)}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-on-surface-variant">
-                  Metode: <strong className="text-brand-charcoal">{order.paymentMethod === 'qris_static' ? 'QRIS statis' : 'BCA manual'}</strong>
-                </p>
-                <p className="text-on-surface-variant">
-                  Subtotal: {formatRupiah(order.subtotal)} · Ongkir: {formatRupiah(order.shippingCost)}
-                </p>
-                {order.shipping.courierName && (
-                  <p className="text-on-surface-variant">
-                    Pengiriman: <strong className="text-brand-charcoal">{order.shipping.courierName} ({order.shipping.courierService})</strong>
-                  </p>
-                )}
-                {order.trackingNumber && (
-                  <p className="font-mono text-brand-teal font-semibold">Resi: {order.trackingNumber}</p>
-                )}
-                {order.rejectionReason && (
-                  <p className="text-brand-maroon font-semibold">Alasan penolakan: {order.rejectionReason}</p>
-                )}
-              </div>
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[10px] font-bold ${getStatusBadge(order.fulfillmentStatus)}`}>
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />{fulfillmentLabels[order.fulfillmentStatus]}
+              </span>
             </div>
 
-            <div className="mt-3 rounded-xs bg-[#F8FAFC] p-2.5">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">
-                Item Dipesan
+            <div className="mt-3.5 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-brand-charcoal">{order.customerName}</p>
+                <a href={`https://wa.me/${order.shipping.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-mono text-[11px] text-brand-navy hover:underline">
+                  <Phone size={11} />{order.shipping.whatsapp}
+                </a>
+              </div>
+              <p className="flex items-start gap-1.5 text-[11px] text-on-surface-variant">
+                <MapPin size={13} className="mt-0.5 shrink-0" />
+                <span>{order.shipping.fullAddress}, {order.shipping.district}, {order.shipping.city}, {order.shipping.province} {order.shipping.postalCode}</span>
               </p>
-              <ul className="space-y-1 text-xs">
+              {order.shipping.notes && <p className="flex items-start gap-1.5 rounded-md border border-amber-200/50 bg-amber-50/60 p-2 text-[11px] text-amber-900"><FileText size={12} className="mt-0.5 shrink-0" />Catatan: {order.shipping.notes}</p>}
+              {order.rejectionReason && <p className="font-semibold text-brand-maroon">Alasan penolakan: {order.rejectionReason}</p>}
+            </div>
+
+            <div className="mt-4 rounded-lg border border-border-subtle bg-slate-50/70 p-3">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">
+                Item Pesanan ({order.items.reduce((total, item) => total + item.quantity, 0)} item)
+              </p>
+              <ul className="divide-y divide-border-subtle/60 text-xs">
                 {order.items.map((item, index) => (
-                  <li key={index} className="flex justify-between font-mono text-xs">
-                    <span>{item.quantity}x {item.productName} ({item.variantLabel})</span>
-                    <span className="font-bold">{formatRupiah(item.lineTotal)}</span>
+                  <li key={index} className="flex items-center justify-between gap-3 py-2 first:pt-1 last:pb-0">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <Image src={getOrderItemImage(item)} alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-md border border-border-subtle bg-white object-cover" unoptimized />
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-brand-charcoal"><span className="mr-1.5 rounded border border-border-subtle bg-white px-1.5 py-0.5 font-mono text-[10px] font-bold">{item.quantity}x</span>{item.productName}</p>
+                        <p className="mt-0.5 font-mono text-[10px] text-on-surface-variant">{item.variantLabel} · {item.grindLabel || 'Biji utuh'}</p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 font-mono text-xs font-semibold">{formatRupiah(item.lineTotal)}</span>
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-md border border-border-subtle p-2.5">
+                <span className="block font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">Pembayaran</span>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <span className="font-mono text-[11px] font-medium text-brand-charcoal">{order.paymentMethod === 'qris_static' ? 'QRIS' : 'BCA Manual'}</span>
+                  <span className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${getStatusBadge(order.paymentStatus)}`}>{order.paymentStatus === 'paid' ? 'Lunas' : order.paymentStatus}</span>
+                </div>
+              </div>
+              <div className="rounded-md border border-border-subtle p-2.5">
+                <span className="block font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">Kurir &amp; Resi</span>
+                <p className="mt-1 truncate text-[11px] font-medium text-brand-charcoal">{order.shipping.courierName || order.shipping.courierService || 'Belum ditentukan'}</p>
+                {order.trackingNumber ? <button type="button" onClick={() => copy(order.trackingNumber!, `track-${order.id}`)} className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-brand-navy hover:underline">{order.trackingNumber}{copiedId === `track-${order.id}` ? <Check size={10} /> : <Copy size={10} />}</button> : <p className="mt-0.5 font-mono text-[10px] text-amber-800">Resi belum diinput</p>}
+              </div>
+            </div>
+
+            <div className="mt-3.5 flex items-baseline justify-between border-t border-border-subtle pt-3">
+              <span className="text-xs font-medium text-on-surface-variant">Total Pembayaran:</span>
+              <strong className="font-mono text-base text-brand-charcoal">{formatRupiah(order.total)}</strong>
             </div>
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 pt-2">
