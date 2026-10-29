@@ -38,6 +38,7 @@ export function CustomerCheckout() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const productionCommerce = process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_MODE === 'operational';
   const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
   const unsupportedItems = items.filter((item) => item.productId.startsWith('byob-') && !item.blendComponents?.length);
   const lines = useMemo(() => items.map((item) => ({
@@ -121,8 +122,8 @@ export function CustomerCheckout() {
   if (!user) return <main className="nav-offset site-container page-section" role="alert">{error}</main>;
   return <main className="nav-offset site-container page-section max-w-4xl">
     <Link href="/catalog" className="text-sm text-brand-navy underline">Kembali ke katalog</Link>
-    <h1 className="mt-5 font-editorial text-3xl font-bold text-brand-charcoal">{policy?.mode === 'operational' ? 'Checkout' : 'Checkout testing'}</h1>
-    <p className="mt-2 text-sm text-on-surface-variant">{policy?.mode === 'operational'
+    <h1 className="mt-5 font-editorial text-3xl font-bold text-brand-charcoal">{policy?.mode === 'operational' || productionCommerce ? 'Checkout' : 'Checkout testing'}</h1>
+    <p className="mt-2 text-sm text-on-surface-variant">{policy?.mode === 'operational' || productionCommerce
       ? 'Pesanan memakai stok dan ongkir yang diverifikasi admin. Pembayaran tetap dikonfirmasi manual.'
       : 'Mode pengujian lokal. Jangan melakukan transfer dana sungguhan. Pesanan dan pembayaran di sini hanya untuk uji alur.'}</p>
     {items.length === 0 ? <p className="mt-8">Keranjang kosong. <Link href="/catalog" className="underline">Pilih produk</Link>.</p>

@@ -51,6 +51,7 @@ function getOrderItemImage(item: CustomerOrder['items'][number]) {
 }
 
 export function AdminVerifiedPayments() {
+  const productionCommerce = process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_MODE === 'operational';
   const [summary, setSummary] = useState<{ paidCount: number; paidTotal: number } | null>(null);
   useEffect(() => {
     customerApi<{ paidCount: number; paidTotal: number }>('admin/payment-summary')
@@ -60,15 +61,15 @@ export function AdminVerifiedPayments() {
     <section className="rounded-sm border border-border-subtle bg-white p-5 shadow-2xs text-sm">
       <div className="flex items-center gap-2">
         <span className="h-2 w-2 rounded-full bg-brand-teal" />
-        <h2 className="font-headline text-base font-bold text-brand-charcoal">Pembayaran database testing</h2>
+        <h2 className="font-headline text-base font-bold text-brand-charcoal">Pembayaran database</h2>
       </div>
       <p className="mt-2 text-on-surface-variant leading-relaxed">
         {summary
-          ? `${summary.paidCount} order berstatus paid · ${formatRupiah(summary.paidTotal)} disetujui admin dalam pengujian lokal.`
-          : 'Masuk dengan akun admin untuk melihat pembayaran database testing.'}
+          ? `${summary.paidCount} order berstatus paid · ${formatRupiah(summary.paidTotal)} disetujui admin${productionCommerce ? '.' : ' dalam pengujian lokal.'}`
+          : 'Masuk dengan akun admin untuk melihat pembayaran database.'}
       </p>
       <p className="mt-1 font-mono text-[10px] text-on-surface-variant">
-        Terpisah dari metrik demo. Persetujuan bukti sintetis bukan penerimaan dana nyata.
+        Terpisah dari metrik demo. Persetujuan admin dilakukan setelah dana benar-benar diperiksa.
       </p>
     </section>
   );
