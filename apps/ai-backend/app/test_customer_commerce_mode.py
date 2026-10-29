@@ -36,6 +36,14 @@ class CustomerCommerceModeTest(unittest.TestCase):
         finally:
             settings.ENVIRONMENT, settings.DATABASE_URL = old_environment, old_database
 
+    def test_verified_local_customer_does_not_need_allowlist(self):
+        with patch.dict(os.environ, {
+            "CUSTOMER_COMMERCE_MODE": "disabled",
+            "CUSTOMER_OPERATIONAL_TEST_MODE": "0",
+            "CUSTOMER_TEST_EMAIL_ALLOWLIST": "",
+        }, clear=False):
+            require_tester({"email": "verified@example.com", "email_verified_at": "verified"})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,6 @@
 """Admin-owned stock and shipping configuration for the local commerce rollout."""
-from uuid import uuid4
+from uuid import UUID, uuid4
+from typing import Literal
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Header, HTTPException
@@ -47,9 +48,39 @@ class ShippingWeight(BaseModel):
     packedWeightGrams: int = Field(ge=1, le=100_000)
 
 
+class RoleUpdate(BaseModel):
+    role: Literal["customer", "admin"]
+
+
 def admin(cur, authorization, x_admin_key):
     require_test_commerce()
     return require_admin(cur, authorization, x_admin_key)
+
+
+@router.get("/users")
+def users(authorization: str = Header(default=""), x_admin_key: str = Header(default="")):
+    with connection() as db, db.cursor() as cur:
+        admin(cur, authorization, x_admin_key)
+        cur.execute("SELECT u.id,u.email,u.role,u.email_verified_at,u.disabled_at,p.display_name "
+                    "FROM customer_users u LEFT JOIN customer_profiles p ON p.user_id=u.id "
+                    "ORDER BY u.created_at DESC LIMIT 200")
+        return [{"id": str(row["id"]), "email": row["email"], "role": row["role"],
+                 "displayName": row["display_name"] or "", "verified": bool(row["email_verified_at"]),
+                 "disabled": bool(row["disabled_at"])} for row in cur.fetchall()]
+
+
+@router.patch("/users/{user_id}/role")
+def update_role(user_id: UUID, payload: RoleUpdate, authorization: str = Header(default=""),
+                x_admin_key: str = Header(default="")):
+    with connection() as db, db.cursor() as cur:
+        actor = admin(cur, authorization, x_admin_key)
+        if str(actor["id"]) == str(user_id) and payload.role != "admin":
+            raise HTTPException(409, "Admin tidak dapat menurunkan role akunnya sendiri.")
+        cur.execute("UPDATE customer_users SET role=%s WHERE id=%s AND disabled_at IS NULL RETURNING id",
+                    (payload.role, str(user_id)))
+        if cur.fetchone() is None:
+            raise HTTPException(404, "Akun tidak ditemukan.")
+        return {"ok": True}
 
 
 def valid_resource(cur, resource_id):

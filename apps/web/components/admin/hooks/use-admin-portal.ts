@@ -33,6 +33,9 @@ function publicationRowsFromOverrides(overrides: Record<string, boolean>): Set<n
 export function useAdminPortal() {
   // Authentication PIN state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authStep, setAuthStep] = useState<'credentials' | 'pin'>('pin');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -77,8 +80,11 @@ export function useAdminPortal() {
     ])
       .then(async ([sessionResponse, publicationResponse]) => {
         if (sessionResponse.ok) {
-          const session = (await sessionResponse.json()) as { authenticated?: boolean };
+          const session = (await sessionResponse.json()) as {
+            authenticated?: boolean; credentialsRequired?: boolean; credentialsVerified?: boolean;
+          };
           setIsAuthenticated(session.authenticated === true);
+          setAuthStep(session.credentialsRequired && !session.credentialsVerified ? 'credentials' : 'pin');
         }
         if (publicationResponse.ok) {
           const publication = (await publicationResponse.json()) as { overrides?: Record<string, boolean> };
@@ -118,22 +124,34 @@ export function useAdminPortal() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    const credentials = authStep === 'credentials';
     const response = await fetch('/api/admin/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: pinInput.trim() }),
+      body: JSON.stringify(credentials
+        ? { stage: 'credentials', username: username.trim(), password }
+        : { stage: 'pin', pin: pinInput.trim() }),
     });
     if (response.ok) {
-      setIsAuthenticated(true);
+      if (credentials) {
+        setAuthStep('pin');
+        setPassword('');
+      } else {
+        setIsAuthenticated(true);
+      }
       setPinError('');
     } else {
-      setPinError('PIN roastery tidak sesuai.');
+      const result = await response.json().catch(() => ({})) as { error?: string };
+      setPinError(result.error ?? 'Akses admin ditolak.');
     }
   };
 
   const handleLogout = async () => {
     await fetch('/api/admin/session', { method: 'DELETE' });
     setIsAuthenticated(false);
+    setAuthStep('credentials');
+    setUsername('');
+    setPassword('');
     setPinInput('');
   };
 
@@ -365,6 +383,11 @@ export function useAdminPortal() {
   return {
     mounted,
     isAuthenticated,
+    authStep,
+    username,
+    setUsername,
+    password,
+    setPassword,
     pinInput,
     setPinInput,
     pinError,

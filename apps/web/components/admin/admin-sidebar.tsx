@@ -9,6 +9,7 @@ import {
   Layers,
   Coffee,
   Coins,
+  Users,
   ShieldCheck,
   Store,
   LogOut,
@@ -70,6 +71,12 @@ const MAIN_NAV: NavItem[] = [
     label: 'HPP & Margin',
     icon: Coins,
     isActive: (p) => p.startsWith('/admin/financials'),
+  },
+  {
+    href: '/admin/users',
+    label: 'Akun & Role',
+    icon: Users,
+    isActive: (p) => p.startsWith('/admin/users'),
   },
 ];
 

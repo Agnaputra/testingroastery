@@ -49,6 +49,8 @@ def require_test_commerce():
 def require_tester(user):
     if operational_mode():
         return
+    if user.get("email_verified_at"):
+        return
     allowed = {email.strip().lower() for email in os.getenv("CUSTOMER_TEST_EMAIL_ALLOWLIST", "").split(",") if email.strip()}
     if user["email"].lower() not in allowed:
         raise HTTPException(403, "Akun belum diizinkan untuk checkout testing.")
