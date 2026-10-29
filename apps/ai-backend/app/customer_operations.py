@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from .customer_auth import connection, one
 from .customer_orders import require_test_commerce
-from .customer_payments import require_admin
+from .customer_payments import require_admin, resolve_actor_user_id
 
 router = APIRouter(prefix="/api/customer/admin", tags=["customer-operations"])
 
@@ -74,7 +74,17 @@ def update_role(user_id: UUID, payload: RoleUpdate, authorization: str = Header(
                 x_admin_key: str = Header(default="")):
     with connection() as db, db.cursor() as cur:
         actor = admin(cur, authorization, x_admin_key)
-        if str(actor["id"]) == str(user_id) and payload.role != "admin":
+        if payload.role != "admin":
+            cur.execute("SELECT count(*) AS total FROM customer_users WHERE role='admin' AND disabled_at IS NULL")
+            count_row = cur.fetchone()
+            if count_row and count_row["total"] <= 1:
+                cur.execute("SELECT role FROM customer_users WHERE id=%s", (str(user_id),))
+                target = cur.fetchone()
+                if target and target["role"] == "admin":
+                    raise HTTPException(400, "Tidak dapat menurunkan role admin terakhir. Harus ada minimal satu admin.")
+
+        # Only block self-demotion if caller is a specific customer user without master admin key
+        if not x_admin_key and str(actor.get("id")) == str(user_id) and payload.role != "admin":
             raise HTTPException(409, "Admin tidak dapat menurunkan role akunnya sendiri.")
         cur.execute("UPDATE customer_users SET role=%s WHERE id=%s AND disabled_at IS NULL RETURNING id",
                     (payload.role, str(user_id)))
@@ -142,9 +152,10 @@ def adjust_stock(payload: StockAdjustment, authorization: str = Header(default="
                         "VALUES (%s,%s,%s,now())", (payload.resourceId, unit, payload.availableQuantity))
         delta = payload.availableQuantity - old
         if delta:
+            actor_id = resolve_actor_user_id(cur, user)
             cur.execute("INSERT INTO customer_inventory_movements(resource_id,delta,reason,actor_user_id) "
                         "VALUES (%s,%s,%s,%s)",
-                        (payload.resourceId, delta, payload.reason.strip(), user["id"]))
+                        (payload.resourceId, delta, payload.reason.strip(), actor_id))
         return {"resourceId": payload.resourceId, "availableQuantity": payload.availableQuantity, "verified": True}
 
 
@@ -179,10 +190,11 @@ def pack_stock(payload: PackConversion, authorization: str = Header(default=""),
         cur.execute("UPDATE customer_inventory SET available_quantity=available_quantity+%s,"
                     "verified_at=now(),updated_at=now() WHERE resource_id=%s", (payload.quantity, pack_id))
         operation_id = str(uuid4())
+        actor_id = resolve_actor_user_id(cur, user)
         cur.executemany("INSERT INTO customer_inventory_movements(operation_id,resource_id,delta,reason,actor_user_id) "
                         "VALUES (%s,%s,%s,%s,%s)", [
-                            (operation_id, bulk_id, -required, "Dikemas menjadi " + payload.skuId, user["id"]),
-                            (operation_id, pack_id, payload.quantity, "Konversi dari " + bulk_id, user["id"]),
+                            (operation_id, bulk_id, -required, "Dikemas menjadi " + payload.skuId, actor_id),
+                            (operation_id, pack_id, payload.quantity, "Konversi dari " + bulk_id, actor_id),
                         ])
         return {"bulkResourceId": bulk_id, "packResourceId": pack_id,
                 "bulkUsedGrams": required, "packagesCreated": payload.quantity}

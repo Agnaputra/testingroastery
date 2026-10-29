@@ -9,6 +9,7 @@ import {
   hasValidAdminSession,
   safeSecretEqual,
   verifyAdminCredentials,
+  getExpectedAdminPin,
 } from '../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { pin } = body;
-  const expectedPin = process.env.ADMIN_PIN ?? '';
+  const expectedPin = getExpectedAdminPin();
   const token = createAdminSessionToken();
   if ((adminCredentialsConfigured() && !hasValidAdminCredential(request))
       || typeof pin !== 'string' || !token || !safeSecretEqual(pin.trim(), expectedPin)) {
