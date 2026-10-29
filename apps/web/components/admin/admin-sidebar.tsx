@@ -93,6 +93,7 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const portal = useAdminPortalContext();
+  const usesDatabaseOrders = process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1';
 
   return (
     <>
@@ -168,7 +169,9 @@ export function AdminSidebar({
                       className={active ? 'text-brand-teal' : 'text-white/60'}
                     />
                     <span className="truncate">{label}</span>
-                    {badge && badge(portal.metrics.pendingOrdersCount)}
+                    {badge &&
+                      (href !== '/admin/orders' || !usesDatabaseOrders) &&
+                      badge(portal.metrics.pendingOrdersCount)}
                   </Link>
                 );
               })}
