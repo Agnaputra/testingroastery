@@ -33,7 +33,7 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
   const headers = new Headers();
   const session = request.cookies.get(SESSION_COOKIE)?.value;
   if (session && !admin) headers.set('Authorization', `Bearer ${session}`);
-  const adminKey = process.env.ADMIN_API_KEY || (process.env.NODE_ENV !== 'production' ? '52coffee-secret-admin-key' : '');
+  const adminKey = process.env.ADMIN_API_KEY ?? '';
   if (admin && adminKey) headers.set('X-Admin-Key', adminKey);
   const contentType = request.headers.get('content-type');
   if (method !== 'GET' && contentType) headers.set('Content-Type', contentType);

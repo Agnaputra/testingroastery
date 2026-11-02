@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export function GET(request: NextRequest) {
   return NextResponse.json({
     authenticated: hasValidAdminSession(request),
-    credentialsRequired: adminCredentialsConfigured(),
+    credentialsRequired: true,
     credentialsVerified: hasValidAdminCredential(request),
   });
 }
@@ -26,8 +26,10 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   if (body.stage === 'credentials') {
     const token = createAdminCredentialToken();
-    if (!token || !adminCredentialsConfigured()
-        || typeof body.username !== 'string' || typeof body.password !== 'string'
+    if (!token || !adminCredentialsConfigured()) {
+      return NextResponse.json({ error: 'Konfigurasi credential admin belum lengkap.' }, { status: 503 });
+    }
+    if (typeof body.username !== 'string' || typeof body.password !== 'string'
         || !verifyAdminCredentials(body.username, body.password)) {
       return NextResponse.json({ error: 'Username atau password tidak sesuai.' }, { status: 401 });
     }
@@ -42,8 +44,8 @@ export async function POST(request: NextRequest) {
   const { pin } = body;
   const expectedPin = getExpectedAdminPin();
   const token = createAdminSessionToken();
-  if ((adminCredentialsConfigured() && !hasValidAdminCredential(request))
-      || typeof pin !== 'string' || !token || !safeSecretEqual(pin.trim(), expectedPin)) {
+  if (!hasValidAdminCredential(request) || typeof pin !== 'string'
+      || !token || !safeSecretEqual(pin.trim(), expectedPin)) {
     return NextResponse.json({ error: 'PIN roastery tidak sesuai.' }, { status: 401 });
   }
 

@@ -4,12 +4,8 @@ import type { NextRequest } from 'next/server';
 export const ADMIN_SESSION_COOKIE = '52coffee_admin_session';
 export const ADMIN_CREDENTIAL_COOKIE = '52coffee_admin_credentials';
 
-const DEFAULT_DEV_SECRET = '52coffee-secret-admin-key';
-const DEFAULT_DEV_PIN = '5252';
-const DEFAULT_DEV_USER = 'admin';
-
 function getAdminSecret(): string | null {
-  return process.env.ADMIN_API_KEY || (process.env.NODE_ENV !== 'production' ? DEFAULT_DEV_SECRET : null);
+  return process.env.ADMIN_API_KEY || null;
 }
 
 function createScopedToken(scope: 'admin' | 'credentials'): string | null {
@@ -58,21 +54,12 @@ export function safeSecretEqual(supplied: string, expected: string): boolean {
 }
 
 export function adminCredentialsConfigured(): boolean {
-  if (process.env.NODE_ENV !== 'production') return true;
   return Boolean(process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD_HASH);
 }
 
 export function verifyAdminCredentials(username: string, password: string): boolean {
   const trimmedUser = username.trim();
-
-  // Local development fallback so dev server doesn't get blocked before reload
-  if (process.env.NODE_ENV !== 'production') {
-    if (trimmedUser === DEFAULT_DEV_USER && (password === 'kopi52roastery' || password === '52coffee')) {
-      return true;
-    }
-  }
-
-  const expectedUsername = process.env.ADMIN_USERNAME ?? (process.env.NODE_ENV !== 'production' ? DEFAULT_DEV_USER : '');
+  const expectedUsername = process.env.ADMIN_USERNAME ?? '';
   const [salt, expectedHash] = (process.env.ADMIN_PASSWORD_HASH ?? '').split(':');
   if (!safeSecretEqual(trimmedUser, expectedUsername) || !salt || !expectedHash || !password) return false;
   const actualHash = scryptSync(password, Buffer.from(salt, 'hex'), 32).toString('hex');
@@ -80,6 +67,6 @@ export function verifyAdminCredentials(username: string, password: string): bool
 }
 
 export function getExpectedAdminPin(): string {
-  return process.env.ADMIN_PIN ?? (process.env.NODE_ENV !== 'production' ? DEFAULT_DEV_PIN : '');
+  return process.env.ADMIN_PIN ?? '';
 }
 
