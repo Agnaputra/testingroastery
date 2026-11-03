@@ -12,7 +12,11 @@ export function GET(request: NextRequest) {
   }
   let configuredOrigin = '';
   try { configuredOrigin = new URL(redirectUri).origin; } catch { /* invalid configuration */ }
-  if (configuredOrigin !== request.nextUrl.origin) {
+  if (configuredOrigin && configuredOrigin !== request.nextUrl.origin) {
+    const canonicalStart = new URL(request.nextUrl.pathname + request.nextUrl.search, configuredOrigin);
+    return NextResponse.redirect(canonicalStart);
+  }
+  if (!configuredOrigin) {
     return NextResponse.json({ detail: 'Hostname Google OAuth tidak sesuai konfigurasi.' }, { status: 503 });
   }
   const nextParam = request.nextUrl.searchParams.get('next') ?? '/account';

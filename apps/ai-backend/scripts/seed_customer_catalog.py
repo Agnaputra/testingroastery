@@ -14,7 +14,11 @@ root = Path(__file__).resolve().parents[3]
 address = urlparse(settings.DATABASE_URL)
 local_database = address.hostname in {"localhost", "127.0.0.1"}
 production_seed = os.getenv("CUSTOMER_CATALOG_SEED_PRODUCTION") == "1"
+preview_seed = (settings.ENVIRONMENT == "preview"
+                and address.hostname and address.hostname.endswith(".neon.tech")
+                and os.getenv("CUSTOMER_COMMERCE_TEST_MODE") == "1")
 if not ((settings.ENVIRONMENT in {"development", "test"} and local_database)
+        or preview_seed
         or (settings.ENVIRONMENT == "production" and not local_database and production_seed)):
     raise SystemExit("Refusing to seed a nonlocal or production database")
 output = subprocess.run(

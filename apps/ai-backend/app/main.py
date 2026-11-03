@@ -3,6 +3,7 @@ import asyncio
 import re
 import secrets
 from typing import Any
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, Header, HTTPException
 # pyrefly: ignore [missing-import]
@@ -74,11 +75,20 @@ def root():
 def health_check():
     guardrails = guardrail_service.status()
     retrieval = rag_service.retrieval_status()
+    db_address = urlparse(settings.DATABASE_URL)
+    db_host = db_address.hostname or ""
     return {
         "status": "healthy" if guardrails["runtime_ready"] and retrieval["runtime"] == "pgvector" else "degraded",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "environment": settings.ENVIRONMENT,
+        "database": {
+            "reachable": retrieval.get("database_reachable", False),
+            "host": db_host,
+            "is_neon": db_host.endswith(".neon.tech"),
+            "is_localhost": db_host in {"localhost", "127.0.0.1"},
+            "database": db_address.path.lstrip("/"),
+        },
         "guardrails": guardrails,
         "retrieval": retrieval,
     }

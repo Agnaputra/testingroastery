@@ -36,11 +36,18 @@ def operational_mode():
             or os.getenv("CUSTOMER_OPERATIONAL_TEST_MODE") == "1")
 
 
+def is_verified_preview_database(address) -> bool:
+    host = address.hostname or ""
+    return settings.ENVIRONMENT == "preview" and host.endswith(".neon.tech")
+
+
 def require_test_commerce():
     address = urlparse(settings.DATABASE_URL)
     local_database = address.hostname in {"localhost", "127.0.0.1"}
+    preview_database = is_verified_preview_database(address)
     testing = (os.getenv("CUSTOMER_COMMERCE_TEST_MODE") == "1"
-               and settings.ENVIRONMENT in {"development", "test"} and local_database)
+               and ((settings.ENVIRONMENT in {"development", "test"} and local_database)
+                    or (settings.ENVIRONMENT == "preview" and preview_database)))
     production = operational_mode() and settings.ENVIRONMENT == "production" and not local_database
     if not testing and not production:
         raise HTTPException(503, "Checkout manual belum tersedia.")
