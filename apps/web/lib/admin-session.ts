@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 
 export const ADMIN_SESSION_COOKIE = '52coffee_admin_session';
 export const ADMIN_CREDENTIAL_COOKIE = '52coffee_admin_credentials';
+export const CUSTOMER_SESSION_COOKIE = '52coffee_customer_session';
 
 function getAdminSecret(): string | null {
   return process.env.ADMIN_API_KEY || null;
@@ -27,6 +28,28 @@ export function createAdminCredentialToken(): string | null {
 
 export function hasValidAdminSession(request: NextRequest): boolean {
   return hasValidAdminSessionCookie(request.cookies.get(ADMIN_SESSION_COOKIE)?.value);
+}
+
+export async function hasAuthorizedAdminSession(request: { cookies: { get(name: string): { value: string } | undefined } }): Promise<boolean> {
+  if (!hasValidAdminSessionCookie(request.cookies.get(ADMIN_SESSION_COOKIE)?.value)) return false;
+  return hasAdminCustomerSessionToken(request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value);
+}
+
+export async function hasAdminCustomerSessionToken(customerToken?: string): Promise<boolean> {
+  const backend = process.env.AI_BACKEND_URL?.replace(/\/$/, '');
+  if (!customerToken || !backend) return false;
+  try {
+    const response = await fetch(`${backend}/api/customer/auth/me`, {
+      headers: { Authorization: `Bearer ${customerToken}` },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) return false;
+    const user = await response.json() as { role?: string; emailVerified?: boolean };
+    return user.role === 'admin' && user.emailVerified === true;
+  } catch {
+    return false;
+  }
 }
 
 export function hasValidAdminSessionCookie(supplied?: string): boolean {

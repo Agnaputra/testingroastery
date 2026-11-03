@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasValidAdminSession } from '../../../../lib/admin-session';
+import { hasAuthorizedAdminSession } from '../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,7 +7,7 @@ async function forward(request: NextRequest, method: 'GET' | 'PATCH') {
   if (process.env.NEXT_PUBLIC_PRICE_TEST_MODE !== '1') {
     return NextResponse.json({ error: 'Price test mode unavailable' }, { status: 503 });
   }
-  if (!hasValidAdminSession(request)) {
+  if (!await hasAuthorizedAdminSession(request)) {
     return NextResponse.json({ error: 'Sesi admin tidak valid.' }, { status: 401 });
   }
   const key = process.env.ADMIN_API_KEY;

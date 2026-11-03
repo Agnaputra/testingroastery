@@ -1,13 +1,13 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { ADMIN_SESSION_COOKIE, hasValidAdminSessionCookie } from '../../../lib/admin-session';
+import { hasAuthorizedAdminSession } from '../../../lib/admin-session';
 import { AdminProductManager } from '../../../components/admin-product-manager';
 import { BackButton } from '../../../components/ui/back-button';
 
 export const dynamic = 'force-dynamic';
 
-export default function AdminProductsPage({ searchParams }: { searchParams: { edit?: string; new?: string } }) {
-  if (!hasValidAdminSessionCookie(cookies().get(ADMIN_SESSION_COOKIE)?.value)) redirect('/admin');
+export default async function AdminProductsPage({ searchParams }: { searchParams: { edit?: string; new?: string } }) {
+  if (!await hasAuthorizedAdminSession({ cookies: cookies() })) redirect('/admin');
 
   return (
     <div className="space-y-6">

@@ -93,6 +93,9 @@ export function AdminUsers() {
               <p className="mt-0.5 text-xs text-on-surface-variant">
                 Kelola hak akses pelanggan, peran administrator, dan status verifikasi akun.
               </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-on-surface-variant">
+                Daftar ini memuat akun website. Username portal bukan akun terpisah; akses portal juga memerlukan akun website ber-role admin.
+              </p>
             </div>
           </div>
 

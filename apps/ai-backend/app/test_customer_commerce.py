@@ -111,7 +111,9 @@ class CustomerCommerceIntegration(unittest.TestCase):
             filter(None, [os.environ.get("CUSTOMER_TEST_EMAIL_ALLOWLIST", ""), email]))
         login = self.client.post("/api/customer/auth/login", json={"email": email, "password": self.password})
         self.assertEqual(login.status_code, 200, login.text)
-        return {"Authorization": "Bearer " + login.json()["token"]}
+        headers = {"Authorization": "Bearer " + login.json()["token"]}
+        self.assertEqual(self.client.get("/api/customer/auth/me", headers=headers).json()["role"], role)
+        return headers
 
     def test_operational_stock_shipping_and_concurrent_checkout(self):
         owner = self.register_login()

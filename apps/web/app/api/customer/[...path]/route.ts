@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasValidAdminSession } from '../../../../lib/admin-session';
+import { hasAuthorizedAdminSession } from '../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,7 +25,7 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
     return NextResponse.json({ detail: 'Origin tidak valid.' }, { status: 403 });
   }
   const admin = path.startsWith('admin/');
-  if (admin && !hasValidAdminSession(request)) {
+  if (admin && !await hasAuthorizedAdminSession(request)) {
     return NextResponse.json({ detail: 'Akses admin diperlukan.' }, { status: 403 });
   }
   const backend = process.env.AI_BACKEND_URL?.replace(/\/$/, '');

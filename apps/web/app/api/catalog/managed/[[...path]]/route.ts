@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasValidAdminSession } from '../../../../../lib/admin-session';
+import { hasAuthorizedAdminSession } from '../../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 
 async function forward(request: NextRequest, path: string[] = []) {
   const imageRead = request.method === 'GET' && path.length === 2 && path[1] === 'image';
-  if (!imageRead && !hasValidAdminSession(request)) {
+  const authorized = imageRead ? false : await hasAuthorizedAdminSession(request);
+  if (!imageRead && !authorized) {
     return NextResponse.json({ error: 'Sesi admin tidak valid.' }, { status: 401 });
   }
   const key = process.env.ADMIN_API_KEY;
@@ -19,7 +20,7 @@ async function forward(request: NextRequest, path: string[] = []) {
     const response = await fetch(`${backend}/api/catalog/managed${path.length ? `/${path.join('/')}` : ''}`, {
       method: request.method,
       headers: {
-        ...(!imageRead || hasValidAdminSession(request) && key ? { 'X-Admin-Key': key! } : {}),
+        ...(!imageRead && authorized && key ? { 'X-Admin-Key': key } : {}),
         ...(contentType ? { 'Content-Type': contentType } : {}),
       },
       body: request.method === 'GET' ? undefined : await request.arrayBuffer(),

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasValidAdminSession } from '../../../../lib/admin-session';
+import { hasAuthorizedAdminSession } from '../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +16,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!hasValidAdminSession(request)) {
+  if (!await hasAuthorizedAdminSession(request)) {
     return NextResponse.json({ error: 'Sesi admin tidak valid.' }, { status: 401 });
   }
 

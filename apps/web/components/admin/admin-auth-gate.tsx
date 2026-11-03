@@ -27,6 +27,9 @@ export function AdminAuthGate(props: AdminAuthGateProps) {
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-brand-navy text-white shadow-xs"><Lock size={18} /></div>
           <h1 className="font-headline text-xl font-bold tracking-tight">Portal Roastery</h1>
           <p className="text-xs leading-relaxed text-on-surface-variant">Akses internal manajemen sangrai, katalog, dan pesanan pelanggan.</p>
+          <p className="text-[11px] leading-relaxed text-on-surface-variant">
+            Masuk lebih dulu ke <Link href="/login?next=/admin" className="font-semibold text-brand-navy underline underline-offset-2">akun website ber-role admin</Link>, lalu verifikasi akses staff di sini.
+          </p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           {authStep === 'credentials' ? <>
