@@ -1,11 +1,8 @@
 **/.venv/**
 **/.venv*/**
-**/node_modules/**
-apps/web/**
 .git/**
 .uv-python/**
 .private/**
 *.pyc
 **/__pycache__/**
-evaluation/.venv/**
 apps/ai-backend/evaluation/.venv/**
