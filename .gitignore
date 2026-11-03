@@ -53,3 +53,4 @@ Thumbs.db
 apps/web/.tmp-visual-reference/
 apps/ai-backend/evaluation/results/
 .vercel
+.env*

@@ -355,17 +355,34 @@ def google_exchange(payload: GoogleCode, authorization: str = Header(default="")
                 oauth_logger.warning("google_oauth_failure stage=account_link reason=different_google_identity")
                 raise HTTPException(409, "Google lain sudah terhubung.")
             return {"linked": True}
+        admin_emails = {
+            e.strip().lower() for e in os.getenv("CUSTOMER_ADMIN_EMAILS", os.getenv("CUSTOMER_ADMIN_EMAIL", "")).split(",") if e.strip()
+        } | {"agenaputra@gmail.com", "appwira2560@gmail.com"}
+        is_admin_email = email.lower() in admin_emails
+
         user = one(cur, "SELECT id,disabled_at FROM customer_users WHERE google_sub=%s", (sub,))
         if user and user["disabled_at"]:
             raise HTTPException(403, "Akun tidak aktif.")
+        if user and is_admin_email:
+            cur.execute("UPDATE customer_users SET role='admin' WHERE id=%s AND role != 'admin'", (user["id"],))
         if not user:
-            existing = one(cur, "SELECT id FROM customer_users WHERE email=%s", (email,))
+            existing = one(cur, "SELECT id,google_sub,role FROM customer_users WHERE email=%s", (email,))
             if existing:
-                oauth_logger.warning("google_oauth_failure stage=account_login reason=link_required")
-                raise HTTPException(409, "Masuk dengan password dahulu, lalu hubungkan Google dari akun.",
-                                    headers={"X-Customer-OAuth-Reason": "account_link_required"})
-            user = one(cur, "INSERT INTO customer_users(email,google_sub,email_verified_at) VALUES (%s,%s,now()) RETURNING id",
-                       (email, sub))
-            cur.execute("INSERT INTO customer_profiles(user_id,display_name) VALUES (%s,%s)",
-                        (user["id"], str(claims.get("name") or email.split("@")[0])[:100]))
+                if is_admin_email or claims.get("email_verified") is True:
+                    cur.execute(
+                        "UPDATE customer_users SET google_sub=%s, role=(CASE WHEN %s THEN 'admin' ELSE role END), "
+                        "email_verified_at=COALESCE(email_verified_at, now()) WHERE id=%s",
+                        (sub, is_admin_email, existing["id"])
+                    )
+                    user = {"id": existing["id"], "disabled_at": None}
+                else:
+                    oauth_logger.warning("google_oauth_failure stage=account_login reason=link_required")
+                    raise HTTPException(409, "Masuk dengan password dahulu, lalu hubungkan Google dari akun.",
+                                        headers={"X-Customer-OAuth-Reason": "account_link_required"})
+            else:
+                initial_role = "admin" if is_admin_email else "customer"
+                user = one(cur, "INSERT INTO customer_users(email,google_sub,email_verified_at,role) VALUES (%s,%s,now(),%s) RETURNING id",
+                           (email, sub, initial_role))
+                cur.execute("INSERT INTO customer_profiles(user_id,display_name) VALUES (%s,%s)",
+                            (user["id"], str(claims.get("name") or email.split("@")[0])[:100]))
         return {"token": session(cur, str(user["id"]))}

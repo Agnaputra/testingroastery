@@ -69,7 +69,19 @@ export function useAdminPortal() {
 
   useEffect(() => {
     const reason = new URLSearchParams(window.location.search).get('reason');
-    if (reason) setLoginError(reason === 'not_admin' ? 'Akun Google ini tidak memiliki akses admin.' : 'Login Google admin gagal. Silakan coba lagi.');
+    if (reason) {
+      if (reason === 'not_admin') {
+        setLoginError('Akun Google ini tidak memiliki akses admin.');
+      } else if (reason === 'account_link_required') {
+        setLoginError('Akun Google perlu dihubungkan terlebih dahulu.');
+      } else if (reason === 'backend_rejected' || reason === 'backend_unavailable') {
+        setLoginError('Koneksi autentikasi ke backend sedang bermasalah. Silakan coba lagi.');
+      } else if (reason === 'flow_cookie_missing' || reason === 'flow_cookie_invalid') {
+        setLoginError('Sesi login kedaluwarsa. Silakan klik masuk kembali.');
+      } else {
+        setLoginError('Login Google admin gagal. Silakan coba lagi.');
+      }
+    }
     Promise.all([
       fetch('/api/admin/session', { cache: 'no-store' }),
       fetch('/api/catalog/publication', { cache: 'no-store' }),
