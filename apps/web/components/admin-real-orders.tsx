@@ -145,7 +145,7 @@ export function AdminRealOrders() {
 
       {error && (
         <p role="alert" className="mt-4 rounded-xs border border-brand-maroon/20 bg-brand-maroon/5 p-3 text-sm text-brand-maroon">
-          {error} <Link href="/login?next=%2Fadmin%2Forders" className="underline font-semibold">Login admin</Link>
+          {error} <Link href="/admin" className="underline font-semibold">Login admin</Link>
         </p>
       )}
 

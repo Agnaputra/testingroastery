@@ -94,7 +94,7 @@ export function AdminUsers() {
                 Kelola hak akses pelanggan, peran administrator, dan status verifikasi akun.
               </p>
               <p className="mt-1 text-[11px] leading-relaxed text-on-surface-variant">
-                Daftar ini memuat akun website. Username portal bukan akun terpisah; akses portal juga memerlukan akun website ber-role admin.
+                Daftar ini memuat akun website. Portal admin memakai login Google terpisah dan hanya menerima akun ber-role admin.
               </p>
             </div>
           </div>

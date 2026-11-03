@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ADMIN_SESSION_COOKIE, hasAdminBackendSessionToken } from '../../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,6 +24,8 @@ export async function GET(request: NextRequest) {
       || typeof flow.verifier !== 'string' || typeof flow.next !== 'string' || typeof flow.link !== 'boolean') {
     return fail('flow_cookie_invalid');
   }
+  const adminFlow = !flow.link && (flow.next === '/admin' || flow.next.startsWith('/admin/'));
+  if (adminFlow) fallback.pathname = '/admin';
   const state = request.nextUrl.searchParams.get('state');
   const code = request.nextUrl.searchParams.get('code');
   if (!state || state !== flow.state) return fail('state_mismatch');
@@ -51,14 +54,15 @@ export async function GET(request: NextRequest) {
     }
     const data = await result.json() as { token?: string; linked?: boolean };
     if (flow.link ? data.linked !== true : !/^[0-9a-f]{64}$/.test(data.token ?? '')) return fail('backend_response_invalid');
+    if (adminFlow && !await hasAdminBackendSessionToken(data.token)) return fail('not_admin');
     const next = flow.next.startsWith('/') && new URL(flow.next, request.url).origin === request.nextUrl.origin
       ? flow.next : '/account';
     const response = NextResponse.redirect(new URL(next, request.url));
     response.cookies.set('52coffee_google_flow', '', { httpOnly: true, path: '/', maxAge: 0 });
     if (!flow.link && data.token) {
-      response.cookies.set('52coffee_customer_session', data.token, {
+      response.cookies.set(adminFlow ? ADMIN_SESSION_COOKIE : '52coffee_customer_session', data.token, {
         httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
-        path: '/', maxAge: 60 * 60 * 24 * 7,
+        path: '/', maxAge: adminFlow ? 60 * 60 * 8 : 60 * 60 * 24 * 7,
       });
     }
     return response;

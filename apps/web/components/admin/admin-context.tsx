@@ -29,20 +29,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }
 
   if (!portal.isAuthenticated) {
-    return (
-      <AdminAuthGate
-        authStep={portal.authStep}
-        username={portal.username}
-        setUsername={portal.setUsername}
-        password={portal.password}
-        setPassword={portal.setPassword}
-        pinInput={portal.pinInput}
-        setPinInput={portal.setPinInput}
-        pinError={portal.pinError}
-        setPinError={portal.setPinError}
-        handleLogin={portal.handleLogin}
-      />
-    );
+    return <AdminAuthGate loginError={portal.loginError} />;
   }
 
   return (

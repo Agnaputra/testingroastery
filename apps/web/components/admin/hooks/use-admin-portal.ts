@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, FormEvent } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PRODUCTS } from '../../../lib/data';
 import {
   OWNER_CATALOG_PRODUCTS,
@@ -31,13 +31,8 @@ function publicationRowsFromOverrides(overrides: Record<string, boolean>): Set<n
 }
 
 export function useAdminPortal() {
-  // Authentication PIN state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authStep, setAuthStep] = useState<'credentials' | 'pin'>('pin');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [mounted, setMounted] = useState(false);
 
   // Catalog & Publication state
@@ -73,18 +68,16 @@ export function useAdminPortal() {
   const { orders, updateOrderStatus, updateShipping } = useOrderStore();
 
   useEffect(() => {
-    setMounted(true);
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    if (reason) setLoginError(reason === 'not_admin' ? 'Akun Google ini tidak memiliki akses admin.' : 'Login Google admin gagal. Silakan coba lagi.');
     Promise.all([
       fetch('/api/admin/session', { cache: 'no-store' }),
       fetch('/api/catalog/publication', { cache: 'no-store' }),
     ])
       .then(async ([sessionResponse, publicationResponse]) => {
         if (sessionResponse.ok) {
-          const session = (await sessionResponse.json()) as {
-            authenticated?: boolean; credentialsRequired?: boolean; credentialsVerified?: boolean;
-          };
+          const session = (await sessionResponse.json()) as { authenticated?: boolean };
           setIsAuthenticated(session.authenticated === true);
-          setAuthStep(session.credentialsRequired && !session.credentialsVerified ? 'credentials' : 'pin');
         }
         if (publicationResponse.ok) {
           const publication = (await publicationResponse.json()) as { overrides?: Record<string, boolean> };
@@ -98,7 +91,8 @@ export function useAdminPortal() {
       .catch(() => {
         setPublicationLoaded(false);
         setCatalogSyncError('Status katalog belum dapat dimuat.');
-      });
+      })
+      .finally(() => setMounted(true));
   }, []);
 
   useEffect(() => {
@@ -122,37 +116,10 @@ export function useAdminPortal() {
       });
   }, [isAuthenticated]);
 
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault();
-    const credentials = authStep === 'credentials';
-    const response = await fetch('/api/admin/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials
-        ? { stage: 'credentials', username: username.trim(), password }
-        : { stage: 'pin', pin: pinInput.trim() }),
-    });
-    if (response.ok) {
-      if (credentials) {
-        setAuthStep('pin');
-        setPassword('');
-      } else {
-        setIsAuthenticated(true);
-      }
-      setPinError('');
-    } else {
-      const result = await response.json().catch(() => ({})) as { error?: string };
-      setPinError(result.error ?? 'Akses admin ditolak.');
-    }
-  };
-
   const handleLogout = async () => {
     await fetch('/api/admin/session', { method: 'DELETE' });
     setIsAuthenticated(false);
-    setAuthStep('credentials');
-    setUsername('');
-    setPassword('');
-    setPinInput('');
+    setLoginError('');
   };
 
   const handleTogglePublish = async (row: number) => {
@@ -383,16 +350,7 @@ export function useAdminPortal() {
   return {
     mounted,
     isAuthenticated,
-    authStep,
-    username,
-    setUsername,
-    password,
-    setPassword,
-    pinInput,
-    setPinInput,
-    pinError,
-    setPinError,
-    handleLogin,
+    loginError,
     handleLogout,
     metrics,
     catalogStats,
