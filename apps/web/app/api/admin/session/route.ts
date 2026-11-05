@@ -1,10 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, hasAuthorizedAdminSession } from '../../../../lib/admin-session';
+import {
+  ADMIN_SESSION_COOKIE,
+  CUSTOMER_SESSION_COOKIE,
+  hasAdminBackendSessionToken,
+} from '../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({ authenticated: await hasAuthorizedAdminSession(request) });
+  const adminToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  if (await hasAdminBackendSessionToken(adminToken)) {
+    return NextResponse.json({ authenticated: true });
+  }
+
+  const customerToken = request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value;
+  if (customerToken && (await hasAdminBackendSessionToken(customerToken))) {
+    const response = NextResponse.json({ authenticated: true });
+    response.cookies.set(ADMIN_SESSION_COOKIE, customerToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 60 * 8,
+    });
+    return response;
+  }
+
+  return NextResponse.json({ authenticated: false });
 }
 
 export async function DELETE(request: NextRequest) {

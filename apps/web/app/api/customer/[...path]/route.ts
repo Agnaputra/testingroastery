@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasAuthorizedAdminSession } from '../../../../lib/admin-session';
+import { ADMIN_SESSION_COOKIE, hasAuthorizedAdminSession } from '../../../../lib/admin-session';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,8 +31,8 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
   const backend = process.env.AI_BACKEND_URL?.replace(/\/$/, '');
   if (!backend) return NextResponse.json({ detail: 'Layanan pelanggan belum dikonfigurasi.' }, { status: 503 });
   const headers = new Headers();
-  const session = request.cookies.get(SESSION_COOKIE)?.value;
-  if (session && !admin) headers.set('Authorization', `Bearer ${session}`);
+  const session = request.cookies.get(ADMIN_SESSION_COOKIE)?.value || request.cookies.get(SESSION_COOKIE)?.value;
+  if (session) headers.set('Authorization', `Bearer ${session}`);
   const adminKey = process.env.ADMIN_API_KEY ?? '';
   if (admin && adminKey) headers.set('X-Admin-Key', adminKey);
   const contentType = request.headers.get('content-type');
@@ -61,16 +61,25 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
   }
   const data = await upstream.json().catch(() => ({ detail: 'Respons tidak valid.' }));
   if (upstream.ok && (path === 'auth/login' || path === 'auth/google')) {
-    const { token, ...safeData } = data as { token: string };
+    const { token, ...safeData } = data as { token: string; user?: { role?: string } };
     const response = NextResponse.json(safeData);
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
       path: '/', maxAge: 60 * 60 * 24 * 7,
     });
+    if (safeData.user?.role === 'admin') {
+      response.cookies.set(ADMIN_SESSION_COOKIE, token, {
+        httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
+        path: '/', maxAge: 60 * 60 * 8,
+      });
+    }
     return response;
   }
   const response = NextResponse.json(data, { status: upstream.status });
-  if (path === 'auth/logout') response.cookies.set(SESSION_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
+  if (path === 'auth/logout') {
+    response.cookies.set(SESSION_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
+    response.cookies.set(ADMIN_SESSION_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
+  }
   return response;
 }
 

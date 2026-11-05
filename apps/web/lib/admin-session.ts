@@ -2,7 +2,27 @@ export const ADMIN_SESSION_COOKIE = '52coffee_admin_session';
 export const CUSTOMER_SESSION_COOKIE = '52coffee_customer_session';
 
 export async function hasAuthorizedAdminSession(request: { cookies: { get(name: string): { value: string } | undefined } }): Promise<boolean> {
-  return hasAdminBackendSessionToken(request.cookies.get(ADMIN_SESSION_COOKIE)?.value);
+  const adminToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  if (await hasAdminBackendSessionToken(adminToken)) {
+    return true;
+  }
+  const customerToken = request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value;
+  if (customerToken && customerToken !== adminToken) {
+    return hasAdminBackendSessionToken(customerToken);
+  }
+  return false;
+}
+
+export async function getAuthorizedAdminSessionToken(request: { cookies: { get(name: string): { value: string } | undefined } }): Promise<string | null> {
+  const adminToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  if (await hasAdminBackendSessionToken(adminToken)) {
+    return adminToken!;
+  }
+  const customerToken = request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value;
+  if (customerToken && customerToken !== adminToken && (await hasAdminBackendSessionToken(customerToken))) {
+    return customerToken;
+  }
+  return null;
 }
 
 export async function hasAdminBackendSessionToken(token?: string): Promise<boolean> {

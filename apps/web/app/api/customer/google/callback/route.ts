@@ -64,6 +64,12 @@ export async function GET(request: NextRequest) {
         httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
         path: '/', maxAge: adminFlow ? 60 * 60 * 8 : 60 * 60 * 24 * 7,
       });
+      if (!adminFlow && (await hasAdminBackendSessionToken(data.token))) {
+        response.cookies.set(ADMIN_SESSION_COOKIE, data.token, {
+          httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
+          path: '/', maxAge: 60 * 60 * 8,
+        });
+      }
     }
     return response;
   } catch {
