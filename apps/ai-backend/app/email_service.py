@@ -412,3 +412,4 @@ def send_order_shipped_email(order: dict, tracking_number: str) -> Optional[dict
 """
     text = f"Pesanan #{order_id_short} telah dikirim via {courier} dengan nomor resi: {tracking_number}."
     return send_transactional_email(recipient, subject, html, text)
+
