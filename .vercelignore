@@ -1,3 +1,5 @@
+**/node_modules/**
+**/.next/**
 **/.venv/**
 **/.venv*/**
 .git/**
@@ -5,4 +7,7 @@
 .private/**
 *.pyc
 **/__pycache__/**
+.tmp*/**
+.tmp*
+.agents/**
 apps/ai-backend/evaluation/.venv/**

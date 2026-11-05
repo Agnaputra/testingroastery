@@ -150,7 +150,7 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
             className="mt-4 block w-full text-sm" aria-label="Pilih bukti pembayaran" />
           {preview && <Image unoptimized src={preview} alt="Pratinjau bukti pembayaran" width={240} height={240} className="mt-3 h-auto max-h-60 w-auto max-w-full" />}
           {file?.type === 'application/pdf' && <p className="mt-2 text-sm">PDF: {file.name}</p>}
-          {busy && <p role="status" className="mt-3 text-sm">Mengunggah buktiâ€¦</p>}
+          {busy && <p role="status" className="mt-3 text-sm">Mengunggah bukti…</p>}
           {error && <p role="alert" className="mt-3 text-sm text-brand-maroon">{error}</p>}
           <button type="button" disabled={!file || busy} onClick={upload}
             className="mt-4 min-h-11 rounded-lg bg-brand-charcoal px-5 text-sm font-bold text-white disabled:opacity-50">
