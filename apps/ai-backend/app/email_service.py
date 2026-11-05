@@ -40,17 +40,54 @@ def get_auth_base_url() -> str:
 
 
 def get_sender() -> str:
-    return os.getenv("RESEND_FROM") or os.getenv("CUSTOMER_SMTP_FROM") or "52 Coffee & Roastery <onboarding@resend.dev>"
+    smtp_host = os.getenv("CUSTOMER_SMTP_HOST", "").strip()
+    smtp_from = os.getenv("CUSTOMER_SMTP_FROM", "").strip()
+    smtp_user = os.getenv("CUSTOMER_SMTP_USER", "").strip()
+    resend_from = os.getenv("RESEND_FROM", "").strip()
+
+    if smtp_host:
+        return smtp_from or (f"52 Coffee & Roastery <{smtp_user}>" if smtp_user else "") or "52 Coffee & Roastery <agenaputra@gmail.com>"
+    return resend_from or "52 Coffee & Roastery <onboarding@resend.dev>"
 
 
 def send_transactional_email(to: str, subject: str, html: str, text: str = "") -> dict:
-    """Send transactional email via Resend API, SMTP relay, or dev outbox."""
-    resend_key = os.getenv("RESEND_API_KEY", "").strip()
+    """Send transactional email via SMTP relay, Resend API, or dev outbox."""
     smtp_host = os.getenv("CUSTOMER_SMTP_HOST", "").strip()
+    resend_key = os.getenv("RESEND_API_KEY", "").strip()
     sender = get_sender()
 
-    # 1. Resend REST API (Recommended)
-    if resend_key:
+    # 1. Standard SMTP (e.g. Gmail SMTP or custom relay - prioritized when configured)
+    if smtp_host:
+        username = os.getenv("CUSTOMER_SMTP_USER", "").strip()
+        password = os.getenv("CUSTOMER_SMTP_PASSWORD", "").strip()
+        try:
+            port = int(os.getenv("CUSTOMER_SMTP_PORT", "587"))
+        except ValueError:
+            raise HTTPException(503, "Port SMTP tidak valid.")
+
+        if not username or not password:
+            raise HTTPException(503, "Kredensial SMTP tidak lengkap.")
+
+        msg = EmailMessage()
+        msg["From"] = sender
+        msg["To"] = to
+        msg["Subject"] = subject
+        msg.set_content(text or "Silakan gunakan klien email yang mendukung HTML.")
+        msg.add_alternative(html, subtype="html")
+
+        try:
+            with smtplib.SMTP(smtp_host, port, timeout=10) as server:
+                server.starttls(context=ssl.create_default_context())
+                server.login(username, password)
+                server.send_message(msg)
+            logger.info("smtp_email_sent recipient=%s host=%s", to, smtp_host)
+            return {"provider": "smtp"}
+        except (OSError, smtplib.SMTPException) as error:
+            logger.error("smtp_delivery_failed: %s", error)
+            raise HTTPException(503, "Email belum dapat dikirim via SMTP.") from error
+
+    # 2. Resend REST API (Used when RESEND_API_KEY is configured and SMTP is not)
+    elif resend_key:
         try:
             with httpx.Client(timeout=10.0) as client:
                 res = client.post(
@@ -90,9 +127,6 @@ def send_transactional_email(to: str, subject: str, html: str, text: str = "") -
         except httpx.RequestError as error:
             logger.error("resend_network_error: %s", error)
             raise HTTPException(503, "Layanan Resend tidak dapat dijangkau.") from error
-
-    # 2. Standard SMTP (Supports Resend SMTP relay or custom SMTP)
-    if smtp_host:
         username = os.getenv("CUSTOMER_SMTP_USER", "").strip()
         password = os.getenv("CUSTOMER_SMTP_PASSWORD", "").strip()
         try:
