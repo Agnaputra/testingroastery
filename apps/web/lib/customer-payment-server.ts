@@ -28,9 +28,9 @@ export function manualPaymentConfig() {
     existsSync(path.resolve(process.cwd(), candidate))
   ) ?? 'public/qris.jpg';
 
-  const account = process.env.PAYMENT_BCA_ACCOUNT ?? process.env.PAYMENT_TEST_BCA_ACCOUNT ?? (isTesting ? '5200112233' : undefined);
-  const holder = process.env.PAYMENT_BCA_HOLDER ?? process.env.PAYMENT_TEST_BCA_HOLDER ?? (isTesting ? '52 COFFEE TEST ROASTERY' : undefined);
-  const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? process.env.PAYMENT_TEST_QRIS_MERCHANT ?? (isTesting ? '52 COFFEE (PREVIEW TEST)' : undefined);
+  const account = process.env.PAYMENT_BCA_ACCOUNT ?? process.env.PAYMENT_TEST_BCA_ACCOUNT ?? (isTesting ? '0392046176' : undefined);
+  const holder = process.env.PAYMENT_BCA_HOLDER ?? process.env.PAYMENT_TEST_BCA_HOLDER ?? (isTesting ? 'Agna Putra Prawira' : undefined);
+  const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? process.env.PAYMENT_TEST_QRIS_MERCHANT ?? (isTesting ? 'NANA STORE - TELECOMMUNICATION' : undefined);
   const file = process.env.PAYMENT_QRIS_PATH ?? process.env.PAYMENT_TEST_QRIS_PATH ?? (isTesting ? defaultTestQris : undefined);
 
   if (!account || !/^\d{8,20}$/.test(account) || !holder || !merchant || !file) return null;

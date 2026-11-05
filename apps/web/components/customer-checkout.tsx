@@ -159,10 +159,21 @@ export function CustomerCheckout() {
           <section className="rounded-xl border border-border-subtle bg-white p-5">
             <h2 className="font-editorial text-xl font-bold">Metode pembayaran manual</h2>
             <div className="mt-4 space-y-3 text-sm">
-              <label className="flex min-h-12 items-center gap-3"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS statis</label>
-              <label className="flex min-h-12 items-center gap-3"><input type="radio" checked={method === 'bca_transfer'} onChange={() => setMethod('bca_transfer')} /> Transfer BCA manual</label>
+              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS statis (QR ShopeePay / QRIS otomatis)</label>
+              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'bca_transfer'} onChange={() => setMethod('bca_transfer')} /> Transfer Bank BCA Manual</label>
             </div>
-            <p className="mt-3 text-xs text-on-surface-variant">Nomor rekening atau QRIS ditampilkan setelah order tersimpan. Jangan membayar tanpa memastikan Order ID dan total.</p>
+            {method === 'bca_transfer' && (
+              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-700 space-y-1.5">
+                <p className="font-semibold text-slate-900">Rekening Tujuan Transfer:</p>
+                <p>Bank: <strong>BCA</strong></p>
+                <p>Nomor Rekening: <strong className="font-mono text-sm">0392046176</strong></p>
+                <p>Atas Nama: <strong>Agna Putra Prawira</strong></p>
+                <p className="pt-1 text-[11px] text-slate-500">Setelah menekan tombol pesanan di samping, Anda akan diarahkan ke halaman detail pesanan untuk mengunggah bukti transfer.</p>
+              </div>
+            )}
+            {method === 'qris_static' && (
+              <p className="mt-3 text-xs text-on-surface-variant">QR code QRIS dinamis akan otomatis dibuat dengan nominal pesanan setelah order tersimpan.</p>
+            )}
           </section>
         </div>
         <aside className="h-fit rounded-xl border border-border-subtle bg-white p-5">

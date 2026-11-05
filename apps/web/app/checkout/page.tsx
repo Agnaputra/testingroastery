@@ -47,7 +47,11 @@ interface ShippingOption {
 }
 
 export default function CheckoutPage() {
-  return process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1' ? <CustomerCheckout /> : <DemoCheckoutPage />;
+  const isCustomerCommerce =
+    process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1' ||
+    process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_MODE === 'operational' ||
+    process.env.CUSTOMER_COMMERCE_MODE === 'operational';
+  return isCustomerCommerce ? <CustomerCheckout /> : <DemoCheckoutPage />;
 }
 
 function DemoCheckoutPage() {
@@ -578,8 +582,8 @@ function DemoCheckoutPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { id: 'qris', name: 'QRIS (demo)', sub: 'QR tidak dapat dipindai', icon: QrCode },
-                { id: 'bca-va', name: 'BCA (demo)', sub: 'Belum tersedia untuk transfer', icon: Building2 },
+                { id: 'qris', name: 'QRIS', sub: 'QR ShopeePay / QRIS otomatis', icon: QrCode },
+                { id: 'bca-va', name: 'Transfer BCA', sub: 'Transfer rekening manual', icon: Building2 },
               ].map((method) => {
                 const isSelected = selectedPayment === method.id;
                 const Icon = method.icon;
@@ -760,10 +764,15 @@ function DemoCheckoutPage() {
               </div>
             )}
             {selectedPayment === 'bca-va' && (
-              <div className="space-y-3 py-2 text-xs">
-                <p className="text-gray-600">Rekening pembayaran tidak ditampilkan dalam mode demo. Jangan melakukan transfer.</p>
-                <p className="text-[11px] text-gray-500">
-                  Mode demo tidak mengirim data ke bank atau payment gateway.
+              <div className="space-y-3 py-3 text-xs bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <p className="font-semibold text-slate-800">Transfer Bank BCA Manual</p>
+                <div className="space-y-1">
+                  <p className="text-slate-600">Nomor Rekening:</p>
+                  <p className="font-mono text-base font-bold text-slate-900">0392046176</p>
+                  <p className="text-slate-600">Atas Nama: <strong>Agna Putra Prawira</strong></p>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Transfer tepat sesuai total belanja. Simpan bukti transfer untuk diunggah saat konfirmasi pesanan.
                 </p>
               </div>
             )}
