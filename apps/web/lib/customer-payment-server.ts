@@ -34,7 +34,10 @@ export function manualPaymentConfig() {
   const file = process.env.PAYMENT_QRIS_PATH ?? process.env.PAYMENT_TEST_QRIS_PATH ?? (isTesting ? defaultTestQris : undefined);
 
   if (!account || !/^\d{8,20}$/.test(account) || !holder || !merchant || !file) return null;
-  const resolved = path.resolve(process.cwd(), file);
+  let resolved = path.resolve(process.cwd(), file);
+  if (!existsSync(resolved)) {
+    resolved = path.resolve(process.cwd(), defaultTestQris);
+  }
   const allowed = [
     path.resolve(process.cwd(), '.private', 'payment'),
     path.resolve(process.cwd(), 'public'),
@@ -46,7 +49,8 @@ export function manualPaymentConfig() {
 
 export async function paymentOrder(request: NextRequest, orderId: string): Promise<PaymentOrder | null> {
   if (!/^[0-9a-f-]{36}$/i.test(orderId)) return null;
-  const token = request.cookies.get('52coffee_customer_session')?.value;
+  const token = request.cookies.get('52coffee_customer_session')?.value
+    || request.cookies.get('52coffee_admin_session')?.value;
   const backend = process.env.AI_BACKEND_URL?.replace(/\/$/, '');
   if (!token || !backend) return null;
   try {
