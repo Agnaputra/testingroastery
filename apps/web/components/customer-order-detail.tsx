@@ -27,7 +27,7 @@ function whatsappText(order: CustomerOrder) {
     `Subtotal: ${formatRupiah(order.subtotal)}`,
     `Ongkir: ${formatRupiah(order.shippingCost)}`,
     `Total: ${formatRupiah(order.total)}`,
-    `Metode Pembayaran: ${order.paymentMethod === 'qris_static' ? 'QRIS statis' : 'Transfer BCA manual'}`,
+    `Metode Pembayaran: ${order.paymentMethod === 'qris_static' ? 'QRIS Dinamis' : 'Transfer BCA manual'}`,
     'Bukti Pembayaran: Sudah Diunggah',
     `Status: ${order.paymentStatus === 'paid' ? 'Pembayaran terverifikasi' : 'Menunggu verifikasi'}`,
     '',

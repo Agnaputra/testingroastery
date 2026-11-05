@@ -159,7 +159,7 @@ export function CustomerCheckout() {
           <section className="rounded-xl border border-border-subtle bg-white p-5">
             <h2 className="font-editorial text-xl font-bold">Metode pembayaran manual</h2>
             <div className="mt-4 space-y-3 text-sm">
-              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS statis (QR ShopeePay / QRIS otomatis)</label>
+              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS Dinamis (ShopeePay / Nominal Otomatis)</label>
               <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'bca_transfer'} onChange={() => setMethod('bca_transfer')} /> Transfer Bank BCA Manual</label>
             </div>
             {method === 'bca_transfer' && (

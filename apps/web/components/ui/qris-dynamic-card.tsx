@@ -15,7 +15,7 @@ interface QrisDynamicCardProps {
 export function QrisDynamicCard({ amount, orderId, className = '' }: QrisDynamicCardProps) {
   const [copied, setCopied] = useState(false);
   const [pngDataUrl, setPngDataUrl] = useState<string>('');
-  const [mode, setMode] = useState<'dynamic' | 'original'>('original');
+  const [mode, setMode] = useState<'dynamic' | 'original'>('dynamic');
 
   const qris = useMemo(() => {
     return createDynamicQris(amount);
