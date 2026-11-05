@@ -110,41 +110,11 @@ def public_user(user):
 
 
 def send_email(recipient: str, purpose: str, token: str):
-    base = os.getenv("CUSTOMER_AUTH_URL", "").rstrip("/")
-    if not base.startswith(("http://127.0.0.1:", "http://localhost:", "https://")):
-        raise HTTPException(503, "URL autentikasi belum dikonfigurasi.")
-    path = "verify-email" if purpose == "verify" else "reset-password"
-    link = f"{base}/{path}#token={token}"
-    smtp_host = os.getenv("CUSTOMER_SMTP_HOST", "")
-    if not smtp_host and settings.ENVIRONMENT in {"development", "test"}:
-        outbox = Path(os.getenv("CUSTOMER_DEV_OUTBOX", ".private/customer-auth-outbox"))
-        outbox.mkdir(parents=True, exist_ok=True)
-        (outbox / f"{purpose}-{secrets.token_hex(8)}.txt").write_text(f"{recipient}\n{link}\n", encoding="utf-8")
-        return
-    if not smtp_host:
-        raise HTTPException(503, "Pengiriman email belum dikonfigurasi.")
-    sender = os.getenv("CUSTOMER_SMTP_FROM", "")
-    username = os.getenv("CUSTOMER_SMTP_USER", "")
-    password = os.getenv("CUSTOMER_SMTP_PASSWORD", "")
-    try:
-        port = int(os.getenv("CUSTOMER_SMTP_PORT", "587"))
-    except ValueError:
-        raise HTTPException(503, "Konfigurasi email tidak valid.")
-    if not sender or not username or not password or not 1 <= port <= 65535:
-        raise HTTPException(503, "Konfigurasi email tidak lengkap.")
-    message = EmailMessage()
-    message["From"] = sender
-    message["To"] = recipient
-    message["Subject"] = "Verifikasi email | 52 Coffee & Roastery" if purpose == "verify" else "Atur ulang password | 52 Coffee & Roastery"
-    action = "verifikasi alamat email" if purpose == "verify" else "atur ulang password"
-    message.set_content(f"Halo,\n\nGunakan tautan ini untuk {action} akun 52 Coffee & Roastery:\n{link}\n\nTautan berlaku 30 menit dan hanya dapat digunakan sekali. Jika Anda tidak meminta ini, abaikan email ini.\n\n52 Coffee & Roastery")
-    try:
-        with smtplib.SMTP(smtp_host, port, timeout=10) as server:
-            server.starttls(context=ssl.create_default_context())
-            server.login(username, password)
-            server.send_message(message)
-    except (OSError, smtplib.SMTPException) as error:
-        raise HTTPException(503, "Email belum dapat dikirim.") from error
+    from .email_service import send_verification_email, send_password_reset_email
+    if purpose == "verify":
+        send_verification_email(recipient, token)
+    else:
+        send_password_reset_email(recipient, token)
 
 
 def issue_email_token(cur, user_id: str, email: str, purpose: str):

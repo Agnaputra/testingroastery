@@ -200,7 +200,15 @@ def decide_payment(order_id: UUID, payload: Decision, authorization: str = Heade
         cur.execute("INSERT INTO customer_order_status_history(order_id,actor_user_id,actor_role,field,old_status,new_status,reason) "
                     "VALUES (%s,%s,'admin','payment','awaiting_verification',%s,%s)",
                     (str(order_id), actor_id, status, payload.reason.strip() if status == "rejected" else None))
-        return order_view(cur, order_id)
+        view = order_view(cur, order_id)
+        if status == "paid":
+            try:
+                from .email_service import send_order_receipt_email
+                send_order_receipt_email(view)
+            except Exception as err:
+                import logging
+                logging.getLogger("customer_payments").warning("Gagal mengirim email struk: %s", err)
+        return view
 
 
 class Fulfillment(BaseModel):
@@ -244,4 +252,12 @@ def update_fulfillment(order_id: UUID, payload: Fulfillment, authorization: str 
             cur.execute("INSERT INTO customer_order_status_history(order_id,actor_user_id,actor_role,field,old_status,new_status) "
                         "VALUES (%s,%s,'admin','payment',%s,'cancelled')",
                         (str(order_id), actor_id, order["payment_status"]))
-        return order_view(cur, order_id)
+        view = order_view(cur, order_id)
+        if payload.status == "shipped" and payload.trackingNumber.strip():
+            try:
+                from .email_service import send_order_shipped_email
+                send_order_shipped_email(view, payload.trackingNumber.strip())
+            except Exception as err:
+                import logging
+                logging.getLogger("customer_payments").warning("Gagal mengirim email pengiriman: %s", err)
+        return view
