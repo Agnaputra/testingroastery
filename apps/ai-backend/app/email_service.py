@@ -69,7 +69,21 @@ def send_transactional_email(to: str, subject: str, html: str, text: str = "") -
                 )
                 if not res.is_success:
                     logger.error("resend_api_failure status=%s body=%s", res.status_code, res.text)
-                    raise HTTPException(502, f"Gagal mengirim email via Resend: {res.text}")
+                    error_detail = res.text
+                    try:
+                        err_json = res.json()
+                        raw_msg = err_json.get("message", "")
+                        if "only send testing emails to your own email address" in raw_msg:
+                            error_detail = (
+                                "Mode uji coba Resend (domain pengirim belum diverifikasi): "
+                                "email saat ini hanya dapat dikirim ke email pemilik akun Resend. "
+                                "Untuk mengirim ke semua pelanggan, verifikasi domain Anda di resend.com/domains."
+                            )
+                        elif raw_msg:
+                            error_detail = raw_msg
+                    except Exception:
+                        pass
+                    raise HTTPException(502, f"Gagal mengirim email via Resend: {error_detail}")
                 data = res.json()
                 logger.info("resend_email_sent id=%s recipient=%s", data.get("id"), to)
                 return {"provider": "resend", "id": data.get("id")}
