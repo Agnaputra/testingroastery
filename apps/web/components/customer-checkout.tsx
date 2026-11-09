@@ -38,7 +38,6 @@ export function CustomerCheckout() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const productionCommerce = process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_MODE === 'operational';
   const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
   const unsupportedItems = items.filter((item) => item.productId.startsWith('byob-') && !item.blendComponents?.length);
   const lines = useMemo(() => items.map((item) => ({
@@ -122,8 +121,8 @@ export function CustomerCheckout() {
   if (!user) return <main className="nav-offset site-container page-section" role="alert">{error}</main>;
   return <main className="nav-offset site-container page-section max-w-4xl">
     <Link href="/catalog" className="text-sm text-brand-navy underline">Kembali ke katalog</Link>
-    <h1 className="mt-5 font-editorial text-3xl font-bold text-brand-charcoal">{policy?.mode === 'operational' || productionCommerce ? 'Checkout' : 'Checkout testing'}</h1>
-    <p className="mt-2 text-sm text-on-surface-variant">{policy?.mode === 'operational' || productionCommerce
+    <h1 className="mt-5 font-editorial text-3xl font-bold text-brand-charcoal">{policy?.mode === 'testing' ? 'Checkout testing' : 'Checkout'}</h1>
+    <p className="mt-2 text-sm text-on-surface-variant">{!policy ? 'Pilih alamat untuk memeriksa ketersediaan checkout dan ongkos kirim.' : policy.mode === 'operational'
       ? 'Pesanan memakai stok dan ongkir yang diverifikasi admin. Pembayaran tetap dikonfirmasi manual.'
       : 'Mode pengujian lokal. Jangan melakukan transfer dana sungguhan. Pesanan dan pembayaran di sini hanya untuk uji alur.'}</p>
     {items.length === 0 ? <p className="mt-8">Keranjang kosong. <Link href="/catalog" className="underline">Pilih produk</Link>.</p>
@@ -159,21 +158,10 @@ export function CustomerCheckout() {
           <section className="rounded-xl border border-border-subtle bg-white p-5">
             <h2 className="font-editorial text-xl font-bold">Metode pembayaran manual</h2>
             <div className="mt-4 space-y-3 text-sm">
-              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS Dinamis (ShopeePay / Nominal Otomatis)</label>
+              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS</label>
               <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'bca_transfer'} onChange={() => setMethod('bca_transfer')} /> Transfer Bank BCA Manual</label>
             </div>
-            {method === 'bca_transfer' && (
-              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-700 space-y-1.5">
-                <p className="font-semibold text-slate-900">Rekening Tujuan Transfer:</p>
-                <p>Bank: <strong>BCA</strong></p>
-                <p>Nomor Rekening: <strong className="font-mono text-sm">0392046176</strong></p>
-                <p>Atas Nama: <strong>Agna Putra Prawira</strong></p>
-                <p className="pt-1 text-[11px] text-slate-500">Setelah menekan tombol pesanan di samping, Anda akan diarahkan ke halaman detail pesanan untuk mengunggah bukti transfer.</p>
-              </div>
-            )}
-            {method === 'qris_static' && (
-              <p className="mt-3 text-xs text-on-surface-variant">QR code QRIS dinamis akan otomatis dibuat dengan nominal pesanan setelah order tersimpan.</p>
-            )}
+            <p className="mt-3 text-sm text-on-surface-variant">Instruksi rekening atau QRIS resmi tersedia pada detail pesanan. Jangan membayar sebelum instruksi ditampilkan.</p>
           </section>
         </div>
         <aside className="h-fit rounded-xl border border-border-subtle bg-white p-5">
@@ -194,14 +182,14 @@ export function CustomerCheckout() {
           </fieldset>}
           {selectedShipping && policy?.shippingOptions.length === 1 && <p className="mt-4 text-sm">Layanan: <strong>{selectedShipping.courier} · {selectedShipping.service}</strong></p>}
           {manualShipping ? <p className="mt-2 text-sm">Ongkir dan total akhir akan dikonfirmasi sebelum pembayaran. Berat isi dari produk di keranjang dihitung otomatis; kurir memakai berat paket setelah dikemas.</p>
-            : selectedShipping && <p className="mt-2 text-sm">Ongkir: <strong>{policy?.mode === 'operational' && selectedShipping.price === 0 ? 'Gratis' : formatRupiah(selectedShipping.price)}</strong><br />Estimasi total sebelum validasi harga server: <strong>{formatRupiah(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) + selectedShipping.price)}</strong></p>}
-          <p className="mt-2 text-xs text-on-surface-variant">{policy?.shippingPolicy ?? 'Kebijakan ongkir belum tersedia.'} Harga produk divalidasi ulang oleh server. Pembayaran pending berlaku {policy?.paymentHours ?? '—'} jam.</p>
+            : selectedShipping && <p className="mt-2 text-sm">Ongkos kirim: <strong>{policy?.mode === 'operational' && selectedShipping.price === 0 ? 'Gratis' : formatRupiah(selectedShipping.price)}</strong><br />Estimasi total sebelum validasi harga server: <strong>{formatRupiah(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) + selectedShipping.price)}</strong></p>}
+          <p className="mt-2 text-xs text-on-surface-variant">{policy?.shippingPolicy ?? 'Kebijakan ongkir belum tersedia.'} Harga produk divalidasi ulang oleh server. Batas pembayaran berlaku {policy?.paymentHours ?? '—'} jam.</p>
           {unsupportedItems.length > 0 && <p role="alert" className="mt-4 text-sm text-brand-maroon">Racikan lama perlu dibuat ulang agar komposisinya dapat divalidasi server. Item tetap di keranjang sampai Anda menghapusnya.</p>}
           {error && <p role="alert" className="mt-4 text-sm text-brand-maroon">{error}</p>}
           {!addressId && <p className="mt-4 text-xs text-on-surface-variant">Simpan alamat pengiriman agar tombol pembuatan pesanan aktif.</p>}
           {manualShipping && unsupportedItems.length === 0 ? <a href={`${WHATSAPP_URL}?text=${encodeURIComponent(shippingRequest)}`} target="_blank" rel="noopener noreferrer" className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-brand-charcoal px-4 text-center font-bold text-white">Minta konfirmasi ongkir via WhatsApp</a>
             : <button type="submit" disabled={busy || !addressId || !selectedShipping || unsupportedItems.length > 0 || manualShipping} className="mt-5 min-h-12 w-full rounded-xl bg-brand-charcoal px-4 font-bold text-white disabled:opacity-50">
-              {manualShipping ? 'Perbaiki keranjang dahulu' : busy ? 'Menyimpan pesanan…' : 'Buat pesanan pending'}
+              {manualShipping ? 'Perbaiki keranjang dahulu' : busy ? 'Menyimpan pesanan…' : 'Buat pesanan'}
             </button>}
         </aside>
       </form>}

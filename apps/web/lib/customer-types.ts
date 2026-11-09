@@ -24,7 +24,7 @@ export interface CustomerAddress {
 
 export interface CustomerOrder {
   id: string;
-  checkoutMode: 'testing' | 'operational';
+  checkoutMode: 'testing' | 'operational' | 'unknown';
   createdAt: string;
   customerName: string;
   customerEmail: string;

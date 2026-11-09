@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CustomerApiError, customerApi } from '../lib/customer-api';
+import { paymentLabels, fulfillmentLabels } from '../lib/customer-order-labels';
 import type { CustomerOrder } from '../lib/customer-types';
 
 export function CustomerTrack() {
@@ -31,8 +32,8 @@ export function CustomerTrack() {
     {!loading && !error && !orders.length && <p className="mt-8">Belum ada pesanan.</p>}
     <ul className="mt-8 space-y-4">{orders.map((order) => <li key={order.id} className="rounded-xl border border-border-subtle bg-white p-5">
       <Link href={`/account/orders/${order.id}`} className="font-semibold text-brand-navy underline">Order #{order.id.slice(0, 8)}</Link>
-      <p className="mt-2 text-sm">Pembayaran: <strong>{order.paymentStatus}</strong></p>
-      <p className="text-sm">Pengiriman: <strong>{order.fulfillmentStatus}</strong></p>
+      <p className="mt-2 text-sm">Pembayaran: <strong>{paymentLabels[order.paymentStatus]}</strong></p>
+      <p className="text-sm">Pengiriman: <strong>{fulfillmentLabels[order.fulfillmentStatus]}</strong></p>
       {order.rejectionReason && <p className="mt-2 text-sm text-brand-maroon">Bukti ditolak: {order.rejectionReason}</p>}
       {order.trackingNumber && <p className="mt-2 text-sm">Nomor resi: {order.trackingNumber}</p>}
     </li>)}</ul>

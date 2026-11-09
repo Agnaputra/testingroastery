@@ -1,3 +1,4 @@
+import { manualPaymentConfig, qrisImage } from '../../../../lib/customer-payment-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { ADMIN_SESSION_COOKIE, hasAuthorizedAdminSession } from '../../../../lib/admin-session';
 
@@ -23,6 +24,10 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
   const method = request.method;
   if (method !== 'GET' && !sameOrigin(request)) {
     return NextResponse.json({ detail: 'Origin tidak valid.' }, { status: 403 });
+  }
+  if (path === 'orders' && method === 'POST') {
+    const config = manualPaymentConfig();
+    if (!config || !await qrisImage(config.file)) return NextResponse.json({ detail: 'Konfigurasi pembayaran belum lengkap. Pesanan belum dibuat; hubungi 52 Coffee.' }, { status: 503 });
   }
   const admin = path.startsWith('admin/');
   if (admin && !await hasAuthorizedAdminSession(request)) {

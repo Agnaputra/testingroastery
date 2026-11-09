@@ -1,5 +1,7 @@
 'use client';
 
+import { usesCustomerCommerce } from '../../lib/customer-commerce-mode';
+
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -47,11 +49,9 @@ interface ShippingOption {
 }
 
 export default function CheckoutPage() {
-  const isCustomerCommerce =
-    process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1' ||
-    process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_MODE === 'operational' ||
-    process.env.CUSTOMER_COMMERCE_MODE === 'operational';
-  return isCustomerCommerce ? <CustomerCheckout /> : <DemoCheckoutPage />;
+  if (usesCustomerCommerce) return <CustomerCheckout />;
+  if (process.env.NEXT_PUBLIC_CHECKOUT_DEMO_MODE === '1') return <DemoCheckoutPage />;
+  return <main className="nav-offset site-container page-section" role="alert">Checkout belum tersedia. Hubungi 52 Coffee untuk pemesanan.</main>;
 }
 
 function DemoCheckoutPage() {

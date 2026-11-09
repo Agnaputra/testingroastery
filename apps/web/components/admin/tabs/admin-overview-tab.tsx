@@ -1,5 +1,7 @@
 'use client';
 
+import { usesCustomerCommerce } from '../../../lib/customer-commerce-mode';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -70,7 +72,7 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
 
   return (
     <div className="space-y-8">
-      {process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1' && <AdminVerifiedPayments />}
+      {usesCustomerCommerce && <AdminVerifiedPayments />}
 
       {/* 1. Unified Operational Metrics Strip (Apple Mac-style Executive Bar) */}
       <section aria-label="Metrik Operasional" className="rounded-xl border border-border-subtle bg-white shadow-xs">

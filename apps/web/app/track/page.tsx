@@ -1,5 +1,7 @@
 'use client';
 
+import { usesCustomerCommerce } from '../../lib/customer-commerce-mode';
+
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -24,7 +26,7 @@ import { formatRupiah } from '../../lib/data';
 import { CustomerTrack } from '../../components/customer-track';
 
 export default function TrackOrderPage() {
-  if (process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1') {
+  if (usesCustomerCommerce) {
     return <Suspense><CustomerTrack /></Suspense>;
   }
   return (

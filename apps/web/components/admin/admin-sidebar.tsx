@@ -1,5 +1,7 @@
 'use client';
 
+import { usesCustomerCommerce } from '../../lib/customer-commerce-mode';
+
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -100,7 +102,7 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const portal = useAdminPortalContext();
-  const usesDatabaseOrders = process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1';
+  const usesDatabaseOrders = usesCustomerCommerce;
 
   return (
     <>

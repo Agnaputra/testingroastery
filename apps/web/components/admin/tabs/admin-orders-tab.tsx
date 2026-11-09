@@ -1,5 +1,7 @@
 'use client';
 
+import { usesCustomerCommerce } from '../../../lib/customer-commerce-mode';
+
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -113,9 +115,9 @@ export function AdminOrdersTab({
 
   return (
     <div className="space-y-6">
-      {process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1' && <AdminRealOrders />}
+      {usesCustomerCommerce && <AdminRealOrders />}
 
-      {process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE !== '1' && (
+      {!usesCustomerCommerce && (
         <div className="space-y-6">
           {/* Top Control Bar: Search & Status Segments */}
           <div className="rounded-xl border border-border-subtle bg-white p-4 shadow-xs">

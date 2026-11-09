@@ -11,6 +11,36 @@ from app.customer_operations import RoleUpdate, update_role
 
 
 class CustomerCommerceModeTest(unittest.TestCase):
+
+    def test_preview_requires_explicit_database_host(self):
+        from app.customer_orders import is_verified_preview_database
+        from urllib.parse import urlparse
+        with patch.object(settings, "ENVIRONMENT", "preview"), patch.dict(os.environ, {"CUSTOMER_PREVIEW_DATABASE_HOST": ""}):
+            self.assertFalse(is_verified_preview_database(urlparse("postgresql://preview.example.neon.tech/test")))
+        with patch.object(settings, "ENVIRONMENT", "preview"), patch.dict(os.environ, {"CUSTOMER_PREVIEW_DATABASE_HOST": "preview.example.neon.tech"}):
+            self.assertTrue(is_verified_preview_database(urlparse("postgresql://preview.example.neon.tech/test")))
+            self.assertFalse(is_verified_preview_database(urlparse("postgresql://other.example.neon.tech/test")))
+
+    def test_operational_test_flag_cannot_enable_production(self):
+        from app.customer_orders import operational_mode
+        with patch.object(settings, "ENVIRONMENT", "production"), patch.dict(os.environ, {
+            "CUSTOMER_COMMERCE_MODE": "disabled", "CUSTOMER_COMMERCE_TEST_MODE": "1", "CUSTOMER_OPERATIONAL_TEST_MODE": "1",
+        }):
+            self.assertFalse(operational_mode())
+
+    def test_incomplete_production_payment_config_never_opens_database(self):
+        from app.customer_orders import CreateOrder, create_order
+        with patch.object(settings, "ENVIRONMENT", "production"), \
+                patch.dict(os.environ, {"CUSTOMER_PAYMENT_READY": "0"}), \
+                patch("app.customer_orders.require_test_commerce"), \
+                patch("app.customer_orders.connection") as database:
+            for method in ("qris_static", "bca_transfer"):
+                payload = CreateOrder.model_construct(paymentMethod=method)
+                with self.assertRaises(HTTPException) as raised:
+                    create_order(payload, authorization="")
+                self.assertEqual(raised.exception.status_code, 503)
+            database.assert_not_called()
+
     def test_last_admin_cannot_be_demoted(self):
         cursor = MagicMock()
         cursor.fetchone.side_effect = [{"total": 1}, {"role": "admin"}]
@@ -28,7 +58,7 @@ class CustomerCommerceModeTest(unittest.TestCase):
         try:
             settings.ENVIRONMENT = "production"
             settings.DATABASE_URL = "postgresql://example.invalid/coffee"
-            with patch.dict(os.environ, {"CUSTOMER_COMMERCE_MODE": "operational"}, clear=False):
+            with patch.dict(os.environ, {"CUSTOMER_COMMERCE_MODE": "operational", "CUSTOMER_COMMERCE_TEST_MODE": "0"}, clear=False):
                 require_test_commerce()
                 require_tester({"email": "customer@example.com"})
         finally:

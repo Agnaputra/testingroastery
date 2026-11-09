@@ -33,12 +33,15 @@ JAVA_PROVINCES = {
 
 def operational_mode():
     return (os.getenv("CUSTOMER_COMMERCE_MODE") == "operational"
-            or os.getenv("CUSTOMER_OPERATIONAL_TEST_MODE") == "1")
+            or (settings.ENVIRONMENT in {"development", "test", "preview"}
+                and os.getenv("CUSTOMER_COMMERCE_TEST_MODE") == "1"
+                and os.getenv("CUSTOMER_OPERATIONAL_TEST_MODE") == "1"))
 
 
 def is_verified_preview_database(address) -> bool:
     host = address.hostname or ""
-    return settings.ENVIRONMENT == "preview" and host.endswith(".neon.tech")
+    return (settings.ENVIRONMENT == "preview" and host.endswith(".neon.tech")
+            and host == os.getenv("CUSTOMER_PREVIEW_DATABASE_HOST", ""))
 
 
 def require_test_commerce():
@@ -48,7 +51,9 @@ def require_test_commerce():
     testing = (os.getenv("CUSTOMER_COMMERCE_TEST_MODE") == "1"
                and ((settings.ENVIRONMENT in {"development", "test"} and local_database)
                     or (settings.ENVIRONMENT == "preview" and preview_database)))
-    production = operational_mode() and settings.ENVIRONMENT == "production" and not local_database
+    production = (os.getenv("CUSTOMER_COMMERCE_MODE") == "operational"
+                  and settings.ENVIRONMENT == "production" and not local_database
+                  and os.getenv("CUSTOMER_COMMERCE_TEST_MODE") != "1")
     if not testing and not production:
         raise HTTPException(503, "Checkout manual belum tersedia.")
 
@@ -65,7 +70,7 @@ def require_tester(user):
 
 def payment_hours() -> int:
     try:
-        hours = int(os.getenv("CUSTOMER_TEST_PAYMENT_HOURS", "24"))
+        hours = int(os.getenv("CUSTOMER_PAYMENT_HOURS", os.getenv("CUSTOMER_TEST_PAYMENT_HOURS", "24")))
     except ValueError:
         raise HTTPException(503, "Batas waktu pembayaran tidak valid.")
     if not 1 <= hours <= 168:
@@ -82,7 +87,7 @@ def expire_unpaid(cur):
         cur.execute("UPDATE customer_payments SET status='cancelled',updated_at=now() WHERE order_id=%s", (order["id"],))
         for field, old in (("payment", order["payment_status"]), ("fulfillment", "pending")):
             cur.execute("INSERT INTO customer_order_status_history(order_id,actor_role,field,old_status,new_status,reason) "
-                        "VALUES (%s,'system',%s,%s,'cancelled','Batas waktu pembayaran testing berakhir')",
+                        "VALUES (%s,'system',%s,%s,'cancelled','Batas waktu pembayaran berakhir')",
                         (order["id"], field, old))
 
 
@@ -135,7 +140,7 @@ def shipping_options(cur, address, requested, priced):
 
 def cup_grams() -> int:
     try:
-        grams = int(os.getenv("CUSTOMER_TEST_CUP_GRAMS", ""))
+        grams = int(os.getenv("CUSTOMER_CUP_GRAMS", os.getenv("CUSTOMER_TEST_CUP_GRAMS", "")))
     except ValueError:
         raise HTTPException(503, "Konsumsi kopi per sajian belum dikonfigurasi.")
     if not 5 <= grams <= 50:
@@ -234,7 +239,7 @@ def checkout_quote(payload: CheckoutQuote, authorization: str = Header(default="
         options, policy = shipping_options(cur, address, payload.items, lines)
     return {"shippingCost": options[0]["price"], "shippingPolicy": policy,
             "shippingOptions": options, "paymentHours": payment_hours(),
-            "mode": "operational" if operational_mode() else "testing"}
+            "mode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing"}
 
 
 @router.get("/checkout-policy")
@@ -252,7 +257,7 @@ def checkout_policy(addressId: UUID | None = None, authorization: str = Header(d
         else:
             shipping, policy = shipping_cost(), SHIPPING_POLICY
     return {"shippingCost": shipping, "shippingPolicy": policy,
-            "paymentHours": payment_hours(), "mode": "operational" if operational_mode() else "testing"}
+            "paymentHours": payment_hours(), "mode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing"}
 
 
 def order_view(cur, order_id, user_id=None):
@@ -274,7 +279,7 @@ def order_view(cur, order_id, user_id=None):
         "id": str(order["id"]), "createdAt": order["created_at"].isoformat(),
         "customerName": order["display_name"] or "", "customerEmail": order["email"],
         "shipping": order["shipping_snapshot"], "items": lines,
-        "checkoutMode": order["shipping_snapshot"].get("checkoutMode", "testing" if order["shipping_snapshot"].get("shippingPolicy") == SHIPPING_POLICY else "operational"),
+        "checkoutMode": order["shipping_snapshot"].get("checkoutMode", "testing" if order["shipping_snapshot"].get("shippingPolicy") == SHIPPING_POLICY else "unknown"),
         "subtotal": order["subtotal"], "discount": order["discount"],
         "shippingCost": order["shipping_cost"], "total": order["total"],
         "paymentMethod": order["payment_method"], "paymentStatus": order["payment_status"],
@@ -289,6 +294,8 @@ def create_order(payload: CreateOrder, authorization: str = Header(default="")):
     require_test_commerce()
     if payload.paymentMethod not in PAYMENT_METHODS:
         raise HTTPException(422, "Metode pembayaran tidak tersedia.")
+    if settings.ENVIRONMENT == "production" and os.getenv("CUSTOMER_PAYMENT_READY") != "1":
+        raise HTTPException(503, "Konfigurasi pembayaran production belum dikonfirmasi. Pesanan belum dibuat.")
     voucher = payload.voucherCode.strip().upper()
     if voucher and voucher not in {"SEDUPRESISI", "52COFFEE"}:
         raise HTTPException(422, "Voucher tidak valid.")
@@ -331,7 +338,7 @@ def create_order(payload: CreateOrder, authorization: str = Header(default="")):
             "district": address["district"], "postalCode": address["postal_code"],
             "fullAddress": address["full_address"], "notes": address["notes"],
             "shippingPolicy": policy,
-            "checkoutMode": "operational" if operational_mode() else "testing",
+            "checkoutMode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing",
             "courierName": selected["courier"], "courierService": selected["service"],
             "shippingOptionId": selected["id"], "courierDuration": selected["duration"],
         }

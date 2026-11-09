@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { formatRupiah, WHATSAPP_URL } from '../lib/data';
 import { CustomerApiError, customerApi } from '../lib/customer-api';
 import type { CustomerOrder } from '../lib/customer-types';
-import { QrisDynamicCard } from './ui/qris-dynamic-card';
+import { paymentLabels, fulfillmentLabels } from '../lib/customer-order-labels';
 
 type Instructions = {
   orderId: string; total: number; status: string;
@@ -27,9 +27,9 @@ function whatsappText(order: CustomerOrder) {
     `Subtotal: ${formatRupiah(order.subtotal)}`,
     `Ongkir: ${formatRupiah(order.shippingCost)}`,
     `Total: ${formatRupiah(order.total)}`,
-    `Metode Pembayaran: ${order.paymentMethod === 'qris_static' ? 'QRIS Dinamis' : 'Transfer BCA manual'}`,
+    `Metode Pembayaran: ${order.paymentMethod === 'qris_static' ? 'QRIS' : 'Transfer BCA manual'}`,
     'Bukti Pembayaran: Sudah Diunggah',
-    `Status: ${order.paymentStatus === 'paid' ? 'Pembayaran terverifikasi' : 'Menunggu verifikasi'}`,
+    `Status: ${paymentLabels[order.paymentStatus]}`,
     '',
     'Mohon konfirmasi pesanan saya. Terima kasih.',
   ].join('\n');
@@ -102,8 +102,9 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
     <Link href="/account" className="text-sm text-brand-navy underline">Kembali ke akun</Link>
     <p className="mt-6 font-mono text-xs uppercase tracking-widest text-brand-maroon">Order ID</p>
     <h1 className="mt-1 break-all font-editorial text-2xl font-bold text-brand-charcoal sm:text-3xl">{order.id}</h1>
-    <p className="mt-3 text-sm text-on-surface-variant">Pembayaran: <strong>{order.paymentStatus}</strong> · Pengiriman: <strong>{order.fulfillmentStatus}</strong></p>
-    {order.checkoutMode === 'testing' && <p role="alert" className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-brand-charcoal">Order testing lokal. Jangan melakukan transfer dana sungguhan ke QRIS atau rekening yang ditampilkan.</p>}
+    <p className="mt-3 text-sm text-on-surface-variant">Pembayaran: <strong>{paymentLabels[order.paymentStatus]}</strong> · Pengiriman: <strong>{fulfillmentLabels[order.fulfillmentStatus]}</strong></p>
+    {order.checkoutMode === 'unknown' && <p role="alert" className="mt-3 text-sm text-brand-maroon">Mode pesanan lama belum teridentifikasi. Konfirmasikan kepada admin sebelum melakukan pembayaran.</p>}
+    {order.checkoutMode === 'testing'  && <p role="alert" className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-brand-charcoal">Order testing lokal. Jangan melakukan transfer dana sungguhan ke QRIS atau rekening yang ditampilkan.</p>}
     {order.expiresAt && ['pending', 'rejected'].includes(order.paymentStatus) && <p className="mt-2 text-sm text-on-surface-variant">Batas unggah bukti: {new Date(order.expiresAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB.</p>}
     {order.rejectionReason && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-brand-maroon">Bukti ditolak: {order.rejectionReason}</p>}
     <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -116,7 +117,7 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
         <div className="mt-5 space-y-2 border-t pt-4 text-sm">
           <p>Subtotal: {formatRupiah(order.subtotal)}</p>
           <p>Diskon: {formatRupiah(order.discount)}</p>
-          <p>Ongkir{order.checkoutMode === 'testing' ? ' testing' : ''}: {order.checkoutMode === 'operational' && order.shippingCost === 0 ? 'Gratis' : formatRupiah(order.shippingCost)}</p>
+          <p>{order.checkoutMode === 'testing' ? 'Ongkir testing' : 'Ongkos kirim'}: {order.checkoutMode === 'operational' && order.shippingCost === 0 ? 'Gratis' : formatRupiah(order.shippingCost)}</p>
           <p className="text-lg font-bold">Total: {formatRupiah(order.total)}</p>
         </div>
         <h3 className="mt-6 font-semibold">Dikirim ke</h3>
@@ -130,8 +131,8 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
           <h2 className="font-editorial text-xl font-bold">Instruksi pembayaran</h2>
           {!paymentInstructions ? <p className="mt-3 text-sm text-on-surface-variant">{order.paymentStatus === 'paid' ? 'Pembayaran telah disetujui admin.' : order.paymentStatus === 'awaiting_verification' ? 'Bukti sedang menunggu verifikasi admin. Jangan membayar ulang.' : order.paymentStatus === 'cancelled' ? 'Pesanan dibatalkan. Jangan melakukan pembayaran.' : 'Instruksi belum tersedia. Jangan melakukan pembayaran.'}</p>
             : paymentInstructions.method === 'qris_static' ? <div className="mt-4 space-y-4 text-sm">
-              <QrisDynamicCard amount={order.total} orderId={order.id} />
-              <p className="text-center text-xs text-on-surface-variant">Merchant ShopeePay: <strong>{paymentInstructions.merchant}</strong>. Nominal di atas telah terkunci otomatis.</p>
+              <Image src={paymentInstructions.imageUrl} alt="QRIS pembayaran resmi" width={320} height={320} unoptimized className="mx-auto h-auto max-w-full" />
+              <p className="text-center text-xs text-on-surface-variant">Merchant: <strong>{paymentInstructions.merchant}</strong>. Masukkan nominal sesuai total pesanan dan periksa nama merchant sebelum membayar.</p>
             </div> : <div className="mt-4 space-y-3 text-sm">
               <p>Bank: <strong>{paymentInstructions.bank}</strong></p>
               <p>Nomor rekening: <strong className="font-mono text-lg">{paymentInstructions.account}</strong></p>

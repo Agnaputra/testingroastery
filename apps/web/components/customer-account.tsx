@@ -1,4 +1,5 @@
 'use client';
+import { paymentLabels, fulfillmentLabels } from '../lib/customer-order-labels';
 
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -135,7 +136,7 @@ export function CustomerAccount({ googleEnabled }: { googleEnabled: boolean }) {
       <h2 className="font-editorial text-xl font-bold">Pesanan saya</h2>
       {orders.length ? <ul className="mt-4 divide-y">{orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm">
         <div><Link href={`/account/orders/${order.id}`} className="font-semibold text-brand-navy underline">#{order.id.slice(0, 8)}</Link>
-          <p className="text-on-surface-variant">{new Date(order.createdAt).toLocaleDateString('id-ID')} · Pembayaran {order.paymentStatus} · Pengiriman {order.fulfillmentStatus}</p></div>
+          <p className="text-on-surface-variant">{new Date(order.createdAt).toLocaleDateString('id-ID')} · Pembayaran {paymentLabels[order.paymentStatus]} · Pengiriman {fulfillmentLabels[order.fulfillmentStatus]}</p></div>
         <strong>{formatRupiah(order.total)}</strong>
       </li>)}</ul> : <p className="mt-4 text-sm text-on-surface-variant">Belum ada pesanan database.</p>}
     </section>

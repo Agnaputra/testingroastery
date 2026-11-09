@@ -1,4 +1,5 @@
 'use client';
+import { paymentLabels } from '../lib/customer-order-labels';
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -30,7 +31,7 @@ function getStatusBadge(status: string) {
 }
 
 const fulfillmentLabels: Record<CustomerOrder['fulfillmentStatus'], string> = {
-  pending: 'Menunggu Pembayaran',
+  pending: 'Menunggu diproses',
   processing: 'Sedang Diproses',
   roasting: 'Sedang Disangrai & Packing',
   shipped: 'Dalam Pengiriman Kurir',
@@ -243,7 +244,7 @@ export function AdminRealOrders() {
                 <span className="block font-mono text-[10px] uppercase tracking-wider text-on-surface-variant">Pembayaran</span>
                 <div className="mt-1 flex items-center justify-between gap-2">
                   <span className="font-mono text-[11px] font-medium text-brand-charcoal">{order.paymentMethod === 'qris_static' ? 'QRIS' : 'BCA Manual'}</span>
-                  <span className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${getStatusBadge(order.paymentStatus)}`}>{order.paymentStatus === 'paid' ? 'Lunas' : order.paymentStatus}</span>
+                  <span className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${getStatusBadge(order.paymentStatus)}`}>{paymentLabels[order.paymentStatus]}</span>
                 </div>
               </div>
               <div className="rounded-md border border-border-subtle p-2.5">
@@ -260,7 +261,7 @@ export function AdminRealOrders() {
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 pt-2">
               <p className="font-mono text-[10px] text-on-surface-variant">
-                {order.checkoutMode === 'testing' ? 'Order pengujian lokal.' : 'Order terverifikasi.'}
+                {order.checkoutMode === 'testing' ? 'Pesanan pengujian.' : order.checkoutMode === 'unknown' ? 'Mode pesanan lama belum teridentifikasi.' : 'Pesanan operasional; pembayaran mengikuti status verifikasi.'}
               </p>
 
               <div className="flex flex-wrap items-center gap-2">

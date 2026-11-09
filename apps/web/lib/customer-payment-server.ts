@@ -17,27 +17,27 @@ export function manualPaymentConfig() {
     || process.env.CUSTOMER_COMMERCE_TEST_MODE === '1';
   const isLocalDev = process.env.NODE_ENV !== 'production';
   const isPreview = process.env.VERCEL_ENV === 'preview'
-    || process.env.ENVIRONMENT === 'preview'
-    || Boolean(process.env.VERCEL_URL && !process.env.VERCEL_PROJECT_PRODUCTION_URL?.includes(process.env.VERCEL_URL));
+    || process.env.ENVIRONMENT === 'preview';
 
   // Allow in operational mode OR test mode in local/preview environments.
-  const isAllowedEnv = operational || (isTesting && (isLocalDev || isPreview));
+  const isAllowedEnv = (operational && !isTesting && !isPreview) || (!operational && isTesting && (isLocalDev || isPreview));
   if (!isAllowedEnv) return null;
 
   const defaultTestQris = ['apps/web/public/qris.jpg', 'public/qris.jpg'].find((candidate) =>
     existsSync(path.resolve(process.cwd(), candidate))
   ) ?? 'public/qris.jpg';
 
-  const account = process.env.PAYMENT_BCA_ACCOUNT ?? process.env.PAYMENT_TEST_BCA_ACCOUNT ?? (isTesting ? '0392046176' : undefined);
-  const holder = process.env.PAYMENT_BCA_HOLDER ?? process.env.PAYMENT_TEST_BCA_HOLDER ?? (isTesting ? 'Agna Putra Prawira' : undefined);
-  const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? process.env.PAYMENT_TEST_QRIS_MERCHANT ?? (isTesting ? 'NANA STORE - TELECOMMUNICATION' : undefined);
-  const file = process.env.PAYMENT_QRIS_PATH ?? process.env.PAYMENT_TEST_QRIS_PATH ?? (isTesting ? defaultTestQris : undefined);
+  const account = process.env.PAYMENT_BCA_ACCOUNT ?? (!operational ? process.env.PAYMENT_TEST_BCA_ACCOUNT : undefined) ?? (!operational && isTesting ? '0392046176' : undefined);
+  const holder = process.env.PAYMENT_BCA_HOLDER ?? (!operational ? process.env.PAYMENT_TEST_BCA_HOLDER : undefined) ?? (!operational && isTesting ? 'Agna Putra Prawira' : undefined);
+  const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? (!operational ? process.env.PAYMENT_TEST_QRIS_MERCHANT : undefined) ?? (!operational && isTesting ? 'NANA STORE - TELECOMMUNICATION' : undefined);
+  const file = process.env.PAYMENT_QRIS_PATH ?? (!operational ? process.env.PAYMENT_TEST_QRIS_PATH : undefined) ?? (!operational && isTesting ? defaultTestQris : undefined);
 
   if (!account || !/^\d{8,20}$/.test(account) || !holder || !merchant || !file) return null;
   let resolved = path.resolve(process.cwd(), file);
-  if (!existsSync(resolved)) {
+  if (!existsSync(resolved) && !operational) {
     resolved = path.resolve(process.cwd(), defaultTestQris);
   }
+  if (!existsSync(resolved)) return null;
   const allowed = [
     path.resolve(process.cwd(), '.private', 'payment'),
     path.resolve(process.cwd(), 'public'),
@@ -65,7 +65,8 @@ export async function paymentOrder(request: NextRequest, orderId: string): Promi
 }
 
 export async function qrisImage(file: string) {
-  const bytes = await readFile(file);
+  const bytes = await readFile(file).catch(() => null);
+  if (!bytes) return null;
   if (bytes.length < 100 || bytes.length > 2_000_000 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
   return bytes;
 }
