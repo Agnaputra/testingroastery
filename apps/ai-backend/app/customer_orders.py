@@ -20,6 +20,12 @@ from .customer_shipping import packed_items
 
 router = APIRouter(prefix="/api/customer", tags=["customer"])
 PAYMENT_METHODS = {"qris_static", "bca_transfer"}
+
+
+def enabled_payment_methods():
+    default = "" if settings.ENVIRONMENT == "production" else "bca_transfer,qris_static"
+    return sorted(PAYMENT_METHODS.intersection(
+        value.strip() for value in os.getenv("CUSTOMER_PAYMENT_METHODS", default).split(",")))
 SHIPPING_POLICY = "Ongkir flat untuk simulasi lokal; tidak termasuk tarif kurir nyata atau janji pengiriman"
 OPERATIONAL_SHIPPING_POLICY = "Tarif JNE/J&T yang dicatat admin dari kalkulator resmi; diperiksa ulang sebelum kirim"
 MANUAL_SHIPPING_POLICY = "Ongkir luar Jawa dikonfirmasi oleh 52 Coffee sebelum pembayaran. Belum ada pesanan atau tagihan."
@@ -239,7 +245,8 @@ def checkout_quote(payload: CheckoutQuote, authorization: str = Header(default="
         options, policy = shipping_options(cur, address, payload.items, lines)
     return {"shippingCost": options[0]["price"], "shippingPolicy": policy,
             "shippingOptions": options, "paymentHours": payment_hours(),
-            "mode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing"}
+            "mode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing",
+            "paymentMethods": enabled_payment_methods()}
 
 
 @router.get("/checkout-policy")
@@ -257,7 +264,8 @@ def checkout_policy(addressId: UUID | None = None, authorization: str = Header(d
         else:
             shipping, policy = shipping_cost(), SHIPPING_POLICY
     return {"shippingCost": shipping, "shippingPolicy": policy,
-            "paymentHours": payment_hours(), "mode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing"}
+            "paymentHours": payment_hours(), "mode": "operational" if settings.ENVIRONMENT == "production" and operational_mode() else "testing",
+            "paymentMethods": enabled_payment_methods()}
 
 
 def order_view(cur, order_id, user_id=None):
@@ -292,7 +300,7 @@ def order_view(cur, order_id, user_id=None):
 @router.post("/orders", status_code=201)
 def create_order(payload: CreateOrder, authorization: str = Header(default="")):
     require_test_commerce()
-    if payload.paymentMethod not in PAYMENT_METHODS:
+    if payload.paymentMethod not in enabled_payment_methods():
         raise HTTPException(422, "Metode pembayaran tidak tersedia.")
     if settings.ENVIRONMENT == "production" and os.getenv("CUSTOMER_PAYMENT_READY") != "1":
         raise HTTPException(503, "Konfigurasi pembayaran production belum dikonfirmasi. Pesanan belum dibuat.")

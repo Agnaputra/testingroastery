@@ -1,4 +1,4 @@
-import { manualPaymentConfig, qrisImage } from '../../../../lib/customer-payment-server';
+import { availablePaymentMethods } from '../../../../lib/customer-payment-server';
 import { NextRequest, NextResponse } from 'next/server';
 import { ADMIN_SESSION_COOKIE, hasAuthorizedAdminSession } from '../../../../lib/admin-session';
 
@@ -26,8 +26,9 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
     return NextResponse.json({ detail: 'Origin tidak valid.' }, { status: 403 });
   }
   if (path === 'orders' && method === 'POST') {
-    const config = manualPaymentConfig();
-    if (!config || !await qrisImage(config.file)) return NextResponse.json({ detail: 'Konfigurasi pembayaran belum lengkap. Pesanan belum dibuat; hubungi 52 Coffee.' }, { status: 503 });
+    const payload = await request.clone().json().catch(() => null);
+    const methods = await availablePaymentMethods();
+    if (!payload || !methods.includes(payload.paymentMethod)) return NextResponse.json({ detail: 'Metode pembayaran tidak aktif atau konfigurasinya belum lengkap. Pesanan belum dibuat; hubungi 52 Coffee.' }, { status: 503 });
   }
   const admin = path.startsWith('admin/');
   if (admin && !await hasAuthorizedAdminSession(request)) {
@@ -65,6 +66,10 @@ async function proxy(request: NextRequest, context: { params: { path: string[] }
     });
   }
   const data = await upstream.json().catch(() => ({ detail: 'Respons tidak valid.' }));
+  if (upstream.ok && path === 'checkout-policy') {
+    const methods = await availablePaymentMethods();
+    data.paymentMethods = methods.filter((value) => Array.isArray(data.paymentMethods) && data.paymentMethods.includes(value));
+  }
   if (upstream.ok && (path === 'auth/login' || path === 'auth/google')) {
     const { token, ...safeData } = data as { token: string; user?: { role?: string } };
     const response = NextResponse.json(safeData);

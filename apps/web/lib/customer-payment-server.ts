@@ -10,7 +10,14 @@ export interface PaymentOrder {
   total: number;
 }
 
-export function manualPaymentConfig() {
+export type PaymentMethod = PaymentOrder['paymentMethod'];
+
+type BcaConfig = { method: 'bca_transfer'; account: string; holder: string };
+type QrisConfig = { method: 'qris_static'; merchant: string; file: string };
+export function manualPaymentConfig(method: 'bca_transfer'): BcaConfig | null;
+export function manualPaymentConfig(method: 'qris_static'): QrisConfig | null;
+export function manualPaymentConfig(method: PaymentMethod): BcaConfig | QrisConfig | null;
+export function manualPaymentConfig(method: PaymentMethod) {
   const operational = process.env.CUSTOMER_COMMERCE_MODE === 'operational';
   const isTesting = process.env.NEXT_PUBLIC_CUSTOMER_COMMERCE_TEST_MODE === '1'
     || process.env.CUSTOMER_COMMERCE_MODE === 'testing'
@@ -22,17 +29,24 @@ export function manualPaymentConfig() {
   // Allow in operational mode OR test mode in local/preview environments.
   const isAllowedEnv = (operational && !isTesting && !isPreview) || (!operational && isTesting && (isLocalDev || isPreview));
   if (!isAllowedEnv) return null;
+  const enabled = (process.env.CUSTOMER_PAYMENT_METHODS ?? (operational ? '' : 'bca_transfer,qris_static'))
+    .split(',').map((value) => value.trim());
+  if (!enabled.includes(method)) return null;
+
+  if (method === 'bca_transfer') {
+    const account = process.env.PAYMENT_BCA_ACCOUNT ?? (!operational ? process.env.PAYMENT_TEST_BCA_ACCOUNT : undefined) ?? (!operational && isTesting ? '0392046176' : undefined);
+    const holder = process.env.PAYMENT_BCA_HOLDER ?? (!operational ? process.env.PAYMENT_TEST_BCA_HOLDER : undefined) ?? (!operational && isTesting ? 'Agna Putra Prawira' : undefined);
+    return account && /^\d{8,20}$/.test(account) && holder?.trim() ? { method, account, holder } : null;
+  }
 
   const defaultTestQris = ['apps/web/public/qris.jpg', 'public/qris.jpg'].find((candidate) =>
     existsSync(path.resolve(process.cwd(), candidate))
   ) ?? 'public/qris.jpg';
 
-  const account = process.env.PAYMENT_BCA_ACCOUNT ?? (!operational ? process.env.PAYMENT_TEST_BCA_ACCOUNT : undefined) ?? (!operational && isTesting ? '0392046176' : undefined);
-  const holder = process.env.PAYMENT_BCA_HOLDER ?? (!operational ? process.env.PAYMENT_TEST_BCA_HOLDER : undefined) ?? (!operational && isTesting ? 'Agna Putra Prawira' : undefined);
   const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? (!operational ? process.env.PAYMENT_TEST_QRIS_MERCHANT : undefined) ?? (!operational && isTesting ? 'NANA STORE - TELECOMMUNICATION' : undefined);
   const file = process.env.PAYMENT_QRIS_PATH ?? (!operational ? process.env.PAYMENT_TEST_QRIS_PATH : undefined) ?? (!operational && isTesting ? defaultTestQris : undefined);
 
-  if (!account || !/^\d{8,20}$/.test(account) || !holder || !merchant || !file) return null;
+  if (!merchant?.trim() || !file) return null;
   let resolved = path.resolve(process.cwd(), file);
   if (!existsSync(resolved) && !operational) {
     resolved = path.resolve(process.cwd(), defaultTestQris);
@@ -44,7 +58,15 @@ export function manualPaymentConfig() {
     path.resolve(process.cwd(), 'apps', 'web', 'public'),
   ];
   if (!allowed.some((root) => resolved.startsWith(root + path.sep) || resolved === root)) return null;
-  return { account, holder, merchant, file: resolved };
+  return { method, merchant, file: resolved };
+}
+
+export async function availablePaymentMethods(): Promise<PaymentMethod[]> {
+  const methods: PaymentMethod[] = [];
+  if (manualPaymentConfig('bca_transfer')) methods.push('bca_transfer');
+  const qris = manualPaymentConfig('qris_static');
+  if (qris && await qrisImage(qris.file)) methods.push('qris_static');
+  return methods;
 }
 
 export async function paymentOrder(request: NextRequest, orderId: string): Promise<PaymentOrder | null> {

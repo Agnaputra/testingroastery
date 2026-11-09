@@ -31,7 +31,7 @@ class CustomerCommerceModeTest(unittest.TestCase):
     def test_incomplete_production_payment_config_never_opens_database(self):
         from app.customer_orders import CreateOrder, create_order
         with patch.object(settings, "ENVIRONMENT", "production"), \
-                patch.dict(os.environ, {"CUSTOMER_PAYMENT_READY": "0"}), \
+                patch.dict(os.environ, {"CUSTOMER_PAYMENT_READY": "0", "CUSTOMER_PAYMENT_METHODS": "bca_transfer,qris_static"}), \
                 patch("app.customer_orders.require_test_commerce"), \
                 patch("app.customer_orders.connection") as database:
             for method in ("qris_static", "bca_transfer"):
@@ -40,6 +40,27 @@ class CustomerCommerceModeTest(unittest.TestCase):
                     create_order(payload, authorization="")
                 self.assertEqual(raised.exception.status_code, 503)
             database.assert_not_called()
+
+    def test_disabled_qris_cannot_create_production_order(self):
+        from app.customer_orders import CreateOrder, create_order, enabled_payment_methods
+        with patch.object(settings, "ENVIRONMENT", "production"), \
+                patch.dict(os.environ, {"CUSTOMER_PAYMENT_READY": "1", "CUSTOMER_PAYMENT_METHODS": "bca_transfer"}), \
+                patch("app.customer_orders.require_test_commerce"), \
+                patch("app.customer_orders.connection") as database:
+            self.assertEqual(enabled_payment_methods(), ["bca_transfer"])
+            with self.assertRaises(HTTPException) as raised:
+                create_order(CreateOrder.model_construct(paymentMethod="qris_static"), authorization="")
+            self.assertEqual(raised.exception.status_code, 422)
+            database.assert_not_called()
+
+    def test_production_methods_default_disabled_and_preview_retains_both(self):
+        from app.customer_orders import enabled_payment_methods
+        with patch.dict(os.environ):
+            os.environ.pop("CUSTOMER_PAYMENT_METHODS", None)
+            with patch.object(settings, "ENVIRONMENT", "production"):
+                self.assertEqual(enabled_payment_methods(), [])
+            with patch.object(settings, "ENVIRONMENT", "preview"):
+                self.assertEqual(enabled_payment_methods(), ["bca_transfer", "qris_static"])
 
     def test_last_admin_cannot_be_demoted(self):
         cursor = MagicMock()

@@ -1,5 +1,6 @@
 # pyrefly: ignore [missing-import]
 import asyncio
+import os
 import re
 import secrets
 from typing import Any
@@ -62,6 +63,7 @@ def root():
         "status": "online",
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
+        "revision": os.getenv("APP_REVISION") or os.getenv("RAILWAY_GIT_COMMIT_SHA"),
         "docs_url": "/docs",
         "endpoints": {
             "health": "/health",
@@ -81,6 +83,7 @@ def health_check():
         "status": "healthy" if guardrails["runtime_ready"] and retrieval["runtime"] == "pgvector" else "degraded",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
+        "revision": os.getenv("APP_REVISION") or os.getenv("RAILWAY_GIT_COMMIT_SHA"),
         "environment": settings.ENVIRONMENT,
         "database": {
             "reachable": retrieval.get("database_reachable", False),

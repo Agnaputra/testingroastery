@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const config = manualPaymentConfig();
+  const config = manualPaymentConfig('qris_static');
   if (!config) return NextResponse.json({ detail: 'QRIS tidak tersedia.' }, { status: 503 });
   const order = await paymentOrder(request, request.nextUrl.searchParams.get('order') ?? '');
   if (!order || order.paymentMethod !== 'qris_static' || !['pending', 'rejected'].includes(order.paymentStatus)) {

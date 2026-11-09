@@ -17,7 +17,7 @@ function sku(item: { productId: string; slug: string; weightGrams: number; weigh
 
 type ShippingOption = { id: string; courier: string; service: string; duration: string; price: number };
 type CheckoutPolicy = { shippingCost: number; shippingPolicy: string; shippingOptions: ShippingOption[];
-  paymentHours: number; mode: 'testing' | 'operational' };
+  paymentHours: number; mode: 'testing' | 'operational'; paymentMethods: CustomerOrder['paymentMethod'][] };
 
 export function CustomerCheckout() {
   const router = useRouter();
@@ -67,7 +67,10 @@ export function CustomerCheckout() {
     setPolicy(null); setShippingOptionId('');
     setError('');
     customerApi<CheckoutPolicy>('checkout-policy', customerJson('POST', { addressId, items: lines }))
-      .then((result) => { if (active) { setPolicy(result); setShippingOptionId(result.shippingOptions[0]?.id ?? ''); } })
+      .then((result) => { if (active) {
+        setPolicy(result); setShippingOptionId(result.shippingOptions[0]?.id ?? '');
+        setMethod((current) => result.paymentMethods.includes(current) ? current : result.paymentMethods[0] ?? 'bca_transfer');
+      } })
       .catch((cause) => { if (active) setError(cause instanceof Error ? cause.message : 'Ongkir belum tersedia.'); });
     return () => { active = false; };
   }, [user, addressId, lines, unsupportedItems.length]);
@@ -95,7 +98,7 @@ export function CustomerCheckout() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!addressId || !items.length || !policy || !selectedShipping || manualShipping) return;
+    if (!addressId || !items.length || !policy?.paymentMethods.includes(method) || !selectedShipping || manualShipping) return;
     const fingerprint = JSON.stringify({ addressId, lines, method, voucherCode, shippingOptionId });
     if (!attempt.current || attempt.current.fingerprint !== fingerprint) {
       attempt.current = { fingerprint, key: crypto.randomUUID() };
@@ -158,10 +161,11 @@ export function CustomerCheckout() {
           <section className="rounded-xl border border-border-subtle bg-white p-5">
             <h2 className="font-editorial text-xl font-bold">Metode pembayaran manual</h2>
             <div className="mt-4 space-y-3 text-sm">
-              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS</label>
-              <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" checked={method === 'bca_transfer'} onChange={() => setMethod('bca_transfer')} /> Transfer Bank BCA Manual</label>
+              {policy?.paymentMethods.includes('qris_static') && <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" name="paymentMethod" checked={method === 'qris_static'} onChange={() => setMethod('qris_static')} /> QRIS</label>}
+              {policy?.paymentMethods.includes('bca_transfer') && <label className="flex min-h-12 items-center gap-3 cursor-pointer"><input type="radio" name="paymentMethod" checked={method === 'bca_transfer'} onChange={() => setMethod('bca_transfer')} /> Transfer Bank BCA Manual</label>}
+              {policy && !policy.paymentMethods.length && <p role="alert">Metode pembayaran belum tersedia. Hubungi 52 Coffee sebelum memesan.</p>}
             </div>
-            <p className="mt-3 text-sm text-on-surface-variant">Instruksi rekening atau QRIS resmi tersedia pada detail pesanan. Jangan membayar sebelum instruksi ditampilkan.</p>
+            <p className="mt-3 text-sm text-on-surface-variant">Instruksi pembayaran tersedia pada detail pesanan. Jangan membayar sebelum instruksi ditampilkan.</p>
           </section>
         </div>
         <aside className="h-fit rounded-xl border border-border-subtle bg-white p-5">
@@ -188,7 +192,7 @@ export function CustomerCheckout() {
           {error && <p role="alert" className="mt-4 text-sm text-brand-maroon">{error}</p>}
           {!addressId && <p className="mt-4 text-xs text-on-surface-variant">Simpan alamat pengiriman agar tombol pembuatan pesanan aktif.</p>}
           {manualShipping && unsupportedItems.length === 0 ? <a href={`${WHATSAPP_URL}?text=${encodeURIComponent(shippingRequest)}`} target="_blank" rel="noopener noreferrer" className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-brand-charcoal px-4 text-center font-bold text-white">Minta konfirmasi ongkir via WhatsApp</a>
-            : <button type="submit" disabled={busy || !addressId || !selectedShipping || unsupportedItems.length > 0 || manualShipping} className="mt-5 min-h-12 w-full rounded-xl bg-brand-charcoal px-4 font-bold text-white disabled:opacity-50">
+            : <button type="submit" disabled={busy || !addressId || !selectedShipping || !policy?.paymentMethods.includes(method) || unsupportedItems.length > 0 || manualShipping} className="mt-5 min-h-12 w-full rounded-xl bg-brand-charcoal px-4 font-bold text-white disabled:opacity-50">
               {manualShipping ? 'Perbaiki keranjang dahulu' : busy ? 'Menyimpan pesanan…' : 'Buat pesanan'}
             </button>}
         </aside>
