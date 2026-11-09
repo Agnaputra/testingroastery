@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
@@ -84,8 +84,21 @@ const SIZE_OPTIONS: Array<{ label: '250 g' | '500 g' | '1 kg'; grams: BlendWeigh
   { label: '1 kg', grams: 1000 },
 ];
 
-export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mode?: 'lab' | 'partnership'; embedded?: boolean }) {
+export function BlendBuilderExperience({ mode = 'lab', embedded = false, guided = false, onStepChange }: { mode?: 'lab' | 'partnership'; embedded?: boolean; guided?: boolean; onStepChange?: (step: number) => void }) {
   const { authority, refresh: refreshPublication } = useCatalogPublication();
+  const [step, setStep] = useState(0);
+  const [furthestStep, setFurthestStep] = useState(0);
+  const workspaceHeading = useRef<HTMLHeadingElement>(null);
+  function goToStep(next: number) {
+    setStep(next);
+    onStepChange?.(next);
+    setFurthestStep((current) => Math.max(current, next));
+    requestAnimationFrame(() => {
+      workspaceHeading.current?.focus({ preventScroll: true });
+      workspaceHeading.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    });
+  }
+
   const activeBeans = useMemo(() => authority?.status === 'verified'
     ? authority.products.filter((product) => product.category === 'espresso' && !product.isSoldOut).map(toBlendComponent)
     : [], [authority]);
@@ -288,6 +301,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
     operationalDays,
     directCostPerCup: hppSimulation.directCostPerCup,
     beanKg: hppSimulation.beanKg,
+    monthlyContribution: hppSimulation.monthlyContribution,
   } : null;
 
   const handleRatioAChange = (val: number) => {
@@ -425,47 +439,42 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
     }
   };
 
-  if (!authority) return <p role="status" className="py-8 text-sm text-on-surface-variant">Memuat pilihan beans dan harga katalog...</p>;
+  const guidedHeader = guided && <>
+    <nav aria-label="Langkah konsultasi" className="guided-stepper">
+      {['Racikan', 'Hitung HPP', 'Konsultasi'].map((label, index) => (
+        <button key={label} type="button" aria-current={step === index ? 'step' : undefined} disabled={index > furthestStep} onClick={() => goToStep(index)}>
+          <span aria-hidden="true">{index < step ? '✓' : index + 1}</span> {label}
+          {index < step && <span className="sr-only"> (selesai)</span>}
+        </button>
+      ))}
+    </nav>
+    <h2 ref={workspaceHeading} tabIndex={-1} className="guided-heading">{['Pilih beans & atur racikan', 'Parameter & estimasi biaya', 'Siapkan brief konsultasi'][step]}</h2>
+  </>;
+
+  if (!authority) return <div className="consultation-experience">{guidedHeader}<p role="status" className="py-8 text-sm text-on-surface-variant">Memuat pilihan beans dan harga katalog...</p></div>;
 
   if (authority.status !== 'verified' || activeBeans.length < 2) {
     if (isPartnership) {
-      return <div className="space-y-10">
-        <section id="pricing-calculator" className="scroll-mt-32 rounded-xl border border-border-subtle bg-white p-6 sm:p-8" aria-labelledby="pricing-unavailable-title">
+      return <div className="consultation-experience space-y-10">
+        {guidedHeader}
+        <section hidden={guided && step === 2} id="pricing-calculator" className="scroll-mt-32 rounded-xl border border-border-subtle bg-white p-6 sm:p-8" aria-labelledby="pricing-unavailable-title">
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-brand-maroon">Build Your Own Blend / Kalkulator HPP</p>
           <h3 id="pricing-unavailable-title" className="mt-3 font-editorial text-2xl font-bold text-brand-charcoal">Data katalog belum tersedia.</h3>
           <p role="status" className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">Pemilihan beans dan estimasi HPP membutuhkan harga katalog yang terverifikasi. Anda tetap dapat mengirim brief tanpa estimasi.</p>
           <button type="button" onClick={() => void refreshPublication()} className="mt-5 min-h-11 rounded-md border border-brand-navy px-5 text-sm font-bold text-brand-navy hover:bg-brand-mist">Coba muat ulang katalog</button>
+          {guided && <button type="button" onClick={() => goToStep(2)} className="btn-primary mt-5 sm:ml-4">Konsultasi tanpa estimasi</button>}
         </section>
-        <section id="consultation-form" className="scroll-mt-40 space-y-6 border-t border-border-subtle pt-10">
-          <SectionIntro kicker="Mulai diskusi" title="Konsultasikan kebutuhan bisnismu" description="Ceritakan kebutuhan pasokan atau karakter kopi yang Anda cari. Tim kami akan menindaklanjuti melalui WhatsApp." />
-          <PartnershipBlendBrief />
+        <section hidden={guided && step !== 2} id="consultation-form" className="scroll-mt-40 space-y-6 border-t border-border-subtle pt-10">
+          {!guided && <SectionIntro kicker="Mulai diskusi" title="Konsultasikan kebutuhan bisnismu" description="Ceritakan kebutuhan pasokan atau karakter kopi yang Anda cari. Tim kami akan menindaklanjuti melalui WhatsApp." />}
+          <PartnershipBlendBrief compactPreview={guided} />
         </section>
+        {guided && step === 2 && <div className="guided-navigation"><button type="button" className="btn-secondary" onClick={() => goToStep(0)}>← Kembali</button></div>}
       </div>;
     }
     return <div className="rounded-xl border border-border-subtle bg-white p-6 text-sm text-on-surface-variant" role="status">Pilihan beans belum tersedia dari katalog. <button type="button" onClick={() => void refreshPublication()} className="min-h-11 font-bold text-brand-navy underline">Coba muat ulang</button></div>;
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-      className={isEmbedded ? undefined : 'page-shell'}
-    >
-      {!isEmbedded && (
-        <PageIntro
-          className="blend-hero"
-          tone="dark"
-          compact
-          kicker="Peracik blend / BYOB"
-          icon={<Sparkles size={14} />}
-          title="Racik profil kopi Anda sendiri."
-          description="Pilih dua atau tiga beans espresso, atur komposisinya, lalu baca perubahan karakter rasa dan harga kemasan secara langsung."
-        />
-      )}
-
-      <div className={isEmbedded ? 'space-y-10' : 'site-container page-section space-y-10'}>
-        {/* Packaging Size Selector on Top (Highlighted) */}
+  const sizeSelector = (
         <section aria-labelledby="blend-size-heading" className="rounded-xl bg-brand-charcoal p-5 text-white sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -475,7 +484,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               <h2 id="blend-size-heading" className="font-headline text-xl font-semibold text-white mt-0.5">
                 Pilih Ukuran Kemasan
               </h2>
-              <p className="text-xs text-white/70">Harga mengikuti varian kemasan katalog setiap beans dan diperbarui langsung dari proporsi racikan.</p>
+              {!isPartnership && <p className="text-xs text-white/70">Harga mengikuti varian kemasan katalog setiap beans dan diperbarui langsung dari proporsi racikan.</p>}
             </div>
             <div className="flex flex-wrap gap-2.5" role="group" aria-label="Ukuran kemasan BYOB">
               {SIZE_OPTIONS.map(({ label, grams }) => (
@@ -497,11 +506,81 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
             </div>
           </div>
         </section>
+  );
+
+  const priceDisplay = (
+            <div className="consultation-price editorial-workspace space-y-3.5 p-5">
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <span className="text-[10px] font-mono text-brand-maroon-dark uppercase font-black tracking-wider block">
+                    HARGA RACIKAN {selectedSize}
+                  </span>
+                  <div className="font-mono text-3xl sm:text-4xl font-black text-brand-charcoal mt-0.5">
+                    {formatRupiah(activePrice)}
+                  </div>
+                </div>
+                <div className="text-right font-mono text-xs text-on-surface-variant">
+                  <span>Setara: </span>
+                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
+                  <span> / kg</span>
+                </div>
+              </div>
+
+              {/* Formula Breakdown */}
+              <details open={!guided} className="guided-price-details p-3.5 rounded-xl bg-surface border border-border-subtle text-[11px] font-mono space-y-2 text-on-surface">
+                <summary hidden={!guided}>Rincian biaya</summary>
+                <div className="flex justify-between items-center text-on-surface">
+                  <span>• {ratioA}% {componentA.name.split(' ')[0]} ({formatRupiah(componentA.prices[selectedWeight])}/{selectedSize})</span>
+                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costA)}</span>
+                </div>
+                <div className="flex justify-between items-center text-on-surface">
+                  <span>• {ratioB}% {componentB.name.split(' ')[0]} ({formatRupiah(componentB.prices[selectedWeight])}/{selectedSize})</span>
+                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costB)}</span>
+                </div>
+                {hasComponentC && (
+                  <div className="flex justify-between items-center text-on-surface">
+                    <span>• {ratioC}% {componentC.name.split(' ')[0]} ({formatRupiah(componentC.prices[selectedWeight])}/{selectedSize})</span>
+                    <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costC)}</span>
+                  </div>
+                )}
+                <div className="border-t-2 border-gray-200 pt-2 flex justify-between items-center font-black text-xs text-brand-charcoal">
+                  <span>Total harga racikan {selectedSize}</span>
+                  <span>{formatRupiah(activePrice)}</span>
+                </div>
+              </details>
+            </div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35 }}
+      className={isEmbedded ? undefined : 'page-shell'}
+    >
+      {!isEmbedded && (
+        <PageIntro
+          className="blend-hero"
+          tone="dark"
+          compact
+          kicker="Peracik blend / BYOB"
+          icon={<Sparkles size={14} />}
+          title="Racik profil kopi Anda sendiri."
+          description="Pilih dua atau tiga beans espresso, atur komposisinya, lalu baca perubahan karakter rasa dan harga kemasan secara langsung."
+        />
+      )}
+
+      <div className={isEmbedded ? (isPartnership ? `consultation-experience${guided ? '' : ' space-y-10'}` : 'space-y-10') : 'site-container page-section space-y-10'}>
+        {guidedHeader}
+        {/* Packaging Size Selector on Top (Highlighted) */}
+        {!isPartnership && sizeSelector}
 
         {/* 2-COLUMN MAIN BYOB SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+        <div hidden={guided && step !== 0} className="consultation-builder-grid grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
           {/* LEFT: Dynamic Bean Pouch Showcase + Live Flavor Radar Chart */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="consultation-results lg:col-span-5 space-y-6">
+            {!isPartnership && (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -628,6 +707,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 </div>
               </div>
             </motion.div>
+            )}
 
             {/* DYNAMIC SENSORY RADAR CARD */}
             <motion.div
@@ -641,12 +721,12 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-brand-maroon" />
                   <h3 className="font-editorial text-base font-extrabold text-brand-charcoal">
-                    Dynamic Real Time Taste
+                    {isPartnership ? 'Profil rasa racikan' : 'Dynamic Real Time Taste'}
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full bg-brand-charcoal/10 text-brand-charcoal">
+                {!isPartnership && <span className="text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-full bg-brand-charcoal/10 text-brand-charcoal">
                   Diperbarui langsung
-                </span>
+                </span>}
               </div>
 
               <FlavorRadarChart
@@ -654,7 +734,8 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 size={270}
                 color="maroon"
                 showLabels={true}
-                showBars={true}
+                showBars={!guided}
+                surface={guided ? 'plain' : 'card'}
               />
 
               <div className="border-y border-black/10 py-3">
@@ -666,6 +747,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 <span className="font-extrabold text-brand-charcoal block mb-0.5">Catatan Karakter Sangrai:</span>
                 {roastCharacter}
               </div>
+            {isPartnership && priceDisplay}
             </motion.div>
           </div>
 
@@ -675,10 +757,28 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}
-            className="scroll-mt-28 lg:col-span-7 space-y-6"
+            className={`consultation-controls scroll-mt-28 lg:col-span-7${guided ? '' : ' space-y-6'}`}
           >
+          {guided && <section className="guided-beans" aria-label="Pilih beans">
+            <p>Pilih beans · A / B / C</p>
+            <div className="guided-bean-options">
+              {([
+                { label: 'A', bean: componentA, change: setComponentA },
+                { label: 'B', bean: componentB, change: setComponentB },
+                ...(hasComponentC ? [{ label: 'C', bean: componentC, change: setComponentC }] : []),
+              ]).map(({ label, bean, change }) => <label key={label} className="guided-bean-option">
+                <Image src={bean.image} alt={bean.name} width={100} height={100} />
+                <span>Bean {label}</span>
+                <select aria-label={`Pilih produk Bean ${label}`} value={bean.id} onChange={(event) => {
+                  const found = activeBeans.find((option) => option.id === event.target.value);
+                  if (found) change(found);
+                }}>{activeBeans.map((option) => <option key={option.id} value={option.id}>{option.name} — {formatRupiah(option.prices[selectedWeight])} / {selectedSize}</option>)}</select>
+              </label>)}
+              {!hasComponentC && <button type="button" className="guided-add-bean" onClick={handleAddComponentC}><Plus size={18} aria-hidden="true" /> Bean C (opsional)</button>}
+            </div>
+          </section>}
             {/* Dual/Triple Ratio Progress Bar */}
-            <div id="blend-development" className="scroll-mt-28 space-y-2.5 pt-2">
+            <div id="blend-development" className="consultation-ratios scroll-mt-28 space-y-2.5 pt-2">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="font-extrabold text-brand-charcoal uppercase tracking-wider">
                   Rasio Racikan Blend
@@ -688,7 +788,19 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 </span>
               </div>
 
-              <div className="w-full h-10 rounded-full overflow-hidden flex bg-gray-200 border-2 border-gray-300 relative shadow-inner">
+              {isPartnership && <div className="consultation-ratio-cards">
+                {([
+                  { label: 'A', bean: componentA, ratio: ratioA, change: handleRatioAChange, accent: 'maroon' },
+                  { label: 'B', bean: componentB, ratio: ratioB, change: handleRatioBChange, accent: 'charcoal' },
+                  ...(hasComponentC ? [{ label: 'C', bean: componentC, ratio: ratioC, change: handleRatioCChange, accent: 'navy' }] : []),
+                ]).map(({ label, bean, ratio, change, accent }) => <div key={label} className={`consultation-ratio-card consultation-ratio-card--${accent}`}>
+                  <div className="consultation-ratio-heading"><span className="font-mono font-bold">{label}</span><span className="min-w-0 flex-1">{bean.name}</span><label className="font-mono font-bold"><span className="sr-only">Persentase Bean {label}</span><input type="number" min={hasComponentC ? 5 : 10} max="90" value={ratio} onChange={(event) => change(Number(event.target.value))} className="w-12 bg-transparent text-right" />%</label></div>
+                  <input aria-label={`Atur persentase Bean ${label}`} type="range" min={hasComponentC ? 5 : 10} max="90" step="1" value={ratio} onChange={(event) => change(Number(event.target.value))} className="w-full accent-brand-maroon" />
+                  {label === 'C' && <button type="button" onClick={handleRemoveComponentC} className="text-xs font-bold text-brand-maroon underline underline-offset-4">Hapus Bean C</button>}
+                </div>)}
+              </div>}
+
+              {!isPartnership && <div className="w-full h-10 rounded-full overflow-hidden flex bg-gray-200 border-2 border-gray-300 relative shadow-inner">
                 <motion.div
                   className="bg-brand-maroon h-full flex items-center justify-center font-mono text-xs font-extrabold text-white transition-all duration-300 shadow-sm"
                   style={{ width: `${ratioA}%` }}
@@ -711,7 +823,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                     C ({ratioC}%)
                   </motion.div>
                 )}
-              </div>
+              </div>}
 
               {/* Quick Blend Ratio Presets */}
               {!hasComponentC ? (
@@ -770,17 +882,20 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               )}
             </div>
 
-            <p className="text-xs leading-5 text-on-surface-variant">Pilihan hanya mengambil produk <strong>Espresso Based</strong> yang dipublikasikan. Field Species mendukung Arabica, Robusta, Liberica, dan Excelsa; opsi aktual mengikuti isi katalog.</p>
+            {!isPartnership && <p className="text-xs leading-5 text-on-surface-variant">Pilihan hanya mengambil produk <strong>Espresso Based</strong> yang dipublikasikan. Field Species mendukung Arabica, Robusta, Liberica, dan Excelsa; opsi aktual mengikuti isi katalog.</p>}
 
             {/* Component A Selector */}
-            <div className="space-y-3">
+            <div hidden={guided} className="consultation-beans space-y-3">
+              {isPartnership && <h3 className="font-editorial text-xl font-bold text-brand-charcoal">Pilih beans espresso</h3>}
               <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-maroon transition-colors shadow-sm space-y-3">
+                {isPartnership && <div className="consultation-bean-detail"><Image src={componentA.image} alt={componentA.name} width={104} height={104} className="consultation-bean-image" /><div><p className="consultation-bean-kicker">Bean A · {componentA.species}</p><p className="consultation-bean-name">{componentA.name}</p><p className="consultation-bean-meta">{[componentA.region, componentA.process].filter(Boolean).join(' · ')}</p><p className="consultation-bean-notes">{componentA.notes.join(' · ')}</p><p className="consultation-bean-price">{formatRupiah(componentA.prices[selectedWeight])} / {selectedSize}</p></div></div>}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
                     <div className="w-8 h-8 rounded-full bg-brand-maroon text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                       A
                     </div>
                     <select
+                      aria-label="Pilih produk Bean A"
                       value={componentA.id}
                       onChange={(e) => {
                         const found = activeBeans.find((b) => b.id === e.target.value);
@@ -797,6 +912,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                   </div>
                   <div className="flex items-center gap-1 pl-3 border-l-2 border-gray-200 shrink-0">
                     <input
+                      aria-label="Persentase Bean A"
                       type="number"
                       min="5"
                       max="90"
@@ -809,6 +925,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 </div>
                 <div className="flex items-center gap-3 pt-1">
                   <input
+                    aria-label="Atur persentase Bean A"
                     type="range"
                     min="5"
                     max="90"
@@ -822,12 +939,14 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
 
               {/* Component B Selector */}
               <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal transition-colors shadow-sm space-y-3">
+                {isPartnership && <div className="consultation-bean-detail"><Image src={componentB.image} alt={componentB.name} width={104} height={104} className="consultation-bean-image" /><div><p className="consultation-bean-kicker">Bean B · {componentB.species}</p><p className="consultation-bean-name">{componentB.name}</p><p className="consultation-bean-meta">{[componentB.region, componentB.process].filter(Boolean).join(' · ')}</p><p className="consultation-bean-notes">{componentB.notes.join(' · ')}</p><p className="consultation-bean-price">{formatRupiah(componentB.prices[selectedWeight])} / {selectedSize}</p></div></div>}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
                     <div className="w-8 h-8 rounded-full bg-brand-charcoal text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                       B
                     </div>
                     <select
+                      aria-label="Pilih produk Bean B"
                       value={componentB.id}
                       onChange={(e) => {
                         const found = activeBeans.find((b) => b.id === e.target.value);
@@ -844,6 +963,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                   </div>
                   <div className="flex items-center gap-1 pl-3 border-l-2 border-gray-200 shrink-0">
                     <input
+                      aria-label="Persentase Bean B"
                       type="number"
                       min="5"
                       max="90"
@@ -856,6 +976,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                 </div>
                 <div className="flex items-center gap-3 pt-1">
                   <input
+                    aria-label="Atur persentase Bean B"
                     type="range"
                     min="5"
                     max="90"
@@ -870,12 +991,14 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               {/* Component C Selector */}
               {hasComponentC && (
                 <div className="p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-navy transition-colors shadow-sm space-y-3">
+                  {isPartnership && <div className="consultation-bean-detail"><Image src={componentC.image} alt={componentC.name} width={104} height={104} className="consultation-bean-image" /><div><p className="consultation-bean-kicker">Bean C · {componentC.species}</p><p className="consultation-bean-name">{componentC.name}</p><p className="consultation-bean-meta">{[componentC.region, componentC.process].filter(Boolean).join(' · ')}</p><p className="consultation-bean-notes">{componentC.notes.join(' · ')}</p><p className="consultation-bean-price">{formatRupiah(componentC.prices[selectedWeight])} / {selectedSize}</p></div></div>}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
                       <div className="w-8 h-8 rounded-full bg-brand-navy text-white font-mono text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                         C
                       </div>
                       <select
+                        aria-label="Pilih produk Bean C"
                         value={componentC.id}
                         onChange={(e) => {
                           const found = activeBeans.find((b) => b.id === e.target.value);
@@ -892,6 +1015,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                     </div>
                     <div className="flex items-center gap-2 pl-3 border-l-2 border-gray-200 shrink-0">
                       <input
+                        aria-label="Persentase Bean C"
                         type="number"
                         min="5"
                         max="90"
@@ -912,6 +1036,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
                   </div>
                   <div className="flex items-center gap-3 pt-1">
                     <input
+                      aria-label="Atur persentase Bean C"
                       type="range"
                       min="5"
                       max="90"
@@ -938,51 +1063,82 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
             </div>
 
             {/* Price Display with Live Formula */}
-            <div className="editorial-workspace space-y-3.5 p-5">
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-[10px] font-mono text-brand-maroon-dark uppercase font-black tracking-wider block">
-                    HARGA RACIKAN {selectedSize}
-                  </span>
-                  <div className="font-mono text-3xl sm:text-4xl font-black text-brand-charcoal mt-0.5">
-                    {formatRupiah(activePrice)}
-                  </div>
-                </div>
-                <div className="text-right font-mono text-xs text-on-surface-variant">
-                  <span>Setara: </span>
-                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.blendedPricePerKg)}</span>
-                  <span> / kg</span>
-                </div>
-              </div>
+            {isPartnership && sizeSelector}
 
-              {/* Formula Breakdown */}
-              <div className="p-3.5 rounded-xl bg-surface border border-border-subtle text-[11px] font-mono space-y-2 text-on-surface">
-                <div className="flex justify-between items-center text-on-surface">
-                  <span>• {ratioA}% {componentA.name.split(' ')[0]} ({formatRupiah(componentA.prices[selectedWeight])}/{selectedSize})</span>
-                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costA)}</span>
-                </div>
-                <div className="flex justify-between items-center text-on-surface">
-                  <span>• {ratioB}% {componentB.name.split(' ')[0]} ({formatRupiah(componentB.prices[selectedWeight])}/{selectedSize})</span>
-                  <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costB)}</span>
-                </div>
-                {hasComponentC && (
-                  <div className="flex justify-between items-center text-on-surface">
-                    <span>• {ratioC}% {componentC.name.split(' ')[0]} ({formatRupiah(componentC.prices[selectedWeight])}/{selectedSize})</span>
-                    <span className="font-extrabold text-brand-charcoal">{formatRupiah(priceCalculation.costC)}</span>
-                  </div>
+            {!isPartnership && priceDisplay}
+
+            {!isPartnership && <>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isAdded}
+                className="flex-1 bg-brand-charcoal hover:bg-brand-charcoal/90 text-white font-mono font-extrabold text-sm py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {isAdded ? (
+                  <>
+                    <Check className="w-5 h-5 text-emerald-300" />
+                    <span>Tersimpan di Keranjang!</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>Masukkan ke Keranjang</span>
+                  </>
                 )}
-                <div className="border-t-2 border-gray-200 pt-2 flex justify-between items-center font-black text-xs text-brand-charcoal">
-                  <span>Total harga racikan {selectedSize}</span>
-                  <span>{formatRupiah(activePrice)}</span>
-                </div>
-              </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                className="px-6 py-4 rounded-xl border-2 border-gray-200 bg-white text-brand-charcoal hover:border-brand-charcoal transition-colors flex items-center gap-2 text-xs font-mono font-extrabold shadow-sm cursor-pointer"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>{copied ? 'Tersalin!' : 'Bagikan'}</span>
+              </button>
             </div>
 
+            {/* Dark Espresso Roast Note Under Button */}
+            <p className="text-center font-mono text-[11px] text-on-surface-variant pt-1">
+              Semua racikan disangrai dengan profil <strong>Dark Espresso Roast</strong> untuk ekstraksi crema tebal, rasa manis seimbang, dan karakter bold.
+            </p>
+            </>}
+
+            {/* Our Picks Preset */}
+            <details open={!guided} className="consultation-presets space-y-2.5 pt-2">
+              <summary className="text-xs font-mono text-brand-charcoal uppercase font-extrabold tracking-wider">
+                Rekomendasi Racikan Roaster 52 Coffee
+              </summary>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => applyPreset(activeBeans[0]?.id || '', activeBeans[1]?.id || '', 70, 30)}
+                  className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
+                >
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {activeBeans[0]?.name} + {activeBeans[1]?.name}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: activeBeans[0]?.notes || [] }, { ratio: 30, notes: activeBeans[1]?.notes || [] }], 3).join(' · ')}</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: activeBeans[0]?.prices || componentA.prices }, { ratio: 30, prices: activeBeans[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyPreset(activeBeans[0]?.id || '', activeBeans[2]?.id || activeBeans[1]?.id || '', 70, 30)}
+                  className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
+                >
+                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {activeBeans[0]?.name} + {activeBeans[2]?.name || activeBeans[1]?.name}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: activeBeans[0]?.notes || [] }, { ratio: 30, notes: activeBeans[2]?.notes || activeBeans[1]?.notes || [] }], 3).join(' · ')}</div>
+                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: activeBeans[0]?.prices || componentA.prices }, { ratio: 30, prices: activeBeans[2]?.prices || activeBeans[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
+                </button>
+              </div>
+            </details>
+          </motion.div>
+        </div>
+
+            {guided && step === 1 && !hppSimulation && <p role="status">Harga racikan belum tersedia. Pilih produk dengan harga tersedia atau lanjutkan konsultasi tanpa estimasi.</p>}
             {isPartnership && hppSimulation && (
-              <section id="pricing-calculator" aria-labelledby="hpp-heading" className="scroll-mt-28 rounded-xl border border-border-subtle bg-white p-5 sm:p-6"><span id="hpp-racikan" className="sr-only" />
-                <div className="border-b border-black/10 pb-4">
-                  <h2 id="hpp-heading" className="font-headline text-lg font-semibold text-brand-charcoal">Kalkulator HPP &amp; Margin</h2>
-                  <p className="mt-1 text-xs leading-5 text-on-surface-variant">Gunakan racikan BYOB atau produk retail sebagai basis perhitungan HPP, kebutuhan bahan baku, dan margin kontribusi.</p>
+              <section hidden={guided && step !== 1} id="pricing-calculator" aria-labelledby="hpp-heading" className="consultation-hpp scroll-mt-28 rounded-xl border border-border-subtle bg-white p-5 sm:p-6"><span id="hpp-racikan" className="sr-only" />
+                <div hidden={guided} className="border-b border-black/10 pb-4">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-brand-maroon">02 / Kalkulator HPP &amp; Margin</p>
+                  <h2 id="hpp-heading" className="mt-3 font-headline text-3xl font-semibold text-brand-charcoal">Kalkulator HPP &amp; Margin</h2>
                 </div>
 
                 <fieldset className="mt-5">
@@ -1058,79 +1214,15 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               </section>
             )}
 
-            {!isPartnership && <>
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={isAdded}
-                className="flex-1 bg-brand-charcoal hover:bg-brand-charcoal/90 text-white font-mono font-extrabold text-sm py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {isAdded ? (
-                  <>
-                    <Check className="w-5 h-5 text-emerald-300" />
-                    <span>Tersimpan di Keranjang!</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>Masukkan ke Keranjang</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleShare}
-                className="px-6 py-4 rounded-xl border-2 border-gray-200 bg-white text-brand-charcoal hover:border-brand-charcoal transition-colors flex items-center gap-2 text-xs font-mono font-extrabold shadow-sm cursor-pointer"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>{copied ? 'Tersalin!' : 'Bagikan'}</span>
-              </button>
-            </div>
-
-            {/* Dark Espresso Roast Note Under Button */}
-            <p className="text-center font-mono text-[11px] text-on-surface-variant pt-1">
-              Semua racikan disangrai dengan profil <strong>Dark Espresso Roast</strong> untuk ekstraksi crema tebal, rasa manis seimbang, dan karakter bold.
-            </p>
-            </>}
-
-            {/* Our Picks Preset */}
-            <div className="space-y-2.5 pt-2">
-              <span className="text-xs font-mono text-brand-charcoal uppercase font-extrabold block tracking-wider">
-                Rekomendasi Racikan Roaster 52 Coffee
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => applyPreset(activeBeans[0]?.id || '', activeBeans[1]?.id || '', 70, 30)}
-                  className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
-                >
-                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {activeBeans[0]?.name} + {activeBeans[1]?.name}</div>
-                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: activeBeans[0]?.notes || [] }, { ratio: 30, notes: activeBeans[1]?.notes || [] }], 3).join(' · ')}</div>
-                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: activeBeans[0]?.prices || componentA.prices }, { ratio: 30, prices: activeBeans[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyPreset(activeBeans[0]?.id || '', activeBeans[2]?.id || activeBeans[1]?.id || '', 70, 30)}
-                  className="text-left p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:bg-surface transition-all font-mono text-xs font-semibold text-on-surface shadow-sm cursor-pointer"
-                >
-                  <div className="font-extrabold text-brand-charcoal text-sm">70/30 {activeBeans[0]?.name} + {activeBeans[2]?.name || activeBeans[1]?.name}</div>
-                  <div className="text-[11px] text-on-surface-variant mt-1 font-medium">{combineBlendTastingNotes([{ ratio: 70, notes: activeBeans[0]?.notes || [] }, { ratio: 30, notes: activeBeans[2]?.notes || activeBeans[1]?.notes || [] }], 3).join(' · ')}</div>
-                  <div className="text-xs font-extrabold text-brand-maroon-dark mt-1.5">{formatRupiah(calculateBlendPackagePrice([{ ratio: 70, prices: activeBeans[0]?.prices || componentA.prices }, { ratio: 30, prices: activeBeans[2]?.prices || activeBeans[1]?.prices || componentB.prices }], selectedWeight))} / {selectedSize}</div>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
         {/* DETAILS COMPARISON TABLE */}
-        <section id="tasting-adjustment" className="scroll-mt-28 space-y-4 pt-8 border-t-2 border-gray-200">
+        <div hidden={guided && step !== 0}><details open={!guided}><summary hidden={!guided} className="guided-specs-summary">Spesifikasi lengkap racikan</summary><section id="tasting-adjustment" className="scroll-mt-28 space-y-4 pt-8 border-t-2 border-gray-200">
+          {isPartnership && <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-brand-maroon">03 / Spesifikasi Komponen</p>}
           <h2 className="font-editorial text-2xl font-bold text-brand-charcoal">
             Spesifikasi Komponen Racikan
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-sans">
+          {isPartnership && <div className="overflow-x-auto border border-border-subtle bg-white"><table className="w-full min-w-[590px] text-left text-sm"><thead className="bg-brand-mist/40 font-mono text-xs uppercase text-brand-navy"><tr><th className="p-4">Informasi</th><th className="p-4">Komponen A</th><th className="p-4">Komponen B</th>{hasComponentC && <th className="p-4">Komponen C</th>}</tr></thead><tbody className="divide-y divide-border-subtle text-brand-charcoal"><tr><th className="p-4">Produk</th><td className="p-4">{componentA.name}</td><td className="p-4">{componentB.name}</td>{hasComponentC && <td className="p-4">{componentC.name}</td>}</tr><tr><th className="p-4">Proses</th><td className="p-4">{componentA.process}</td><td className="p-4">{componentB.process}</td>{hasComponentC && <td className="p-4">{componentC.process}</td>}</tr><tr><th className="p-4">Region</th><td className="p-4">{componentA.region}</td><td className="p-4">{componentB.region}</td>{hasComponentC && <td className="p-4">{componentC.region}</td>}</tr><tr><th className="p-4">Species</th><td className="p-4">{componentA.species}</td><td className="p-4">{componentB.species}</td>{hasComponentC && <td className="p-4">{componentC.species}</td>}</tr><tr><th className="p-4">Tasting notes</th><td className="p-4">{componentA.notes.join(' · ')}</td><td className="p-4">{componentB.notes.join(' · ')}</td>{hasComponentC && <td className="p-4">{componentC.notes.join(' · ')}</td>}</tr></tbody></table></div>}
+          {!isPartnership && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-sans">
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
               <span className="text-brand-navy font-mono font-bold">Komponen A</span>
               <span className="font-extrabold text-brand-charcoal">{componentA.name} ({formatRupiah(componentA.prices[selectedWeight])}/{selectedSize})</span>
@@ -1139,6 +1231,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               <span className="text-brand-navy font-mono font-bold">Komponen B</span>
               <span className="font-extrabold text-brand-charcoal">{componentB.name} ({formatRupiah(componentB.prices[selectedWeight])}/{selectedSize})</span>
             </div>
+            {hasComponentC && <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between"><span className="text-brand-navy font-mono font-bold">Komponen C</span><span className="font-extrabold text-brand-charcoal">{componentC.name} ({formatRupiah(componentC.prices[selectedWeight])}/{selectedSize})</span></div>}
 
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
               <span className="text-brand-navy font-mono font-bold">Process (A)</span>
@@ -1148,6 +1241,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               <span className="text-brand-navy font-mono font-bold">Process (B)</span>
               <span className="font-extrabold text-brand-charcoal">{componentB.process}</span>
             </div>
+            {hasComponentC && <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between"><span className="text-brand-navy font-mono font-bold">Process (C)</span><span className="font-extrabold text-brand-charcoal">{componentC.process}</span></div>}
 
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
               <span className="text-brand-navy font-mono font-bold">Region (A)</span>
@@ -1157,6 +1251,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               <span className="text-brand-navy font-mono font-bold">Region (B)</span>
               <span className="font-extrabold text-brand-charcoal">{componentB.region}</span>
             </div>
+            {hasComponentC && <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between"><span className="text-brand-navy font-mono font-bold">Region (C)</span><span className="font-extrabold text-brand-charcoal">{componentC.region}</span></div>}
 
             <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between">
               <span className="text-brand-navy font-mono font-bold">Species (A)</span>
@@ -1166,7 +1261,8 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
               <span className="text-brand-navy font-mono font-bold">Species (B)</span>
               <span className="font-extrabold text-brand-charcoal">{componentB.species}</span>
             </div>
-          </div>
+            {hasComponentC && <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-xs flex justify-between"><span className="text-brand-navy font-mono font-bold">Species (C)</span><span className="font-extrabold text-brand-charcoal">{componentC.species}</span></div>}
+          </div>}
 
           <div className="p-5 rounded-xl bg-white border-2 border-gray-200 space-y-1.5 shadow-sm">
             <span className="text-brand-navy font-mono text-xs block font-bold uppercase tracking-wider">Beans Tasting Notes · Maksimal 4</span>
@@ -1177,13 +1273,15 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false }: { mod
           </div>
         </section>
 
+        </details></div>
         {isPartnership && (
-          <section id="consultation-form" className="scroll-mt-40 space-y-8 border-t border-border-subtle pt-12">
+          <section hidden={guided && step !== 2} id="consultation-form" className="scroll-mt-40 space-y-8 border-t border-border-subtle pt-12">
             <span id="business-blend-brief" className="block scroll-mt-40" aria-hidden="true" />
-            <SectionIntro kicker="Mulai diskusi" title="Konsultasikan kebutuhan bisnismu" description="Isi brief di bawah untuk membahas pasokan beans, custom blend, atau racikan menu. Jika tersedia, pilihan beans dan estimasi HPP dari kalkulator otomatis disertakan dalam pesan WhatsApp." />
-            <PartnershipBlendBrief selection={consultationSelection ?? undefined} />
+            {!guided && <SectionIntro kicker="04 / Mulai diskusi" title="Konsultasikan kebutuhan bisnismu" description="Isi kebutuhan bisnis dan tinjau pesan sebelum membuka WhatsApp." />}
+            <PartnershipBlendBrief compactPreview={guided} selection={consultationSelection ?? undefined} onEditSelection={guided ? () => goToStep(0) : undefined} />
           </section>
         )}
+        {guided && <div className="guided-navigation"><button type="button" className="btn-secondary" disabled={step === 0} onClick={() => goToStep(step - 1)}>← Kembali</button>{step < 2 && <button type="button" className="btn-primary" onClick={() => goToStep(step + 1)}>Lanjut →</button>}</div>}
       </div>
     </motion.div>
   );

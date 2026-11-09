@@ -161,7 +161,8 @@ export function Navbar() {
   const totalItems = getTotalItems();
   const cartItemCount = getHydratedCartItemCount(hasCartHydrated, totalItems);
   const isHome = pathname === '/';
-  const hasDarkNavbarCanvas = isHome || pathname.startsWith('/about') || pathname.startsWith('/guide') || pathname.startsWith('/coffee-lab') || pathname.startsWith('/blend-builder') || pathname.startsWith('/work-with-us') || pathname.startsWith('/tools/price-calculator');
+  const isConsultations = pathname === '/work-with-us/consultations';
+  const hasDarkNavbarCanvas = isHome || pathname.startsWith('/about') || pathname.startsWith('/guide') || pathname.startsWith('/coffee-lab') || pathname.startsWith('/blend-builder') || (pathname.startsWith('/work-with-us') && pathname !== '/work-with-us' && !isConsultations) || pathname.startsWith('/tools/price-calculator');
   const active = (href: string) => {
     if (href.includes('#') || href.includes('?')) return false;
     return href === '/' ? pathname === '/' : pathname === href;
@@ -198,7 +199,7 @@ export function Navbar() {
       <header className={`fixed top-0 z-50 w-full border-b text-white transition-[background-color,border-color,box-shadow] duration-300 ease-[cubic-bezier(.16,1,.3,1)] ${headerSurface}`}>
         <div className="relative mx-auto flex h-[76px] w-[calc(100%-28px)] items-center justify-between gap-3 px-1 sm:w-[calc(100%-52px)] sm:px-0">
           <Link href="/" aria-label="52 Coffee & Roastery — Beranda" className="shrink-0 px-1 py-2">
-            <FiftyTwoLogo size="md" textColor={hasDarkNavbarCanvas || scrolled ? 'light' : 'dark'} className="max-[359px]:[&>div:last-child]:hidden" />
+            <FiftyTwoLogo size="md" textColor={hasDarkNavbarCanvas || scrolled ? 'light' : 'dark'} className={isConsultations ? 'max-[479px]:[&>div:last-child]:hidden' : 'max-[359px]:[&>div:last-child]:hidden'} />
           </Link>
 
           <nav ref={desktopNavRef} aria-label="Navigasi utama" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 rounded-full border border-white/55 bg-[#182131]/90 px-6 text-[12px] font-semibold shadow-[0_8px_24px_rgba(20,24,28,.14)] xl:flex">

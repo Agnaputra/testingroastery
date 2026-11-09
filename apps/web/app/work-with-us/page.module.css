@@ -1,5 +1,6 @@
+@font-face { font-family: '52 Cascadia Code'; src: url('/fonts/CascadiaCode.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
 .page { background: #f8fafc; }
-.eyebrow { font: 700 11px/1.5 'Cascadia Code', monospace; letter-spacing: .16em; text-transform: uppercase; }
+.eyebrow { font: 700 11px/1.5 '52 Cascadia Code', monospace; letter-spacing: .16em; text-transform: uppercase; }
 .hero { color: white; background: #15191b; }
 .heroInner { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr); column-gap: clamp(40px, 7vw, 110px); min-height: min(760px, 90vh); align-items: center; padding-top: calc(76px + 56px); padding-bottom: 44px; }
 .heroCopy { max-width: 760px; }
@@ -12,15 +13,15 @@
 .heroImage { position: relative; aspect-ratio: 1 / 1.12; overflow: hidden; border-radius: 5px; background: #2c3136; }
 .image { object-fit: cover; transition: transform .7s cubic-bezier(.22,1,.36,1); }
 .heroVisual:hover .image { transform: scale(1.045); }
-.heroVisual figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 11px 2px; color: #cfe8ea; font: 700 10px/1.5 'Cascadia Code', monospace; letter-spacing: .08em; text-transform: uppercase; }
-.heroIndex { display: flex; gap: clamp(24px, 5vw, 80px); grid-column: 1 / -1; align-self: end; padding-top: 42px; color: rgb(255 255 255 / 65%); font: 700 11px/1.5 'Cascadia Code', monospace; letter-spacing: .1em; text-transform: uppercase; }
+.heroVisual figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 11px 2px; color: #cfe8ea; font: 700 10px/1.5 '52 Cascadia Code', monospace; letter-spacing: .08em; text-transform: uppercase; }
+.heroIndex { display: flex; gap: clamp(24px, 5vw, 80px); grid-column: 1 / -1; align-self: end; padding-top: 42px; color: rgb(255 255 255 / 65%); font: 700 11px/1.5 '52 Cascadia Code', monospace; letter-spacing: .1em; text-transform: uppercase; }
 .paths { display: grid; grid-template-columns: minmax(220px, .65fr) minmax(0, 1.35fr); gap: clamp(40px, 7vw, 100px); padding-top: clamp(80px, 9vw, 140px); padding-bottom: clamp(80px, 9vw, 140px); scroll-margin-top: 76px; }
 .pathsIntro .eyebrow { color: #a52136; }
 .pathsIntro h2 { max-width: 9ch; margin-top: 24px; color: #2c3136; font: 800 clamp(2.7rem, 4vw, 4rem)/1.03 'Raleway', sans-serif; letter-spacing: -.055em; }
 .pathsIntro > p:last-child { max-width: 25ch; margin-top: 20px; color: #59666c; font-size: 15px; line-height: 1.7; }
 .path { border-top: 1px solid #b9c9d1; padding: 22px 0 32px; }
 .path:last-child { border-bottom: 1px solid #b9c9d1; }
-.path > span { color: #a52136; font: 700 10px/1.5 'Cascadia Code', monospace; letter-spacing: .12em; text-transform: uppercase; }
+.path > span { color: #a52136; font: 700 10px/1.5 '52 Cascadia Code', monospace; letter-spacing: .12em; text-transform: uppercase; }
 .path h3 { margin-top: 14px; color: #2c3136; font: 800 clamp(1.65rem, 2.6vw, 2.65rem)/1.08 'Raleway', sans-serif; letter-spacing: -.04em; }
 .path p { max-width: 53ch; margin-top: 10px; color: #59666c; font-size: 14px; line-height: 1.7; }
 .path a { display: inline-flex; min-height: 44px; align-items: center; gap: 14px; margin-top: 15px; color: #a52136; font-size: 13px; font-weight: 700; }
@@ -35,4 +36,21 @@
   .paths { grid-template-columns: 1fr; gap: 38px; }
   .pathsIntro h2 { max-width: none; }
 }
-@media (prefers-reduced-motion: reduce) { .heroLink, .image, .path a svg { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .heroLink, .image, .path a svg { transition: none; } }/* Brand guideline: Raleway Extra Bold headline, Montserrat Regular body,
+   Cascadia Code Regular subheadline/accent; web sizes adapt to viewport. */
+.page { font: 400 16px/1.6 Montserrat,sans-serif; }
+.hero { color: #2c3136; background: #f3f0e9; }
+.heroInner { min-height: 0; padding-top: 120px; padding-bottom: 32px; gap: 32px; }
+.heroCopy .eyebrow { color: #465c70; }
+.eyebrow,.heroIndex,.path > span,.heroVisual figcaption { font-family: '52 Cascadia Code',monospace; font-weight: 400; font-size: 13px; letter-spacing: .04em; }
+.heroCopy h1 { max-width: 19ch; font: 800 clamp(30px,3.6vw,48px)/1.15 Raleway,sans-serif; letter-spacing: -.025em; margin-top: 16px; }
+.heroDescription { color: #465c70; font-size: 16px; line-height: 1.6; margin-top: 18px; }
+.heroImage { aspect-ratio: 1.6; }
+.heroVisual figcaption,.heroIndex { color: #465c70; }
+.heroIndex { padding-top: 8px; }
+.paths { padding-top: 36px; padding-bottom: 24px; gap: 32px; }
+.pathsIntro h2 { max-width: 16ch; font: 800 clamp(26px,3vw,36px)/1.2 Raleway,sans-serif; letter-spacing: -.02em; margin-top: 12px; }
+.path h3 { font: 800 26px/1.25 Raleway,sans-serif; letter-spacing: -.02em; }
+.path p,.pathsIntro > p:last-child { font-size: 16px; font-weight: 400; line-height: 1.6; }
+.path a,.heroLink { font-size: 15px; font-weight: 600; }
+@media(max-width:767px) { .heroInner { padding-top: 112px; gap: 22px; } .heroVisual { max-width: 100%; } .heroImage { aspect-ratio: 2; } .paths { gap: 24px; } }

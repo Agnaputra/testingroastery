@@ -1,0 +1,184 @@
+@font-face { font-family: '52 Cascadia Code'; src: url('/fonts/CascadiaCode.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+/* Scope the final workspace to this route; Coffee Lab keeps its existing UI. */
+.consultation-page .site-container { max-width: 1440px; padding-inline: clamp(20px, 5.56vw, 80px); }
+.consultation-header { background: #fff; padding-top: 100px; padding-bottom: 30px; }
+.consultation-breadcrumb { color: #465c70; font-size: 12px; line-height: 20px; }
+.consultation-breadcrumb a { display: inline-flex; min-height: 28px; align-items: center; }
+.consultation-breadcrumb a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.consultation-header h1 { margin-top: 8px; color: #2c3136; font: 600 38px/1.2 Raleway, sans-serif; letter-spacing: -.025em; }
+.consultation-header p { margin-top: 12px; color: #465c70; font-size: 16px; line-height: 24px; }
+.consultation-workspace { padding-top: 12px; padding-bottom: 48px; }
+.consultation-page [hidden] { display: none !important; }
+.consultation-page .consultation-experience > * + * { margin-top: 24px; }
+.consultation-page .guided-stepper { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
+.consultation-page .guided-stepper button { position: relative; min-width: 0; min-height: 60px; padding: 14px 16px; border: 1px solid #dce6eb; border-radius: 4px; background: #fff; color: #465c70; text-align: left; font-size: 18px; line-height: 24px; font-weight: 600; }
+.consultation-page .guided-stepper button[aria-current='step'] { border-color: #8fb9bc; background: #cfe8ea; color: #a52136; font-weight: 700; }
+.consultation-page .guided-stepper button[aria-current='step']::after { position: absolute; right: -1px; bottom: -1px; left: -1px; height: 3px; background: #a52136; content: ''; }
+.consultation-page .guided-stepper button:not(:disabled):hover { border-color: #465c70; }
+.consultation-page .guided-stepper button:disabled { cursor: not-allowed; }
+.consultation-page .guided-heading { color: #2c3136; font: 500 28px/1.35 Raleway, sans-serif; scroll-margin-top: 100px; }
+.consultation-page .guided-heading:focus { outline: none; }
+.consultation-page .consultation-builder-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 48px; }
+.consultation-page .guided-beans { order: 0; color: #465c70; font-size: 14px; }
+.consultation-page .guided-bean-options { display: grid; grid-template-columns: repeat(3, minmax(0, 160px)); gap: 24px; margin-top: 12px; }
+.consultation-page .guided-bean-option { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 8px; }
+.consultation-page .guided-bean-option img { width: 100px; height: 100px; object-fit: contain; }
+.consultation-page .guided-bean-option > span { font-size: 12px; font-weight: 600; }
+.consultation-page .guided-bean-option select { width: 100%; min-height: 44px; padding: 8px 16px 8px 0; border: 0; border-bottom: 1px solid #dce6eb; background: transparent; color: #465c70; font-size: 13px; text-overflow: ellipsis; cursor: pointer; }
+.consultation-page .guided-add-bean { display: flex; min-height: 48px; align-self: end; align-items: center; gap: 6px; margin-bottom: 1px; color: #465c70; text-align: left; font-size: 13px; }
+.consultation-page .consultation-controls { display: flex; min-width: 0; grid-column: 1; grid-row: 1; flex-direction: column; gap: 20px; }
+.consultation-page .consultation-results { min-width: 0; grid-column: 2; grid-row: 1; }
+.consultation-page .consultation-controls > * { margin-top: 0; }
+.consultation-page .consultation-ratios { order: 1; padding-top: 0; }
+.consultation-page .consultation-ratios > div:first-child { flex-wrap: wrap; gap: 8px; font-family: inherit; }
+.consultation-page .consultation-ratios > div:first-child > span { font-size: 12px; }
+.consultation-page .consultation-ratios > div:first-child > span:last-child { border: 0; padding: 0; background: transparent; color: #465c70; }
+.consultation-page .consultation-ratio-cards { display: grid; gap: 16px; margin-top: 12px; }
+.consultation-page .consultation-ratio-card { padding: 12px 16px; border: 1px solid #dce6eb; border-radius: 6px; background: #fff; }
+.consultation-page .consultation-ratio-heading { display: flex; align-items: flex-start; gap: 8px; color: #2c3136; font-size: 14px; line-height: 22px; }
+.consultation-page .consultation-ratio-heading > span { padding-top: 10px; }
+.consultation-page .consultation-ratio-heading label { display: flex; flex-shrink: 0; align-items: center; color: #a52136; font-size: 22px; }
+.consultation-page .consultation-ratio-heading input { width: 3ch; min-height: 44px; appearance: textfield; }
+.consultation-page .consultation-ratio-heading input::-webkit-inner-spin-button { appearance: none; }
+.consultation-page input[type='range'] { min-height: 44px; accent-color: #a52136; }
+.consultation-page .consultation-ratios > div:last-child { gap: 8px; }
+.consultation-page .consultation-ratios button { min-height: 40px; font-family: inherit; font-size: 12px; }
+.consultation-page .consultation-controls > section[aria-labelledby='blend-size-heading'] { order: 2; padding: 0; background: transparent; color: #2c3136; }
+.consultation-page [aria-labelledby='blend-size-heading'] > div { display: block; }
+.consultation-page [aria-labelledby='blend-size-heading'] > div > div:first-child > span { display: none; }
+.consultation-page #blend-size-heading { margin: 0; color: #2c3136; font-family: inherit; font-size: 16px; font-weight: 500; }
+.consultation-page [aria-labelledby='blend-size-heading'] > div > div:last-child { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.consultation-page [aria-labelledby='blend-size-heading'] button { min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid #dce6eb; border-radius: 4px; background: #fff; color: #465c70; }
+.consultation-page [aria-labelledby='blend-size-heading'] button[aria-pressed='true'] { border-color: #a52136; background: #a52136; color: #fff; }
+.consultation-page [aria-labelledby='blend-size-heading'] button > span:last-child { display: none; }
+.consultation-page .consultation-presets { order: 3; }
+.consultation-page summary { min-height: 44px; cursor: pointer; color: #465c70; font-family: inherit; font-size: 14px; line-height: 22px; letter-spacing: normal; text-transform: none; }
+.consultation-page #define-profile { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.consultation-page #define-profile > div:first-child { padding: 0; border: 0; }
+.consultation-page #define-profile h3 { font: 500 24px/1.35 Raleway, sans-serif; }
+.consultation-page #define-profile > div:first-child svg { display: none; }
+.consultation-page #define-profile svg[role='img'] { width: min(100%, 320px); height: auto; margin-inline: auto; }
+.consultation-page #define-profile > .border-y { border: 0; padding: 0; }
+.consultation-page #define-profile > .border-y > span { display: none; }
+.consultation-page #define-profile > .border-y p { font-size: 16px; font-weight: 400; }
+.consultation-page #define-profile > div:nth-last-child(2) { padding: 0; border: 0; border-radius: 0; background: transparent; color: #465c70; font-size: 14px; }
+.consultation-page #define-profile > div:nth-last-child(2) > span { display: none; }
+.consultation-page .consultation-price { margin-top: 24px; padding: 20px; border: 0; border-radius: 4px; background: #2c3136; color: #fff; box-shadow: none; }
+.consultation-page .consultation-price span, .consultation-page .consultation-price div { color: inherit; }
+.consultation-page .consultation-price > div:first-child { display: block; }
+.consultation-page .consultation-price > div:first-child > div:first-child > span { font: 400 14px/22px Montserrat, sans-serif; letter-spacing: normal; }
+.consultation-page .consultation-price > div:first-child > div:first-child > div { margin-top: 8px; font-size: 30px; font-weight: 600; }
+.consultation-page .consultation-price > div:first-child > div:last-child { margin-top: 12px; text-align: left; font-family: inherit; font-size: 13px; }
+.consultation-page .guided-price-details { padding: 0; border: 0; background: transparent; color: #fff; }
+.consultation-page .guided-price-details summary { color: #fff; }
+.consultation-page .guided-price-details > div { flex-wrap: wrap; gap: 6px; }
+.consultation-page .guided-price-details > div > span:first-child { min-width: 0; flex: 1 1 180px; }
+.consultation-page .consultation-hpp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 80px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.consultation-page .consultation-hpp > fieldset { min-width: 0; grid-column: 1; margin: 0; }
+.consultation-page .consultation-hpp > fieldset legend { font-size: 16px; font-weight: 500; }
+.consultation-page .consultation-hpp > fieldset label { border-radius: 4px; }
+.consultation-page .consultation-hpp > fieldset label:has(input:checked) { border-color: #a52136; background: #a52136; }
+.consultation-page .consultation-hpp > fieldset label:has(input:checked) span { color: #fff; }
+.consultation-page .consultation-hpp > fieldset input { accent-color: #a52136; }
+.consultation-page .consultation-hpp > div.grid { min-width: 0; grid-column: 1; grid-template-columns: 1fr; margin: 0; }
+.consultation-page .consultation-hpp > dl { display: flex; min-width: 0; grid-column: 2; grid-row: 1 / span 3; flex-direction: column; gap: 12px; margin: 0; padding: 0; border: 0; }
+.consultation-page .consultation-hpp > dl > div { min-width: 0; padding: 14px 16px; border: 1px solid #dce6eb; border-radius: 4px; background: #fff; }
+.consultation-page .consultation-hpp > dl > div:nth-child(1) { order: 3; }
+.consultation-page .consultation-hpp > dl > div:nth-child(2) { order: 4; }
+.consultation-page .consultation-hpp > dl > div:nth-child(3) { order: 1; background: #2c3136; }
+.consultation-page .consultation-hpp > dl > div:nth-child(3) * { color: #fff; }
+.consultation-page .consultation-hpp > dl > div:nth-child(4) { order: 2; }
+.consultation-page .consultation-hpp > dl > div:nth-child(5) { order: 5; }
+.consultation-page .consultation-hpp > dl > div:nth-child(6) { order: 6; }
+.consultation-page .consultation-hpp dt { font-size: 14px; }
+.consultation-page .consultation-hpp dd { overflow-wrap: anywhere; font-size: 21px; }
+.consultation-page .consultation-hpp > dl > div:nth-child(3) dd, .consultation-page .consultation-hpp > dl > div:nth-child(4) dd { font-size: 28px; }
+.consultation-page .consultation-hpp > p:last-child { grid-column: 1 / -1; color: #465c70; font-size: 13px; line-height: 22px; }
+.consultation-page .consultation-hpp label { display: block; font-size: 14px; }
+.consultation-page .field-control { min-height: 48px; border-radius: 4px; background: #fff; font-size: 16px; }
+.consultation-page #consultation-form { margin-top: 28px; padding-top: 0; border: 0; }
+.consultation-page #business-blend-brief { display: none; }
+.consultation-page #consultation-form form { display: grid; grid-template-columns: 1fr; gap: 28px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.consultation-page .guided-selection-summary { padding: 16px; border-radius: 4px; background: #cfe8ea; }
+.consultation-page .guided-selection-summary h3 { color: #465c70; font-family: inherit; font-size: 16px; font-weight: 500; }
+.consultation-page .guided-selection-summary dl { gap: 12px 24px; }
+.consultation-page #consultation-form legend { font: 500 24px/1.35 Raleway, sans-serif; }
+.consultation-page #consultation-form fieldset { min-width: 0; border: 0; padding-top: 0; }
+.consultation-page #consultation-form label { display: block; min-width: 0; }
+.consultation-page #consultation-form .field-label { font-size: 14px; font-weight: 400; }
+.consultation-page #consultation-form details { border: 1px solid #dce6eb; border-radius: 4px; background: #fff; padding: 8px 16px; }
+.consultation-page #consultation-form details summary { display: list-item; min-height: 32px; font-size: 14px; font-weight: 500; }
+.consultation-page #consultation-form pre { overflow-wrap: anywhere; font-size: 14px; line-height: 22px; }
+.consultation-page #consultation-form form > div:last-of-type { align-items: flex-start; border: 0; padding: 0; }
+.consultation-page #blend-brief-note { font-size: 13px; line-height: 22px; }
+.consultation-page .btn-primary, .consultation-page .btn-secondary { min-height: 48px; border-radius: 4px; padding: 12px 20px; font-size: 14px; }
+.consultation-page .btn-primary { background: #a52136; color: #fff; }
+.consultation-page .btn-primary:hover { background: #8b1e2d; }
+.consultation-page .guided-navigation { display: flex; justify-content: space-between; gap: 20px; }
+.consultation-page .guided-navigation button:disabled { opacity: .45; cursor: default; }
+.consultation-page .guided-specs-summary { font-weight: 500; }
+.consultation-page :is(button, select, input, textarea, summary, a):focus-visible { outline: 2px solid #465c70; outline-offset: 3px; }
+.consultation-page .field-control:user-invalid { border-color: #a52136; }
+@media (max-width: 900px) {
+  .consultation-page .site-container { padding-inline: 24px; }
+  .consultation-page .consultation-builder-grid { grid-template-columns: 1fr; gap: 28px; }
+  .consultation-page .consultation-controls { grid-column: 1; grid-row: 1; }
+  .consultation-page .consultation-results { grid-column: 1; grid-row: 2; }
+  .consultation-page .consultation-hpp { grid-template-columns: 1fr; gap: 24px; }
+  .consultation-page .consultation-hpp > dl { grid-column: 1; grid-row: auto; }
+  .consultation-page .consultation-hpp > dl > div { min-height: 92px; }
+}
+@media (max-width: 639px) {
+  .consultation-page .site-container { padding-inline: 20px; }
+  .consultation-header { padding-top: 94px; padding-bottom: 30px; }
+  .consultation-header h1 { margin-top: 8px; font-size: 28px; line-height: 36px; }
+  .consultation-header p { margin-top: 12px; font-size: 15px; line-height: 23px; }
+  .consultation-page .guided-stepper { gap: 8px; }
+  .consultation-page .guided-stepper button { min-height: 52px; padding: 10px 7px; font-size: 12px; line-height: 20px; }
+  .consultation-page .guided-heading { font-size: 24px; }
+  .consultation-page .consultation-experience > * + * { margin-top: 24px; }
+  .consultation-page .guided-bean-options { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .consultation-page .guided-bean-option img { width: 100%; max-width: 100px; }
+  .consultation-page .guided-add-bean { flex-wrap: wrap; font-size: 12px; }
+  .consultation-page .consultation-ratio-heading { font-size: 13px; }
+  .consultation-page .guided-selection-summary dl { grid-template-columns: 1fr; }
+  .consultation-page .guided-navigation { gap: 12px; }
+  .consultation-page .guided-navigation .btn-primary { min-width: 60%; }
+  .consultation-page #consultation-form form > div:last-of-type button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.consultation-page) { scroll-behavior: auto !important; }
+  .consultation-page *, .consultation-page *::before, .consultation-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* Consultation-only WebGL hero: fixed visual box keeps the poster and canvas aligned. */
+.consultation-page .coffee-editorial-hero { background: #f3f0e9; padding-top: 104px; padding-bottom: 24px; }
+.consultation-page .coffee-editorial-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: center; gap: 24px; min-height: 240px; }
+.consultation-page .coffee-editorial-hero h1 { max-width: 21ch; font: 500 clamp(30px, 3.1vw, 44px)/1.2 Raleway,sans-serif; color: #465c70; margin-top: 12px; }
+.consultation-page .coffee-editorial-hero p { max-width: 48ch; margin-top: 20px; font-size: 16px; line-height: 1.6; }
+.consultation-page .coffee-editorial-highlights { display: flex; flex-wrap: wrap; gap: 10px 20px; padding: 0; margin: 24px 0 0; list-style: none; font-size: 13px; color: #465c70; }
+.consultation-page .coffee-editorial-visual { position: relative; width: 100%; height: 240px; touch-action: pan-y; }
+.consultation-page .coffee-poster { object-fit: contain; }
+.consultation-page .coffee-poster--hidden { visibility: hidden; }
+.consultation-page .coffee-editorial-canvas { position: absolute; inset: 0; pointer-events: none; }
+.consultation-page .coffee-editorial-hero--compact .coffee-editorial-grid { display: block; min-height: 0; }
+.consultation-page .coffee-editorial-hero--compact h1 { font-size: 30px; max-width: none; }
+@media(max-width:900px) {
+ .consultation-page .coffee-editorial-grid { grid-template-columns: minmax(0,1fr) 180px; gap: 16px; min-height: 200px; }
+ .consultation-page .coffee-editorial-visual { height: 180px; }
+}
+@media(max-width:639px) {
+ .consultation-page .coffee-editorial-hero { padding-top: 100px; padding-bottom: 18px; }
+ .consultation-page .coffee-editorial-grid { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-height: 0; }
+ .consultation-page .coffee-editorial-hero h1 { font-size: 30px; }
+ .consultation-page .coffee-editorial-hero p { font-size: 15px; margin-top: 12px; }
+ .consultation-page .coffee-editorial-highlights { margin-top: 14px; gap: 6px 12px; font-size: 12px; }
+ .consultation-page .coffee-editorial-visual { height: 120px; max-width: 180px; align-self: center; }
+}
+/* Typography verified against 52 Coffee Canva brand guideline. */
+.consultation-page :is(h1,h2,h3,h4),.consultation-page .guided-heading { font-family: Raleway,sans-serif; font-weight: 800; }
+.consultation-page .coffee-editorial-hero h1 { font-weight: 800; }
+.consultation-page p,.consultation-page .field-control,.consultation-page .field-label { font-family: Montserrat,sans-serif; font-weight: 400; }
+.consultation-page .font-mono { font-family: '52 Cascadia Code','JetBrains Mono',monospace; font-weight: 400; }
+.consultation-page .consultation-breadcrumb,.consultation-page .coffee-editorial-highlights { font-family: '52 Cascadia Code','JetBrains Mono',monospace; font-weight: 400; }
+.consultation-page .consultation-results #define-profile h3,.consultation-page .consultation-bean-name { font-family: Raleway,sans-serif; font-weight: 800; }
+.consultation-page .consultation-bean-kicker { font-family: '52 Cascadia Code','JetBrains Mono',monospace; font-weight: 400; }
