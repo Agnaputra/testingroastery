@@ -1,0 +1,81 @@
+[
+  {
+    "width": 1440,
+    "status": "PASS",
+    "checks": [
+      "three steps",
+      "layout overflow",
+      "bean C add/remove",
+      "ratio total",
+      "radar update",
+      "HPP formula",
+      "retail source",
+      "required validation",
+      "WhatsApp preview and URL intercepted",
+      "state retained",
+      "reduced motion",
+      "no page errors"
+    ]
+  },
+  {
+    "width": 768,
+    "status": "PASS",
+    "checks": [
+      "three steps",
+      "layout overflow",
+      "bean C add/remove",
+      "ratio total",
+      "radar update",
+      "HPP formula",
+      "retail source",
+      "required validation",
+      "WhatsApp preview and URL intercepted",
+      "state retained",
+      "reduced motion",
+      "no page errors"
+    ]
+  },
+  {
+    "width": 390,
+    "status": "PASS",
+    "checks": [
+      "three steps",
+      "layout overflow",
+      "bean C add/remove",
+      "ratio total",
+      "radar update",
+      "HPP formula",
+      "retail source",
+      "required validation",
+      "WhatsApp preview and URL intercepted",
+      "state retained",
+      "reduced motion",
+      "no page errors"
+    ]
+  },
+  {
+    "width": 320,
+    "status": "PASS",
+    "checks": [
+      "three steps",
+      "layout overflow",
+      "bean C add/remove",
+      "ratio total",
+      "radar update",
+      "HPP formula",
+      "retail source",
+      "required validation",
+      "WhatsApp preview and URL intercepted",
+      "state retained",
+      "reduced motion",
+      "no page errors"
+    ]
+  },
+  {
+    "status": "PASS",
+    "checks": [
+      "catalog unavailable",
+      "consultation without estimate"
+    ]
+  }
+]

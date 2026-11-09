@@ -1,0 +1,404 @@
+[
+  {
+    "id": "espresso-dampit-natural",
+    "slug": "dampit-natural-espresso",
+    "name": "Dampit Natural Robusta Espresso",
+    "slowbarAlias": "DAMPIT NATURAL",
+    "category": "espresso",
+    "categoryLabel": "Espresso Based",
+    "series": "Robusta Espresso",
+    "publicationStatus": "published",
+    "masterRow": 24,
+    "origin": "East Java, Indonesia",
+    "region": "Dampit, Malang",
+    "altitude": "700 - 900 MASL",
+    "varietal": "Fine Robusta Malang",
+    "process": "Natural Process",
+    "roastLevel": "Medium-Dark",
+    "tastingNotes": [
+      "Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "flavorCategory": [
+      "Chocolaty",
+      "Sweet"
+    ],
+    "description": "Robusta terbaik kebanggaan Malang dengan body tebal mantap, aroma cokelat pekat, dan manis brown sugar yang pas untuk es kopi susu.",
+    "story": "Karya petani Dampit Malang Selatan yang diproses petik merah untuk menghasilkan fine robusta tanpa rasa getir berlebih.",
+    "basePrice": 35000,
+    "defaultWeight": "200g",
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 35000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 85000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 150000,
+        "inStock": true
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+    "badge": "Best for Milk Based",
+    "acidity": 1,
+    "sweetness": 4,
+    "body": 5,
+    "brewingRecipe": {
+      "method": "Espresso Machine / Moka Pot",
+      "dose": "18g - 20g",
+      "water": "38g - 40g yield",
+      "ratio": "1:2",
+      "temp": "93°C",
+      "time": "25 - 30s",
+      "steps": [
+        "Grind fine merata dengan WDT tool.",
+        "Tamping konsisten 15kg.",
+        "Ekstraksi 38g espresso dalam 26 detik.",
+        "Padukan dengan 120ml fresh milk dingin dan 20ml gula aren cair."
+      ]
+    },
+    "displayImage": "/images/bag-prau.jpg"
+  },
+  {
+    "id": "espresso-telemung-honey",
+    "slug": "telemung-honey-robusta-espresso",
+    "name": "Telemung Honey Robusta Espresso",
+    "slowbarAlias": "TELEMUNG HONEY",
+    "category": "espresso",
+    "categoryLabel": "Espresso Based",
+    "series": "Robusta Espresso",
+    "publicationStatus": "published",
+    "masterRow": 25,
+    "origin": "East Java, Indonesia",
+    "region": "Telemung, Banyuwangi",
+    "altitude": "600 - 800 MASL",
+    "varietal": "Fine Robusta Banyuwangi",
+    "process": "Honey Process",
+    "roastLevel": "Medium-Dark",
+    "tastingNotes": [
+      "Sweet Chocolate",
+      "Brown Sugar",
+      "Medium Body"
+    ],
+    "flavorCategory": [
+      "Sweet",
+      "Chocolaty"
+    ],
+    "description": "Robusta proses madu dari Telemung dengan cita rasa manis cokelat susu, body lembut seimbang, dan aroma karamel yang gurih.",
+    "story": "Berasal dari desa kopi Telemung Banyuwangi yang terkenal dengan tradisi olah kopi madu bernilai tinggi.",
+    "basePrice": 35000,
+    "defaultWeight": "200g",
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 35000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 85000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 150000,
+        "inStock": true
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+    "acidity": 1,
+    "sweetness": 4,
+    "body": 4,
+    "brewingRecipe": {
+      "method": "Espresso Machine",
+      "dose": "19g",
+      "water": "38g yield",
+      "ratio": "1:2",
+      "temp": "92°C",
+      "time": "26s",
+      "steps": [
+        "Ekstraksi 38g yield espresso.",
+        "Campurkan dengan susu oat atau susu sapi segar."
+      ]
+    },
+    "displayImage": "/images/bag-prau.jpg"
+  },
+  {
+    "id": "espresso-arabica-kintamani",
+    "slug": "kintamani-full-wash-arabica-espresso",
+    "name": "Kintamani Full Wash Arabica Espresso",
+    "slowbarAlias": "KINTAMANI FULL WASH",
+    "category": "espresso",
+    "categoryLabel": "Espresso Based",
+    "series": "Arabica Espresso",
+    "publicationStatus": "published",
+    "masterRow": 18,
+    "origin": "Bali, Indonesia",
+    "region": "Kintamani, Bali",
+    "altitude": "1,200 - 1,400 MASL",
+    "varietal": "Typica, Kartika",
+    "process": "Full Wash",
+    "roastLevel": "Medium",
+    "tastingNotes": [
+      "Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "flavorCategory": [
+      "Chocolaty",
+      "Sweet"
+    ],
+    "description": "Single origin Arabika Bali dengan profil sangrai espresso menghasilkan krema tebal, manis brown sugar, dan sentuhan cokelat hangat.",
+    "story": "Ditanam berdampingan dengan pohon jeruk Kintamani yang terkenal akan kesuburan tanah vulkanis Danau Batur.",
+    "basePrice": 70000,
+    "defaultWeight": "200g",
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 70000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 135000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 260000,
+        "inStock": true
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+    "acidity": 2,
+    "sweetness": 4,
+    "body": 4,
+    "brewingRecipe": {
+      "method": "Espresso Machine",
+      "dose": "18g",
+      "water": "36g yield",
+      "ratio": "1:2",
+      "temp": "93°C",
+      "time": "28s",
+      "steps": [
+        "Ekstraksi 36g espresso untuk Americano atau Cafe Latte yang manis seimbang."
+      ]
+    },
+    "displayImage": "/images/bag-sumbing.jpg"
+  },
+  {
+    "id": "espresso-arabica-gayo-full-wash",
+    "slug": "gayo-full-wash-arabica-espresso",
+    "name": "Gayo Full Wash Arabica Espresso",
+    "slowbarAlias": "GAYO FULL WASH",
+    "category": "espresso",
+    "categoryLabel": "Espresso Based",
+    "series": "Arabica Espresso",
+    "publicationStatus": "published",
+    "masterRow": 27,
+    "origin": "Aceh, Indonesia",
+    "region": "Takengon, Aceh Tengah",
+    "altitude": "1,400 - 1,600 MASL",
+    "varietal": "Timtim, Borbor",
+    "process": "Full Wash",
+    "roastLevel": "Medium-Dark",
+    "tastingNotes": [
+      "Earthy",
+      "Dark Chocolate",
+      "Full Body"
+    ],
+    "flavorCategory": [
+      "Chocolaty",
+      "Spicy"
+    ],
+    "description": "Karakter legendaris tanah Gayo dengan body yang sangat tebal, aroma rempah earthy yang harum, dan kekayaan dark chocolate.",
+    "story": "Kopi Arabika organik terbaik dari perkebunan dataran tinggi Danau Laut Tawar Takengon.",
+    "basePrice": 75000,
+    "defaultWeight": "200g",
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 75000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 140000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 265000,
+        "inStock": true
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+    "acidity": 1,
+    "sweetness": 3,
+    "body": 5,
+    "brewingRecipe": {
+      "method": "Espresso Machine",
+      "dose": "19g",
+      "water": "38g yield",
+      "ratio": "1:2",
+      "temp": "92°C",
+      "time": "27s",
+      "steps": [
+        "Ekstraksi 38g untuk Espresso murni atau Piccolo Latte yang kuat."
+      ]
+    },
+    "displayImage": "/images/bag-sumbing.jpg"
+  },
+  {
+    "id": "espresso-arabica-ijen-full-wash",
+    "slug": "arabica-ijen-full-wash-espresso",
+    "name": "Arabica Ijen Full Wash Espresso",
+    "slowbarAlias": "ARABICA IJEN FULL WASH",
+    "category": "espresso",
+    "categoryLabel": "Espresso Based",
+    "series": "Arabica Espresso",
+    "publicationStatus": "published",
+    "masterRow": 15,
+    "origin": "East Java, Indonesia",
+    "region": "Gunung Ijen, Bondowoso",
+    "altitude": "1,400 MASL",
+    "varietal": "Kartika / Typica",
+    "process": "Full Wash",
+    "roastLevel": "Medium",
+    "tastingNotes": [
+      "Earthy",
+      "Dark Chocolate",
+      "Full Body"
+    ],
+    "flavorCategory": [
+      "Chocolaty",
+      "Nutty"
+    ],
+    "description": "Espresso Arabika Ijen yang balance dengan crema cokelat keemasan, sentuhan cokelat hitam gurih, dan aftertaste yang bersih.",
+    "story": "Roasting profil khusus dari biji Ijen pilihan untuk kebutuhan kedai kopi dan seduhan rumah.",
+    "basePrice": 60000,
+    "defaultWeight": "200g",
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 60000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 140000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 250000,
+        "inStock": true
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+    "badge": "House Espresso",
+    "acidity": 2,
+    "sweetness": 4,
+    "body": 4,
+    "brewingRecipe": {
+      "method": "Espresso Machine",
+      "dose": "18g",
+      "water": "36g yield",
+      "ratio": "1:2",
+      "temp": "93°C",
+      "time": "26s",
+      "steps": [
+        "Ekstraksi 36g yield untuk Cappuccino dan Flat White yang creamy."
+      ]
+    },
+    "displayImage": "/images/bag-sumbing.jpg"
+  },
+  {
+    "id": "espresso-brazil-santos",
+    "slug": "brazil-santos-espresso",
+    "name": "Brazil Santos Espresso",
+    "slowbarAlias": "BRAZIL SANTOS",
+    "category": "espresso",
+    "categoryLabel": "Espresso Based",
+    "series": "Arabica Espresso",
+    "publicationStatus": "published",
+    "masterRow": 28,
+    "origin": "Brazil",
+    "region": "Minas Gerais, Santos, Brazil",
+    "altitude": "900 - 1,200 MASL",
+    "varietal": "Mundo Novo, Catuai",
+    "process": "Natural Process",
+    "roastLevel": "Medium-Dark",
+    "tastingNotes": [
+      "Earthy",
+      "Dark Chocolate",
+      "Full Body"
+    ],
+    "flavorCategory": [
+      "Chocolaty",
+      "Nutty"
+    ],
+    "description": "Kopi Arabika impor asal Brazil dengan rasa nutty cokelat klasik dunia, keasaman sangat rendah, dan body yang mantap.",
+    "story": "Berasal dari perkebunan terbaik Minas Gerais Brazil, pilihan utama cafe specialty internasional.",
+    "basePrice": 92000,
+    "defaultWeight": "200g",
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 92000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 175000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 340000,
+        "inStock": true
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+    "acidity": 1,
+    "sweetness": 4,
+    "body": 5,
+    "brewingRecipe": {
+      "method": "Espresso Machine",
+      "dose": "18.5g",
+      "water": "37g yield",
+      "ratio": "1:2",
+      "temp": "92°C",
+      "time": "28s",
+      "steps": [
+        "Ekstraksi 37g espresso untuk Cafe Latte yang manis cokelat nutty tanpa asam."
+      ]
+    },
+    "displayImage": "/images/bag-sumbing.jpg"
+  }
+]

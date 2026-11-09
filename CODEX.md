@@ -25,7 +25,7 @@ Baca [AGENTS.md](./AGENTS.md) sebagai panduan utama. Instruksi ini berlaku untuk
 
 ## Lingkungan dan batas data
 
-- Lokal: `npm run dev` untuk web di `127.0.0.1:3000`, `npm run ai:start` untuk FastAPI di `127.0.0.1:8013`; web mengakses backend melalui `AI_BACKEND_URL`. Jalankan PostgreSQL lokal sebelum fitur database. Next.js memakai `.next-dev` untuk dev dan `.next` untuk build agar cache tidak bertabrakan.
+- Lokal: `npm run dev` untuk web di `127.0.0.1:3031`, `npm run ai:start` untuk FastAPI di `127.0.0.1:8013`; web mengakses backend melalui `AI_BACKEND_URL`. Jalankan PostgreSQL lokal sebelum fitur database. Next.js memakai `.next-dev` untuk dev dan `.next` untuk build agar cache tidak bertabrakan.
 - Preview branch `feature/customer-commerce-manual-payments` harus memakai branch Neon Preview yang terisolasi. Branch yang pernah disiapkan adalah `preview/customer-commerce-manual-payments` (`br-icy-meadow-b3bj54j6`), tetapi **nilai efektif `DATABASE_URL` deployment backend belum terverifikasi**. Jangan menulis seed, mengaktifkan checkout, atau melakukan migration sebelum target koneksi dibuktikan.
 - Audit terakhir menemukan backend Preview berkonfigurasi `ENVIRONMENT=production` dan `CUSTOMER_COMMERCE_MODE=operational`; frontend Preview menampilkan mode testing. Guard checkout backend saat ini hanya menerima test mode pada PostgreSQL localhost. Perbaiki ketidakcocokan ini dengan pembatasan Preview yang eksplisit dan tes sebelum transaksi uji.
 - URL callback Google harus cocok persis dengan hostname frontend yang diuji serta konfigurasi Google OAuth dan backend. Alias branch dan URL deployment unik tidak otomatis saling menggantikan.

@@ -1,0 +1,579 @@
+{
+  "two": {
+    "ps": [
+      {
+        "id": "espresso-dampit-natural",
+        "slug": "dampit-natural-espresso",
+        "name": "Dampit Natural Robusta Espresso",
+        "slowbarAlias": "DAMPIT NATURAL",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Robusta Espresso",
+        "publicationStatus": "published",
+        "masterRow": 24,
+        "origin": "East Java, Indonesia",
+        "region": "Dampit, Malang",
+        "altitude": "700 - 900 MASL",
+        "varietal": "Fine Robusta Malang",
+        "process": "Natural Process",
+        "roastLevel": "Medium-Dark",
+        "tastingNotes": [
+          "Chocolate",
+          "Brown Sugar",
+          "Full Body"
+        ],
+        "flavorCategory": [
+          "Chocolaty",
+          "Sweet"
+        ],
+        "description": "Robusta terbaik kebanggaan Malang dengan body tebal mantap, aroma cokelat pekat, dan manis brown sugar yang pas untuk es kopi susu.",
+        "story": "Karya petani Dampit Malang Selatan yang diproses petik merah untuk menghasilkan fine robusta tanpa rasa getir berlebih.",
+        "basePrice": 35000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 35000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 85000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 150000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "badge": "Best for Milk Based",
+        "acidity": 1,
+        "sweetness": 4,
+        "body": 5,
+        "brewingRecipe": {
+          "method": "Espresso Machine / Moka Pot",
+          "dose": "18g - 20g",
+          "water": "38g - 40g yield",
+          "ratio": "1:2",
+          "temp": "93°C",
+          "time": "25 - 30s",
+          "steps": [
+            "Grind fine merata dengan WDT tool.",
+            "Tamping konsisten 15kg.",
+            "Ekstraksi 38g espresso dalam 26 detik.",
+            "Padukan dengan 120ml fresh milk dingin dan 20ml gula aren cair."
+          ]
+        },
+        "displayImage": "/images/bag-prau.jpg"
+      },
+      {
+        "id": "espresso-telemung-honey",
+        "slug": "telemung-honey-robusta-espresso",
+        "name": "Telemung Honey Robusta Espresso",
+        "slowbarAlias": "TELEMUNG HONEY",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Robusta Espresso",
+        "publicationStatus": "published",
+        "masterRow": 25,
+        "origin": "East Java, Indonesia",
+        "region": "Telemung, Banyuwangi",
+        "altitude": "600 - 800 MASL",
+        "varietal": "Fine Robusta Banyuwangi",
+        "process": "Honey Process",
+        "roastLevel": "Medium-Dark",
+        "tastingNotes": [
+          "Sweet Chocolate",
+          "Brown Sugar",
+          "Medium Body"
+        ],
+        "flavorCategory": [
+          "Sweet",
+          "Chocolaty"
+        ],
+        "description": "Robusta proses madu dari Telemung dengan cita rasa manis cokelat susu, body lembut seimbang, dan aroma karamel yang gurih.",
+        "story": "Berasal dari desa kopi Telemung Banyuwangi yang terkenal dengan tradisi olah kopi madu bernilai tinggi.",
+        "basePrice": 35000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 35000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 85000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 150000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "acidity": 1,
+        "sweetness": 4,
+        "body": 4,
+        "brewingRecipe": {
+          "method": "Espresso Machine",
+          "dose": "19g",
+          "water": "38g yield",
+          "ratio": "1:2",
+          "temp": "92°C",
+          "time": "26s",
+          "steps": [
+            "Ekstraksi 38g yield espresso.",
+            "Campurkan dengan susu oat atau susu sapi segar."
+          ]
+        },
+        "displayImage": "/images/bag-prau.jpg"
+      }
+    ],
+    "ratios": [
+      70,
+      30
+    ],
+    "price": 44000,
+    "kg": 176000,
+    "metrics": [
+      1,
+      8.2,
+      10,
+      2.9,
+      9.7,
+      6.9
+    ],
+    "notes": [
+      "Chocolate",
+      "Sweet Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "hpp": {
+      "cupsPerKg": 55.55555555555556,
+      "coffeePerCup": 3168,
+      "directCostPerCup": 7668,
+      "contributionPerCup": 14332,
+      "monthlyCups": 3000,
+      "beanKg": 54,
+      "monthlyContribution": 42996000
+    }
+  },
+  "three": {
+    "ps": [
+      {
+        "id": "espresso-dampit-natural",
+        "slug": "dampit-natural-espresso",
+        "name": "Dampit Natural Robusta Espresso",
+        "slowbarAlias": "DAMPIT NATURAL",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Robusta Espresso",
+        "publicationStatus": "published",
+        "masterRow": 24,
+        "origin": "East Java, Indonesia",
+        "region": "Dampit, Malang",
+        "altitude": "700 - 900 MASL",
+        "varietal": "Fine Robusta Malang",
+        "process": "Natural Process",
+        "roastLevel": "Medium-Dark",
+        "tastingNotes": [
+          "Chocolate",
+          "Brown Sugar",
+          "Full Body"
+        ],
+        "flavorCategory": [
+          "Chocolaty",
+          "Sweet"
+        ],
+        "description": "Robusta terbaik kebanggaan Malang dengan body tebal mantap, aroma cokelat pekat, dan manis brown sugar yang pas untuk es kopi susu.",
+        "story": "Karya petani Dampit Malang Selatan yang diproses petik merah untuk menghasilkan fine robusta tanpa rasa getir berlebih.",
+        "basePrice": 35000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 35000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 85000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 150000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "badge": "Best for Milk Based",
+        "acidity": 1,
+        "sweetness": 4,
+        "body": 5,
+        "brewingRecipe": {
+          "method": "Espresso Machine / Moka Pot",
+          "dose": "18g - 20g",
+          "water": "38g - 40g yield",
+          "ratio": "1:2",
+          "temp": "93°C",
+          "time": "25 - 30s",
+          "steps": [
+            "Grind fine merata dengan WDT tool.",
+            "Tamping konsisten 15kg.",
+            "Ekstraksi 38g espresso dalam 26 detik.",
+            "Padukan dengan 120ml fresh milk dingin dan 20ml gula aren cair."
+          ]
+        },
+        "displayImage": "/images/bag-prau.jpg"
+      },
+      {
+        "id": "espresso-telemung-honey",
+        "slug": "telemung-honey-robusta-espresso",
+        "name": "Telemung Honey Robusta Espresso",
+        "slowbarAlias": "TELEMUNG HONEY",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Robusta Espresso",
+        "publicationStatus": "published",
+        "masterRow": 25,
+        "origin": "East Java, Indonesia",
+        "region": "Telemung, Banyuwangi",
+        "altitude": "600 - 800 MASL",
+        "varietal": "Fine Robusta Banyuwangi",
+        "process": "Honey Process",
+        "roastLevel": "Medium-Dark",
+        "tastingNotes": [
+          "Sweet Chocolate",
+          "Brown Sugar",
+          "Medium Body"
+        ],
+        "flavorCategory": [
+          "Sweet",
+          "Chocolaty"
+        ],
+        "description": "Robusta proses madu dari Telemung dengan cita rasa manis cokelat susu, body lembut seimbang, dan aroma karamel yang gurih.",
+        "story": "Berasal dari desa kopi Telemung Banyuwangi yang terkenal dengan tradisi olah kopi madu bernilai tinggi.",
+        "basePrice": 35000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 35000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 85000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 150000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "acidity": 1,
+        "sweetness": 4,
+        "body": 4,
+        "brewingRecipe": {
+          "method": "Espresso Machine",
+          "dose": "19g",
+          "water": "38g yield",
+          "ratio": "1:2",
+          "temp": "92°C",
+          "time": "26s",
+          "steps": [
+            "Ekstraksi 38g yield espresso.",
+            "Campurkan dengan susu oat atau susu sapi segar."
+          ]
+        },
+        "displayImage": "/images/bag-prau.jpg"
+      },
+      {
+        "id": "espresso-arabica-kintamani",
+        "slug": "kintamani-full-wash-arabica-espresso",
+        "name": "Kintamani Full Wash Arabica Espresso",
+        "slowbarAlias": "KINTAMANI FULL WASH",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Arabica Espresso",
+        "publicationStatus": "published",
+        "masterRow": 18,
+        "origin": "Bali, Indonesia",
+        "region": "Kintamani, Bali",
+        "altitude": "1,200 - 1,400 MASL",
+        "varietal": "Typica, Kartika",
+        "process": "Full Wash",
+        "roastLevel": "Medium",
+        "tastingNotes": [
+          "Chocolate",
+          "Brown Sugar",
+          "Full Body"
+        ],
+        "flavorCategory": [
+          "Chocolaty",
+          "Sweet"
+        ],
+        "description": "Single origin Arabika Bali dengan profil sangrai espresso menghasilkan krema tebal, manis brown sugar, dan sentuhan cokelat hangat.",
+        "story": "Ditanam berdampingan dengan pohon jeruk Kintamani yang terkenal akan kesuburan tanah vulkanis Danau Batur.",
+        "basePrice": 70000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 70000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 135000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 260000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "acidity": 2,
+        "sweetness": 4,
+        "body": 4,
+        "brewingRecipe": {
+          "method": "Espresso Machine",
+          "dose": "18g",
+          "water": "36g yield",
+          "ratio": "1:2",
+          "temp": "93°C",
+          "time": "28s",
+          "steps": [
+            "Ekstraksi 36g espresso untuk Americano atau Cafe Latte yang manis seimbang."
+          ]
+        },
+        "displayImage": "/images/bag-sumbing.jpg"
+      }
+    ],
+    "ratios": [
+      56,
+      24,
+      20
+    ],
+    "price": 53000,
+    "kg": 212000,
+    "metrics": [
+      1.4,
+      8.2,
+      10,
+      2.9,
+      9.6,
+      6.9
+    ],
+    "notes": [
+      "Chocolate",
+      "Sweet Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "hpp": {
+      "cupsPerKg": 55.55555555555556,
+      "coffeePerCup": 3816,
+      "directCostPerCup": 8316,
+      "contributionPerCup": 13684,
+      "monthlyCups": 3000,
+      "beanKg": 54,
+      "monthlyContribution": 41052000
+    }
+  },
+  "ratio": {
+    "ps": [
+      {
+        "id": "espresso-dampit-natural",
+        "slug": "dampit-natural-espresso",
+        "name": "Dampit Natural Robusta Espresso",
+        "slowbarAlias": "DAMPIT NATURAL",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Robusta Espresso",
+        "publicationStatus": "published",
+        "masterRow": 24,
+        "origin": "East Java, Indonesia",
+        "region": "Dampit, Malang",
+        "altitude": "700 - 900 MASL",
+        "varietal": "Fine Robusta Malang",
+        "process": "Natural Process",
+        "roastLevel": "Medium-Dark",
+        "tastingNotes": [
+          "Chocolate",
+          "Brown Sugar",
+          "Full Body"
+        ],
+        "flavorCategory": [
+          "Chocolaty",
+          "Sweet"
+        ],
+        "description": "Robusta terbaik kebanggaan Malang dengan body tebal mantap, aroma cokelat pekat, dan manis brown sugar yang pas untuk es kopi susu.",
+        "story": "Karya petani Dampit Malang Selatan yang diproses petik merah untuk menghasilkan fine robusta tanpa rasa getir berlebih.",
+        "basePrice": 35000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 35000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 85000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 150000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "badge": "Best for Milk Based",
+        "acidity": 1,
+        "sweetness": 4,
+        "body": 5,
+        "brewingRecipe": {
+          "method": "Espresso Machine / Moka Pot",
+          "dose": "18g - 20g",
+          "water": "38g - 40g yield",
+          "ratio": "1:2",
+          "temp": "93°C",
+          "time": "25 - 30s",
+          "steps": [
+            "Grind fine merata dengan WDT tool.",
+            "Tamping konsisten 15kg.",
+            "Ekstraksi 38g espresso dalam 26 detik.",
+            "Padukan dengan 120ml fresh milk dingin dan 20ml gula aren cair."
+          ]
+        },
+        "displayImage": "/images/bag-prau.jpg"
+      },
+      {
+        "id": "espresso-telemung-honey",
+        "slug": "telemung-honey-robusta-espresso",
+        "name": "Telemung Honey Robusta Espresso",
+        "slowbarAlias": "TELEMUNG HONEY",
+        "category": "espresso",
+        "categoryLabel": "Espresso Based",
+        "series": "Robusta Espresso",
+        "publicationStatus": "published",
+        "masterRow": 25,
+        "origin": "East Java, Indonesia",
+        "region": "Telemung, Banyuwangi",
+        "altitude": "600 - 800 MASL",
+        "varietal": "Fine Robusta Banyuwangi",
+        "process": "Honey Process",
+        "roastLevel": "Medium-Dark",
+        "tastingNotes": [
+          "Sweet Chocolate",
+          "Brown Sugar",
+          "Medium Body"
+        ],
+        "flavorCategory": [
+          "Sweet",
+          "Chocolaty"
+        ],
+        "description": "Robusta proses madu dari Telemung dengan cita rasa manis cokelat susu, body lembut seimbang, dan aroma karamel yang gurih.",
+        "story": "Berasal dari desa kopi Telemung Banyuwangi yang terkenal dengan tradisi olah kopi madu bernilai tinggi.",
+        "basePrice": 35000,
+        "defaultWeight": "200g",
+        "variants": [
+          {
+            "weightGrams": 200,
+            "weightLabel": "200g",
+            "price": 35000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 500,
+            "weightLabel": "500g",
+            "price": 85000,
+            "inStock": true
+          },
+          {
+            "weightGrams": 1000,
+            "weightLabel": "1kg",
+            "price": 150000,
+            "inStock": true
+          }
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop",
+        "acidity": 1,
+        "sweetness": 4,
+        "body": 4,
+        "brewingRecipe": {
+          "method": "Espresso Machine",
+          "dose": "19g",
+          "water": "38g yield",
+          "ratio": "1:2",
+          "temp": "92°C",
+          "time": "26s",
+          "steps": [
+            "Ekstraksi 38g yield espresso.",
+            "Campurkan dengan susu oat atau susu sapi segar."
+          ]
+        },
+        "displayImage": "/images/bag-prau.jpg"
+      }
+    ],
+    "ratios": [
+      60,
+      40
+    ],
+    "price": 44000,
+    "kg": 176000,
+    "metrics": [
+      1,
+      8.2,
+      10,
+      2.9,
+      9.6,
+      6.8
+    ],
+    "notes": [
+      "Chocolate",
+      "Sweet Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "hpp": {
+      "cupsPerKg": 55.55555555555556,
+      "coffeePerCup": 3168,
+      "directCostPerCup": 7668,
+      "contributionPerCup": 14332,
+      "monthlyCups": 3000,
+      "beanKg": 54,
+      "monthlyContribution": 42996000
+    }
+  }
+}

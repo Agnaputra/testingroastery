@@ -18,8 +18,8 @@ def _cors_origins() -> list[str]:
         return [origin.strip().rstrip("/") for origin in configured_origins.split(",") if origin.strip()]
 
     return [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "http://localhost:3031",
+        "http://127.0.0.1:3031",
         "https://52coffee-roastery.vercel.app",
         "https://52coffee.id",
     ]
