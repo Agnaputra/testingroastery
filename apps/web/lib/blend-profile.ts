@@ -26,10 +26,12 @@ export function calculateBlendPackagePrice(
   const totalRatio = components.reduce((total, component) => total + Math.max(0, component.ratio), 0);
   if (totalRatio === 0) return 0;
 
-  return roundToThousand(components.reduce(
-    (total, component) => total + component.prices[targetWeight] * (Math.max(0, component.ratio) / totalRatio),
+  // Sum price × ratio before division to match checkout rounding at half-thousands.
+  const weightedTotal = components.reduce(
+    (total, component) => total + component.prices[targetWeight] * Math.max(0, component.ratio),
     0,
-  ));
+  );
+  return Math.round(weightedTotal / (totalRatio * 1000)) * 1000;
 }
 
 export function combineBlendTastingNotes(

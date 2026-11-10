@@ -10,7 +10,7 @@ export interface CoffeePointer { x: number; y: number }
 function Composition({ pointer, onReady }: { pointer: React.MutableRefObject<CoffeePointer>; onReady: () => void }) {
   const group = useRef<Group>(null);
   const { invalidate, gl } = useThree();
-  const source = useTexture('/images/bag-grand-reserve-cutout.png');
+  const source = useTexture('/images/bag-maroon-geisha-cutout.png');
   const texture = useMemo(() => {
     const copy = source.clone();
     copy.colorSpace = SRGBColorSpace;

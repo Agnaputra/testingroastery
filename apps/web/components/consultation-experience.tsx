@@ -48,7 +48,7 @@ export function ConsultationExperience() {
           {<><p>Pilih beans, atur komposisi, dan hitung estimasi biaya.</p><ul className="coffee-editorial-highlights"><li>Pilih dan racik beans</li><li>Hitung HPP &amp; margin</li><li>Konsultasi bisnis</li></ul></>}
         </div>
         <div ref={visual} className="coffee-editorial-visual" onPointerMove={event => { const rect = event.currentTarget.getBoundingClientRect(); move((event.clientX - rect.left) / rect.width * 2 - 1, (event.clientY - rect.top) / rect.height * 2 - 1); }} onPointerLeave={() => move(0, 0)} role="img" aria-label="Kemasan asli 52 Coffee Grand Reserve dengan efek kedalaman">
-          <Image src="/images/bag-grand-reserve-cutout.png" alt="" fill sizes="(min-width: 901px) 400px, 180px" className={ready && eligible && visible && !failed ? 'coffee-poster coffee-poster--hidden' : 'coffee-poster'} priority />
+          <Image src="/images/bag-maroon-geisha-cutout.png" alt="" fill sizes="(min-width: 901px) 400px, 180px" className={ready && eligible && visible && !failed ? 'coffee-poster coffee-poster--hidden' : 'coffee-poster'} priority />
           {eligible && visible && !failed && <div className="coffee-editorial-canvas" aria-hidden="true"><SceneBoundary onError={onUnavailable}><Scene pointer={pointer} onReady={onReady} onUnavailable={onUnavailable} /></SceneBoundary></div>}
         </div>
       </div>
