@@ -12,11 +12,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ detail: 'Pesanan tidak ditemukan.' }, { status: 404 });
   }
   try {
-    const bytes = await qrisImage(config.file);
+    const bytes = await qrisImage(config.payload, order.total);
     if (!bytes) return NextResponse.json({ detail: 'QRIS tidak valid.' }, { status: 503 });
-    return new NextResponse(bytes, {
-      headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff', 'Content-Disposition': 'inline' },
+    return new NextResponse(new Uint8Array(bytes), {
+      headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Disposition': request.nextUrl.searchParams.get('download') === '1'
+          ? 'attachment; filename="52coffee-qris.png"' : 'inline' },
     });
   } catch {
     return NextResponse.json({ detail: 'QRIS tidak tersedia.' }, { status: 503 });

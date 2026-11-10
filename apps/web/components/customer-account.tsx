@@ -144,7 +144,7 @@ export function CustomerAccount({ googleEnabled }: { googleEnabled: boolean }) {
       <h2 className="font-editorial text-xl font-bold">Riwayat pembayaran</h2>
       {payments.length ? <ul className="mt-4 divide-y">{payments.map((payment) => <li key={payment.orderId} className="py-3 text-sm">
         <Link href={`/account/orders/${payment.orderId}`} className="font-semibold text-brand-navy underline">#{payment.orderId.slice(0, 8)}</Link>
-        <p>{payment.method === 'qris_static' ? 'QRIS statis' : 'Transfer BCA'} · {payment.status} · {formatRupiah(payment.total)}</p>
+        <p>{payment.method === 'qris_static' ? 'QRIS' : 'Transfer BCA'} · {payment.status} · {formatRupiah(payment.total)}</p>
         {payment.rejectionReason && <p className="text-brand-maroon">Alasan ditolak: {payment.rejectionReason}</p>}
       </li>)}</ul> : <p className="mt-4 text-sm text-on-surface-variant">Belum ada pembayaran.</p>}
     </section>

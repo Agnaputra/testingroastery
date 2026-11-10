@@ -1,6 +1,5 @@
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import path from 'path';
+import QRCode from 'qrcode';
+import { BASE_STATIC_QRIS, generateDynamicQrisPayload } from './qris';
 import type { NextRequest } from 'next/server';
 
 export interface PaymentOrder {
@@ -13,7 +12,7 @@ export interface PaymentOrder {
 export type PaymentMethod = PaymentOrder['paymentMethod'];
 
 type BcaConfig = { method: 'bca_transfer'; account: string; holder: string };
-type QrisConfig = { method: 'qris_static'; merchant: string; file: string };
+type QrisConfig = { method: 'qris_static'; merchant: string; payload: string };
 export function manualPaymentConfig(method: 'bca_transfer'): BcaConfig | null;
 export function manualPaymentConfig(method: 'qris_static'): QrisConfig | null;
 export function manualPaymentConfig(method: PaymentMethod): BcaConfig | QrisConfig | null;
@@ -39,33 +38,24 @@ export function manualPaymentConfig(method: PaymentMethod) {
     return account && /^\d{8,20}$/.test(account) && holder?.trim() ? { method, account, holder } : null;
   }
 
-  const defaultTestQris = ['apps/web/public/qris.jpg', 'public/qris.jpg'].find((candidate) =>
-    existsSync(path.resolve(process.cwd(), candidate))
-  ) ?? 'public/qris.jpg';
-
   const merchant = process.env.PAYMENT_QRIS_MERCHANT ?? (!operational ? process.env.PAYMENT_TEST_QRIS_MERCHANT : undefined) ?? (!operational && isTesting ? 'NANA STORE - TELECOMMUNICATION' : undefined);
-  const file = process.env.PAYMENT_QRIS_PATH ?? (!operational ? process.env.PAYMENT_TEST_QRIS_PATH : undefined) ?? (!operational && isTesting ? defaultTestQris : undefined);
-
-  if (!merchant?.trim() || !file) return null;
-  let resolved = path.resolve(process.cwd(), file);
-  if (!existsSync(resolved) && !operational) {
-    resolved = path.resolve(process.cwd(), defaultTestQris);
+  const payload = process.env.PAYMENT_QRIS_PAYLOAD
+    ?? (!operational ? process.env.PAYMENT_TEST_QRIS_PAYLOAD : undefined)
+    ?? (!operational && isTesting ? BASE_STATIC_QRIS : undefined);
+  if (!merchant?.trim() || !payload) return null;
+  try {
+    generateDynamicQrisPayload(1, payload);
+    return { method, merchant, payload };
+  } catch {
+    return null;
   }
-  if (!existsSync(resolved)) return null;
-  const allowed = [
-    path.resolve(process.cwd(), '.private', 'payment'),
-    path.resolve(process.cwd(), 'public'),
-    path.resolve(process.cwd(), 'apps', 'web', 'public'),
-  ];
-  if (!allowed.some((root) => resolved.startsWith(root + path.sep) || resolved === root)) return null;
-  return { method, merchant, file: resolved };
 }
 
 export async function availablePaymentMethods(): Promise<PaymentMethod[]> {
   const methods: PaymentMethod[] = [];
   if (manualPaymentConfig('bca_transfer')) methods.push('bca_transfer');
   const qris = manualPaymentConfig('qris_static');
-  if (qris && await qrisImage(qris.file)) methods.push('qris_static');
+  if (qris) methods.push('qris_static');
   return methods;
 }
 
@@ -86,9 +76,8 @@ export async function paymentOrder(request: NextRequest, orderId: string): Promi
   }
 }
 
-export async function qrisImage(file: string) {
-  const bytes = await readFile(file).catch(() => null);
-  if (!bytes) return null;
-  if (bytes.length < 100 || bytes.length > 2_000_000 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
-  return bytes;
+export async function qrisImage(payload: string, total: number) {
+  return QRCode.toBuffer(generateDynamicQrisPayload(total, payload), {
+    type: 'png', width: 640, margin: 4, errorCorrectionLevel: 'M',
+  });
 }

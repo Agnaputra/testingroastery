@@ -4,6 +4,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Download } from 'lucide-react';
 import { formatRupiah, WHATSAPP_URL } from '../lib/data';
 import { CustomerApiError, customerApi } from '../lib/customer-api';
 import type { CustomerOrder } from '../lib/customer-types';
@@ -131,8 +132,13 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
           <h2 className="font-editorial text-xl font-bold">Instruksi pembayaran</h2>
           {!paymentInstructions ? <p className="mt-3 text-sm text-on-surface-variant">{order.paymentStatus === 'paid' ? 'Pembayaran telah disetujui admin.' : order.paymentStatus === 'awaiting_verification' ? 'Bukti sedang menunggu verifikasi admin. Jangan membayar ulang.' : order.paymentStatus === 'cancelled' ? 'Pesanan dibatalkan. Jangan melakukan pembayaran.' : 'Instruksi belum tersedia. Jangan melakukan pembayaran.'}</p>
             : paymentInstructions.method === 'qris_static' ? <div className="mt-4 space-y-4 text-sm">
-              <Image src={paymentInstructions.imageUrl} alt="QRIS pembayaran resmi" width={320} height={320} unoptimized className="mx-auto h-auto max-w-full" />
-              <p className="text-center text-xs text-on-surface-variant">Merchant: <strong>{paymentInstructions.merchant}</strong>. Masukkan nominal sesuai total pesanan dan periksa nama merchant sebelum membayar.</p>
+              <Image src={paymentInstructions.imageUrl} alt="QRIS dinamis sesuai total pesanan" width={320} height={320} unoptimized className="mx-auto h-auto max-w-full" />
+              <a href={`${paymentInstructions.imageUrl}&download=1`} download="52coffee-qris.png"
+                className="mx-auto flex min-h-12 w-full max-w-80 items-center justify-center gap-2 rounded-lg bg-brand-navy px-5 text-sm font-bold text-white shadow-sm hover:bg-brand-navy-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy">
+                <Download aria-hidden="true" className="h-5 w-5 shrink-0" />
+                Download QRIS (PNG)
+              </a>
+              <p className="text-center text-xs text-on-surface-variant">Merchant: <strong>{paymentInstructions.merchant}</strong>. Nominal QR mengikuti total pesanan. Periksa nominal dan nama merchant di aplikasi pembayaran sebelum membayar.</p>
             </div> : <div className="mt-4 space-y-3 text-sm">
               <p>Bank: <strong>{paymentInstructions.bank}</strong></p>
               <p>Nomor rekening: <strong className="font-mono text-lg">{paymentInstructions.account}</strong></p>

@@ -56,34 +56,39 @@ export function generateDynamicQrisPayload(
   amount: number,
   baseStatic: string = BASE_STATIC_QRIS
 ): string {
-  // 1. Strip existing CRC (last 8 chars: '6304xxxx')
-  let base = baseStatic.slice(0, -8);
-
-  // 2. Change Point of Initiation Method (Tag 01) from Static ('010211') to Dynamic ('010212')
-  base = base.replace('010211', '010212');
-
-  // 3. Format Tag 54 (Transaction Amount)
-  const cleanAmount = Math.max(1, Math.round(amount));
-  const amountStr = cleanAmount.toString();
-  const amountTag = `54${amountStr.length.toString().padStart(2, '0')}${amountStr}`;
-
-  // 4. Inject Tag 54 immediately after Currency Tag 53 ('5303360')
-  const currencyTag = '5303360';
-  const tag53Idx = base.indexOf(currencyTag);
-
-  if (tag53Idx === -1) {
-    throw new Error('QRIS Payload Format Invalid: Tag 53 (Currency) not found.');
+  if (!Number.isSafeInteger(amount) || amount <= 0 || String(amount).length > 13) {
+    throw new Error('Invalid QRIS transaction amount.');
   }
-
-  const insertPos = tag53Idx + currencyTag.length;
-  let dynamicPayload = base.slice(0, insertPos) + amountTag + base.slice(insertPos);
-
-  // 5. Append Tag 63 (CRC checksum indicator)
-  dynamicPayload += '6304';
-
-  // 6. Calculate & Append CRC-16
-  const checksum = calculateCrc16(dynamicPayload);
-  return dynamicPayload + checksum;
+  if (!/^[\x20-\x7E]+$/.test(baseStatic) || !/6304[0-9A-F]{4}$/.test(baseStatic)
+    || calculateCrc16(baseStatic.slice(0, -4)) !== baseStatic.slice(-4)) {
+    throw new Error('Invalid QRIS payload checksum.');
+  }
+  const fields = new Map<string, string>();
+  let offset = 0;
+  while (offset < baseStatic.length) {
+    const header = baseStatic.slice(offset, offset + 4);
+    if (!/^\d{4}$/.test(header)) throw new Error('Invalid QRIS field.');
+    const tag = header.slice(0, 2);
+    const length = Number(header.slice(2));
+    const value = baseStatic.slice(offset + 4, offset + 4 + length);
+    if (!length || value.length !== length || fields.has(tag)) throw new Error('Invalid QRIS field length.');
+    fields.set(tag, value);
+    offset += 4 + length;
+  }
+  if (fields.get('00') !== '01' || !['11', '12'].includes(fields.get('01') ?? '')
+    || fields.get('53') !== '360' || fields.get('58') !== 'ID'
+    || !fields.get('59') || !fields.get('60')
+    || !Array.from(fields.keys()).some(tag => Number(tag) >= 26 && Number(tag) <= 51)) {
+    throw new Error('Invalid QRIS merchant configuration.');
+  }
+  // Fee-bearing QR codes require an acquirer integration to reconcile the total.
+  if (['55', '56', '57'].some(tag => fields.has(tag))) throw new Error('QRIS fees are not supported.');
+  fields.set('01', '12');
+  fields.set('54', String(amount));
+  fields.delete('63');
+  const body = Array.from(fields).sort(([a], [b]) => Number(a) - Number(b))
+    .map(([tag, value]) => `${tag}${String(value.length).padStart(2, '0')}${value}`).join('') + '6304';
+  return body + calculateCrc16(body);
 }
 
 /**
