@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const fail = (reason: string, status?: number) => {
     console.warn('customer_google_callback_failure', { reason, ...(status ? { status } : {}) });
     fallback.searchParams.set('reason', reason);
-    const response = NextResponse.redirect(fallback);
+    const response = NextResponse.redirect(fallback, { headers: { 'Cache-Control': 'no-store' } });
     response.cookies.set('52coffee_google_flow', '', { httpOnly: true, path: '/', maxAge: 0 });
     return response;
   };
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     if (adminFlow && !await hasAdminBackendSessionToken(data.token)) return fail('not_admin');
     const next = flow.next.startsWith('/') && new URL(flow.next, request.url).origin === request.nextUrl.origin
       ? flow.next : '/account';
-    const response = NextResponse.redirect(new URL(next, request.url));
+    const response = NextResponse.redirect(new URL(next, request.url), { headers: { 'Cache-Control': 'no-store' } });
     response.cookies.set('52coffee_google_flow', '', { httpOnly: true, path: '/', maxAge: 0 });
     if (!flow.link && data.token) {
       response.cookies.set(adminFlow ? ADMIN_SESSION_COOKIE : '52coffee_customer_session', data.token, {

@@ -14,7 +14,7 @@ export function GET(request: NextRequest) {
   try { configuredOrigin = new URL(redirectUri).origin; } catch { /* invalid configuration */ }
   if (configuredOrigin && configuredOrigin !== request.nextUrl.origin) {
     const canonicalStart = new URL(request.nextUrl.pathname + request.nextUrl.search, configuredOrigin);
-    return NextResponse.redirect(canonicalStart);
+    return NextResponse.redirect(canonicalStart, { headers: { 'Cache-Control': 'no-store' } });
   }
   if (!configuredOrigin) {
     return NextResponse.json({ detail: 'Hostname Google OAuth tidak sesuai konfigurasi.' }, { status: 503 });
@@ -34,7 +34,7 @@ export function GET(request: NextRequest) {
     code_challenge: challenge, code_challenge_method: 'S256',
     prompt: 'select_account',
   }).toString();
-  const response = NextResponse.redirect(url);
+  const response = NextResponse.redirect(url, { headers: { 'Cache-Control': 'no-store' } });
   response.cookies.set('52coffee_google_flow', JSON.stringify({ state, nonce, verifier, next, link }), {
     httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
     path: '/', maxAge: 600,
