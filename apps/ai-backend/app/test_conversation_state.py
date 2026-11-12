@@ -42,6 +42,30 @@ def assistant(intent: str, slugs: list[str] | None = None) -> dict[str, object]:
 
 
 class ConversationStateTest(unittest.TestCase):
+    def test_compare_suggestion_uses_latest_active_recommendation_set(self):
+        slugs = [product['slug'] for product in PRODUCTS]
+        history = [assistant('product_recommendation', slugs)]
+        state = derive_conversation_state(history, 'Bandingkan pilihan ini', PRODUCTS)
+        self.assertEqual(state.comparison_product_slugs, slugs)
+        self.assertEqual(state.referenced_product_slugs, slugs)
+        self.assertTrue(state.used_history)
+        self.assertFalse(state.needs_clarification)
+        active_only = derive_conversation_state(history, 'Bandingkan pilihan ini', PRODUCTS[:2])
+        self.assertEqual(active_only.comparison_product_slugs, slugs[:2])
+
+    def test_compare_suggestion_clarifies_without_recommendations_or_after_topic_switch(self):
+        for history in [[], [assistant('product_recommendation', [PRODUCTS[0]['slug']])],
+                        [assistant('product_recommendation', [p['slug'] for p in PRODUCTS]), assistant('website_feature')]]:
+            state = derive_conversation_state(history, 'Bandingkan pilihan ini', PRODUCTS)
+            self.assertTrue(state.needs_clarification)
+            self.assertEqual(state.comparison_product_slugs, [])
+
+    def test_unrelated_comparison_does_not_reuse_recommendations(self):
+        history = [assistant('product_recommendation', [p['slug'] for p in PRODUCTS])]
+        state = derive_conversation_state(history, 'Bandingkan pilihan ini untuk laptop', PRODUCTS)
+        self.assertEqual(state.comparison_product_slugs, [])
+        self.assertFalse(state.used_history)
+
     def test_second_recommendation_stays_focused_across_followups(self) -> None:
         slugs = [product["slug"] for product in PRODUCTS]
         history = [

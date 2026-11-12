@@ -9,6 +9,29 @@ from .rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE, rag_service
 
 
 class CatalogConversationTest(unittest.TestCase):
+    def test_fruity_recommendation_comparison_button_retains_all_three_products(self):
+        passed = GuardrailDecision(True, 'passed_nemo')
+        history = []
+        with patch('app.rag_service.get_publication_overrides', return_value={}), \
+                patch.object(guardrail_service, 'check_input', return_value=passed), \
+                patch.object(guardrail_service, 'check_output', return_value=passed), \
+                patch.object(rag_service, 'openai_api_key', ''), \
+                patch.object(rag_service, '_classify_unrecognized_intent', return_value='off_topic') as classifier, \
+                patch.object(rag_service, 'search_similar_products', return_value=[(p, 1.0) for p in PUBLISHED_COFFEE_KNOWLEDGE_BASE]):
+            for question in ['Bantu saya memilih kopi sesuai selera', 'Manis fruity']:
+                reply = rag_service.generate_barista_response(question, history)
+                history.extend([{'role': 'user', 'content': question}, {'role': 'assistant', 'content': reply['reply'], 'intent': reply['intent'], 'grounding': reply['grounding'], 'recommendedProductSlugs': reply['recommendedProductSlugs']}])
+            selected = reply['recommendedProductSlugs']
+            self.assertEqual(len(selected), 3)
+            compared = rag_service.generate_barista_response('Bandingkan pilihan ini', history)
+            self.assertEqual(compared['intent'], 'product_comparison')
+            self.assertEqual(set(compared['recommendedProductSlugs']), set(selected))
+            self.assertEqual(compared['grounding'], 'catalog')
+            for slug in selected:
+                product = next(p for p in PUBLISHED_COFFEE_KNOWLEDGE_BASE if p['slug'] == slug)
+                self.assertIn(product['name'], compared['reply'])
+            classifier.assert_not_called()
+
     def test_direct_questions(self):
         self.assertEqual(route_chat_intent("website apa ini?"), "website_feature")
         self.assertEqual(route_chat_intent("apa yang bisa saya beli di sini?"), "catalog_query")

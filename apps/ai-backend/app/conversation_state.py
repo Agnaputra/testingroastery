@@ -524,6 +524,18 @@ def derive_conversation_state(
             state.referenced_product_slugs = direct_comparison
             state.focus_product_slug = direct_comparison[-1]
             state.active_topic = "coffee"
+        elif _normalise(message.content) in {
+            'bandingkan pilihan ini', 'bandingkan rekomendasi ini',
+            'bandingkan ketiganya', 'bandingkan semua pilihan',
+        }:
+            if len(state.last_recommended_product_slugs) >= 2:
+                state.comparison_product_slugs = state.last_recommended_product_slugs.copy()
+                state.referenced_product_slugs = state.comparison_product_slugs.copy()
+                state.active_topic = 'coffee'
+                state.used_history = True
+            else:
+                state.needs_clarification = True
+                state.clarification_candidates = state.last_recommended_product_slugs.copy()
         elif ordinal is not None:
             if ordinal < len(state.last_recommended_product_slugs):
                 state.referenced_product_slugs = [state.last_recommended_product_slugs[ordinal]]
@@ -564,7 +576,7 @@ def derive_conversation_state(
                 else:
                     state.needs_clarification = True
                     state.clarification_candidates = alternatives
-            elif _is_comparison(message.content) and len(state.comparison_product_slugs) == 2:
+            elif _is_comparison(message.content) and len(state.comparison_product_slugs) >= 2:
                 state.referenced_product_slugs = state.comparison_product_slugs.copy()
                 state.used_history = True
             elif len(state.referenced_product_slugs) == 1:
