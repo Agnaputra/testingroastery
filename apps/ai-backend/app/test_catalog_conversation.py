@@ -9,6 +9,27 @@ from .rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE, rag_service
 
 
 class CatalogConversationTest(unittest.TestCase):
+    def test_comparison_sends_only_selected_products_to_openai(self):
+        selected = PUBLISHED_COFFEE_KNOWLEDGE_BASE[:3]
+        slugs = [product['slug'] for product in selected]
+        passed = GuardrailDecision(True, 'passed_nemo')
+        candidate = {'intent': 'product_comparison', 'reply': 'Perbandingan: ' + ', '.join(p['name'] for p in selected), 'recommendedProductSlugs': slugs, 'needsClarification': False, 'clarifyingQuestion': None, 'safetyNote': None, 'followUpSuggestions': []}
+        result = Mock()
+        result.json.return_value = {'output': [{'content': [{'type':'output_text','text':json.dumps(candidate)}]}]}
+        with patch('app.rag_service.get_publication_overrides', return_value={}), \
+                patch.object(guardrail_service, 'check_input', return_value=passed), \
+                patch.object(guardrail_service, 'check_output', return_value=passed), \
+                patch.object(rag_service, 'openai_api_key', 'test'), \
+                patch.object(rag_service, 'search_similar_products', side_effect=AssertionError('Exact comparison must not add semantic neighbors')), \
+                patch('app.rag_service.httpx.post', return_value=result) as request:
+            reply = rag_service.generate_barista_response('Bandingkan pilihan ini', [{'role':'assistant','content':'Rekomendasi kopi','intent':'product_recommendation','grounding':'catalog','recommendedProductSlugs':slugs}])
+        self.assertEqual(reply['responseSource'], 'openai')
+        self.assertEqual(set(reply['recommendedProductSlugs']), set(slugs))
+        prompt = request.call_args.kwargs['json']['input'][-1]['content']
+        for product in selected:
+            self.assertIn(product['slug'], prompt)
+        self.assertNotIn(PUBLISHED_COFFEE_KNOWLEDGE_BASE[3]['slug'], prompt)
+
     def test_fruity_recommendation_comparison_button_retains_all_three_products(self):
         passed = GuardrailDecision(True, 'passed_nemo')
         history = []

@@ -39,7 +39,7 @@ _request_price_authority: ContextVar[Optional[Tuple[int, str]]] = ContextVar("re
 BARISTA_OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
-        "intent": {"type": "string", "enum": ["product_recommendation", "catalog_question", "sales_question", "coffee_knowledge", "website_feature", "website_action", "health_sensitive_recommendation", "unsupported"]},
+        "intent": {"type": "string", "enum": ["product_recommendation", "product_comparison", "catalog_question", "sales_question", "coffee_knowledge", "website_feature", "website_action", "health_sensitive_recommendation", "unsupported"]},
         "reply": {"type": "string"},
         "recommendedProductSlugs": {"type": "array", "items": {"type": "string"}},
         "needsClarification": {"type": "boolean"},
@@ -1382,9 +1382,13 @@ class RAGService:
                     guardrail_status="catalog_product_unpublished",
                 )
             search_limit = 10 if conversation_state.budget_max is not None or conversation_state.relative_price_direction else None
-            similar_items = [] if feature_question else self.search_similar_products(
-                retrieval_query, top_k=search_limit, active_products=active_products
-            )
+            if intent == 'product_comparison' and referenced_products:
+                similar_items = [(product, 1.0) for product in referenced_products]
+                record_evaluation(retrieval_source='catalog_direct')
+            else:
+                similar_items = [] if feature_question else self.search_similar_products(
+                    retrieval_query, top_k=search_limit, active_products=active_products
+                )
             if referenced_products and not feature_question:
                 referenced_items = [
                     (product, 1.0)
