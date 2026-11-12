@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 from .config import settings
 from .customer_auth import connection, one
+from .publication_service import get_publication_overrides
 
 router = APIRouter(prefix="/api/catalog/managed", tags=["catalog-management"])
 SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
@@ -99,12 +100,19 @@ def require_admin(key: str):
         raise HTTPException(401, "Akses admin tidak valid.")
 
 
-def public_overlay():
-    with connection() as db, db.cursor() as cur:
-        cur.execute("SELECT slug,product,is_published,deleted_at FROM catalog_managed_products")
-        rows = cur.fetchall()
+def public_overlay(cur=None):
+    if cur is None:
+        with connection() as db, db.cursor() as cursor:
+            return public_overlay(cursor)
+    cur.execute("SELECT slug,product,is_published,deleted_at FROM catalog_managed_products")
+    rows = cur.fetchall()
     return {"managedProducts": [row["product"] for row in rows if row["is_published"] and not row["deleted_at"]],
             "unpublishedSlugs": [row["slug"] for row in rows if not row["is_published"] or row["deleted_at"]]}
+
+
+def public_catalog_snapshot():
+    with connection() as db, db.cursor() as cur:
+        return {"overrides": get_publication_overrides(cur), **public_overlay(cur)}
 
 
 @router.get("")

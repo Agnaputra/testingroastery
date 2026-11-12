@@ -1,22 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { getPublishedProducts } from './catalog-master';
-import {
-  loadCatalogPublicationAuthority,
-  CATALOG_AUTHORITY_PATH,
-  type CatalogPublicationAuthority,
-} from './catalog-publication';
-
-const catalog = getPublishedProducts();
+import type { CatalogPublicationAuthority } from './catalog-publication';
+import { loadSharedCatalogPublication } from './catalog-publication-client';
 
 export function useCatalogPublication(enabled = true) {
   const [authority, setAuthority] = useState<CatalogPublicationAuthority | null>(null);
   const refresh = useCallback(async () => {
-    const result = await loadCatalogPublicationAuthority(
-      catalog,
-      () => fetch(CATALOG_AUTHORITY_PATH, { cache: 'no-store' }),
-    );
+    const result = await loadSharedCatalogPublication();
     setAuthority(result);
     return result;
   }, []);

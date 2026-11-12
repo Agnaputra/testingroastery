@@ -5,18 +5,18 @@ import hmac
 import json
 import re
 import secrets
-from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import psycopg2
-from psycopg2.extras import RealDictCursor, Json
+from psycopg2.extras import Json
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from .config import settings
+from .postgres_pool import connection
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 PHONE = re.compile(r"^[1-9][0-9]{7,14}$")
@@ -24,19 +24,6 @@ SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 IMAGE_TYPES = {"image/jpeg": b"\xff\xd8\xff", "image/png": b"\x89PNG\r\n\x1a\n", "image/webp": b"RIFF"}
 EVENT_FIELDS = "e.id, e.slug, e.title, e.description, e.starts_at, e.ends_at, e.timezone, e.location_type, e.venue_name, e.address, e.meeting_link, e.capacity, e.confirmed_count, e.is_paid, e.price, e.whatsapp, e.instructions, e.registration_status, e.status, e.moderation_status, e.created_at, e.updated_at, e.published_at, e.cover_mime, e.cover_data IS NOT NULL AS has_cover, c.slug AS category_slug, c.name AS category_name, p.slug AS organizer_slug, p.name AS organizer_name, p.bio AS organizer_bio, p.whatsapp AS organizer_whatsapp, p.avatar_data IS NOT NULL AS has_avatar, p.suspended_at IS NOT NULL AS organizer_suspended"
 EVENT_FROM = " FROM events e JOIN event_categories c ON c.id=e.category_id JOIN organizer_profiles p ON p.user_id=e.organizer_id"
-
-
-@contextmanager
-def connection():
-    try:
-        conn = psycopg2.connect(settings.DATABASE_URL, connect_timeout=5, cursor_factory=RealDictCursor)
-    except psycopg2.Error:
-        raise HTTPException(503, "Event database tidak tersedia.")
-    try:
-        with conn:
-            yield conn
-    finally:
-        conn.close()
 
 
 def query_one(cursor, sql, params=()):

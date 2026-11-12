@@ -111,7 +111,8 @@ class PublicationIntegrationTests(unittest.TestCase):
         with patch("app.rag_service.get_publication_overrides", side_effect=psycopg2.OperationalError("test outage")):
             self.assertEqual(self.search(), [])
         with TestClient(app) as client:
-            with patch("app.main.get_publication_overrides", side_effect=psycopg2.OperationalError("test outage")):
+            with patch("app.main.get_publication_overrides", side_effect=psycopg2.OperationalError("test outage")), \
+                    patch("app.catalog_management.get_publication_overrides", side_effect=psycopg2.OperationalError("test outage")):
                 self.assertEqual(client.get("/api/catalog/publication").status_code, 503)
                 self.assertEqual(client.get("/api/products").status_code, 503)
 

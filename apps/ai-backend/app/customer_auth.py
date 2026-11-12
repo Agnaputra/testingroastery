@@ -6,7 +6,6 @@ import re
 import secrets
 import smtplib
 import ssl
-from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from pathlib import Path
@@ -17,10 +16,10 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError
 from authlib.jose import jwt
 from fastapi import APIRouter, Header, HTTPException, Request
-from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel, Field
 
 from .config import settings
+from .postgres_pool import connection
 
 router = APIRouter(prefix="/api/customer", tags=["customer"])
 oauth_logger = logging.getLogger("customer.oauth")
@@ -29,19 +28,6 @@ DUMMY_HASH = password_hasher.hash("dummy-password-never-used")
 EMAIL = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
 PHONE = r"^[1-9][0-9]{7,14}$"
 SESSION_DAYS = 7
-
-
-@contextmanager
-def connection():
-    try:
-        db = psycopg2.connect(settings.DATABASE_URL, connect_timeout=5, cursor_factory=RealDictCursor)
-    except psycopg2.Error as error:
-        raise HTTPException(503, "Database pelanggan tidak tersedia.") from error
-    try:
-        with db:
-            yield db
-    finally:
-        db.close()
 
 
 def digest(value: str) -> str:

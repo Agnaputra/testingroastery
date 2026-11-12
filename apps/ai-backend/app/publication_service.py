@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-import psycopg2
 from psycopg2.extras import execute_values
 
-from .config import settings
+from .postgres_pool import connection as pooled_connection
 
 
 # Admin mapping aliases and knowledge slugs must change as one publication unit.
@@ -39,7 +38,7 @@ def known_publication_slugs() -> set[str]:
 
 
 def ensure_publication_schema() -> None:
-    with psycopg2.connect(settings.DATABASE_URL, connect_timeout=5) as connection:
+    with pooled_connection(cursor_factory=None) as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -52,20 +51,21 @@ def ensure_publication_schema() -> None:
             )
 
 
-def get_publication_overrides() -> dict[str, bool]:
-    with psycopg2.connect(settings.DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT slug, is_published FROM catalog_publication_overrides")
-            overrides = {slug: bool(is_published) for slug, is_published in cursor.fetchall()}
-            for group in PUBLICATION_SLUG_GROUPS:
-                if any(overrides.get(slug) is False for slug in group):
-                    overrides.update({slug: False for slug in group})
-            return overrides
+def get_publication_overrides(cursor=None) -> dict[str, bool]:
+    if cursor is None:
+        with pooled_connection() as db, db.cursor() as cur:
+            return get_publication_overrides(cur)
+    cursor.execute("SELECT slug, is_published FROM catalog_publication_overrides")
+    overrides = {row['slug']: bool(row['is_published']) for row in cursor.fetchall()}
+    for group in PUBLICATION_SLUG_GROUPS:
+        if any(overrides.get(slug) is False for slug in group):
+            overrides.update({slug: False for slug in group})
+    return overrides
 
 
 def set_publication(slugs: list[str], is_published: bool) -> None:
     expanded = sorted({member for slug in slugs for member in _publication_group(slug)})
-    with psycopg2.connect(settings.DATABASE_URL, connect_timeout=5) as connection:
+    with pooled_connection(cursor_factory=None) as connection:
         with connection.cursor() as cursor:
             execute_values(
                 cursor,

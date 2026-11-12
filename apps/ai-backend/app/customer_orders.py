@@ -4,7 +4,7 @@ import hmac
 import json
 import os
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from math import ceil, floor
 from urllib.parse import urlparse
@@ -269,20 +269,41 @@ def checkout_policy(addressId: UUID | None = None, authorization: str = Header(d
 
 
 def order_view(cur, order_id, user_id=None):
-    where = "o.id=%s" + (" AND o.user_id=%s" if user_id else "")
-    params = (str(order_id), str(user_id)) if user_id else (str(order_id),)
-    order = one(cur, "SELECT o.*,u.email,p.display_name FROM customer_orders o "
-                "JOIN customer_users u ON u.id=o.user_id LEFT JOIN customer_profiles p ON p.user_id=u.id "
-                f"WHERE {where}", params)
-    if not order:
+    orders = order_views(cur, user_id=user_id, order_ids=[str(order_id)], limit=1)
+    if not orders:
         raise HTTPException(404, "Pesanan tidak ditemukan.")
-    cur.execute("SELECT sku_id,product_name,variant_label,grind_label,quantity,unit_price,line_total "
-                "FROM customer_order_items WHERE order_id=%s ORDER BY id", (str(order_id),))
+    return orders[0]
+
+
+def order_views(cur, user_id=None, order_ids=None, limit=100):
+    where, params = [], []
+    if user_id:
+        where.append('o.user_id=%s')
+        params.append(str(user_id))
+    if order_ids is not None:
+        where.append('o.id=ANY(%s::uuid[])')
+        params.append(order_ids)
+    clause = ' WHERE ' + ' AND '.join(where) if where else ''
+    cur.execute("SELECT o.*,u.email,p.display_name FROM customer_orders o "
+                "JOIN customer_users u ON u.id=o.user_id LEFT JOIN customer_profiles p ON p.user_id=u.id"
+                + clause + " ORDER BY o.created_at DESC,o.id DESC LIMIT %s", (*params, limit))
+    orders = cur.fetchall()
+    if not orders:
+        return []
+    cur.execute("SELECT order_id,sku_id,product_name,variant_label,grind_label,quantity,unit_price,line_total "
+                "FROM customer_order_items WHERE order_id=ANY(%s::uuid[]) ORDER BY id", ([str(row['id']) for row in orders],))
+    items = defaultdict(list)
+    for row in cur.fetchall():
+        items[str(row['order_id'])].append(row)
+    return [_order_payload(order, items[str(order['id'])]) for order in orders]
+
+
+def _order_payload(order, items):
     lines = [{
         "skuId": row["sku_id"], "productName": row["product_name"],
         "variantLabel": row["variant_label"], "grindLabel": row["grind_label"],
         "quantity": row["quantity"], "unitPrice": row["unit_price"], "lineTotal": row["line_total"],
-    } for row in cur.fetchall()]
+    } for row in items]
     return {
         "id": str(order["id"]), "createdAt": order["created_at"].isoformat(),
         "customerName": order["display_name"] or "", "customerEmail": order["email"],
@@ -396,8 +417,7 @@ def list_orders(authorization: str = Header(default="")):
         expire_unpaid(cur)
         user = current_user(cur, authorization)
         require_tester(user)
-        cur.execute("SELECT id FROM customer_orders WHERE user_id=%s ORDER BY created_at DESC LIMIT 100", (user["id"],))
-        return [order_view(cur, row["id"], user["id"]) for row in cur.fetchall()]
+        return order_views(cur, user_id=user['id'], limit=100)
 
 
 @router.get("/orders/{order_id}")

@@ -29,7 +29,7 @@ class AdminOverviewTest(unittest.TestCase):
             with patch('app.customer_payments.connection', return_value=nullcontext(db)), \
                     patch('app.customer_payments.require_test_commerce'), \
                     patch('app.customer_payments.require_admin'), \
-                    patch('app.customer_payments.order_view', side_effect=lambda cur, oid: {'id': oid}):
+                    patch('app.customer_payments.order_views', return_value=[{'id': str(i)} for i in range(5)]):
                 result = admin_overview('', '')
             metrics = result['metrics']
             self.assertEqual(metrics['totalOrdersCount'], 213)

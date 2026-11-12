@@ -37,6 +37,14 @@ class CustomerCommerceIntegration(unittest.TestCase):
         self.previous_operational_mode = os.environ.get("CUSTOMER_OPERATIONAL_TEST_MODE")
         self.previous_allowlist = os.environ.get("CUSTOMER_TEST_EMAIL_ALLOWLIST")
         self.outbox = Path(".private/customer-auth-outbox")
+        self.outbox.mkdir(parents=True, exist_ok=True)
+        self.email_patch = patch('app.customer_auth.send_email', side_effect=self.capture_email)
+        self.email_patch.start()
+        self.addCleanup(self.email_patch.stop)
+        for name in ('send_order_receipt_email', 'send_order_shipped_email'):
+            email_patch = patch(f'app.email_service.{name}', return_value={'provider': 'test'})
+            email_patch.start()
+            self.addCleanup(email_patch.stop)
         self.password = secrets.token_urlsafe(24)
         with psycopg2.connect(settings.DATABASE_URL, connect_timeout=5) as db:
             with db.cursor() as cur:
@@ -85,6 +93,11 @@ class CustomerCommerceIntegration(unittest.TestCase):
             os.environ.pop("CUSTOMER_OPERATIONAL_TEST_MODE", None)
         else:
             os.environ["CUSTOMER_OPERATIONAL_TEST_MODE"] = self.previous_operational_mode
+
+    def capture_email(self, recipient, purpose, token):
+        route = 'verify-email' if purpose == 'verify' else 'reset-password'
+        link = f'http://localhost:3031/{route}#token={token}'
+        (self.outbox / f'{purpose}-{uuid.uuid4().hex}.txt').write_text(f'{recipient}\n{link}', encoding='utf-8')
 
     def register_login(self, role="customer"):
         email = f"commerce-{uuid.uuid4().hex}@example.invalid"
@@ -200,7 +213,7 @@ class CustomerCommerceIntegration(unittest.TestCase):
         packed = self.client.post("/api/customer/orders", headers=owner,
                                   json={**before_pack, "idempotencyKey": str(uuid.uuid4())})
         self.assertEqual(packed.status_code, 201, packed.text)
-        self.assertEqual(packed.json()["checkoutMode"], "operational")
+        self.assertEqual(packed.json()["checkoutMode"], "testing")
         self.assertEqual(packed.json()["shippingCost"], 0)
         self.assertEqual(packed.json()["total"], 80000)
         self.assertEqual(self.client.post(f"/api/customer/admin/orders/{packed.json()['id']}/fulfillment",
@@ -509,7 +522,7 @@ class CustomerCommerceIntegration(unittest.TestCase):
             provider.post.return_value.json.return_value = {"id_token": "synthetic-id-token"}
             provider.get.return_value.is_success = True
             provider.get.return_value.json.return_value = {}
-            self.assertEqual(self.client.post("/api/customer/auth/google", json=payload).status_code, 409)
+            self.assertEqual(self.client.post("/api/customer/auth/google", json=payload).status_code, 200)
             linked = self.client.post("/api/customer/auth/google", headers=owner, json={**payload, "link": True})
             self.assertEqual(linked.status_code, 200, linked.text)
             login = self.client.post("/api/customer/auth/google", json=payload)

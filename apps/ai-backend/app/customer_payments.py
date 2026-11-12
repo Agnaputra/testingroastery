@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from pypdf import PdfReader
 
 from .customer_auth import connection, current_user, one
-from .customer_orders import order_view, require_test_commerce, require_tester, expire_unpaid, release_inventory, payment_hours
+from .customer_orders import order_view, order_views, require_test_commerce, require_tester, expire_unpaid, release_inventory, payment_hours
 from .events import admin_key
 
 router = APIRouter(prefix="/api/customer", tags=["customer"])
@@ -140,8 +140,7 @@ def admin_orders(authorization: str = Header(default=""), x_admin_key: str = Hea
     with connection() as db, db.cursor() as cur:
         require_admin(cur, authorization, x_admin_key)
         expire_unpaid(cur)
-        cur.execute("SELECT id FROM customer_orders ORDER BY created_at DESC LIMIT 200")
-        return [order_view(cur, row["id"]) for row in cur.fetchall()]
+        return order_views(cur, limit=200)
 
 
 @router.get("/admin/payment-summary")
@@ -184,8 +183,7 @@ def admin_overview(authorization: str = Header(default=""), x_admin_key: str = H
             ORDER BY sum(i.quantity) DESC,i.sku_id LIMIT 4
         """)
         top_products = cur.fetchall()
-        cur.execute("SELECT id FROM customer_orders ORDER BY created_at DESC,id DESC LIMIT 5")
-        recent_orders = [order_view(cur, row['id']) for row in cur.fetchall()]
+        recent_orders = order_views(cur, limit=5)
         return {"metrics": metrics, "topProducts": top_products, "recentOrders": recent_orders}
 
 

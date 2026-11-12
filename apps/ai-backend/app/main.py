@@ -27,7 +27,8 @@ from .customer_account import router as customer_account_router
 from .customer_orders import router as customer_orders_router
 from .customer_payments import router as customer_payments_router
 from .customer_operations import router as customer_operations_router
-from .catalog_management import router as catalog_management_router, public_overlay
+from .catalog_management import router as catalog_management_router, public_overlay, public_catalog_snapshot
+from .postgres_pool import pool as request_database_pool
 from evaluation.trace import capture
 
 app = FastAPI(
@@ -56,6 +57,11 @@ app.add_middleware(
 @app.on_event("startup")
 def initialise_publication_store():
     ensure_publication_schema()
+
+
+@app.on_event("shutdown")
+def close_request_database_pool():
+    request_database_pool.dispose()
 
 @app.get("/")
 def root():
@@ -114,7 +120,7 @@ async def chat_with_barista(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Barista service tidak tersedia. Silakan coba lagi.")
 
 @app.post("/api/search", response_model=SearchResponse)
-async def search_coffee_catalog(request: SearchRequest):
+def search_coffee_catalog(request: SearchRequest):
     """
     Semantic vector search for coffee products by tasting notes or queries
     """
@@ -138,7 +144,7 @@ async def search_coffee_catalog(request: SearchRequest):
         raise HTTPException(status_code=500, detail="Pencarian katalog tidak tersedia. Silakan coba lagi.")
 
 @app.get("/api/products")
-async def get_all_products():
+def get_all_products():
     """
     Returns full authentic 52 Coffee & Roastery knowledge data
     """
@@ -157,15 +163,15 @@ async def get_all_products():
 
 
 @app.get("/api/catalog/publication")
-async def get_catalog_publication():
+def get_catalog_publication():
     try:
-        return {"overrides": get_publication_overrides(), **public_overlay()}
+        return public_catalog_snapshot()
     except Exception:
         raise HTTPException(status_code=503, detail="Status katalog tidak tersedia.")
 
 
 @app.patch("/api/catalog/publication")
-async def update_catalog_publication(
+def update_catalog_publication(
     request: PublicationUpdateRequest,
     x_admin_key: str = Header(default=""),
 ):
