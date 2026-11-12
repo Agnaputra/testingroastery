@@ -1,10 +1,7 @@
 'use client';
 
-import { usesCustomerCommerce } from '../../../lib/customer-commerce-mode';
-
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   ArrowUpRight,
   Clock,
@@ -13,7 +10,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { formatRupiah } from '../../../lib/data';
-import { AdminVerifiedPayments } from '../../admin-real-orders';
+import { LoadingState } from '../../ui/loading-state';
+import { paymentLabels, fulfillmentLabels } from '../../../lib/customer-order-labels';
 import { useAdminPortalContext } from '../admin-context';
 import type { AdminMetrics, AdminCatalogStats } from '../types';
 
@@ -22,57 +20,19 @@ interface AdminOverviewTabProps {
   catalogStats: AdminCatalogStats;
 }
 
-const FEATURED_ROASTS = [
-  {
-    name: 'Ijen Carbonic Maceration (Asmara)',
-    origin: 'Bondowoso, Jawa Timur',
-    process: 'Anaerobic Natural',
-    roastProfile: 'Light-Medium Filter',
-    notes: 'Strawberry candy, floral, winey finish',
-    volume: '48 pouch',
-    imageUrl: '/images/bag-walida.jpg',
-  },
-  {
-    name: 'Sumbing Supernova Wash (Celestia)',
-    origin: 'Temanggung, Jawa Tengah',
-    process: 'Double Washed',
-    roastProfile: 'Light Filter',
-    notes: 'Peach, bergamot, honeysuckle',
-    volume: '36 pouch',
-    imageUrl: '/images/bag-sumbing.jpg',
-  },
-  {
-    name: 'Puntang Natural Aromanis',
-    origin: 'Gunung Puntang, Jawa Barat',
-    process: 'Slow Dry Natural',
-    roastProfile: 'Medium Filter',
-    notes: 'Tropical fruit, jackfruit, brown sugar',
-    volume: '29 pouch',
-    imageUrl: '/images/bag-prau.jpg',
-  },
-  {
-    name: 'Magnum Sidra Colombia (Soberano)',
-    origin: 'Huila, Colombia',
-    process: 'Thermal Shock Yeast',
-    roastProfile: 'Nordic Filter',
-    notes: 'Pink guava, apricot, jasmine blossom',
-    volume: '18 tube',
-    imageUrl: '/images/bag-grand-reserve.jpg',
-  },
-];
-
 export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProps) {
-  const { orders } = useAdminPortalContext();
-  const recentOrders = orders.slice(0, 5);
-
-  const pendingCount = orders.filter((o) => o.status === 'pending').length;
-  const roastingCount = orders.filter((o) => o.status === 'roasting').length;
-  const shippedCount = orders.filter((o) => o.status === 'shipped').length;
-  const completedCount = orders.filter((o) => o.status === 'completed').length;
+  const { overview, overviewError, refreshOverview, publicationLoaded } = useAdminPortalContext();
+  if (overviewError) return <div role="alert" className="rounded-xl border border-brand-maroon/25 bg-white p-6 text-sm">{overviewError} <button type="button" className="ml-2 min-h-11 underline" onClick={() => void refreshOverview()}>Coba lagi</button></div>;
+  if (!overview) return <LoadingState label="Memuat ringkasan operasional…" />;
+  const { recentOrders, topProducts } = overview;
+  const { waitingPaymentCount: pendingCount, roastingCount, shippedOrdersCount: shippedCount, completedCount } = metrics;
 
   return (
     <div className="space-y-8">
-      {usesCustomerCommerce && <AdminVerifiedPayments />}
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-on-surface-variant">
+        <p>{metrics.totalOrdersCount} pesanan tersimpan · {metrics.nonOperationalCount} pesanan pengujian / mode tidak diketahui, dikecualikan dari omzet production.</p>
+        <button type="button" onClick={() => void refreshOverview()} className="min-h-11 rounded-md border border-border-subtle px-4 font-semibold text-brand-navy">Perbarui data</button>
+      </div>
 
       {/* 1. Unified Operational Metrics Strip (Apple Mac-style Executive Bar) */}
       <section aria-label="Metrik Operasional" className="rounded-xl border border-border-subtle bg-white shadow-xs">
@@ -89,7 +49,7 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
               <span className="text-xs text-on-surface-variant font-medium">order</span>
             </div>
             <p className="mt-1 text-[11px] text-brand-maroon font-medium">
-              {roastingCount > 0 ? `${roastingCount} dalam mesin sangrai` : 'Belum ada batch berjalan'}
+              {metrics.processingCount} diproses · {roastingCount} berstatus disangrai
             </p>
           </div>
 
@@ -116,27 +76,27 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
             </span>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="font-mono text-2xl font-bold tracking-tight text-brand-charcoal sm:text-3xl tabular-nums">
-                {catalogStats.published}
+                {publicationLoaded ? catalogStats.published : '—'}
               </span>
               <span className="text-xs text-on-surface-variant font-medium">/ {catalogStats.total} SKU</span>
             </div>
             <p className="mt-1 text-[11px] text-emerald-700 font-medium">
-              {catalogStats.draft} draft siap rilis
+              {publicationLoaded ? `${catalogStats.draft} draft · ${catalogStats.review} perlu ditinjau` : 'Status katalog belum tersedia'}
             </p>
           </div>
 
           {/* Item 4: Omset Tercatat */}
           <div className="p-5">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
-              Omset Tercatat (Sesi)
+              Omzet Produk Production
             </span>
             <div className="mt-2">
               <span className="font-mono text-xl font-bold tracking-tight text-brand-charcoal sm:text-2xl tabular-nums">
-                {formatRupiah(metrics.totalGrossRevenue)}
+                {formatRupiah(metrics.productRevenue)}
               </span>
             </div>
             <p className="mt-1 text-[11px] text-on-surface-variant font-medium">
-              {metrics.totalOrdersCount} transaksi browser
+              {metrics.paidCount} pembayaran disetujui · setelah diskon, di luar ongkir
             </p>
           </div>
         </div>
@@ -150,7 +110,7 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
               Alur Fulfillment &amp; Roasting
             </h2>
             <p className="text-xs text-on-surface-variant">
-              Status perjalanan pesanan pelanggan dari antrean sangrai hingga serah terima ekspedisi
+              Berdasarkan status pesanan tersimpan; antrean proses hingga selesai hanya menghitung pembayaran disetujui
             </p>
           </div>
           <Link
@@ -188,9 +148,9 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
                 {roastingCount}
               </span>
             </div>
-            <p className="mt-3 text-xs font-semibold text-brand-charcoal">2. Jadwal Sangrai</p>
+            <p className="mt-3 text-xs font-semibold text-brand-charcoal">2. Sedang Disangrai</p>
             <p className="mt-0.5 text-[11px] text-on-surface-variant leading-relaxed">
-              Batch roasting &amp; resting biji kopi
+              Jumlah pesanan berstatus roasting, bukan jumlah batch mesin
             </p>
           </div>
 
@@ -235,10 +195,10 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
           <div className="flex items-center justify-between border-b border-border-subtle pb-4">
             <div>
               <h2 className="font-headline text-base font-bold text-brand-charcoal">
-                Katalog Specialty Unggulan
+                Produk Terjual Terbanyak
               </h2>
               <p className="text-xs text-on-surface-variant">
-                Single origin dengan permintaan sangrai tertinggi
+                Kuantitas dari pesanan production dengan pembayaran disetujui
               </p>
             </div>
             <Link
@@ -250,38 +210,26 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
           </div>
 
           <div className="mt-4 divide-y divide-border-subtle">
-            {FEATURED_ROASTS.map((bean) => (
-              <div key={bean.name} className="py-3.5 first:pt-1 last:pb-1">
+            {topProducts.length === 0 && <p className="py-8 text-sm text-on-surface-variant">Belum ada penjualan production yang pembayarannya disetujui.</p>}
+            {topProducts.map((bean) => (
+              <div key={bean.skuId} className="py-3.5 first:pt-1 last:pb-1">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-slate-100 shadow-2xs">
-                      <Image
-                        src={bean.imageUrl}
-                        alt={bean.name}
-                        width={48}
-                        height={48}
-                        className="h-full w-full object-cover"
-                        unoptimized
-                      />
-                    </div>
                     <div className="min-w-0">
                       <h3 className="font-sans text-sm font-semibold text-brand-charcoal">
                         {bean.name}
                       </h3>
                       <p className="text-[11px] text-on-surface-variant mt-0.5">
-                        {bean.origin} • <span className="font-medium text-brand-navy">{bean.process}</span>
-                      </p>
-                      <p className="text-[11px] text-brand-charcoal/70 italic mt-1 font-sans">
-                        {bean.notes}
+                        {bean.variant}
                       </p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-brand-charcoal tabular-nums">
-                      {bean.volume}
+                      {bean.quantity} unit
                     </span>
                     <p className="mt-1 font-mono text-[10px] text-on-surface-variant">
-                      {bean.roastProfile}
+                      {formatRupiah(bean.grossTotal)} sebelum diskon
                     </p>
                   </div>
                 </div>
@@ -311,30 +259,22 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
 
           {recentOrders.length === 0 ? (
             <div className="py-12 text-center text-xs text-on-surface-variant">
-              Belum ada pesanan yang tercatat di sesi browser ini.
+              Belum ada pesanan yang tercatat.
             </div>
           ) : (
             <div className="mt-4 divide-y divide-border-subtle">
               {recentOrders.map((order) => {
-                const statusLabel =
-                  order.status === 'completed'
-                    ? 'Selesai'
-                    : order.status === 'shipped'
-                    ? 'Dikirim'
-                    : order.status === 'roasting'
-                    ? 'Roasting'
-                    : order.status === 'cancelled'
-                    ? 'Batal'
-                    : 'Menunggu';
+                const statusLabel = order.paymentStatus === 'paid'
+                  ? fulfillmentLabels[order.fulfillmentStatus] : paymentLabels[order.paymentStatus];
 
                 const statusColor =
-                  order.status === 'completed'
+                  order.fulfillmentStatus === 'completed'
                     ? 'text-emerald-700 bg-emerald-50'
-                    : order.status === 'shipped'
+                    : order.fulfillmentStatus === 'shipped'
                     ? 'text-brand-navy bg-brand-mist/40'
-                    : order.status === 'roasting'
+                    : order.fulfillmentStatus === 'roasting'
                     ? 'text-blue-700 bg-blue-50'
-                    : order.status === 'cancelled'
+                    : order.fulfillmentStatus === 'cancelled'
                     ? 'text-brand-maroon bg-brand-maroon/10'
                     : 'text-amber-800 bg-amber-50';
 
@@ -350,7 +290,7 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
                         </span>
                       </div>
                       <p className="mt-0.5 text-xs text-on-surface-variant truncate">
-                        {order.customerName} · {order.customerCity}
+                        {order.customerName} · {order.shipping.city} · {order.checkoutMode === 'operational' ? 'Production' : 'Pengujian / mode tidak diketahui'}
                       </p>
                     </div>
 
@@ -359,11 +299,10 @@ export function AdminOverviewTab({ metrics, catalogStats }: AdminOverviewTabProp
                         {formatRupiah(order.total)}
                       </div>
                       <Link
-                        href={`/track?order=${order.id}`}
-                        target="_blank"
+                        href="/admin/orders"
                         className="mt-0.5 inline-block text-[11px] text-brand-navy hover:underline"
                       >
-                        Lacak Status ↗
+                        Kelola pesanan
                       </Link>
                     </div>
                   </div>

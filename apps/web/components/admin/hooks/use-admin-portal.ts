@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { customerApi } from '../../../lib/customer-api';
 import { PRODUCTS } from '../../../lib/data';
 import {
   OWNER_CATALOG_PRODUCTS,
@@ -9,7 +10,7 @@ import {
 } from '../../../lib/catalog-master';
 import { useOrderStore, OrderStatus, CourierType } from '../../../lib/store/useOrderStore';
 import { PRICE_TEST_MODE } from '../../../lib/catalog-publication';
-import type { AdminMetrics, AdminCatalogStats } from '../types';
+import type { AdminMetrics, AdminCatalogStats, AdminOverview } from '../types';
 
 const DEFAULT_PUBLISHED_ROWS = new Set(ACTIVE_CATALOG_MAPPING.map((mapping) => mapping.masterRow));
 
@@ -34,6 +35,23 @@ export function useAdminPortal() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [overviewError, setOverviewError] = useState('');
+  const refreshOverview = useCallback(async () => {
+    try {
+      const data = await customerApi<AdminOverview>('admin/overview');
+      setOverview(data);
+      setOverviewError('');
+    } catch (cause) {
+      setOverviewError(cause instanceof Error ? cause.message : 'Ringkasan belum dapat dimuat.');
+    }
+  }, []);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    void refreshOverview();
+    window.addEventListener('focus', refreshOverview);
+    return () => window.removeEventListener('focus', refreshOverview);
+  }, [isAuthenticated, refreshOverview]);
 
   // Catalog & Publication state
   const [catalogSyncError, setCatalogSyncError] = useState('');
@@ -299,30 +317,17 @@ export function useAdminPortal() {
     });
   };
 
-  const metrics: AdminMetrics = useMemo(() => {
-    const totalGrossRevenue = orders.reduce((acc, o) => acc + o.total, 0);
-    const totalBeansRevenue = orders.reduce((acc, o) => acc + o.subtotal, 0);
-    const totalOrdersCount = orders.length;
-    const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalGrossRevenue / totalOrdersCount) : 0;
-    const estimatedNetProfit = Math.round(totalBeansRevenue * 0.48);
-    const pendingOrdersCount = orders.filter((o) => o.status === 'pending' || o.status === 'roasting').length;
-    const shippedOrdersCount = orders.filter((o) => o.status === 'shipped').length;
-
-    return {
-      totalGrossRevenue,
-      estimatedNetProfit,
-      totalOrdersCount,
-      avgOrderValue,
-      pendingOrdersCount,
-      shippedOrdersCount,
-    };
-  }, [orders]);
+  const metrics: AdminMetrics = overview?.metrics ?? {
+    totalGrossRevenue: 0, totalOrdersCount: 0, pendingOrdersCount: 0, shippedOrdersCount: 0,
+    completedCount: 0, roastingCount: 0, processingCount: 0, waitingPaymentCount: 0,
+    paidCount: 0, productRevenue: 0, nonOperationalCount: 0,
+  };
 
   const catalogStats: AdminCatalogStats = useMemo(() => {
     const published = masterItems.filter((p) => publishedRows.has(p.sourceRow)).length;
     const review = masterItems.filter(
       (p) =>
-        p.prices.filter100g === '-' &&
+        !publishedRows.has(p.sourceRow) && p.prices.filter100g === '-' &&
         p.prices.filter200g === '-' &&
         p.prices.espresso200g === '-' &&
         p.prices.reserve100g === '-'
@@ -365,6 +370,9 @@ export function useAdminPortal() {
     loginError,
     handleLogout,
     metrics,
+    overview,
+    overviewError,
+    refreshOverview,
     catalogStats,
     filteredCatalog,
     catalogSearch,

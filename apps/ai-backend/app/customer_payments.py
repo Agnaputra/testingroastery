@@ -154,6 +154,41 @@ def admin_payment_summary(authorization: str = Header(default=""), x_admin_key: 
         return {"paidCount": row["count"], "paidTotal": row["total"]}
 
 
+@router.get("/admin/overview")
+def admin_overview(authorization: str = Header(default=""), x_admin_key: str = Header(default="")):
+    require_test_commerce()
+    with connection() as db, db.cursor() as cur:
+        require_admin(cur, authorization, x_admin_key)
+        # Historical testing/unknown orders remain visible, but never become production revenue.
+        metrics = one(cur, """
+            SELECT count(*) AS "totalOrdersCount",
+                count(*) FILTER (WHERE payment_status='paid' AND fulfillment_status IN ('pending','processing','roasting')) AS "pendingOrdersCount",
+                count(*) FILTER (WHERE payment_status='paid' AND fulfillment_status='shipped') AS "shippedOrdersCount",
+                count(*) FILTER (WHERE payment_status='paid' AND fulfillment_status='completed') AS "completedCount",
+                count(*) FILTER (WHERE payment_status='paid' AND fulfillment_status='roasting') AS "roastingCount",
+                count(*) FILTER (WHERE payment_status='paid' AND fulfillment_status IN ('pending','processing')) AS "processingCount",
+                count(*) FILTER (WHERE payment_status IN ('pending','awaiting_verification','rejected') AND fulfillment_status<>'cancelled' AND expires_at>now()) AS "waitingPaymentCount",
+                count(*) FILTER (WHERE shipping_snapshot->>'checkoutMode'='operational' AND payment_status='paid' AND fulfillment_status<>'cancelled') AS "paidCount",
+                COALESCE(sum(total) FILTER (WHERE shipping_snapshot->>'checkoutMode'='operational' AND payment_status='paid' AND fulfillment_status<>'cancelled'),0) AS "totalGrossRevenue",
+                COALESCE(sum(subtotal-discount) FILTER (WHERE shipping_snapshot->>'checkoutMode'='operational' AND payment_status='paid' AND fulfillment_status<>'cancelled'),0) AS "productRevenue",
+                count(*) FILTER (WHERE shipping_snapshot->>'checkoutMode' IS DISTINCT FROM 'operational') AS "nonOperationalCount"
+            FROM customer_orders
+        """)
+        cur.execute("""
+            SELECT i.sku_id AS "skuId", i.product_name AS name, i.variant_label AS variant,
+                sum(i.quantity) AS quantity, sum(i.line_total) AS "grossTotal"
+            FROM customer_order_items i JOIN customer_orders o ON o.id=i.order_id
+            WHERE o.payment_status='paid' AND o.fulfillment_status<>'cancelled'
+                AND o.shipping_snapshot->>'checkoutMode'='operational'
+            GROUP BY i.sku_id,i.product_name,i.variant_label
+            ORDER BY sum(i.quantity) DESC,i.sku_id LIMIT 4
+        """)
+        top_products = cur.fetchall()
+        cur.execute("SELECT id FROM customer_orders ORDER BY created_at DESC,id DESC LIMIT 5")
+        recent_orders = [order_view(cur, row['id']) for row in cur.fetchall()]
+        return {"metrics": metrics, "topProducts": top_products, "recentOrders": recent_orders}
+
+
 @router.get("/admin/orders/{order_id}/proof-file")
 def admin_proof(order_id: UUID, authorization: str = Header(default=""), x_admin_key: str = Header(default="")):
     require_test_commerce()
