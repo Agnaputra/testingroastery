@@ -20,7 +20,7 @@ from .chat_router import (
 )
 from .guardrail_service import guardrail_service
 from .action_service import resolve_contextual_action
-from .conversation_state import ConversationState, derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup
+from .conversation_state import ConversationState, derive_conversation_state, find_product_candidates, is_contextual_knowledge_followup, is_comparison_request
 from .models import ProductSearchResult
 from .publication_service import apply_publication_overrides, get_publication_overrides
 from .price_service import PriceError, get_price_snapshot, overlay_knowledge_price, price_mode_requested
@@ -1123,7 +1123,7 @@ class RAGService:
         )
         if conversation_state.comparison_product_slugs and (
             conversation_state.used_history or has_current_active_product
-        ):
+        ) and is_comparison_request(user_query):
             intent = "product_comparison"
         elif (
             conversation_state.current_constraints_changed

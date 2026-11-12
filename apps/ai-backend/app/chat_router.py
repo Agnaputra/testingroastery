@@ -86,7 +86,7 @@ def route_chat_intent(
         return "website_action"
     if any(term in query for term in WEBSITE_FEATURE_TERMS):
         return "website_feature"
-    if any(term in query for term in COMPARISON_TERMS) and (catalog_match or has_coffee_context):
+    if any(term in query for term in COMPARISON_TERMS if term != 'mana yang') and (catalog_match or has_coffee_context):
         return "product_comparison"
     if query.startswith(("apa itu ", "kenapa ", "mengapa ")) and any(
         term in query for term in COFFEE_KNOWLEDGE_TERMS
@@ -97,6 +97,8 @@ def route_chat_intent(
         or any(term in query for term in COFFEE_KNOWLEDGE_TERMS)
     ):
         return "product_recommendation"
+    if 'mana yang' in query and (catalog_match or has_coffee_context):
+        return 'product_comparison'
     if catalog_match or catalog_list:
         return "catalog_query"
     if any(term in query for term in COFFEE_KNOWLEDGE_TERMS):

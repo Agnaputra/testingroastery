@@ -30,9 +30,17 @@ class CatalogConversationTest(unittest.TestCase):
             for slug in selected:
                 product = next(p for p in PUBLISHED_COFFEE_KNOWLEDGE_BASE if p['slug'] == slug)
                 self.assertIn(product['name'], compared['reply'])
+            history.extend([{'role': 'user', 'content': 'Bandingkan pilihan ini'}, {'role': 'assistant', 'content': compared['reply'], 'intent': compared['intent'], 'grounding': compared['grounding'], 'recommendedProductSlugs': compared['recommendedProductSlugs']}])
+            v60 = rag_service.generate_barista_response('Mana yang cocok untuk V60?', history)
+            self.assertEqual(v60['intent'], 'product_recommendation')
+            self.assertNotEqual(v60['reply'], compared['reply'])
+            history.extend([{'role': 'user', 'content': 'Mana yang cocok untuk V60?'}, {'role': 'assistant', 'content': v60['reply'], 'intent': v60['intent'], 'grounding': v60['grounding'], 'recommendedProductSlugs': v60['recommendedProductSlugs']}])
+            repeated = rag_service.generate_barista_response('Mana yang cocok untuk V60?', history[-8:])
+            self.assertEqual(repeated['intent'], 'product_recommendation')
             classifier.assert_not_called()
 
     def test_direct_questions(self):
+        self.assertEqual(route_chat_intent('Mana yang cocok untuk V60?', has_coffee_context=True), 'product_recommendation')
         self.assertEqual(route_chat_intent("website apa ini?"), "website_feature")
         self.assertEqual(route_chat_intent("apa yang bisa saya beli di sini?"), "catalog_query")
         self.assertEqual(route_chat_intent("apa saja produknya?"), "catalog_query")

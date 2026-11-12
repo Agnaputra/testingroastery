@@ -375,7 +375,7 @@ def _has_generic_product_reference(message: str) -> bool:
     return any(term in query for term in GENERIC_PRODUCT_REFERENCES)
 
 
-def _is_comparison(message: str) -> bool:
+def is_comparison_request(message: str) -> bool:
     query = message.lower()
     return any(term in query for term in ("bandingkan", "dibanding", "perbedaan", " versus ", " vs ", "bedanya"))
 
@@ -513,7 +513,7 @@ def derive_conversation_state(
         ordinal = _ordinal_index(message.content)
         generic_reference = _has_generic_product_reference(message.content)
         direct_comparison, ambiguous_comparison = (
-            _comparison_candidates(message.content, products) if _is_comparison(message.content) else ([], [])
+            _comparison_candidates(message.content, products) if is_comparison_request(message.content) else ([], [])
         )
 
         if ambiguous_comparison:
@@ -554,7 +554,7 @@ def derive_conversation_state(
                 selected = candidates[0]
                 state.needs_clarification = False
                 state.clarification_candidates.clear()
-                if _is_comparison(message.content) and previous_refs and selected not in previous_refs:
+                if is_comparison_request(message.content) and previous_refs and selected not in previous_refs:
                     state.comparison_product_slugs = [previous_refs[-1], selected]
                     state.referenced_product_slugs = state.comparison_product_slugs.copy()
                     state.focus_product_slug = selected
@@ -576,7 +576,7 @@ def derive_conversation_state(
                 else:
                     state.needs_clarification = True
                     state.clarification_candidates = alternatives
-            elif _is_comparison(message.content) and len(state.comparison_product_slugs) >= 2:
+            elif is_comparison_request(message.content) and len(state.comparison_product_slugs) >= 2:
                 state.referenced_product_slugs = state.comparison_product_slugs.copy()
                 state.used_history = True
             elif len(state.referenced_product_slugs) == 1:
