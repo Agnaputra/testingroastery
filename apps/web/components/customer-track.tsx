@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -27,7 +29,7 @@ export function CustomerTrack() {
     <p className="font-mono text-xs uppercase tracking-widest text-brand-maroon">52 Coffee & Roastery</p>
     <h1 className="mt-2 font-editorial text-3xl font-bold">Lacak pesanan</h1>
     <p className="mt-2 text-sm text-on-surface-variant">Hanya pesanan milik akun yang sedang masuk yang ditampilkan.</p>
-    {loading && <p role="status" className="mt-8">Memuat status…</p>}
+    {loading && <LoadingState label="Memuat status…" />}
     {error && <p role="alert" className="mt-8 text-brand-maroon">{error}</p>}
     {!loading && !error && !orders.length && <p className="mt-8">Belum ada pesanan.</p>}
     <ul className="mt-8 space-y-4">{orders.map((order) => <li key={order.id} className="rounded-xl border border-border-subtle bg-white p-5">

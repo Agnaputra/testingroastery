@@ -1,3 +1,4 @@
+import { LoadingState } from '@/components/ui/loading-state';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Image from 'next/image';
@@ -21,11 +22,7 @@ export default function BrewingGuidancePage() {
         </div>
       </section>
       <Suspense
-        fallback={
-          <div className="site-container py-16 text-center font-mono text-xs text-on-surface-variant">
-            Memuat Brewing Guidance &amp; Timer Seduh...
-          </div>
-        }
+        fallback={<LoadingState label="Memuat Brewing Guidance & Timer Seduh..." fullPage />}
       >
         <BrewingGuidanceExperience />
       </Suspense>

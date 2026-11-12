@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Search } from 'lucide-react';
@@ -75,7 +77,7 @@ export function EventDiscovery() {
       </div>
       </details>
       {error ? <div role="alert" className="mt-8 rounded-xl border border-brand-maroon/25 bg-brand-maroon/5 p-6 text-sm text-brand-charcoal">{error} <button type="button" className="ml-2 underline" onClick={() => setRetry((current) => current + 1)}>Coba lagi</button></div> : null}
-      {!error && !listing ? <p role="status" className="py-12 text-on-surface-variant">Memuat agenda…</p> : null}
+      {!error && !listing ? <LoadingState label="Memuat agenda…" /> : null}
       {listing && listing.items.length === 0 ? <div className="mt-8 rounded-2xl border border-dashed border-border-subtle bg-surface-bright px-6 py-14 text-center"><h3 className="font-editorial text-xl font-bold text-brand-charcoal">Belum ada event yang sesuai.</h3><p className="mt-2 text-sm text-on-surface-variant">Coba ubah filter atau kembali saat jadwal baru diumumkan.</p></div> : null}
       {listing && listing.items.length > 0 ? <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 editorial-reveal-list">{listing.items.map((item) => <EventCard key={item.id} event={item} />)}</div> : null}
       {listing && listing.total > 12 ? <div className="mt-8 flex items-center justify-center gap-4 text-sm"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="min-h-11 rounded-lg border px-4 disabled:opacity-40">Sebelumnya</button><span>Halaman {page} dari {Math.ceil(listing.total / 12)}</span><button type="button" disabled={page * 12 >= listing.total} onClick={() => setPage(page + 1)} className="min-h-11 rounded-lg border px-4 disabled:opacity-40">Berikutnya</button></div> : null}

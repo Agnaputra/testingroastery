@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { ChangeEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -95,8 +97,9 @@ export function CustomerOrderDetail({ orderId }: { orderId: string }) {
     } finally { setBusy(false); }
   }
 
-  if (loading) return <main className="nav-offset site-container page-section" role="status">Memuat pesanan…</main>;
-  if (!order) return <main className="nav-offset site-container page-section" role={loadError ? 'alert' : 'status'}>{loadError || 'Mengalihkan ke login…'}</main>;
+  if (loading) return <LoadingState fullPage label="Memuat pesanan…" />;
+  if (!order && !loadError) return <LoadingState fullPage label="Mengalihkan ke login…" />;
+  if (!order) return <main className="nav-offset site-container page-section" role="alert">{loadError}</main>;
   const canUpload = order.paymentStatus === 'pending' || order.paymentStatus === 'rejected';
   const paymentInstructions = canUpload ? instructions : null;
   return <main className="nav-offset site-container page-section max-w-4xl">

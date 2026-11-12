@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -119,8 +121,8 @@ export function CustomerCheckout() {
     }
   }
 
-  if (loading) return <main className="nav-offset site-container page-section" role="status">Memeriksa akun dan alamat…</main>;
-  if (!user && !error) return <main className="nav-offset site-container page-section" role="status">Mengalihkan ke login…</main>;
+  if (loading) return <LoadingState fullPage label="Memeriksa akun dan alamat…" />;
+  if (!user && !error) return <LoadingState fullPage label="Mengalihkan ke login…" />;
   if (!user) return <main className="nav-offset site-container page-section" role="alert">{error}</main>;
   return <main className="nav-offset site-container page-section max-w-4xl">
     <Link href="/catalog" className="text-sm text-brand-navy underline">Kembali ke katalog</Link>

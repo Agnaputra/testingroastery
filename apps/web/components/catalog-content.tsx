@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -58,11 +60,7 @@ export default function CatalogContent({
 }) {
   return (
     <Suspense
-      fallback={
-        <div className="p-24 text-center text-xs font-mono uppercase tracking-widest text-on-surface-variant">
-          Memuat Menu Katalog 52 Coffee...
-        </div>
-      }
+      fallback={<LoadingState label="Memuat Menu Katalog 52 Coffee..." fullPage />}
     >
       <CatalogClientContent defaultCategory={defaultCategory} publishedSlugs={publishedSlugs} effectiveProducts={effectiveProducts} publicationUnavailable={publicationUnavailable} />
     </Suspense>

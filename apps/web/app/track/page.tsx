@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { usesCustomerCommerce } from '../../lib/customer-commerce-mode';
 
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
@@ -27,15 +29,11 @@ import { CustomerTrack } from '../../components/customer-track';
 
 export default function TrackOrderPage() {
   if (usesCustomerCommerce) {
-    return <Suspense><CustomerTrack /></Suspense>;
+    return <Suspense fallback={<LoadingState fullPage />}><CustomerTrack /></Suspense>;
   }
   return (
     <Suspense
-      fallback={
-        <div className="text-center py-20 text-xs font-mono text-on-surface-variant">
-          Memuat data pelacakan...
-        </div>
-      }
+      fallback={<LoadingState label="Memuat data pelacakan..." fullPage />}
     >
       <TrackOrderContent />
     </Suspense>

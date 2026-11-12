@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import React, { useRef, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -41,7 +43,7 @@ interface CatalogProductDetailProps {
 
 export default function CatalogProductDetail({ slug, effectiveProduct }: CatalogProductDetailProps) {
   return (
-    <Suspense fallback={<div className="p-20 text-center text-xs font-mono text-gray-400">Memuat detail produk...</div>}>
+    <Suspense fallback={<LoadingState label="Memuat detail produk..." fullPage />}>
       <ProductDetailContent slug={slug} effectiveProduct={effectiveProduct} />
     </Suspense>
   );

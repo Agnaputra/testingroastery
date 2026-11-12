@@ -1,4 +1,7 @@
 'use client';
+
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { paymentLabels, fulfillmentLabels } from '../lib/customer-order-labels';
 
 import { FormEvent, useEffect, useState } from 'react';
@@ -80,8 +83,9 @@ export function CustomerAccount({ googleEnabled }: { googleEnabled: boolean }) {
     router.replace('/login'); router.refresh();
   }
 
-  if (loading) return <main className="nav-offset site-container page-section" role="status">Memuat akun…</main>;
-  if (!user) return <main className="nav-offset site-container page-section" role={error ? 'alert' : 'status'}>{error || 'Mengalihkan ke login…'}</main>;
+  if (loading) return <LoadingState fullPage label="Memuat akun…" />;
+  if (!user && !error) return <LoadingState fullPage label="Mengalihkan ke login…" />;
+  if (!user) return <main className="nav-offset site-container page-section" role="alert">{error}</main>;
   return <main className="nav-offset site-container page-section max-w-5xl">
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div><p className="font-mono text-xs uppercase tracking-widest text-brand-maroon">My Account</p>

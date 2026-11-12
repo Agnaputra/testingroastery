@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -451,7 +453,7 @@ export function BlendBuilderExperience({ mode = 'lab', embedded = false, guided 
     <h2 ref={workspaceHeading} tabIndex={-1} className="guided-heading">{['Pilih beans & atur racikan', 'Parameter & estimasi biaya', 'Siapkan brief konsultasi'][step]}</h2>
   </>;
 
-  if (!authority) return <div className="consultation-experience">{guidedHeader}<p role="status" className="py-8 text-sm text-on-surface-variant">Memuat pilihan beans dan harga katalog...</p></div>;
+  if (!authority) return <div className="consultation-experience">{guidedHeader}<LoadingState label="Memuat pilihan beans dan harga katalog..." /></div>;
 
   if (authority.status !== 'verified' || activeBeans.length < 2) {
     if (isPartnership) {

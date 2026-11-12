@@ -1,3 +1,4 @@
+import { LoadingState } from '@/components/ui/loading-state';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Suspense } from 'react';
@@ -39,11 +40,7 @@ export default function GuidePage() {
       />
 
       <Suspense
-        fallback={
-          <div className="site-container py-16 text-center font-mono text-xs text-on-surface-variant">
-            Memuat Brewing Guidance &amp; Timer Seduh...
-          </div>
-        }
+        fallback={<LoadingState label="Memuat Brewing Guidance & Timer Seduh..." fullPage />}
       >
         <BrewingGuidanceExperience />
       </Suspense>

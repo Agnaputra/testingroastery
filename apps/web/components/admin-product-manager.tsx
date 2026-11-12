@@ -1,5 +1,7 @@
 'use client';
 
+import { LoadingState } from '@/components/ui/loading-state';
+
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { CoffeeProduct, CoffeeSeries, PRODUCTS, formatRupiah } from '../lib/data';
@@ -179,7 +181,7 @@ export function AdminProductManager({ initialSlug, createOnLoad = false }: { ini
 
       {/* Product list */}
       {loading ? (
-        <p className="py-8 text-center text-sm text-on-surface-variant" role="status">Memuat produk…</p>
+        <LoadingState label="Memuat produk…" />
       ) : (
         <ul className="divide-y divide-border-subtle rounded-sm border border-border-subtle bg-white">
           {products.map(({ product, managed: saved, published, deleted }) => {
