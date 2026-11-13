@@ -164,7 +164,7 @@ export function HeroSection() {
                 key={item.src}
                 className={styles.carouselItem}
                 animate={{
-                  x: `${offset * 27}vw`,
+                  x: `calc(${offset} * var(--hero-slide-step, 27vw))`,
                   y: `${distance * 7.2}vh`,
                   rotate: offset * 7,
                   scale,

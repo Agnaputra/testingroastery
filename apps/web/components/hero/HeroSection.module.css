@@ -262,7 +262,7 @@
 }
 
 @media (max-width: 767px) {
-  .hero { min-height: max(100svh, 700px); padding: 7px; }
+  .hero { --hero-slide-step: 70vw; min-height: max(100svh, 700px); padding: 7px; }
   .frame { min-height: calc(max(100svh, 700px) - 14px); border-width: 2px; border-radius: 14px; }
   .frame::before { background-size: 25vw 100%, 100% 20vh; }
   .orderPill { top: 82px; min-height: 42px; padding-inline: 14px; font-size: 11px; }
