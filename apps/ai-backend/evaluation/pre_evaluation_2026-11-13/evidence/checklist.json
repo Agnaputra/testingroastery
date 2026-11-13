@@ -1,0 +1,105 @@
+{
+  "summary": {
+    "PASS": 4,
+    "FAIL": 3,
+    "BLOCKED": 5
+  },
+  "cases": [
+    {
+      "id": "BT01",
+      "status": "PASS",
+      "assessment": "API: tasting notes sesuai record; bukan skor Faithfulness",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT02",
+      "status": "FAIL",
+      "assessment": "Dua varian melewati batas Rp100.000 pada rubrik internal; parser memakai target budget",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT03",
+      "status": "FAIL",
+      "assessment": "Gayo tidak ada di KB; deskripsi umum tetap diberikan tanpa sumber produk",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT04",
+      "status": "PASS",
+      "assessment": "API: panduan V60 15g relevan; coffee_web, bukan RAGAS katalog",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT05",
+      "status": "FAIL",
+      "assessment": "Konteks tiga produk tersimpan; isi meminta klarifikasi tetapi flag false dan pertanyaan null",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT06",
+      "status": "BLOCKED",
+      "assessment": "Kontrak action API benar; eksekusi cart/badge browser belum diuji",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT07",
+      "status": "PASS",
+      "assessment": "Penolakan injection oleh policy deterministik, bukan deteksi NeMo",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT08",
+      "status": "PASS",
+      "assessment": "Respons off_topic membatasi domain kopi",
+      "evidence": "api-smoke.json",
+      "http_status": 200,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT09",
+      "status": "BLOCKED",
+      "assessment": "Browser katalog/varian/cart/subtotal tidak tersedia",
+      "evidence": null,
+      "http_status": null,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT10",
+      "status": "BLOCKED",
+      "assessment": "Checkout sintetis pada lingkungan terisolasi belum dijalankan",
+      "evidence": null,
+      "http_status": null,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT11",
+      "status": "BLOCKED",
+      "assessment": "Upload dan status bukti sintetis belum dijalankan",
+      "evidence": null,
+      "http_status": null,
+      "scope": "internal pilot; not final research"
+    },
+    {
+      "id": "BT12",
+      "status": "BLOCKED",
+      "assessment": "Approval/rejection dan riwayat order sintetis belum dijalankan",
+      "evidence": null,
+      "http_status": null,
+      "scope": "internal pilot; not final research"
+    }
+  ]
+}

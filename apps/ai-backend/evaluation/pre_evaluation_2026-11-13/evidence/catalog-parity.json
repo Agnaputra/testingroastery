@@ -1,0 +1,32 @@
+{
+  "web_published_coffee_count": 31,
+  "backend_published_kb_count": 26,
+  "web_products_without_backend_kb_record": [
+    {
+      "webSlug": "prau-not-chiroso-unchiro",
+      "knowledgeSlug": "prau-not-chiroso-unchiro",
+      "name": "Prau Not-Chiroso Style (Unchiro)"
+    },
+    {
+      "webSlug": "sindoro-lavender-candy",
+      "knowledgeSlug": "sindoro-lavender-candy",
+      "name": "Sindoro Lavender Candy Wash (Lavender)"
+    },
+    {
+      "webSlug": "inmaculada-pink-bourbon-marfil",
+      "knowledgeSlug": "inmaculada-pink-bourbon-marfil",
+      "name": "Inmaculada Pink Bourbon Huila (Marfil)"
+    },
+    {
+      "webSlug": "telemung-honey-robusta-espresso",
+      "knowledgeSlug": "telemung-honey-robusta-espresso",
+      "name": "Telemung Honey Robusta Espresso"
+    },
+    {
+      "webSlug": "gayo-full-wash-arabica-espresso",
+      "knowledgeSlug": "gayo-full-wash-arabica-espresso",
+      "name": "Gayo Full Wash Arabica Espresso"
+    }
+  ],
+  "kb_without_web_mapping": []
+}

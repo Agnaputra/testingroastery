@@ -1,0 +1,186 @@
+{
+  "status": "completed",
+  "study_stage": "pilot",
+  "evaluator_retry_policy": {
+    "maximum_transient_retries": 2,
+    "backoff_seconds": [
+      1,
+      2
+    ]
+  },
+  "created_at": "2026-11-13T05:58:06.351705+00:00",
+  "retrieval": {
+    "runtime": "pgvector",
+    "database_reachable": true,
+    "embedded_chunks": 26,
+    "embedding_model": "text-embedding-3-small"
+  },
+  "evaluator_model": "gpt-4.1-mini",
+  "embedding_model": "text-embedding-3-small",
+  "ragas_version": "0.4.3",
+  "generation_model": "gpt-4.1-mini",
+  "fixture_sha256": "726fab2eef71a6a568a721ce03fafaf1a405aa9e4ad68f1af6983ec9f384f34c",
+  "knowledge_base_version": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+  "code_revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+  "code_version": "5805163384f77c7ad45f646195c124d09beb99cdee92c5924a7fc1b3e1edb7aa",
+  "included_count": 4,
+  "excluded_count": 0,
+  "averages": {
+    "faithfulness": 0.8809523809523809,
+    "answer_relevancy": 0.6001342000612402,
+    "context_precision": 0.9999999999458333,
+    "context_recall": 1.0
+  },
+  "successful_scores": {
+    "faithfulness": 4,
+    "answer_relevancy": 4,
+    "context_precision": 4,
+    "context_recall": 4
+  },
+  "retrieval_averages": {
+    "precision_at_k": 0.41666666666666663,
+    "recall_at_k": 0.75
+  },
+  "cases": [
+    {
+      "id": "fruit-filter",
+      "evaluation_request_id": "42cb0277-f955-40a3-9414-f85acb808385",
+      "timestamp_utc": "2026-11-13T05:56:56.822743+00:00",
+      "code_revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+      "knowledge_base_version": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+      "ragas_version": "0.4.3",
+      "generation_model": "gpt-4.1-mini",
+      "evaluator_model": "gpt-4.1-mini",
+      "embedding_model": "text-embedding-3-small",
+      "question": "Saya ingin kopi filter yang fruity dan wangi melati untuk V60.",
+      "expected_slugs": [
+        "ijen-carbonic-maceration-asmara",
+        "ijen-kenyan-wening"
+      ],
+      "retrieved_slugs": [
+        "buntu-lenta-natural-duharman",
+        "ijen-kenyan-wening",
+        "sindoro-strawberry-selai"
+      ],
+      "recommended_slugs": [
+        "ijen-kenyan-wening"
+      ],
+      "included": true,
+      "context_hash": "d49ca68c33412ce12e42c1648dd8d4a9a01db92def1bd6e0d33d1a66175cfdb0",
+      "retrieval_precision_at_k": 0.3333333333333333,
+      "retrieval_recall_at_k": 0.5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.6584741441944487,
+        "context_precision": 0.9999999999666667,
+        "context_recall": 1.0
+      },
+      "score_errors": {}
+    },
+    {
+      "id": "milk-espresso",
+      "evaluation_request_id": "220c62e8-968d-4b6e-bbda-bffde9005ec6",
+      "timestamp_utc": "2026-11-13T05:57:15.496654+00:00",
+      "code_revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+      "knowledge_base_version": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+      "ragas_version": "0.4.3",
+      "generation_model": "gpt-4.1-mini",
+      "evaluator_model": "gpt-4.1-mini",
+      "embedding_model": "text-embedding-3-small",
+      "question": "Biji apa yang cocok untuk espresso susu dengan cokelat dan body tebal?",
+      "expected_slugs": [
+        "dampit-natural-espresso",
+        "brazil-santos-espresso"
+      ],
+      "retrieved_slugs": [
+        "dampit-natural-espresso",
+        "kintamani-full-wash-arabica-espresso",
+        "brazil-santos-espresso"
+      ],
+      "recommended_slugs": [
+        "dampit-natural-espresso"
+      ],
+      "included": true,
+      "context_hash": "bc381ca751dd3fe710040578c1733c01e66ffc9187bf7af3873b1e8979040fec",
+      "retrieval_precision_at_k": 0.6666666666666666,
+      "retrieval_recall_at_k": 1.0,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.5848859967353037,
+        "context_precision": 0.9999999999666667,
+        "context_recall": 1.0
+      },
+      "score_errors": {}
+    },
+    {
+      "id": "reserve-geisha",
+      "evaluation_request_id": "8ea145c8-9a84-4062-9872-c2267d4b0f31",
+      "timestamp_utc": "2026-11-13T05:57:30.795798+00:00",
+      "code_revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+      "knowledge_base_version": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+      "ragas_version": "0.4.3",
+      "generation_model": "gpt-4.1-mini",
+      "evaluator_model": "gpt-4.1-mini",
+      "embedding_model": "text-embedding-3-small",
+      "question": "Saya mencari Geisha untuk seduhan filter yang floral dan peach.",
+      "expected_slugs": [
+        "el-triunfo-geisha-tolima-aurora"
+      ],
+      "retrieved_slugs": [
+        "el-triunfo-geisha-tolima-aurora",
+        "ijen-kenyan-wening",
+        "ijen-carbonic-maceration-asmara"
+      ],
+      "recommended_slugs": [
+        "el-triunfo-geisha-tolima-aurora"
+      ],
+      "included": true,
+      "context_hash": "25cac85507f81f5d72fd2d21a7795c3e85970b6df85cab7221916225e964fc5c",
+      "retrieval_precision_at_k": 0.3333333333333333,
+      "retrieval_recall_at_k": 1.0,
+      "scores": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": 0.6304852040627343,
+        "context_precision": 0.9999999999,
+        "context_recall": 1.0
+      },
+      "score_errors": {}
+    },
+    {
+      "id": "berry-natural",
+      "evaluation_request_id": "4d949def-df83-4168-a239-64ccf1265c74",
+      "timestamp_utc": "2026-11-13T05:57:48.286976+00:00",
+      "code_revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+      "knowledge_base_version": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+      "ragas_version": "0.4.3",
+      "generation_model": "gpt-4.1-mini",
+      "evaluator_model": "gpt-4.1-mini",
+      "embedding_model": "text-embedding-3-small",
+      "question": "Ada kopi natural dengan rasa strawberry atau berry?",
+      "expected_slugs": [
+        "buntu-lenta-natural-duharman",
+        "sindoro-strawberry-selai"
+      ],
+      "retrieved_slugs": [
+        "puntang-natural-aromanis",
+        "buntu-lenta-natural-duharman",
+        "argopuro-walida-anaerob-arcapada"
+      ],
+      "recommended_slugs": [
+        "puntang-natural-aromanis",
+        "buntu-lenta-natural-duharman"
+      ],
+      "included": true,
+      "context_hash": "662c7f9507ca9a32df926ecef5c21ac5140239c1e2be5180576f11e094ddb1b1",
+      "retrieval_precision_at_k": 0.3333333333333333,
+      "retrieval_recall_at_k": 0.5,
+      "scores": {
+        "faithfulness": 0.8571428571428571,
+        "answer_relevancy": 0.5266914552524742,
+        "context_precision": 0.99999999995,
+        "context_recall": 1.0
+      },
+      "score_errors": {}
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+[
+  {
+    "file": "ragas-20261113-125010.json",
+    "note": "Before availability routing and NeMo verdict fixes",
+    "included": 3,
+    "excluded": 1,
+    "code_version": "837097d30c88e1ed96352a27f5dc20d3c40c1c3d7bc7326a76313d4d3d34e48c",
+    "averages": {
+      "faithfulness": 0.9166666666666666,
+      "answer_relevancy": 0.646639142787122,
+      "context_precision": 0.9999999999444444,
+      "context_recall": 1.0
+    }
+  },
+  {
+    "file": "ragas-20261113-125449.json",
+    "note": "After availability routing fix; before NeMo verdict/prompt fixes",
+    "included": 4,
+    "excluded": 0,
+    "code_version": "837097d30c88e1ed96352a27f5dc20d3c40c1c3d7bc7326a76313d4d3d34e48c",
+    "averages": {
+      "faithfulness": 0.96875,
+      "answer_relevancy": 0.54873808246146,
+      "context_precision": 0.9999999999458333,
+      "context_recall": 1.0
+    }
+  },
+  {
+    "file": "ragas-20261113-125806.json",
+    "note": "After NeMo verdict/prompt fixes; latest pilot, not final research",
+    "included": 4,
+    "excluded": 0,
+    "code_version": "5805163384f77c7ad45f646195c124d09beb99cdee92c5924a7fc1b3e1edb7aa",
+    "averages": {
+      "faithfulness": 0.8809523809523809,
+      "answer_relevancy": 0.6001342000612402,
+      "context_precision": 0.9999999999458333,
+      "context_recall": 1.0
+    }
+  }
+]

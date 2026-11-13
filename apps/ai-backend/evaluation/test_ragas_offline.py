@@ -95,6 +95,7 @@ class RagasOfflineSmoke(unittest.TestCase):
                     patch.object(run_ragas.rag_service, "generate_barista_response", return_value={"reply": "Jawaban sintetis."}) as generate,
                     patch.object(run_ragas, "knowledge_base_version", return_value="pgvector:test"),
                     patch.object(run_ragas, "FIXTURES_PATH", fixture_path),
+                    patch.object(run_ragas, "RESULTS_DIR", Path(directory) / "reports"),
                     patch.object(run_ragas, "capture", side_effect=fake_capture),
                     patch.object(run_ragas, "AsyncOpenAI", return_value=Mock()),
                     patch("ragas.llms.llm_factory", return_value=Mock()),
@@ -104,8 +105,13 @@ class RagasOfflineSmoke(unittest.TestCase):
                     patch("ragas.metrics.collections.ContextPrecisionWithReference", return_value=metric),
                     patch("ragas.metrics.collections.ContextRecall", return_value=metric),
                 ):
-                    with self.assertRaisesRegex(RuntimeError, "Tidak ada fixture pgvector"):
-                        asyncio.run(run_ragas.main())
+                    asyncio.run(run_ragas.main())
+                    reports = list((Path(directory) / "reports").glob("ragas-*.json"))
+                    report = json.loads(reports[-1].read_text(encoding="utf-8"))
+                    self.assertEqual(report["status"], "no_eligible_cases")
+                    self.assertEqual(report["included_count"], 0)
+                    self.assertEqual(report["excluded_count"], 1)
+                    self.assertTrue(all(score is None for score in report["averages"].values()))
                 generate.assert_called_once()
                 metric.ascore.assert_not_called()
 

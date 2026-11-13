@@ -10,11 +10,12 @@ import hashlib
 import json
 import math
 import os
+import httpx
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, APIConnectionError, APITimeoutError, InternalServerError, RateLimitError
 from app.config import settings
 from app.rag_service import rag_service
 from evaluation.trace import FIXTURES_PATH, capture, enabled, knowledge_base_version
@@ -54,16 +55,24 @@ async def score_metrics(metrics: dict, metric_inputs: dict) -> tuple[dict, dict]
     scores = {}
     errors = {}
     for name, metric in metrics.items():
-        try:
-            result = await metric.ascore(**metric_inputs[name])
-            value = float(result.value)
-            lower_bound = -1 if name == "answer_relevancy" else 0
-            if not math.isfinite(value) or not lower_bound <= value <= 1:
-                raise ValueError("invalid_metric_value")
-            scores[name] = value
-        except Exception as error:
-            scores[name] = None
-            errors[name] = type(error).__name__
+        for attempt in range(3):
+            try:
+                result = await metric.ascore(**metric_inputs[name])
+                value = float(result.value)
+                lower_bound = -1 if name == "answer_relevancy" else 0
+                if not math.isfinite(value) or not lower_bound <= value <= 1:
+                    raise ValueError("invalid_metric_value")
+                scores[name] = value
+                break
+            except Exception as error:
+                transient = isinstance(error, (APIConnectionError, APITimeoutError, InternalServerError,
+                                               RateLimitError, httpx.TimeoutException, httpx.NetworkError))
+                if transient and attempt < 2:
+                    await asyncio.sleep(attempt + 1)
+                    continue
+                scores[name] = None
+                errors[name] = type(error).__name__
+                break
     return scores, errors
 
 
@@ -97,6 +106,8 @@ async def main() -> None:
     }
     fixture_bytes = FIXTURES_PATH.read_bytes()
     fixtures = json.loads(fixture_bytes)
+    if not fixtures:
+        raise RuntimeError("Dataset evaluasi kosong.")
     kb_version_before = knowledge_base_version()
     if kb_version_before == "unavailable":
         raise RuntimeError("Snapshot knowledge base tidak dapat diverifikasi.")
@@ -171,10 +182,11 @@ async def main() -> None:
     kb_version_after = knowledge_base_version()
     if kb_version_after != kb_version_before:
         raise RuntimeError("Knowledge base berubah selama evaluasi; hasil dibatalkan.")
-    if not retrieval_precision:
-        raise RuntimeError("Tidak ada fixture pgvector + OpenAI yang layak dinilai RAGAS.")
     RESULTS_DIR.mkdir(exist_ok=True)
     report = {
+        "status": "completed" if retrieval_precision else "no_eligible_cases",
+        "study_stage": "pilot",
+        "evaluator_retry_policy": {"maximum_transient_retries": 2, "backoff_seconds": [1, 2]},
         "created_at": datetime.now(timezone.utc).isoformat(),
         "retrieval": retrieval,
         "evaluator_model": settings.RAGAS_EVALUATOR_MODEL,
@@ -183,14 +195,15 @@ async def main() -> None:
         "generation_model": settings.OPENAI_MODEL,
         "fixture_sha256": hashlib.sha256(fixture_bytes).hexdigest(),
         "knowledge_base_version": kb_version_before,
-        "code_revision": active_trace.data["code_revision"],
-        "code_version": active_trace.data["code_version"],
+        "code_revision": trace["code_revision"],
+        "code_version": trace.get("code_version"),
         "included_count": len(retrieval_precision),
         "excluded_count": len(cases) - len(retrieval_precision),
         "averages": {name: sum(values) / len(values) if values else None for name, values in totals.items()},
+        "successful_scores": {name: len(values) for name, values in totals.items()},
         "retrieval_averages": {
-            "precision_at_k": sum(retrieval_precision) / len(retrieval_precision),
-            "recall_at_k": sum(retrieval_recall) / len(retrieval_recall),
+            "precision_at_k": sum(retrieval_precision) / len(retrieval_precision) if retrieval_precision else None,
+            "recall_at_k": sum(retrieval_recall) / len(retrieval_recall) if retrieval_recall else None,
         },
         "cases": cases,
     }

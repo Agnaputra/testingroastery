@@ -86,15 +86,16 @@ class NemoGuardrailService:
             # check() is NeMo's no-generation validation API; it executes the
             # configured input/output rails without replacing our Responses API.
             result = self._rails.check(messages=[message])
-            self._error = None
-            if hasattr(result, "passed"):
-                return bool(result.passed)
-            if isinstance(result, dict):
-                if "passed" in result:
-                    return bool(result["passed"])
-                if "blocked" in result:
-                    return not bool(result["blocked"])
-            return True
+            status = getattr(result, "status", None)
+            if status == "passed":
+                self._error = None
+                return True
+            if status in {"blocked", "modified"}:
+                # Modified content is not substituted into our Responses API answer.
+                self._error = None
+                return False
+            self._error = "unrecognized_rail_result"
+            return None
         except Exception as error:
             self._error = type(error).__name__
             return None

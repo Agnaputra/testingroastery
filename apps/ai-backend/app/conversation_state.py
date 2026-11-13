@@ -191,7 +191,7 @@ def _append_unique(values: list[str], value: str) -> None:
 
 def _extract_budget(message: str) -> int | None:
     match = re.search(
-        r"(?:budget\s+maksimal|maksimal|maximal|max|di bawah|kurang dari|tidak lebih dari)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
+        r"\b(?:budget\s+maksimal|budget|maksimal|maximal|max|di bawah|kurang dari|tidak lebih dari)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
         message.lower(),
     )
     if not match:
@@ -208,7 +208,7 @@ def _extract_budget(message: str) -> int | None:
 
 def _extract_budget_target(message: str) -> int | None:
     match = re.search(
-        r"(?:budget|sekitar)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
+        r"(?:budget\s+sekitar|sekitar(?:\s+budget)?)\s*(?:rp\.?\s*)?([0-9][0-9.,]*)\s*(ribu|rb|k|juta|jt)?",
         message.lower(),
     )
     if not match:
@@ -260,13 +260,15 @@ def _extract_constraints(
             state.brew_method = method
             mentioned = True
             break
-    budget = _extract_budget(query)
+    budget_target = _extract_budget_target(query)
+    budget = _extract_budget(query) if budget_target is None else None
     if budget is not None:
         state.budget_max = budget
         state.budget_target = None
         mentioned = True
-    elif (budget_target := _extract_budget_target(query)) is not None:
+    elif budget_target is not None:
         state.budget_target = budget_target
+        state.budget_max = None
         mentioned = True
     if (weight := _extract_weight(query)) is not None:
         state.requested_weight_grams = weight

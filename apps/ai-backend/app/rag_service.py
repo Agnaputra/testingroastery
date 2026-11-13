@@ -4,6 +4,7 @@ from contextvars import ContextVar
 from typing import List, Dict, Any, Tuple, Optional, get_args, cast
 import httpx
 import psycopg2
+from fastapi import HTTPException
 from pgvector import Vector
 from pgvector.psycopg2 import register_vector
 
@@ -701,6 +702,10 @@ def _active_catalog_products() -> Tuple[List[Dict[str, Any]], bool]:
         return apply_publication_overrides(PUBLISHED_COFFEE_KNOWLEDGE_BASE, overrides), True
     except (psycopg2.Error, PriceError):
         return [], False
+    except HTTPException as error:
+        if error.status_code != 503:
+            raise
+        return [], False
 
 
 def _runtime_price_fields(product: Dict[str, Any]) -> Dict[str, Any]:
@@ -1240,7 +1245,18 @@ class RAGService:
                 "catalog_query",
                 "conversation",
                 follow_ups=candidate_names,
+                needs_clarification=True,
+                clarifying_question="Produk mana yang kamu maksud?",
                 guardrail_status=input_decision.status,
+            )
+
+        if intent == "product_comparison" and len(referenced_products) < 2:
+            return self._response(
+                "Data katalog untuk kedua produk belum lengkap di knowledge base saya. Sebutkan dua produk yang datanya tersedia agar saya tidak mengarang perbandingan.",
+                intent, "catalog",
+                needs_clarification=True,
+                clarifying_question="Dua produk katalog mana yang ingin kamu bandingkan?",
+                guardrail_status="catalog_comparison_incomplete",
             )
 
         recent_health_question = any(

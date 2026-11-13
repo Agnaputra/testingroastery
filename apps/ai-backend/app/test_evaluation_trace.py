@@ -21,6 +21,16 @@ QUESTION = "Saya ingin kopi filter yang fruity dan wangi melati untuk V60."
 
 
 class EvaluationTraceTest(unittest.TestCase):
+    def test_transient_metric_failure_retries_without_retrying_invalid_scores(self):
+        from unittest.mock import AsyncMock
+        metric = Mock(ascore=AsyncMock(side_effect=[httpx.ReadTimeout("synthetic"), Mock(value=.75)]))
+        with patch("evaluation.run_ragas.asyncio.sleep", new_callable=AsyncMock) as sleep:
+            scores, errors = asyncio.run(score_metrics({"faithfulness": metric}, {"faithfulness": {}}))
+        self.assertEqual(scores, {"faithfulness": .75})
+        self.assertEqual(errors, {})
+        self.assertEqual(metric.ascore.call_count, 2)
+        sleep.assert_awaited_once_with(1)
+
     def test_metric_scores_preserve_missing_and_errors(self) -> None:
         class Metric:
             def __init__(self, value=None, error=None):

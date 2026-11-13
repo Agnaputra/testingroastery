@@ -1,0 +1,48 @@
+{
+  "timestamp_utc": "2026-11-13T04:29:03.843958+00:00",
+  "revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+  "trace_code_revision_function": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+  "file_sha256": {
+    "apps/ai-backend/app/rag_service.py": "228c09bb046657b72431980ba71bf8bfce9269c191a258dae546ba1b592b41d4",
+    "apps/ai-backend/app/guardrail_service.py": "eb190039b53bd355fd98654c473bef05f1dcf346644e8356e83f7dde09f9d724",
+    "apps/ai-backend/app/recommendation_service.py": "646678a849896702ad8092e9e2fb9308ae70348bd8242112b1029774001cd563",
+    "apps/ai-backend/app/chat_router.py": "e4ba537fdbd9f1907cefece1ea8a743edf16f020f41b25dc278c6da15d8bab07",
+    "apps/ai-backend/app/guardrails/config.yml": "41123f70655b831c7458f3db1ae69c2349f2e184d423d0d3a1fb5ad8588d6478",
+    "apps/ai-backend/evaluation/run_ragas.py": "86c64a36e36716e5f4c2e4919146749b2f382849792f38dfabcbd1b6636db4bd",
+    "apps/ai-backend/evaluation/trace.py": "09375e33fa4574a3f9bc1b7b757a8703e08246a2a45b7c9a951fd1ad8657e10e",
+    "apps/ai-backend/evaluation/fixtures.json": "726fab2eef71a6a568a721ce03fafaf1a405aa9e4ad68f1af6983ec9f384f34c",
+    "apps/web/lib/data.ts": "f61ecb6f220577f36ea776ffcbdc3c0fddc9119c0d6b48f9bfb7ae53c9059620",
+    "apps/web/app/api/chat/route.ts": "eab506cd80c495873ad98ee30fb27bbb06d2a4ef947d0a52393cf5c61319c8e5"
+  },
+  "backend_environment_versions": {
+    "ragas": null,
+    "openai": "3.26.0",
+    "nemoguardrails": "0.24.1",
+    "httpx": "0.28.1",
+    "authlib": "1.9.1"
+  },
+  "web_checks": [
+    {
+      "command": "npm run test:virtual-barista",
+      "status": "PASS",
+      "suites": 5,
+      "assertions_reported_by_runner": 37
+    },
+    {
+      "command": "npm run typecheck --prefix apps/web",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run lint --prefix apps/web",
+      "status": "PASS",
+      "exit_code": 0,
+      "output": "No ESLint warnings or errors"
+    }
+  ],
+  "browser": {
+    "status": "BLOCKED",
+    "reason": "Computer Use native pipe and browser access host unavailable"
+  },
+  "writes": "Only local audit artifacts; no deployment, config changes, seed, migration, customer orders or research dataset changes in this task"
+}

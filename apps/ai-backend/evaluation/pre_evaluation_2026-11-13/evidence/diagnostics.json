@@ -1,0 +1,11 @@
+{
+  "budget_query": "Rekomendasikan kopi fruity untuk V60 dengan budget Rp100.000.",
+  "parsed_budget_max": null,
+  "parsed_budget_target": 100000,
+  "source": "conversation_state.py _extract_budget / _extract_budget_target",
+  "database_outage_check": {
+    "result": "HTTPException propagates rather than returning ([], False)",
+    "status_code": 503,
+    "note": "mocked diagnostic, no actual database outage induced"
+  }
+}

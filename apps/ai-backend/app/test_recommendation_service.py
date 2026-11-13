@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from .chat_router import route_chat_intent
@@ -220,7 +221,7 @@ class RecommendationServiceTest(unittest.TestCase):
         class PassingRails:
             @staticmethod
             def check(*, messages):
-                return {"passed": True}
+                return SimpleNamespace(status="passed")
 
         service._initialised = True
         service._rails = PassingRails()

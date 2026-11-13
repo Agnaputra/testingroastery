@@ -1,0 +1,42 @@
+{
+  "timestamp_utc": "2026-11-13T04:25:38.173794+00:00",
+  "branch": "main",
+  "revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+  "python": "3.12.14",
+  "database": {
+    "host": "localhost",
+    "name": "testingroastery",
+    "transaction_read_only": "on",
+    "knowledge_rows": 26,
+    "embedded_rows": 26,
+    "publication_override_rows": 0
+  },
+  "kb_fingerprint": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+  "draft_fingerprint": "pgvector:f36baa310f973e0db0eeed692a357e93a86b85ae0c930a46336516f2d8d29311",
+  "smoke_fixture_count": 4,
+  "candidates": 50,
+  "proposed_final": 40,
+  "categories": {
+    "Product Information": 10,
+    "Product Recommendation": 10,
+    "Brewing Guidance / Recipe Information": 10,
+    "Product Comparison": 10
+  },
+  "validation_status": {
+    "VERIFIED BY SOURCE": 40
+  },
+  "signoff_approvals": {
+    "researcher": 0,
+    "owner": 0
+  },
+  "freeze_blockers": [
+    "Dataset version missing or invalid",
+    "Validation date missing or invalid",
+    "Validator missing: researcher",
+    "Validator missing: owner_52_coffee",
+    "Final reference answers not confirmed",
+    "Source units not confirmed",
+    "Human approvals incomplete: 80 of 80 (PI01:researcher, PI01:owner_52_coffee, PI02:researcher, PI02:owner_52_coffee, PI03:researcher, PI03:owner_52_coffee ...)"
+  ],
+  "frozen_exists": false
+}

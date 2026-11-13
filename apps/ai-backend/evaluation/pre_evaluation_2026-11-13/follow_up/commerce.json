@@ -1,0 +1,16 @@
+{
+  "tests_run": 5,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "status": "PASS",
+  "real_llm": false,
+  "external_network": "blocked; loopback allowed",
+  "suite": "commerce",
+  "timestamp_utc": "2026-11-13T05:48:45.976810+00:00",
+  "database": {
+    "host": "127.0.0.1",
+    "port": 55434,
+    "name": "testingroastery"
+  }
+}

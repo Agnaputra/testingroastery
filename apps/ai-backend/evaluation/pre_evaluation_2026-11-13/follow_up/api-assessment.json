@@ -1,0 +1,16 @@
+{
+  "source": "apps\\ai-backend\\evaluation\\results\\internal-smoke-20261113-124900\\api-smoke.json",
+  "scope": "API contracts only; not UI or full answer faithfulness",
+  "checks": {
+    "all_api_http_200": true,
+    "BT01_structured_tasting_notes": true,
+    "BT02_all_selected_variants_within_budget": true,
+    "BT05_clarification_contract": true,
+    "BT03_missing_data_safe_abstention": true,
+    "BT03_supported_comparison_two_products": true,
+    "BT04_relevant_dose": true,
+    "BT06_action_only_not_browser_execution": true,
+    "BT07_deterministic_injection_refusal": true,
+    "BT08_off_topic": true
+  }
+}

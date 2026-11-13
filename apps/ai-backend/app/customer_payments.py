@@ -1,10 +1,11 @@
 """Private proof storage and audited manual verification."""
 import hashlib
 import io
+import logging
 import warnings
 from uuid import UUID
 
-from fastapi import APIRouter, File, Header, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, Header, HTTPException, UploadFile
 from fastapi.responses import Response
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field
@@ -16,6 +17,17 @@ from .events import admin_key
 
 router = APIRouter(prefix="/api/customer", tags=["customer"])
 MAX_PROOF_BYTES = 5_000_000
+
+
+def send_order_notification(order: dict, tracking_number: str | None = None):
+    try:
+        from .email_service import send_order_receipt_email, send_order_shipped_email
+        if tracking_number is None:
+            send_order_receipt_email(order)
+        else:
+            send_order_shipped_email(order, tracking_number)
+    except Exception as error:
+        logging.getLogger("customer_payments").warning("order_email_failed type=%s", type(error).__name__)
 
 
 def validated_mime(data: bytes) -> str:
@@ -207,7 +219,7 @@ class Decision(BaseModel):
 
 
 @router.post("/admin/orders/{order_id}/payment")
-def decide_payment(order_id: UUID, payload: Decision, authorization: str = Header(default=""),
+def decide_payment(order_id: UUID, payload: Decision, background_tasks: BackgroundTasks, authorization: str = Header(default=""),
                    x_admin_key: str = Header(default="")):
     require_test_commerce()
     if payload.action not in {"approve", "reject"} or (payload.action == "approve" and not payload.receiptConfirmed) \
@@ -235,12 +247,8 @@ def decide_payment(order_id: UUID, payload: Decision, authorization: str = Heade
                     (str(order_id), actor_id, status, payload.reason.strip() if status == "rejected" else None))
         view = order_view(cur, order_id)
         if status == "paid":
-            try:
-                from .email_service import send_order_receipt_email
-                send_order_receipt_email(view)
-            except Exception as err:
-                import logging
-                logging.getLogger("customer_payments").warning("Gagal mengirim email struk: %s", err)
+            # Tasks run after the response, once the database transaction has committed.
+            background_tasks.add_task(send_order_notification, view)
         return view
 
 
@@ -250,7 +258,7 @@ class Fulfillment(BaseModel):
 
 
 @router.post("/admin/orders/{order_id}/fulfillment")
-def update_fulfillment(order_id: UUID, payload: Fulfillment, authorization: str = Header(default=""),
+def update_fulfillment(order_id: UUID, payload: Fulfillment, background_tasks: BackgroundTasks, authorization: str = Header(default=""),
                        x_admin_key: str = Header(default="")):
     require_test_commerce()
     allowed = {
@@ -287,10 +295,5 @@ def update_fulfillment(order_id: UUID, payload: Fulfillment, authorization: str 
                         (str(order_id), actor_id, order["payment_status"]))
         view = order_view(cur, order_id)
         if payload.status == "shipped" and payload.trackingNumber.strip():
-            try:
-                from .email_service import send_order_shipped_email
-                send_order_shipped_email(view, payload.trackingNumber.strip())
-            except Exception as err:
-                import logging
-                logging.getLogger("customer_payments").warning("Gagal mengirim email pengiriman: %s", err)
+            background_tasks.add_task(send_order_notification, view, payload.trackingNumber.strip())
         return view

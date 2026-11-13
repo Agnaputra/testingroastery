@@ -92,6 +92,10 @@ def route_chat_intent(
         term in query for term in COFFEE_KNOWLEDGE_TERMS
     ):
         return "coffee_knowledge"
+    if query.startswith(("ada kopi ", "punya kopi ", "ada beans ")) and any(
+        term in query for term in ("rasa", "notes", "untuk", "dengan")
+    ):
+        return "product_recommendation"
     if any(term in query for term in RECOMMENDATION_TERMS) and (
         catalog_match or has_coffee_context or "budget" in query
         or any(term in query for term in COFFEE_KNOWLEDGE_TERMS)

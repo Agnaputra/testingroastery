@@ -3,6 +3,9 @@
 .private
 .venv
 .venv-*
+**/.venv
+**/.venv-*
 __pycache__
 *.py[cod]
 evaluation/results
+evaluation/pre_evaluation_*

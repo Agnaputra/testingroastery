@@ -1,10 +1,12 @@
 """Transactional email service for 52 Coffee & Roastery.
 
 Supports:
-1. Resend REST API (via RESEND_API_KEY)
-2. Standard SMTP (via CUSTOMER_SMTP_HOST / smtp.resend.com)
-3. Local/Preview outbox fallback (.private/customer-auth-outbox)
+1. Gmail REST API (via CUSTOMER_GMAIL_REFRESH_TOKEN)
+2. Standard SMTP (via CUSTOMER_SMTP_HOST)
+3. Resend REST API (via RESEND_API_KEY)
+4. Local/Preview outbox fallback (.private/customer-auth-outbox)
 """
+import base64
 import logging
 import os
 import secrets
@@ -40,6 +42,8 @@ def get_auth_base_url() -> str:
 
 
 def get_sender() -> str:
+    if os.getenv("CUSTOMER_GMAIL_REFRESH_TOKEN", "").strip():
+        return os.getenv("CUSTOMER_GMAIL_FROM", "").strip()
     smtp_host = os.getenv("CUSTOMER_SMTP_HOST", "").strip()
     smtp_from = os.getenv("CUSTOMER_SMTP_FROM", "").strip()
     smtp_user = os.getenv("CUSTOMER_SMTP_USER", "").strip()
@@ -51,10 +55,48 @@ def get_sender() -> str:
 
 
 def send_transactional_email(to: str, subject: str, html: str, text: str = "") -> dict:
-    """Send transactional email via SMTP relay, Resend API, or dev outbox."""
+    """Send transactional email via Gmail API, SMTP, Resend, or dev outbox."""
     smtp_host = os.getenv("CUSTOMER_SMTP_HOST", "").strip()
     resend_key = os.getenv("RESEND_API_KEY", "").strip()
     sender = get_sender()
+
+    # Gmail API takes precedence over SMTP on hosts that block SMTP egress.
+    refresh_token = os.getenv("CUSTOMER_GMAIL_REFRESH_TOKEN", "").strip()
+    if refresh_token:
+        client_id = os.getenv("CUSTOMER_GMAIL_CLIENT_ID", "").strip()
+        client_secret = os.getenv("CUSTOMER_GMAIL_CLIENT_SECRET", "").strip()
+        if not client_id or not client_secret or not sender:
+            raise HTTPException(503, "Konfigurasi Gmail API belum lengkap.")
+        msg = EmailMessage()
+        msg["From"] = sender
+        msg["To"] = to
+        msg["Subject"] = subject
+        msg.set_content(text or "Silakan gunakan klien email yang mendukung HTML.")
+        msg.add_alternative(html, subtype="html")
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                token_response = client.post("https://oauth2.googleapis.com/token", data={
+                    "client_id": client_id, "client_secret": client_secret,
+                    "refresh_token": refresh_token, "grant_type": "refresh_token",
+                })
+                token_response.raise_for_status()
+                access_token = token_response.json().get("access_token")
+                if not isinstance(access_token, str) or not access_token:
+                    raise ValueError("Missing Gmail access token")
+                response = client.post(
+                    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    json={"raw": base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")},
+                )
+                response.raise_for_status()
+                message_id = response.json().get("id")
+                if not message_id:
+                    raise ValueError("Missing Gmail message ID")
+                logger.info("gmail_email_sent id=%s", message_id)
+                return {"provider": "gmail", "id": message_id}
+        except (httpx.HTTPError, ValueError, KeyError) as error:
+            logger.error("gmail_delivery_failed type=%s", type(error).__name__)
+            raise HTTPException(503, "Email belum dapat dikirim via Gmail API. Periksa izin akun pengirim.") from error
 
     # 1. Standard SMTP (e.g. Gmail SMTP or custom relay - prioritized when configured)
     if smtp_host:
@@ -164,7 +206,7 @@ def send_transactional_email(to: str, subject: str, html: str, text: str = "") -
         logger.info("dev_email_outbox_written file=%s recipient=%s", filename, to)
         return {"provider": "outbox", "file": filename}
 
-    raise HTTPException(503, "Pengiriman email belum dikonfigurasi. Masukkan RESEND_API_KEY di Vercel.")
+    raise HTTPException(503, "Pengiriman email belum dikonfigurasi di backend.")
 
 
 # ---------------------------------------------------------------------------

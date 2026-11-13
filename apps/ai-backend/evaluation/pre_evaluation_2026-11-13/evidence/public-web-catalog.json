@@ -1,0 +1,930 @@
+[
+  {
+    "slug": "ijen-carbonic-maceration-asmara",
+    "knowledgeSlug": "ijen-carbonic-maceration-asmara",
+    "name": "Ijen Carbonic Maceration (Asmara)",
+    "tastingNotes": [
+      "Peach",
+      "Jasmine",
+      "Rich Taste",
+      "Medium Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 65000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 120000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 320000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "ijen-kenyan-wening",
+    "knowledgeSlug": "ijen-kenyan-wening",
+    "name": "Ijen Kenyan (Wening)",
+    "tastingNotes": [
+      "Clean",
+      "Jasmine",
+      "Crisp Citrus"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 59000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 290000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "ijen-anaerob-rahsa",
+    "knowledgeSlug": "ijen-anaerob-rahsa",
+    "name": "Ijen Anaerob (Rahsa)",
+    "tastingNotes": [
+      "Tropical",
+      "Fermented Sweetness",
+      "Complex"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 59000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 290000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "ijen-lactic-laras",
+    "knowledgeSlug": "ijen-lactic-laras",
+    "name": "Ijen Lactic (Laras)",
+    "tastingNotes": [
+      "Mango",
+      "Lychee",
+      "Lime",
+      "Creamy",
+      "Chocolate"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 59000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 290000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "ijen-yellow-bourbon-kencana",
+    "knowledgeSlug": "ijen-yellow-bourbon-kencana",
+    "name": "Ijen Yellow Bourbon (Kencana)",
+    "tastingNotes": [
+      "Honey",
+      "Almond",
+      "Smooth Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 59000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 290000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "ijen-full-wash-washey",
+    "knowledgeSlug": "ijen-full-wash-washey",
+    "name": "Ijen Full Wash (Washey)",
+    "tastingNotes": [
+      "Balanced",
+      "Mild",
+      "Acidity",
+      "Nutty"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 59000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 290000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "buntu-lenta-wash-duharman",
+    "knowledgeSlug": "buntu-lenta-wash-duharman",
+    "name": "Buntu Lenta Wash (Duharman Wash)",
+    "tastingNotes": [
+      "Mandarin",
+      "Honey",
+      "Caramel",
+      "Floral"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 199000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 439000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "buntu-lenta-wine-duharman",
+    "knowledgeSlug": "buntu-lenta-wine-duharman",
+    "name": "Buntu Lenta Wine (Duharman Winey)",
+    "tastingNotes": [
+      "Wine",
+      "Tangerine",
+      "Caramel"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 115000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 215000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 459000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "buntu-lenta-natural-duharman",
+    "knowledgeSlug": "buntu-lenta-natural-duharman",
+    "name": "Buntu Lenta Natural (Duharman Natural)",
+    "tastingNotes": [
+      "Blueberry",
+      "Strawberry",
+      "Bold Body",
+      "Sweetness"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 109000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 199000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 439000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "kalaciri-wash-process",
+    "knowledgeSlug": "kalaciri-wash-process",
+    "name": "Kalaciri Wash Process",
+    "tastingNotes": [
+      "Palm Sugar",
+      "Sweet Spicy",
+      "Chocolate"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 99000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 185000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 399000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "benteng-alla-wash-sembada",
+    "knowledgeSlug": "benteng-alla-wash-sembada",
+    "name": "Benteng Alla Wash (Sembada)",
+    "tastingNotes": [
+      "Lime",
+      "Brown Sugar",
+      "Cashew",
+      "Caramel",
+      "Tamarind"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 115000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 215000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 459000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "puntang-honey-gulali",
+    "knowledgeSlug": "puntang-honey-gulali",
+    "name": "Puntang Honey (Gulali)",
+    "tastingNotes": [
+      "Honey",
+      "Peach",
+      "Chocolate-Like"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 95000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 179000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 379000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "puntang-natural-aromanis",
+    "knowledgeSlug": "puntang-natural-aromanis",
+    "name": "Puntang Natural (Aromanis)",
+    "tastingNotes": [
+      "Pineapple",
+      "Berry",
+      "Jackfruit"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 99000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 185000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 399000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "sumbing-supernova-celestia",
+    "knowledgeSlug": "sumbing-supernova-celestia",
+    "name": "Sumbing Supernova Wash (Celestia)",
+    "tastingNotes": [
+      "Explosive Berry",
+      "Complex",
+      "Candy-Like"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 139000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 259000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "prau-natural-el-davisio-surya",
+    "knowledgeSlug": "prau-natural-el-davisio-surya",
+    "name": "Prau Natural El Davisio Double Mosto (Surya)",
+    "tastingNotes": [
+      "White Floral",
+      "Strawberry",
+      "Candy Mint"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 139000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 259000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "prau-not-chiroso-unchiro",
+    "knowledgeSlug": "prau-not-chiroso-unchiro",
+    "name": "Prau Not-Chiroso Style (Unchiro)",
+    "tastingNotes": [
+      "Tropical",
+      "Floral",
+      "Pineapple-Jasmine"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 139000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 259000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "sindoro-strawberry-selai",
+    "knowledgeSlug": "sindoro-strawberry-selai",
+    "name": "Sindoro Strawberry Triple Yeast (Selai)",
+    "tastingNotes": [
+      "Sweet Jammy Strawberry",
+      "Vanilla"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 119000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 220000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "sindoro-lavender-candy",
+    "knowledgeSlug": "sindoro-lavender-candy",
+    "name": "Sindoro Lavender Candy Wash (Lavender)",
+    "tastingNotes": [
+      "Purple Flower",
+      "Peach",
+      "Guava",
+      "Pome Candy"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 119000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 220000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "argopuro-walida-anaerob-arcapada",
+    "knowledgeSlug": "argopuro-walida-anaerob-arcapada",
+    "name": "Argopuro Natural Anaerob (Arcapada)",
+    "tastingNotes": [
+      "Intensely Sweet",
+      "Boozy",
+      "Candy Like Fruit"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 80000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 150000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "damarkandang-cm-kismis",
+    "knowledgeSlug": "damarkandang-cm-kismis",
+    "name": "Damarkandang Carbonic Maceration Kismis",
+    "tastingNotes": [
+      "Intensely Sweet",
+      "Winey",
+      "Candy Like Cup"
+    ],
+    "variants": [
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 90000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 175000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "el-triunfo-geisha-tolima-aurora",
+    "knowledgeSlug": "el-triunfo-geisha-tolima-aurora",
+    "name": "El Triunfo Geisha Tolima (Aurora)",
+    "tastingNotes": [
+      "Jasmine",
+      "Bergamot",
+      "Peach",
+      "Tea-like",
+      "Crystalline"
+    ],
+    "variants": [
+      {
+        "weightGrams": 16,
+        "weightLabel": "16g (Tasting Dose)",
+        "price": 86000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 50,
+        "weightLabel": "50g",
+        "price": 200000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 380000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 709000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "magnum-sidra-el-vergel-soberano",
+    "knowledgeSlug": "magnum-sidra-el-vergel-soberano",
+    "name": "Magnum Sidra El Vergel Cauca (Soberano)",
+    "tastingNotes": [
+      "Tropical",
+      "Syrup",
+      "Layered Cocoa",
+      "Brown Sugar"
+    ],
+    "variants": [
+      {
+        "weightGrams": 16,
+        "weightLabel": "16g (Tasting Dose)",
+        "price": 72000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 50,
+        "weightLabel": "50g",
+        "price": 180000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 350000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 685000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "sudan-rume-huila-carmin",
+    "knowledgeSlug": "sudan-rume-huila-carmin",
+    "name": "Sudan Rume Huila (Carmin)",
+    "tastingNotes": [
+      "Deepberry",
+      "Wine-Like",
+      "Red Fruit"
+    ],
+    "variants": [
+      {
+        "weightGrams": 16,
+        "weightLabel": "16g (Tasting Dose)",
+        "price": 80000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 50,
+        "weightLabel": "50g",
+        "price": 185000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 360000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 690000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "inmaculada-pink-bourbon-marfil",
+    "knowledgeSlug": "inmaculada-pink-bourbon-marfil",
+    "name": "Inmaculada Pink Bourbon Huila (Marfil)",
+    "tastingNotes": [
+      "Honey Peach",
+      "White Blossom",
+      "Refine Elegance"
+    ],
+    "variants": [
+      {
+        "weightGrams": 16,
+        "weightLabel": "16g (Tasting Dose)",
+        "price": 62000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 50,
+        "weightLabel": "50g",
+        "price": 177000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 348000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 687000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "yemen-haraz-golden-harvest-sahara",
+    "knowledgeSlug": "yemen-haraz-golden-harvest-sahara",
+    "name": "Yemen Haraz Golden Harvest (Sahara)",
+    "tastingNotes": [
+      "Sweet Jammy Strawberry",
+      "Vanilla"
+    ],
+    "variants": [
+      {
+        "weightGrams": 16,
+        "weightLabel": "16g (Tasting Dose)",
+        "price": 59000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 50,
+        "weightLabel": "50g",
+        "price": 165000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 100,
+        "weightLabel": "100g",
+        "price": 229000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 549000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "dampit-natural-espresso",
+    "knowledgeSlug": "dampit-natural-espresso",
+    "name": "Dampit Natural Robusta Espresso",
+    "tastingNotes": [
+      "Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 35000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 85000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 150000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "telemung-honey-robusta-espresso",
+    "knowledgeSlug": "telemung-honey-robusta-espresso",
+    "name": "Telemung Honey Robusta Espresso",
+    "tastingNotes": [
+      "Sweet Chocolate",
+      "Brown Sugar",
+      "Medium Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 35000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 85000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 150000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "kintamani-full-wash-arabica-espresso",
+    "knowledgeSlug": "kintamani-full-wash-arabica-espresso",
+    "name": "Kintamani Full Wash Arabica Espresso",
+    "tastingNotes": [
+      "Chocolate",
+      "Brown Sugar",
+      "Full Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 70000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 135000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 260000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "gayo-full-wash-arabica-espresso",
+    "knowledgeSlug": "gayo-full-wash-arabica-espresso",
+    "name": "Gayo Full Wash Arabica Espresso",
+    "tastingNotes": [
+      "Earthy",
+      "Dark Chocolate",
+      "Full Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 75000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 140000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 265000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "arabica-ijen-full-wash-espresso",
+    "knowledgeSlug": "arabica-ijen-full-wash-espresso",
+    "name": "Arabica Ijen Full Wash Espresso",
+    "tastingNotes": [
+      "Earthy",
+      "Dark Chocolate",
+      "Full Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 60000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 140000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 250000,
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "slug": "brazil-santos-espresso",
+    "knowledgeSlug": "brazil-santos-espresso",
+    "name": "Brazil Santos Espresso",
+    "tastingNotes": [
+      "Earthy",
+      "Dark Chocolate",
+      "Full Body"
+    ],
+    "variants": [
+      {
+        "weightGrams": 200,
+        "weightLabel": "200g",
+        "price": 92000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 500,
+        "weightLabel": "500g",
+        "price": 175000,
+        "inStock": true
+      },
+      {
+        "weightGrams": 1000,
+        "weightLabel": "1kg",
+        "price": 340000,
+        "inStock": true
+      }
+    ]
+  }
+]

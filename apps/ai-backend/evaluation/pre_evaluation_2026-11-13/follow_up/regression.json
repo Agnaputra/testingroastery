@@ -1,0 +1,30 @@
+{
+  "tests_run": 137,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "status": "PASS",
+  "real_llm": false,
+  "external_network": "blocked; loopback allowed",
+  "web_checks": [
+    {
+      "command": "npm.cmd run test:virtual-barista",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run typecheck --prefix apps/web",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run lint --prefix apps/web",
+      "exit_code": 0
+    }
+  ],
+  "suite": "regression",
+  "timestamp_utc": "2026-11-13T05:57:06.041899+00:00",
+  "database": {
+    "host": "127.0.0.1",
+    "port": 55434,
+    "name": "testingroastery"
+  }
+}

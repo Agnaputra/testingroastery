@@ -1,7 +1,9 @@
 import unittest
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import psycopg2
+from fastapi import HTTPException
 
 from .publication_service import apply_publication_overrides
 from .chat_router import route_chat_intent
@@ -33,6 +35,12 @@ class ScopeTest(unittest.TestCase):
         self.assertEqual(route_chat_intent("Bagaimana process scheduler Linux?"), "off_topic")
         self.assertEqual(route_chat_intent("Apa itu natural language processing?"), "off_topic")
         self.assertFalse(is_website_feature_question("Kopi floral untuk V60 apa yang tersedia?"))
+
+    def test_product_availability_with_preferences_uses_catalog_not_web_search(self):
+        for question in ("Ada kopi natural dengan rasa strawberry atau berry?",
+                         "Punya kopi dengan notes jasmine?", "Ada beans untuk V60?"):
+            self.assertEqual(route_chat_intent(question), "product_recommendation")
+        self.assertEqual(route_chat_intent("Kenapa proses natural bisa terasa berry pada kopi?"), "coffee_knowledge")
 
     def test_router_distinguishes_catalog_feature_and_action(self) -> None:
         self.assertEqual(route_chat_intent("Jelaskan Prau Natural", catalog_match=True), "catalog_query")
@@ -131,11 +139,19 @@ class ScopeTest(unittest.TestCase):
         self.assertFalse(available)
         self.assertEqual(products, [])
 
+    def test_publication_pool_unavailable_remains_fail_closed(self) -> None:
+        with patch("app.rag_service.get_publication_overrides", side_effect=HTTPException(503, "offline")):
+            self.assertEqual(_active_catalog_products(), ([], False))
+        with patch("app.rag_service.get_publication_overrides", side_effect=HTTPException(403, "forbidden")):
+            with self.assertRaises(HTTPException) as error:
+                _active_catalog_products()
+        self.assertEqual(error.exception.status_code, 403)
+
     def test_successful_nemo_check_clears_transient_error(self) -> None:
         class PassingRails:
             @staticmethod
             def check(*, messages):
-                return {"passed": True}
+                return SimpleNamespace(status="passed")
 
         service = NemoGuardrailService()
         service._initialised = True
@@ -143,6 +159,22 @@ class ScopeTest(unittest.TestCase):
         service._error = "LLMCallException"
         self.assertTrue(service._check({"role": "user", "content": "Halo"}))
         self.assertIsNone(service._error)
+
+    def test_nemo_runtime_status_blocks_denied_or_modified_original_content(self):
+        service = NemoGuardrailService()
+        service._initialised = True
+        for status, expected in [("passed", True), ("blocked", False), ("modified", False)]:
+            with self.subTest(status=status):
+                service._rails = Mock(check=Mock(return_value=SimpleNamespace(status=status)))
+                self.assertIs(service._check({"role": "user", "content": "Kopi"}), expected)
+
+    def test_unknown_nemo_result_is_degraded_and_never_reported_as_passed(self):
+        service = NemoGuardrailService()
+        service._initialised = True
+        service._rails = Mock(check=Mock(return_value={"unexpected": True}))
+        decision = service.check_input("Kopi fruity untuk V60")
+        self.assertEqual(decision.status, "degraded_custom_input")
+        self.assertEqual(service._error, "unrecognized_rail_result")
 
     def test_nemo_blocked_coffee_prompt_never_reaches_retrieval_or_actions(self) -> None:
         blocked = GuardrailDecision(False, "blocked_input_nemo", "Permintaan ditolak.")

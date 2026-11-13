@@ -1,0 +1,12 @@
+{
+  "tests_run": 120,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "database_access": "localhost testingroastery; default_transaction_read_only=on",
+  "external_network": "blocked; loopback allowed",
+  "real_nemo_or_llm": false,
+  "api_key": "synthetic placeholder; not real",
+  "error_tests": [],
+  "failure_tests": []
+}

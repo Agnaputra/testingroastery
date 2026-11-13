@@ -42,6 +42,40 @@ def assistant(intent: str, slugs: list[str] | None = None) -> dict[str, object]:
 
 
 class ConversationStateTest(unittest.TestCase):
+    def test_plain_budget_is_a_ceiling_and_around_is_explicitly_a_target(self):
+        for query in ("budget Rp100.000", "budget 100 ribu", "budget 100k", "budget maksimal 100 rb"):
+            with self.subTest(query=query):
+                state = derive_conversation_state([], query, PRODUCTS)
+                self.assertEqual(state.budget_max, 100_000)
+                self.assertIsNone(state.budget_target)
+        for query in ("budget sekitar Rp100.000", "sekitar budget 100 ribu", "sekitar Rp100.000"):
+            with self.subTest(query=query):
+                state = derive_conversation_state([], query, PRODUCTS)
+                self.assertIsNone(state.budget_max)
+                self.assertEqual(state.budget_target, 100_000)
+
+    def test_ambiguous_cheaper_followup_marks_the_clarification_contract(self):
+        slugs = [product["slug"] for product in PRODUCTS]
+        passed = GuardrailDecision(True, "passed_nemo")
+        with patch("app.rag_service.get_publication_overrides", return_value={}), \
+                patch.object(guardrail_service, "check_input", return_value=passed):
+            response = rag_service.generate_barista_response(
+                "Ada yang lebih murah dari rekomendasi tadi?", [assistant("product_recommendation", slugs)])
+        self.assertTrue(response["needsClarification"])
+        self.assertTrue(response["clarifyingQuestion"])
+        self.assertFalse(response["actions"])
+
+    def test_missing_comparison_record_does_not_call_generation(self):
+        passed = GuardrailDecision(True, "passed_nemo")
+        with patch("app.rag_service.get_publication_overrides", return_value={}), \
+                patch.object(guardrail_service, "check_input", return_value=passed), \
+                patch("app.rag_service.httpx.post") as generation:
+            response = rag_service.generate_barista_response("Apa perbedaan kopi Prau dan Gayo?")
+        self.assertEqual(response["guardrailStatus"], "catalog_comparison_incomplete")
+        self.assertTrue(response["needsClarification"])
+        self.assertEqual(response["responseSource"], "deterministic")
+        generation.assert_not_called()
+
     def test_compare_suggestion_uses_latest_active_recommendation_set(self):
         slugs = [product['slug'] for product in PRODUCTS]
         history = [assistant('product_recommendation', slugs)]

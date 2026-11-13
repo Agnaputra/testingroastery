@@ -1,0 +1,14 @@
+{
+  "tests_run": 120,
+  "failures": 2,
+  "errors": 0,
+  "skipped": 0,
+  "database_access": "localhost testingroastery; PostgreSQL default_transaction_read_only=on",
+  "external_network": "blocked; loopback allowed",
+  "real_nemo_or_llm": false,
+  "error_tests": [],
+  "failure_tests": [
+    "test_context_is_exact_payload_and_ordered_without_extra_retrieval (app.test_evaluation_trace.EvaluationTraceTest.test_context_is_exact_payload_and_ordered_without_extra_retrieval)",
+    "test_in_memory_openai_and_web_search_have_separate_routes (app.test_evaluation_trace.EvaluationTraceTest.test_in_memory_openai_and_web_search_have_separate_routes)"
+  ]
+}

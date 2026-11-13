@@ -1,0 +1,32 @@
+{
+  "created_at_utc": "2026-11-13T05:57:56.834249+00:00",
+  "branch": "main",
+  "base_revision": "ac834429c287a21a64f6ebdb9bd66edec514854f",
+  "working_tree": "dirty; no commit, push or deployment in this task",
+  "scope": "internal tests and pilot; 26-record KB; no human validation or research final",
+  "code_sha256": {
+    "app/rag_service.py": "1f6ae749f437bfeaf530404b3b058395163d6d34202a8cb578d1723d1f170017",
+    "app/chat_router.py": "cde42a0bd6da226edbff5897a02dc4e0739db4380394c3bea0936c7e0ec4d5b9",
+    "app/conversation_state.py": "975f67b7df820a24174dfaecea3e22211f3a4b9d98cda03030efcd17d2dbd920",
+    "app/recommendation_service.py": "646678a849896702ad8092e9e2fb9308ae70348bd8242112b1029774001cd563",
+    "app/action_service.py": "74ff9349e2bb0b9d5d9360967c68b7b2a7619d6c1dbd6b407eaa7798dc56d914",
+    "app/guardrail_service.py": "ee95fc5c4f428749872d98067f79a7a5f0dd5112d510ccace94501d486153942",
+    "app/guardrails/config.yml": "41123f70655b831c7458f3db1ae69c2349f2e184d423d0d3a1fb5ad8588d6478",
+    "app/guardrails/prompts.yml": "460d9f69f15e8fe0f20db86ee06515d32cb7bb82346e0bb65579ba95bde45bfa",
+    "app/guardrails/rails.colang": "d5931cc90b56ea698ee52ef32ca743ac8ac5c0edc80453ba126cfe64f13f27d3",
+    "app/config.py": "1f5785e66e85f546520736bbb510897f5c4d2130f4a3ce45202c62b0c0fc61af",
+    "evaluation/run_ragas.py": "67f8d540dd46050fd1c4f958481d8c846a28a558378b1810dbb9151f8e132125",
+    "evaluation/trace.py": "09375e33fa4574a3f9bc1b7b757a8703e08246a2a45b7c9a951fd1ad8657e10e",
+    "evaluation/fixtures.json": "726fab2eef71a6a568a721ce03fafaf1a405aa9e4ad68f1af6983ec9f384f34c",
+    "scripts/run_pre_evaluation.py": "f001fcdfa39e716e4663e4493bc821a901870d64f4cc1c873fc6d7d620176cc5"
+  },
+  "database": {
+    "container": "52coffee-preeval-20261113",
+    "host": "127.0.0.1",
+    "port": 55434,
+    "name": "testingroastery",
+    "customer_data_copied": false,
+    "seeded_public_checkout_skus": 126,
+    "public_kb_records": 26
+  }
+}

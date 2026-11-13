@@ -350,10 +350,20 @@ class CustomerCommerceIntegration(unittest.TestCase):
         writer.write(pdf)
         self.assertEqual(self.client.post(f"/api/customer/orders/{order_id}/proof", headers=owner,
                                           files={"file": ("proof.pdf", pdf.getvalue(), "application/pdf")}).status_code, 201)
-        approved = self.client.post(f"/api/customer/admin/orders/{order_id}/payment", headers=admin_headers,
-                                    json={"action": "approve", "receiptConfirmed": True})
+        notification_states = []
+
+        def receipt_after_commit(_order):
+            with psycopg2.connect(settings.DATABASE_URL, connect_timeout=5) as notification_db:
+                with notification_db.cursor() as notification_cur:
+                    notification_cur.execute("SELECT payment_status FROM customer_orders WHERE id=%s", (order_id,))
+                    notification_states.append(notification_cur.fetchone()[0])
+
+        with patch("app.email_service.send_order_receipt_email", side_effect=receipt_after_commit):
+            approved = self.client.post(f"/api/customer/admin/orders/{order_id}/payment", headers=admin_headers,
+                                        json={"action": "approve", "receiptConfirmed": True})
         self.assertEqual(approved.status_code, 200, approved.text)
         self.assertEqual(approved.json()["paymentStatus"], "paid")
+        self.assertEqual(notification_states, ["paid"])
         self.assertEqual(self.client.post(f"/api/customer/admin/orders/{order_id}/fulfillment", headers=admin_headers,
                                           json={"status": "cancelled"}).status_code, 409)
         cancel_payload = {**payload, "idempotencyKey": str(uuid.uuid4())}
