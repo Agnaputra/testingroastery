@@ -11,13 +11,14 @@ import httpx
 from authlib.oauth2.client import OAuth2Client
 from dotenv import dotenv_values
 
-ROOT = Path(__file__).resolve().parents[3]
+BACKEND = Path(__file__).resolve().parents[1]
+ROOT = BACKEND.parent.parent if BACKEND.parent.name == "apps" else BACKEND
 REDIRECT_URI = "http://127.0.0.1:8765/gmail/callback"
 GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.send"
 
 
 def authorize():
-    env = {**dotenv_values(ROOT / "apps/ai-backend/.env"), **os.environ}
+    env = {**dotenv_values(BACKEND / ".env"), **os.environ}
     client_id = env.get("CUSTOMER_GMAIL_CLIENT_ID") or env.get("CUSTOMER_GOOGLE_CLIENT_ID")
     client_secret = env.get("CUSTOMER_GMAIL_CLIENT_SECRET") or env.get("CUSTOMER_GOOGLE_CLIENT_SECRET")
     sender = env.get("CUSTOMER_SMTP_USER", "").strip().lower()
