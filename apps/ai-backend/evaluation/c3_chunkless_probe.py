@@ -5,8 +5,8 @@ import psycopg2
 from psycopg2.extras import Json
 from pgvector.psycopg2 import register_vector
 
-from app.config import settings
-from app.price_service import require_price_test_mode
+from app.core.config import settings
+from app.services.catalog.price_service import require_price_test_mode
 
 
 require_price_test_mode()

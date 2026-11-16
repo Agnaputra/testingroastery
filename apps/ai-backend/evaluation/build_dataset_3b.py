@@ -13,10 +13,10 @@ from pathlib import Path
 
 import psycopg2
 
-from app.config import settings
-from app.conversation_state import _comparison_candidates, derive_conversation_state, find_product_candidates
-from app.chat_router import route_chat_intent
-from app.rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE
+from app.core.config import settings
+from app.services.conversation.conversation_state import _comparison_candidates, derive_conversation_state, find_product_candidates
+from app.services.conversation.chat_router import route_chat_intent
+from app.services.rag.rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE
 from evaluation.trace import code_revision, knowledge_base_version
 
 

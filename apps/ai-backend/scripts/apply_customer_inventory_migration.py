@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import psycopg2
 
-from app.config import settings
+from app.core.config import settings
 
 url = urlparse(settings.DATABASE_URL)
 if settings.ENVIRONMENT != "development" or url.hostname not in {"localhost", "127.0.0.1"} or url.path != "/testingroastery":

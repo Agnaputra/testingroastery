@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 import psycopg2
 from psycopg2.extras import execute_values
 
-from app.config import settings
+from app.core.config import settings
 
 root = Path(__file__).resolve().parents[3]
 address = urlparse(settings.DATABASE_URL)

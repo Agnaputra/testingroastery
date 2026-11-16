@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import psycopg2
 
-from app.config import settings
+from app.core.config import settings
 
 email = os.getenv("CUSTOMER_ADMIN_EMAIL", "").strip().lower()
 address = urlparse(settings.DATABASE_URL)

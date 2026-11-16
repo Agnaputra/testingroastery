@@ -8,9 +8,9 @@ from threading import Lock
 import uvicorn
 
 from app.main import app
-from app.price_service import require_price_test_mode
-from app.rag_service import rag_service
-import app.rag_service as rag_module
+from app.services.catalog.price_service import require_price_test_mode
+from app.services.rag.rag_service import rag_service
+import app.services.rag.rag_service as rag_module
 
 
 require_price_test_mode()

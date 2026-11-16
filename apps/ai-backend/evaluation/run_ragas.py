@@ -16,8 +16,8 @@ from importlib.metadata import version
 from pathlib import Path
 
 from openai import AsyncOpenAI, APIConnectionError, APITimeoutError, InternalServerError, RateLimitError
-from app.config import settings
-from app.rag_service import rag_service
+from app.core.config import settings
+from app.services.rag.rag_service import rag_service
 from evaluation.trace import FIXTURES_PATH, capture, enabled, knowledge_base_version
 
 
@@ -87,7 +87,7 @@ async def main() -> None:
         raise RuntimeError("OPENAI_API_KEY wajib diisi untuk RAGAS evaluator.")
     retrieval = rag_service.retrieval_status()
     if retrieval["runtime"] != "pgvector":
-        raise RuntimeError("pgvector belum siap. Jalankan python -m app.seed_data sebelum evaluasi RAGAS.")
+        raise RuntimeError("pgvector belum siap. Jalankan python -m scripts.seed_data sebelum evaluasi RAGAS.")
 
     client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
     # Faithfulness returns structured statements and verdicts; RAGAS's default

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 import psycopg2
 
-from app.config import settings
+from app.core.config import settings
 
 
 def main() -> None:

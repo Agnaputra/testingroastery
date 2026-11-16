@@ -9,9 +9,9 @@ from urllib.parse import urlparse
 import psycopg2
 from psycopg2.extras import execute_values
 
-from app.config import settings
-from app.publication_service import PUBLICATION_SLUG_GROUPS
-from app.rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE
+from app.core.config import settings
+from app.services.catalog.publication_service import PUBLICATION_SLUG_GROUPS
+from app.services.rag.rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE
 
 
 BASELINE = Path(__file__).with_name("price_baseline_3b4_c2.json")

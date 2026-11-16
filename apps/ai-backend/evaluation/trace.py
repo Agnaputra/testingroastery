@@ -17,7 +17,7 @@ from typing import Any, Iterator
 
 import psycopg2
 
-from app.config import settings
+from app.core.config import settings
 
 
 ROOT = Path(__file__).parent
@@ -62,8 +62,8 @@ def code_revision() -> str:
 def code_version() -> str:
     files = [
         ROOT / "trace.py", ROOT / "run_ragas.py",
-        ROOT.parent / "app" / "rag_service.py", ROOT.parent / "app" / "guardrail_service.py",
-        ROOT.parent / "app" / "recommendation_service.py", ROOT.parent / "app" / "config.py",
+        ROOT.parent / "app/services/rag/rag_service.py", ROOT.parent / "app/services/guardrails/guardrail_service.py",
+        ROOT.parent / "app/services/recommendation/recommendation_service.py", ROOT.parent / "app/core/config.py",
     ]
     digest = hashlib.sha256()
     for path in files:
@@ -73,7 +73,7 @@ def code_version() -> str:
 
 
 def catalog_version() -> str:
-    from app.rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE
+    from app.services.rag.rag_service import PUBLISHED_COFFEE_KNOWLEDGE_BASE
 
     payload = json.dumps(PUBLISHED_COFFEE_KNOWLEDGE_BASE, ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
