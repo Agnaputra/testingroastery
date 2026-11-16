@@ -1,4 +1,4 @@
-import { WholesaleSection } from './wholesale-section';
+import { WholesaleSection } from '../../features/partnerships/wholesale/wholesale-section';
 import styles from './page.module.css';
 
 export default function WorkWithUsPage() {

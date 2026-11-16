@@ -1,7 +1,7 @@
 'use client';
 
-import { useAdminPortalContext } from '../../../components/admin/admin-context';
-import { AdminCatalogTab } from '../../../components/admin/tabs/admin-catalog-tab';
+import { useAdminPortalContext } from '../../../features/admin/admin-context';
+import { AdminCatalogTab } from '../../../features/admin/tabs/admin-catalog-tab';
 
 export default function AdminCatalogPage() {
   const portal = useAdminPortalContext();

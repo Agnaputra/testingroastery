@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Suspense } from 'react';
 import { BookOpen } from 'lucide-react';
 import { PageIntro } from '../../components/ui/page-structure';
-import { BrewingGuidanceExperience } from '../../components/brewing-guidance-experience';
+import { BrewingGuidanceExperience } from '../../features/coffee-lab/brewing-guidance/brewing-guidance-experience';
 
 export const metadata: Metadata = {
   title: 'Panduan & Kalkulator Seduh | 52 Coffee & Roastery',

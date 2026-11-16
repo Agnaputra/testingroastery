@@ -1,0 +1,425 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ACTIVE_CATALOG_MAPPING,
+  OWNER_CATALOG_PRODUCTS,
+  OwnerCatalogProduct,
+} from '../../../lib/catalog-master';
+import { PRICE_TEST_MODE } from '../../../lib/catalog-publication';
+import { customerApi } from '../../../lib/customer-api';
+import { PRODUCTS } from '../../../lib/data';
+import { CourierType, useOrderStore } from '../../../lib/store/useOrderStore';
+import type { AdminCatalogStats, AdminMetrics, AdminOverview } from '../types';
+
+const DEFAULT_PUBLISHED_ROWS = new Set(ACTIVE_CATALOG_MAPPING.map((mapping) => mapping.masterRow));
+
+function publicationRowsFromOverrides(overrides: Record<string, boolean>): Set<number> {
+  const rows = new Set<number>();
+  DEFAULT_PUBLISHED_ROWS.forEach((row) => {
+    const mappings = ACTIVE_CATALOG_MAPPING.filter((mapping) => mapping.masterRow === row);
+    if (
+      mappings.every(
+        (mapping) =>
+          overrides[mapping.slug] !== false &&
+          (!mapping.knowledgeSlug || overrides[mapping.knowledgeSlug] !== false)
+      )
+    ) {
+      rows.add(row);
+    }
+  });
+  return rows;
+}
+
+export function useAdminPortal() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [mounted, setMounted] = useState(false);
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [overviewError, setOverviewError] = useState('');
+  const refreshOverview = useCallback(async () => {
+    try {
+      const data = await customerApi<AdminOverview>('admin/overview');
+      setOverview(data);
+      setOverviewError('');
+    } catch (cause) {
+      setOverviewError(cause instanceof Error ? cause.message : 'Ringkasan belum dapat dimuat.');
+    }
+  }, []);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    void refreshOverview();
+    window.addEventListener('focus', refreshOverview);
+    return () => window.removeEventListener('focus', refreshOverview);
+  }, [isAuthenticated, refreshOverview]);
+
+  // Catalog & Publication state
+  const [catalogSyncError, setCatalogSyncError] = useState('');
+  const [publicationLoaded, setPublicationLoaded] = useState(false);
+  const [updatingRow, setUpdatingRow] = useState<number | null>(null);
+  const [masterItems, setMasterItems] = useState<OwnerCatalogProduct[]>(OWNER_CATALOG_PRODUCTS);
+  const [publishedRows, setPublishedRows] = useState<Set<number>>(new Set());
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [catalogStatusFilter, setCatalogStatusFilter] = useState<'all' | 'published' | 'draft' | 'review'>('all');
+
+  // Slowbar availability state
+  const [slowbarOutOfStock, setSlowbarOutOfStock] = useState<Set<string>>(new Set(['Arkana', 'Gayo']));
+
+  // Edit Price Modal state
+  const [editingProduct, setEditingProduct] = useState<OwnerCatalogProduct | null>(null);
+  const [price100g, setPrice100g] = useState('');
+  const [price200g, setPrice200g] = useState('');
+  const [price500g, setPrice500g] = useState('');
+  const [priceCup, setPriceCup] = useState('');
+  const [editingSlug, setEditingSlug] = useState('');
+  const [effectivePrices, setEffectivePrices] = useState<Record<string, { amountIdr: number }>>({});
+  const [editingAmounts, setEditingAmounts] = useState<Record<string, string>>({});
+  const [priceRevision, setPriceRevision] = useState<number | null>(null);
+  const [priceError, setPriceError] = useState('');
+
+  // Shipping modal state
+  const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
+  const [selectedCourier, setSelectedCourier] = useState<CourierType>('JNE Reguler');
+  const [trackingNumberInput, setTrackingNumberInput] = useState('');
+
+  // Orders from Zustand store
+  const { orders, updateOrderStatus, updateShipping } = useOrderStore();
+
+  useEffect(() => {
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    if (reason) {
+      if (reason === 'not_admin') {
+        setLoginError('Akun Google ini tidak memiliki akses admin.');
+      } else if (reason === 'account_link_required') {
+        setLoginError('Akun Google perlu dihubungkan terlebih dahulu.');
+      } else if (reason === 'backend_rejected' || reason === 'backend_unavailable') {
+        setLoginError('Koneksi autentikasi ke backend sedang bermasalah. Silakan coba lagi.');
+      } else if (reason === 'flow_cookie_missing' || reason === 'flow_cookie_invalid') {
+        setLoginError('Sesi login kedaluwarsa. Silakan klik masuk kembali.');
+      } else {
+        setLoginError('Login Google admin gagal. Silakan coba lagi.');
+      }
+    }
+    Promise.all([
+      fetch('/api/admin/session', { cache: 'no-store' }),
+      fetch('/api/catalog/publication', { cache: 'no-store' }),
+    ])
+      .then(async ([sessionResponse, publicationResponse]) => {
+        if (sessionResponse.ok) {
+          const session = (await sessionResponse.json()) as { authenticated?: boolean };
+          setIsAuthenticated(session.authenticated === true);
+        }
+        if (publicationResponse.ok) {
+          const publication = (await publicationResponse.json()) as { overrides?: Record<string, boolean> };
+          setPublishedRows(publicationRowsFromOverrides(publication.overrides ?? {}));
+          setPublicationLoaded(true);
+        } else {
+          setPublicationLoaded(false);
+          setCatalogSyncError('Status katalog belum dapat dimuat.');
+        }
+      })
+      .catch(() => {
+        setPublicationLoaded(false);
+        setCatalogSyncError('Status katalog belum dapat dimuat.');
+      })
+      .finally(() => setMounted(true));
+  }, []);
+
+  useEffect(() => {
+    if (!PRICE_TEST_MODE || !isAuthenticated) return;
+    void fetch('/api/catalog/prices', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('price unavailable');
+        const payload = (await response.json()) as {
+          revision?: number;
+          prices?: Record<string, { amountIdr: number }>;
+        };
+        if (!Number.isSafeInteger(payload.revision) || !payload.prices) {
+          throw new Error('invalid price payload');
+        }
+        setEffectivePrices(payload.prices);
+        setPriceRevision(payload.revision ?? null);
+      })
+      .catch(() => {
+        setPriceRevision(null);
+        setPriceError('Harga belum dapat diverifikasi.');
+      });
+  }, [isAuthenticated]);
+
+  const handleLogout = async () => {
+    await fetch('/api/admin/session', { method: 'DELETE' });
+    setIsAuthenticated(false);
+    setLoginError('');
+  };
+
+  const handleTogglePublish = async (row: number) => {
+    const slugs = ACTIVE_CATALOG_MAPPING
+      .filter((mapping) => mapping.masterRow === row)
+      .flatMap((mapping) => [mapping.slug, mapping.knowledgeSlug].filter((slug): slug is string => Boolean(slug)));
+    if (slugs.length === 0 || updatingRow !== null || !publicationLoaded) return;
+    const nextPublished = !publishedRows.has(row);
+    setCatalogSyncError('');
+    setUpdatingRow(row);
+    setPublishedRows((previous) => {
+      const next = new Set(previous);
+      if (nextPublished) next.add(row);
+      else next.delete(row);
+      return next;
+    });
+    try {
+      const response = await fetch('/api/catalog/publication', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slugs, isPublished: nextPublished }),
+      });
+      if (!response.ok) throw new Error('Publication update failed');
+      const confirmed = await fetch('/api/catalog/publication', { cache: 'no-store' });
+      if (!confirmed.ok) throw new Error('Publication confirmation failed');
+      const payload = (await confirmed.json()) as { overrides?: Record<string, boolean> };
+      setPublishedRows(publicationRowsFromOverrides(payload.overrides ?? {}));
+    } catch {
+      setPublishedRows((previous) => {
+        const reverted = new Set(previous);
+        if (nextPublished) reverted.delete(row);
+        else reverted.add(row);
+        return reverted;
+      });
+      setCatalogSyncError('Perubahan gagal disimpan. Silakan masuk ulang dan coba lagi.');
+      setPublicationLoaded(false);
+    } finally {
+      setUpdatingRow(null);
+    }
+  };
+
+  const loadAdminPrices = async () => {
+    const response = await fetch('/api/catalog/prices', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Harga belum dapat diverifikasi');
+    const payload = (await response.json()) as {
+      revision?: number;
+      prices?: Record<string, { amountIdr: number }>;
+    };
+    if (!Number.isSafeInteger(payload.revision) || !payload.prices) {
+      throw new Error('Respons harga tidak valid');
+    }
+    setEffectivePrices(payload.prices);
+    setPriceRevision(payload.revision ?? null);
+    return payload;
+  };
+
+  const selectPriceProfile = (slug: string, prices: Record<string, { amountIdr: number }>) => {
+    const product = PRODUCTS.find((item) => item.slug === slug);
+    if (!product) return;
+    setEditingSlug(slug);
+    const variants = [
+      ...product.variants.map((variant) => `${slug}:beans:${variant.weightGrams}`),
+      ...(product.cupPrice ? [`${slug}:cup:1`] : []),
+    ];
+    setEditingAmounts(Object.fromEntries(variants.map((sku) => [sku, String(prices[sku]?.amountIdr ?? '')])));
+  };
+
+  const openEditModal = async (p: OwnerCatalogProduct) => {
+    setEditingProduct(p);
+    if (PRICE_TEST_MODE) {
+      setPriceError('Memuat harga efektif...');
+      setPriceRevision(null);
+      try {
+        const payload = await loadAdminPrices();
+        const mapping = ACTIVE_CATALOG_MAPPING.find((item) => item.masterRow === p.sourceRow);
+        const slug = PRODUCTS.find((item) => item.id === mapping?.webId)?.slug ?? mapping?.slug;
+        if (!slug) throw new Error('Produk belum memiliki mapping harga');
+        selectPriceProfile(slug, payload.prices ?? {});
+        setPriceError('');
+      } catch (error) {
+        setPriceError(error instanceof Error ? error.message : 'Harga tidak tersedia');
+      }
+      return;
+    }
+    setPrice100g(p.prices.filter100g !== '-' ? p.prices.filter100g : '');
+    setPrice200g(p.prices.filter200g !== '-' ? p.prices.filter200g : '');
+    setPrice500g(p.prices.filter500g !== '-' ? p.prices.filter500g : '');
+    setPriceCup(p.prices.slowbarCup !== '-' ? p.prices.slowbarCup : '');
+  };
+
+  const saveProductPrice = async () => {
+    if (!editingProduct) return;
+    if (PRICE_TEST_MODE) {
+      if (priceRevision === null || !editingSlug) return;
+      const amounts: Record<string, number> = {};
+      for (const [sku, input] of Object.entries(editingAmounts)) {
+        const amount = Number(input.trim());
+        if (!Number.isSafeInteger(amount) || amount <= 0) {
+          setPriceError('Masukkan nominal Rupiah penuh yang positif untuk setiap variant.');
+          return;
+        }
+        amounts[sku] = amount;
+      }
+      try {
+        setPriceError('Menyimpan harga...');
+        const response = await fetch('/api/catalog/prices', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: editingSlug, amounts, expectedRevision: priceRevision }),
+        });
+        if (!response.ok) {
+          throw new Error(response.status === 409 ? 'Harga berubah. Muat ulang editor.' : 'Harga gagal disimpan.');
+        }
+        const result = (await response.json()) as { revision?: number };
+        const confirmed = await loadAdminPrices();
+        if (confirmed.revision !== result.revision) {
+          throw new Error('Revisi harga belum dapat dikonfirmasi.');
+        }
+        setEditingProduct(null);
+        setPriceError('');
+      } catch (error) {
+        setPriceError(error instanceof Error ? error.message : 'Harga gagal disimpan.');
+      }
+      return;
+    }
+    setMasterItems((prev) =>
+      prev.map((item) => {
+        if (item.sourceRow === editingProduct.sourceRow) {
+          return {
+            ...item,
+            prices: {
+              ...item.prices,
+              filter100g: price100g.trim() || item.prices.filter100g,
+              filter200g: price200g.trim() || item.prices.filter200g,
+              filter500g: price500g.trim() || item.prices.filter500g,
+              slowbarCup: priceCup.trim() || item.prices.slowbarCup,
+            },
+          };
+        }
+        return item;
+      })
+    );
+    setEditingProduct(null);
+  };
+
+  const handleSaveShipping = () => {
+    if (!shippingOrderId) return;
+    updateShipping(shippingOrderId, selectedCourier, trackingNumberInput.trim());
+    setShippingOrderId(null);
+    setTrackingNumberInput('');
+  };
+
+  const openShippingModal = (orderId: string, courier?: CourierType, tracking?: string) => {
+    setShippingOrderId(orderId);
+    setSelectedCourier(courier || 'JNE Reguler');
+    setTrackingNumberInput(tracking || '');
+  };
+
+  const handleToggleSlowbarStock = (alias: string) => {
+    setSlowbarOutOfStock((prev) => {
+      const next = new Set(prev);
+      if (next.has(alias)) next.delete(alias);
+      else next.add(alias);
+      return next;
+    });
+  };
+
+  const metrics: AdminMetrics = overview?.metrics ?? {
+    totalGrossRevenue: 0, totalOrdersCount: 0, pendingOrdersCount: 0, shippedOrdersCount: 0,
+    completedCount: 0, roastingCount: 0, processingCount: 0, waitingPaymentCount: 0,
+    paidCount: 0, productRevenue: 0, nonOperationalCount: 0,
+  };
+
+  const catalogStats: AdminCatalogStats = useMemo(() => {
+    const published = masterItems.filter((p) => publishedRows.has(p.sourceRow)).length;
+    const review = masterItems.filter(
+      (p) =>
+        !publishedRows.has(p.sourceRow) && p.prices.filter100g === '-' &&
+        p.prices.filter200g === '-' &&
+        p.prices.espresso200g === '-' &&
+        p.prices.reserve100g === '-'
+    ).length;
+    const draft = masterItems.length - published - review;
+    return { published, draft, review, total: masterItems.length };
+  }, [masterItems, publishedRows]);
+
+  const filteredCatalog = useMemo(() => {
+    return masterItems.filter((item) => {
+      const isPublished = publishedRows.has(item.sourceRow);
+      const isReview =
+        item.prices.filter100g === '-' &&
+        item.prices.filter200g === '-' &&
+        item.prices.espresso200g === '-' &&
+        item.prices.reserve100g === '-';
+      const isDraft = !isPublished && !isReview;
+
+      if (catalogStatusFilter === 'published' && !isPublished) return false;
+      if (catalogStatusFilter === 'draft' && !isDraft) return false;
+      if (catalogStatusFilter === 'review' && !isReview) return false;
+
+      if (catalogSearch.trim()) {
+        const q = catalogSearch.toLowerCase().trim();
+        const match =
+          item.name.toLowerCase().includes(q) ||
+          item.slowbarAlias.toLowerCase().includes(q) ||
+          item.origin.toLowerCase().includes(q) ||
+          item.seriesExcel.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+
+      return true;
+    });
+  }, [masterItems, publishedRows, catalogStatusFilter, catalogSearch]);
+
+  return {
+    mounted,
+    isAuthenticated,
+    loginError,
+    handleLogout,
+    metrics,
+    overview,
+    overviewError,
+    refreshOverview,
+    catalogStats,
+    filteredCatalog,
+    catalogSearch,
+    setCatalogSearch,
+    catalogStatusFilter,
+    setCatalogStatusFilter,
+    catalogSyncError,
+    publishedRows,
+    publicationLoaded,
+    updatingRow,
+    priceRevision,
+    effectivePrices,
+    openEditModal,
+    handleTogglePublish,
+    orders,
+    updateOrderStatus,
+    openShippingModal,
+    slowbarOutOfStock,
+    handleToggleSlowbarStock,
+    priceModalProps: {
+      editingProduct,
+      onClose: () => setEditingProduct(null),
+      onSave: saveProductPrice,
+      price100g,
+      setPrice100g,
+      price200g,
+      setPrice200g,
+      price500g,
+      setPrice500g,
+      priceCup,
+      setPriceCup,
+      editingSlug,
+      editingAmounts,
+      setEditingAmounts,
+      effectivePrices,
+      priceRevision,
+      priceError,
+      onSelectPriceProfile: selectPriceProfile,
+    },
+    shippingModalProps: {
+      shippingOrderId,
+      selectedCourier,
+      setSelectedCourier,
+      trackingNumberInput,
+      setTrackingNumberInput,
+      onClose: () => setShippingOrderId(null),
+      onSave: handleSaveShipping,
+    },
+  };
+}

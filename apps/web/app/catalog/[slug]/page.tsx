@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import CatalogProductDetail from '../../../components/catalog-product-detail';
+import CatalogProductDetail from '../../../features/catalog/catalog-product-detail';
 import { getPublishedProducts } from '../../../lib/catalog-master';
 import { getServerCatalogPublicationAuthority } from '../../../lib/catalog-publication-server';
 

@@ -1,4 +1,4 @@
-import CatalogContent from '../../components/catalog-content';
+import CatalogContent from '../../features/catalog/catalog-content';
 import { getServerCatalogPublicationAuthority } from '../../lib/catalog-publication-server';
 
 export const dynamic = 'force-dynamic';

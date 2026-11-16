@@ -3,14 +3,14 @@ const path = require('node:path');
 
 require('../apps/web/node_modules/sucrase/register');
 
-const { runVirtualBaristaActionClaimTests } = require('../apps/web/lib/virtual-barista-actions.test.ts');
-const { runVirtualBaristaResponseContractTests } = require('../apps/web/lib/virtual-barista-response.test.ts');
+const { runVirtualBaristaActionClaimTests } = require('../apps/web/features/virtual-barista/virtual-barista-actions.test.ts');
+const { runVirtualBaristaResponseContractTests } = require('../apps/web/features/virtual-barista/virtual-barista-response.test.ts');
 
 runVirtualBaristaActionClaimTests();
 runVirtualBaristaResponseContractTests();
 
 const moduleTests = [
-  'apps/web/lib/virtual-barista-recommendations.test.mjs',
+  'apps/web/features/virtual-barista/virtual-barista-recommendations.test.mjs',
   'apps/web/lib/store/cart-hydration.test.mjs',
   'apps/web/lib/catalog-publication.test.mjs',
 ];

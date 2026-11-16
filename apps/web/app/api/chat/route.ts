@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublishedProducts, toKnowledgeCatalogSlug, toWebCatalogSlug } from '../../../lib/catalog-master';
-import { isVirtualBaristaAction, type VirtualBaristaAction } from '../../../lib/virtual-barista-actions';
-import { resolveCatalogSelectedVariant } from '../../../lib/virtual-barista-recommendations';
-import { isVirtualBaristaChatResponse } from '../../../lib/virtual-barista-response';
+import { isVirtualBaristaAction, type VirtualBaristaAction } from '../../../features/virtual-barista/virtual-barista-actions';
+import { resolveCatalogSelectedVariant } from '../../../features/virtual-barista/virtual-barista-recommendations';
+import { isVirtualBaristaChatResponse } from '../../../features/virtual-barista/virtual-barista-response';
 import { loadCatalogPublicationAuthority, PRICE_TEST_MODE } from '../../../lib/catalog-publication';
 
 export const dynamic = 'force-dynamic';

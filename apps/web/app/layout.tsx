@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-page-custom-font -- Brand fonts are loaded once by this App Router root layout. */
 import type { Metadata } from 'next';
 import './globals.css';
-import { MotionProvider } from '../components/motion-provider';
-import { AppLayoutShell } from '../components/app-layout-shell';
+import { MotionProvider } from '../components/layout/motion-provider';
+import { AppLayoutShell } from '../components/layout/app-layout-shell';
 
 export const metadata: Metadata = {
   title: '52 Coffee & Roastery — Artisanal Roasting, Precision Extraction (Malang)',

@@ -23,7 +23,7 @@ import { formatRupiah } from '../../lib/data';
 import { useCatalogPublication } from '../../lib/use-catalog-publication';
 import { isCartItemAvailable } from '../../lib/cart-publication';
 import { PRICE_TEST_MODE } from '../../lib/catalog-publication';
-import { CustomerCheckout } from '../../components/customer-checkout';
+import { CustomerCheckout } from '../../features/checkout/customer-checkout';
 import { QrisDynamicCard } from '../../components/ui/qris-dynamic-card';
 
 interface ServerQuote {

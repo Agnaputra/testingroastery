@@ -9,7 +9,7 @@ for (const extension of ['.ts', '.tsx']) {
 }
 const React = require('../apps/web/node_modules/react');
 const { renderToStaticMarkup } = require('../apps/web/node_modules/react-dom/server');
-const { WholesaleSection } = require('../apps/web/app/work-with-us/wholesale-section.tsx');
+const { WholesaleSection } = require('../apps/web/features/partnerships/wholesale/wholesale-section.tsx');
 const html = renderToStaticMarkup(React.createElement(WholesaleSection));
 assert.equal((html.match(/type="radio"/g) || []).length, 3);
 assert.equal((html.match(/required=""/g) || []).length, 3);

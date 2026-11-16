@@ -1,5 +1,5 @@
 import { LoaderCircle } from 'lucide-react';
-import { FiftyTwoLogo } from '../logo';
+import { FiftyTwoLogo } from '../layout/logo';
 
 export function LoadingState({ label = 'Memuat halaman…', fullPage = false }: {
   label?: string;

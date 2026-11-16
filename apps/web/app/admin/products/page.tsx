@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { hasAuthorizedAdminSession } from '../../../lib/admin-session';
-import { AdminProductManager } from '../../../components/admin-product-manager';
+import { AdminProductManager } from '../../../features/admin/admin-product-manager';
 import { BackButton } from '../../../components/ui/back-button';
 
 export const dynamic = 'force-dynamic';

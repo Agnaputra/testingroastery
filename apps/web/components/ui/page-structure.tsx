@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import clsx from 'clsx';
-import { FiftyTwoLogo } from '../logo';
+import { FiftyTwoLogo } from '../layout/logo';
 
 type Alignment = 'left' | 'center';
 type Tone = 'light' | 'dark';
